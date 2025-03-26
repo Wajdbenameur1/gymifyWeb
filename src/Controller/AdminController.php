@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class AdminController extends AbstractController
 {
-    #[Route('/wajd', name: 'app_admin')]
+    #[Route('/admin', name: 'app_admin')]
     public function index(): Response
     {
       $stats = [
@@ -32,8 +32,22 @@ final class AdminController extends AbstractController
        #[Route('/dashboard', name:'app_dashboard')]
       public function dashboard()
       {
+        $stats = [
+          'visitors' => 1294,
+          'subscribers' => 1303,
+          'sales' => 1345,
+          'orders' => 576
+      ];
+  
+      return $this->render('index.html.twig', [
+          'stats' => $stats,
+          'page_title' => 'Tableau de bord'
+      ]);
+        
     
        }
+
+
        #[Route('/profile', name:'app_profile')]
       public function profile()
       {
@@ -59,10 +73,27 @@ final class AdminController extends AbstractController
        {
      
         }
+        #[Route('/admin/activity', name:'app_activity')]
+       public function activity()
+       {
+        
+  
+      return $this->render('activity/index.html.twig', [
+          'page_title' => 'Activity Dashboard',
+          'stats' => [
+                'visitors' => 1294,
+                'subscribers' => 1303,
+                'sales' => 1345,
+                'orders' => 576
+            ]
+      ]);
+       }
+     
+  }
 
 
        
 
     
     
-}
+

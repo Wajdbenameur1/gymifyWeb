@@ -21,23 +21,19 @@
         <div class="sidebar-content">
             <ul class="nav nav-secondary">
                 <li class="nav-item {{ app.request.get('_route') == 'app_dashboard' ? 'active' }}">
-                    <a data-bs-toggle="collapse" href="#dashboard" class="{{ app.request.get('_route') == 'app_dashboard' ? '' : 'collapsed' }}" aria-expanded="{{ app.request.get('_route') == 'app_dashboard' ? 'true' : 'false' }}">
+                    <a href="{{ path('app_dashboard') }}">
                         <i class="fas fa-home"></i>
                         <p>Dashboard</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse {{ app.request.get('_route') == 'app_dashboard' ? 'show' }}" id="dashboard">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a href="{{ path('app_dashboard') }}">
-                                    <span class="sub-item">Tableau de bord</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
-                
-                {# Ajoutez ici les autres éléments du menu avec la même logique de route active #}
+                  <li class="nav-item {{ app.request.get('_route') == 'app_activity' ? 'active' }}">
+                    <a href="{{ path('app_activity') }}">
+                    <i class="fas fa-dumbbell"></i>
+                        <p>Activity</p>
+                    </a>
+                </li>
+
+                {# Ajoutez ici les autres éléments du menu #}
                 
             </ul>
         </div>
