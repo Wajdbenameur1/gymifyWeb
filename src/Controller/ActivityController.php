@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Activité; // Changé de 'activité' à 'Activite'
 use App\Enum\ActivityType;
+use App\Repository\ActivityRepository; 
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -69,7 +71,7 @@ class ActivityController extends AbstractController
                     $uploadDir,
                     $newFilename
                 );
-                $activity->setImageUrl('/uploads/activities/'.$newFilename);
+                $activity->setUrl('/uploads/activities/'.$newFilename);
             } catch (FileException $e) {
                 $this->addFlash('error', 'Error uploading image');
                 return $this->redirectToRoute('app_activity_new');
@@ -82,4 +84,67 @@ class ActivityController extends AbstractController
         $this->addFlash('success', 'Activity created successfully!');
         return $this->redirectToRoute('app_activity_new');
     }
+    #[Route('/activity/edit/{id}', name: 'app_activity_edit')]
+public function edit(Request $request, Activité $activity, EntityManagerInterface $entityManager): Response
+{
+    $form = $this->createForm(ActivityType::class, $activity);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $entityManager->flush();
+        return $this->redirectToRoute('app_activity_index');
+    }
+
+    return $this->render('activity/edit.html.twig', [
+        'activity' => $activity,
+        'form' => $form,
+    ]);
+}
+
+    
+    #[Route('/activity/delete/{id}', name: 'app_activity_delete', methods: ['POST'])]
+public function delete(
+    Request $request,
+    EntityManagerInterface $entityManager,
+    int $id
+): Response {
+    $activity = $entityManager->getRepository(Activité::class)->find($id);
+    
+    if (!$activity) {
+        $this->addFlash('error', 'Activity not found');
+        return $this->redirectToRoute('app_activity_index');
+    }
+
+    if (!$this->isCsrfTokenValid('delete'.$activity->getId(), $request->request->get('_token'))) {
+        $this->addFlash('error', 'Invalid CSRF token');
+        return $this->redirectToRoute('app_activity_index');
+    }
+
+    // Remove associated image
+    if ($activity->getUrl()) {
+        $imagePath = $this->getParameter('kernel.project_dir').'/public'.$activity->getUrl();
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+    }
+
+    $entityManager->remove($activity);
+    $entityManager->flush();
+
+    $this->addFlash('success', 'Activity deleted successfully!');
+    return $this->redirectToRoute('app_activity_index');
+}
+#[Route('/activity', name: 'app_activity_index')]
+public function activity(ActivityRepository $activityRepository): Response
+       { return $this->render('activity/index.html.twig', [
+          'page_title' => 'Activity Dashboard',
+          'activities' => $activityRepository->findAll(),
+          'stats' => [
+                'visitors' => 1294,
+                'subscribers' => 1303,
+                'sales' => 1345,
+                'orders' => 576
+            ]
+      ]);
+  }
 }

@@ -16,4 +16,5 @@ enum ActivityType: string
             self::FITNESS_CONSULTATION => 'Fitness Consultation',
         };
     }
+    
 }

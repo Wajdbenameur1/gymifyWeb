@@ -5,6 +5,11 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\ActivityRepository; 
+use App\Entity\Activité; 
+
+
+
 
 
 final class AdminController extends AbstractController
@@ -74,12 +79,10 @@ final class AdminController extends AbstractController
      
         }
         #[Route('/admin/activity', name:'app_activity')]
-       public function activity()
-       {
-        
-  
-      return $this->render('activity/index.html.twig', [
+       public function activity(ActivityRepository $activityRepository): Response
+       { return $this->render('activity/index.html.twig', [
           'page_title' => 'Activity Dashboard',
+          'activities' => $activityRepository->findAll(),
           'stats' => [
                 'visitors' => 1294,
                 'subscribers' => 1303,

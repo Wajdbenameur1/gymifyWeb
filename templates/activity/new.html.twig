@@ -43,7 +43,7 @@
                         </div>
                         <div class="d-flex flex-column flex-md-row gap-3">
                             <div class="flex-grow-1">
-                                <input type="file" class="form-control d-none" id="activityImage" name="activityImage" accept="image/*">
+                                <input type="file" class="form-control d-none" id="activityImage" name="activityImage" accept="image/*" required>
                                 <label for="activityImage" class="btn btn-outline-primary w-100 py-3 rounded-3">
                                     <i class="fas fa-cloud-upload-alt me-2"></i> Choose Image
                                 </label>
@@ -100,7 +100,7 @@
 
                 <!-- Submit Button -->
                 <div class="d-grid gap-2 mt-5">
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold" id="submitBtn">
                         <i class="fas fa-save me-2"></i> Save Activity
                     </button>
                 </div>
@@ -154,74 +154,200 @@
             max-height: 300px;
             object-fit: contain;
         }
+        .is-invalid {
+            border: 1px solid #dc3545 !important;
+        }
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875em;
+        }
+        .border-danger {
+            border-color: #dc3545 !important;
+        }
+        #submitBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
     </style>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const imageInput = document.getElementById('activityImage');
-            const imagePreview = document.getElementById('imagePreview');
-            const placeholderText = document.getElementById('placeholderText');
-            const removeImageBtn = document.getElementById('removeImageBtn');
-            const previewContainer = document.querySelector('.image-preview-container');
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('activityImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const placeholderText = document.getElementById('placeholderText');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const previewContainer = document.querySelector('.image-preview-container');
+        const form = document.querySelector('form');
+        const submitBtn = document.getElementById('submitBtn');
 
-            // Handle image selection
-            imageInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    if (!file.type.match('image.*')) {
-                        alert('Please select an image file (JPG, PNG, WEBP)');
-                        return;
-                    }
+        // Fonction pour afficher les erreurs
+        function showError(input, message) {
+            // Trouver le conteneur parent
+            let formGroup;
+            if (input === imageInput) {
+                formGroup = input.closest('.image-upload-container');
+            } else {
+                formGroup = input.closest('.form-group') || input.closest('.mb-4');
+            }
+            
+            // Créer ou trouver l'élément d'erreur
+            let errorElement = formGroup.querySelector('.invalid-feedback');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.className = 'invalid-feedback d-block';
+                formGroup.appendChild(errorElement);
+            }
+            
+            // Afficher le message d'erreur
+            errorElement.textContent = message;
+            input.classList.add('is-invalid');
+            
+            // Style spécial pour l'upload d'image
+            if (input === imageInput) {
+                placeholderText.classList.add('border-danger');
+                placeholderText.innerHTML = '<i class="fas fa-exclamation-circle fa-3x text-danger mb-3 d-block"></i><p class="text-danger">' + message + '</p>';
+            }
+        }
 
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.style.display = 'block';
-                        placeholderText.style.display = 'none';
-                        removeImageBtn.style.display = 'block';
-                    }
-                    reader.readAsDataURL(file);
+        // Fonction pour effacer les erreurs
+        function clearError(input) {
+            let formGroup;
+            if (input === imageInput) {
+                formGroup = input.closest('.image-upload-container');
+                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
+                placeholderText.classList.remove('border-danger');
+            } else {
+                formGroup = input.closest('.form-group') || input.closest('.mb-4');
+            }
+            
+            const errorElement = formGroup.querySelector('.invalid-feedback');
+            if (errorElement) {
+                errorElement.remove();
+            }
+            
+            input.classList.remove('is-invalid');
+        }
+
+        // Validation en temps réel
+        function validateField(input) {
+            if (input === imageInput) {
+                if (!imageInput.files.length) {
+                    showError(imageInput, 'Please select an image');
+                    return false;
+                }
+            } else {
+                if (!input.value.trim()) {
+                    showError(input, `Please enter ${input.placeholder || 'a value'}`);
+                    return false;
+                }
+            }
+            clearError(input);
+            return true;
+        }
+
+        // Gestion de la sélection d'image
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    showError(imageInput, 'Please select a valid image file (JPG, PNG, WEBP)');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    placeholderText.style.display = 'none';
+                    removeImageBtn.style.display = 'block';
+                    clearError(imageInput);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Gestion du bouton de suppression
+        removeImageBtn.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.src = '';
+            imagePreview.style.display = 'none';
+            placeholderText.style.display = 'block';
+            removeImageBtn.style.display = 'none';
+            showError(imageInput, 'Please select an image');
+        });
+
+        // Drag and drop
+        previewContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            previewContainer.classList.add('border-primary');
+            placeholderText.innerHTML = '<i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3 d-block"></i><p class="text-primary">Drop image here</p>';
+        });
+
+        previewContainer.addEventListener('dragleave', () => {
+            previewContainer.classList.remove('border-primary');
+            if (!imageInput.files.length) {
+                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
+            }
+        });
+
+        previewContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            previewContainer.classList.remove('border-primary');
+
+            if (e.dataTransfer.files.length) {
+                const file = e.dataTransfer.files[0];
+                if (!file.type.match('image.*')) {
+                    showError(imageInput, 'Please select a valid image file (JPG, PNG, WEBP)');
+                    return;
+                }
+
+                imageInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                imageInput.dispatchEvent(event);
+            }
+        });
+
+        // Validation lors de la soumission
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Valider tous les champs
+            const fieldsToValidate = [
+                { input: document.getElementById('activityName'), required: true },
+                { input: imageInput, required: true },
+                { input: document.getElementById('activityDescription'), required: true }
+            ];
+            
+            fieldsToValidate.forEach(field => {
+                if (field.required && !validateField(field.input)) {
+                    isValid = false;
                 }
             });
 
-            // Handle remove button
-            removeImageBtn.addEventListener('click', function() {
-                imageInput.value = '';
-                imagePreview.src = '';
-                imagePreview.style.display = 'none';
-                placeholderText.style.display = 'block';
-                removeImageBtn.style.display = 'none';
-            });
-
-            // Drag and drop handling
-            previewContainer.addEventListener('dragover', (e) => {
+            if (!isValid) {
                 e.preventDefault();
-                previewContainer.classList.add('border-primary');
-                placeholderText.innerHTML = '<i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3 d-block"></i><p class="text-primary">Drop image here</p>';
-            });
-
-            previewContainer.addEventListener('dragleave', () => {
-                previewContainer.classList.remove('border-primary');
-                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
-            });
-
-            previewContainer.addEventListener('drop', (e) => {
-                e.preventDefault();
-                previewContainer.classList.remove('border-primary');
-                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
-
-                if (e.dataTransfer.files.length) {
-                    const file = e.dataTransfer.files[0];
-                    if (!file.type.match('image.*')) {
-                        alert('Please select an image file (JPG, PNG, WEBP)');
-                        return;
-                    }
-
-                    imageInput.files = e.dataTransfer.files;
-                    const event = new Event('change');
-                    imageInput.dispatchEvent(event);
+                
+                // Trouver le premier champ invalide
+                const firstInvalid = form.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
                 }
+            } else {
+                // Désactiver le bouton pendant l'envoi
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            }
+        });
+
+        // Validation en temps réel
+        document.querySelectorAll('input[required], textarea[required]').forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
             });
         });
-    </script>
+    });
+</script>
+
 {% endblock %}

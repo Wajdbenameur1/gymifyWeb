@@ -73,12 +73,12 @@ class Activité
         return $this;
     }
 
-    public function getImageUrl(): ?string
+    public function getUrl(): ?string
     {
         return $this->url;
     }
 
-    public function setImageUrl(string $url): static
+    public function setUrl(string $url): static
     {
         $this->url = $url;
         return $this;
