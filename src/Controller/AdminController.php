@@ -19,7 +19,7 @@ final class AdminController extends AbstractController
         'orders' => 576
     ];
 
-    return $this->render('index.html.twig', [
+    return $this->render('admin/index.html.twig', [
         'stats' => $stats,
         'page_title' => 'Tableau de bord'
     ]);
@@ -39,7 +39,7 @@ final class AdminController extends AbstractController
           'orders' => 576
       ];
   
-      return $this->render('index.html.twig', [
+      return $this->render('admin/index.html.twig', [
           'stats' => $stats,
           'page_title' => 'Tableau de bord'
       ]);

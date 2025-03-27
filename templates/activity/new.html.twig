@@ -1,0 +1,231 @@
+{% extends 'admin/homepageadmin.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">{{ page_title }}</h3>
+            <h6 class="op-7 mb-2">Create a new activity</h6>
+        </div>
+    </div>
+
+    <div class="card card-round shadow-lg">
+        <div class="card-body p-5">
+            <form class="modern-form" enctype="multipart/form-data">
+                <!-- Activity Name -->
+                <div class="form-group mb-4">
+                    <label for="activityName" class="form-label fw-bold text-muted small">ACTIVITY NAME</label>
+                    <input type="text" class="form-control form-control-lg border-0 bg-light rounded-3" 
+                           id="activityName" placeholder="Enter activity name" required>
+                </div>
+
+                <!-- Image Upload - Modern Design -->
+                <div class="form-group mb-4">
+                    <label class="form-label fw-bold text-muted small">ACTIVITY IMAGE</label>
+                    <div class="image-upload-container">
+                        <div class="image-preview-container text-center mb-3 position-relative" 
+                             style="min-height: 200px;">
+                            <img id="imagePreview" src="" 
+                                 class="img-fluid rounded-3 shadow-sm mx-auto d-block" 
+                                 style="max-height: 300px; object-fit: contain; display: none;">
+                            <div id="placeholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light">
+                                <i class="fas fa-image fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted mb-0">No image selected</p>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column flex-md-row gap-3">
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control d-none" id="activityImage" 
+                                       name="activityImage" accept="image/*">
+                                <label for="activityImage" class="btn btn-outline-primary w-100 py-3 rounded-3">
+                                    <i class="fas fa-cloud-upload-alt me-2"></i> Choose Image
+                                </label>
+                            </div>
+                            <button type="button" id="removeImageBtn" class="btn btn-outline-danger py-3 rounded-3" 
+                                    style="display: none;">
+                                <i class="fas fa-trash-alt me-2"></i> Remove
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">Recommended size: 1200x800px (JPG, PNG or WEBP)</small>
+                    </div>
+                </div>
+
+                <!-- Activity Type Selector -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">ACTIVITY TYPE</label>
+                    <div class="row g-3">
+                        {% for type in activity_types %}
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" name="activityType" 
+                                   id="type-{{ type.name }}" value="{{ type.value }}" 
+                                   {{ loop.first ? 'checked' : '' }} required>
+                            <label class="btn btn-outline-primary w-100 h-100 p-3 rounded-3 d-flex flex-column align-items-center justify-content-center activity-type-card"
+                                   for="type-{{ type.name }}">
+                                <div class="activity-icon mb-2">
+                                    <i class="fas 
+                                        {% if type == constant('App\\Enum\\ActivityType::PERSONAL_TRAINING') %}fa-user-tie
+                                        {% elseif type == constant('App\\Enum\\ActivityType::GROUP_ACTIVITY') %}fa-users
+                                        {% else %}fa-comments{% endif %} 
+                                        fa-2x"></i>
+                                </div>
+                                <span class="text-center">{{ type.label() }}</span>
+                                <small class="text-muted mt-1">
+                                    {% if type == constant('App\\Enum\\ActivityType::PERSONAL_TRAINING') %}
+                                        1-on-1 session
+                                    {% elseif type == constant('App\\Enum\\ActivityType::GROUP_ACTIVITY') %}
+                                        Group classes
+                                    {% else %}
+                                        Professional advice
+                                    {% endif %}
+                                </small>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group mb-4">
+                    <label for="activityDescription" class="form-label fw-bold text-muted small">DESCRIPTION</label>
+                    <textarea class="form-control border-0 bg-light rounded-3" 
+                              id="activityDescription" rows="4"
+                              placeholder="Describe the activity..." required></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid gap-2 mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold">
+                        <i class="fas fa-save me-2"></i> Save Activity
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .activity-type-card {
+            transition: all 0.3s ease;
+            min-height: 150px;
+        }
+        .activity-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .btn-check:checked + .activity-type-card {
+            background: linear-gradient(135deg, rgb(35, 132, 147), rgb(124, 148, 200));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 5px 20px rgba(118, 75, 162, 0.3);
+        }
+        .btn-check:checked + .activity-type-card .text-muted {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        .activity-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+        .modern-form .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+        .border-dashed {
+            border: 2px dashed #dee2e6;
+        }
+        .image-upload-container:hover .border-dashed {
+            border-color: #3a7bd5;
+        }
+        .image-preview-container {
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('activityImage');
+            const imagePreview = document.getElementById('imagePreview');
+            const placeholderText = document.getElementById('placeholderText');
+            const removeImageBtn = document.getElementById('removeImageBtn');
+            const previewContainer = document.querySelector('.image-preview-container');
+
+            // Handle image selection
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (!file.type.match('image.*')) {
+                        alert('Please select an image file (JPG, PNG, WEBP)');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        placeholderText.style.display = 'none';
+                        removeImageBtn.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Handle remove button
+            removeImageBtn.addEventListener('click', function() {
+                // Reset file input
+                imageInput.value = '';
+                
+                // Clear preview
+                imagePreview.src = '';
+                imagePreview.style.display = 'none';
+                
+                // Show placeholder
+                placeholderText.style.display = 'block';
+                
+                // Hide remove button
+                removeImageBtn.style.display = 'none';
+            });
+
+            // Drag and drop handling
+            previewContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                previewContainer.classList.add('border-primary');
+                placeholderText.innerHTML = '<i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3 d-block"></i><p class="text-primary">Drop image here</p>';
+            });
+
+            previewContainer.addEventListener('dragleave', () => {
+                previewContainer.classList.remove('border-primary');
+                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
+            });
+
+            previewContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                previewContainer.classList.remove('border-primary');
+                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
+
+                if (e.dataTransfer.files.length) {
+                    const file = e.dataTransfer.files[0];
+                    if (!file.type.match('image.*')) {
+                        alert('Please select an image file (JPG, PNG, WEBP)');
+                        return;
+                    }
+
+                    imageInput.files = e.dataTransfer.files;
+                    const event = new Event('change');
+                    imageInput.dispatchEvent(event);
+                }
+            });
+        });
+    </script>
+{% endblock %}
