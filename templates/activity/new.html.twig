@@ -10,25 +10,32 @@
         </div>
     </div>
 
+    {# Flash messages #}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
     <div class="card card-round shadow-lg">
         <div class="card-body p-5">
-            <form class="modern-form" enctype="multipart/form-data">
+            <form class="modern-form" enctype="multipart/form-data" action="{{ path('app_activity_create') }}" method="POST">
+                <input type="hidden" name="_token" value="{{ csrf_token('create_activity') }}">
+
                 <!-- Activity Name -->
                 <div class="form-group mb-4">
                     <label for="activityName" class="form-label fw-bold text-muted small">ACTIVITY NAME</label>
                     <input type="text" class="form-control form-control-lg border-0 bg-light rounded-3" 
-                           id="activityName" placeholder="Enter activity name" required>
+                           id="activityName" name="nom" placeholder="Enter activity name" required>
                 </div>
 
-                <!-- Image Upload - Modern Design -->
+                <!-- Image Upload -->
                 <div class="form-group mb-4">
                     <label class="form-label fw-bold text-muted small">ACTIVITY IMAGE</label>
                     <div class="image-upload-container">
-                        <div class="image-preview-container text-center mb-3 position-relative" 
-                             style="min-height: 200px;">
-                            <img id="imagePreview" src="" 
-                                 class="img-fluid rounded-3 shadow-sm mx-auto d-block" 
-                                 style="max-height: 300px; object-fit: contain; display: none;">
+                        <div class="image-preview-container text-center mb-3 position-relative" style="min-height: 200px;">
+                            <img id="imagePreview" src="" class="img-fluid rounded-3 shadow-sm mx-auto d-block" style="max-height: 300px; object-fit: contain; display: none;">
                             <div id="placeholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light">
                                 <i class="fas fa-image fa-3x text-muted mb-3 d-block"></i>
                                 <p class="text-muted mb-0">No image selected</p>
@@ -36,14 +43,12 @@
                         </div>
                         <div class="d-flex flex-column flex-md-row gap-3">
                             <div class="flex-grow-1">
-                                <input type="file" class="form-control d-none" id="activityImage" 
-                                       name="activityImage" accept="image/*">
+                                <input type="file" class="form-control d-none" id="activityImage" name="activityImage" accept="image/*">
                                 <label for="activityImage" class="btn btn-outline-primary w-100 py-3 rounded-3">
                                     <i class="fas fa-cloud-upload-alt me-2"></i> Choose Image
                                 </label>
                             </div>
-                            <button type="button" id="removeImageBtn" class="btn btn-outline-danger py-3 rounded-3" 
-                                    style="display: none;">
+                            <button type="button" id="removeImageBtn" class="btn btn-outline-danger py-3 rounded-3" style="display: none;">
                                 <i class="fas fa-trash-alt me-2"></i> Remove
                             </button>
                         </div>
@@ -57,23 +62,23 @@
                     <div class="row g-3">
                         {% for type in activity_types %}
                         <div class="col-md-4">
-                            <input type="radio" class="btn-check" name="activityType" 
+                            <input type="radio" class="btn-check" name="type" 
                                    id="type-{{ type.name }}" value="{{ type.value }}" 
                                    {{ loop.first ? 'checked' : '' }} required>
                             <label class="btn btn-outline-primary w-100 h-100 p-3 rounded-3 d-flex flex-column align-items-center justify-content-center activity-type-card"
                                    for="type-{{ type.name }}">
                                 <div class="activity-icon mb-2">
                                     <i class="fas 
-                                        {% if type == constant('App\\Enum\\ActivityType::PERSONAL_TRAINING') %}fa-user-tie
-                                        {% elseif type == constant('App\\Enum\\ActivityType::GROUP_ACTIVITY') %}fa-users
+                                        {% if type.value == 'PERSONAL_TRAINING' %}fa-user-tie
+                                        {% elseif type.value == 'GROUP_ACTIVITY' %}fa-users
                                         {% else %}fa-comments{% endif %} 
                                         fa-2x"></i>
                                 </div>
                                 <span class="text-center">{{ type.label() }}</span>
                                 <small class="text-muted mt-1">
-                                    {% if type == constant('App\\Enum\\ActivityType::PERSONAL_TRAINING') %}
+                                    {% if type.value == 'personal_training' %}
                                         1-on-1 session
-                                    {% elseif type == constant('App\\Enum\\ActivityType::GROUP_ACTIVITY') %}
+                                    {% elseif type.value == 'group_activity' %}
                                         Group classes
                                     {% else %}
                                         Professional advice
@@ -89,7 +94,7 @@
                 <div class="form-group mb-4">
                     <label for="activityDescription" class="form-label fw-bold text-muted small">DESCRIPTION</label>
                     <textarea class="form-control border-0 bg-light rounded-3" 
-                              id="activityDescription" rows="4"
+                              id="activityDescription" name="description" rows="4"
                               placeholder="Describe the activity..." required></textarea>
                 </div>
 
@@ -104,6 +109,8 @@
     </div>
 
     <style>
+        .navbar-form.nav-search { display: none !important; }
+        .navbar-header { justify-content: flex-end !important; }
         .activity-type-card {
             transition: all 0.3s ease;
             min-height: 150px;
@@ -133,12 +140,8 @@
         .modern-form .form-control:focus {
             box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
         }
-        .border-dashed {
-            border: 2px dashed #dee2e6;
-        }
-        .image-upload-container:hover .border-dashed {
-            border-color: #3a7bd5;
-        }
+        .border-dashed { border: 2px dashed #dee2e6; }
+        .image-upload-container:hover .border-dashed { border-color: #3a7bd5; }
         .image-preview-container {
             position: relative;
             min-height: 200px;
@@ -183,17 +186,10 @@
 
             // Handle remove button
             removeImageBtn.addEventListener('click', function() {
-                // Reset file input
                 imageInput.value = '';
-                
-                // Clear preview
                 imagePreview.src = '';
                 imagePreview.style.display = 'none';
-                
-                // Show placeholder
                 placeholderText.style.display = 'block';
-                
-                // Hide remove button
                 removeImageBtn.style.display = 'none';
             });
 

@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ActivityRepository::class)]
-class activité
+class Activité
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -25,19 +25,19 @@ class activité
     #[ORM\Column(length: 200)]
     private ?string $url = null;
 
-    #[ORM\Column(enumType: ActivityType::class)]
+    #[ORM\Column(type: 'string',enumType: ActivityType::class,columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')")]
     private ?ActivityType $type = null;
 
     /**
      * @var Collection<int, abonnement>
      */
-    #[ORM\OneToMany(targetEntity: abonnement::class, mappedBy: 'activite')]
+    #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'activite')]
     private Collection $activite;
 
     /**
      * @var Collection<int, cours>
      */
-    #[ORM\OneToMany(targetEntity: cours::class, mappedBy: 'activité')]
+    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'activité')]
     private Collection $activité;
 
     public function __construct()
@@ -73,12 +73,12 @@ class activité
         return $this;
     }
 
-    public function getUrl(): ?string
+    public function getImageUrl(): ?string
     {
         return $this->url;
     }
 
-    public function setUrl(string $url): static
+    public function setImageUrl(string $url): static
     {
         $this->url = $url;
         return $this;
@@ -103,19 +103,19 @@ class activité
         return $this->activite;
     }
 
-    public function addActivite(abonnement $Activite): static
+    public function addActivite(Abonnement $activite): static
     {
-        if (!$this->activite->contains($Activite)) {
-            $this->activite->add($Activite);
-            $Activite->setActivite($this);
+        if (!$this->activite->contains($activite)) {
+            $this->activite->add($activite);
+            $activite->setActivite($this);
         }
 
         return $this;
     }
 
-    public function removeActivite(abonnement $Activite): static
+    public function removeActivite(Abonnement $activite): static
     {
-        if ($this->activite->removeElement($Activite)) {
+        if ($this->activite->removeElement($activite)) {
             // set the owning side to null (unless already changed)
             if ($Activite->getActivite() === $this) {
                 $Activite->setActivite(null);
@@ -133,17 +133,17 @@ class activité
         return $this->activité;
     }
 
-    public function addActivit(cours $activit): static
+    public function addActivité(Cours $activité): static
     {
         if (!$this->activité->contains($activité)) {
-            $this->activité->add($activite);
+            $this->activité->add($activité);
             $activité->setActivité($this);
         }
 
         return $this;
     }
 
-    public function removeActivit(cours $activité): static
+    public function removeActivité(Cours $activité): static
     {
         if ($this->activité->removeElement($activité)) {
             // set the owning side to null (unless already changed)

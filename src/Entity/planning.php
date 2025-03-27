@@ -102,7 +102,7 @@ class Planning
         return $this->planning;
     }
 
-    public function addPlanning(cours $planning): static
+    public function addPlanning(Cours $planning): static
     {
         if (!$this->planning_id->contains($planning)) {
             $this->planning->add($planning);
@@ -112,7 +112,7 @@ class Planning
         return $this;
     }
 
-    public function removePlanning(cours $planning): static
+    public function removePlanning(Cours $planning): static
     {
         if ($this->planning_id->removeElement($planning)) {
             // set the owning side to null (unless already changed)
