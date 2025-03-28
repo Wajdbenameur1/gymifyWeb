@@ -194,4 +194,19 @@ public function update(
     $this->addFlash('success', 'Activity updated successfully!');
     return $this->redirectToRoute('app_activity_index');
 }
+#[Route('/entraineur', name: 'app_planning_index')]
+  public function index(): Response
+  {
+    $stats = [
+      'visitors' => 1294,
+      'subscribers' => 1303,
+      'sales' => 1345,
+      'orders' => 576
+  ];
+
+  return $this->render('planning/index.html.twig', [
+      'stats' => $stats,
+      'page_title' => 'Planning'
+  ]);
+  }
 }

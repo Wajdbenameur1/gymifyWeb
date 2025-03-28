@@ -31,9 +31,9 @@ class Planning
     private ?User $entaineur = null;
 
     /**
-     * @var Collection<int, cours>
+     * @var Collection<int, Cours>
      */
-    #[ORM\OneToMany(targetEntity: cours::class, mappedBy: 'planning')]
+    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'planning')]
     private Collection $planning;
 
     public function __construct()
@@ -95,7 +95,7 @@ class Planning
     }
 
     /**
-     * @return Collection<int, cours>
+     * @return Collection<int, Cours>
      */
     public function getPlanning(): Collection
     {

@@ -562,6 +562,21 @@ body {
   -moz-box-shadow: 4px 4px 10px rgba(69, 65, 78, 0.06);
   box-shadow: 4px 4px 10px rgba(69, 65, 78, 0.06);
   transition: all .3s; }
+  .sidebar, .sidebar[data-background-color="white"] {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 265px;
+  display: block;
+  z-index: 1002;
+  color: #ffffff;
+  font-weight: 200;
+  background: #ffffff;
+  -webkit-box-shadow: 4px 4px 10px rgba(69, 65, 78, 0.06);
+  -moz-box-shadow: 4px 4px 10px rgba(69, 65, 78, 0.06);
+  box-shadow: 4px 4px 10px rgba(69, 65, 78, 0.06);
+  transition: all .3s; }
   .sidebar .user, .sidebar[data-background-color="white"] .user {
     padding-top: 15px;
     padding-left: 15px;
@@ -834,6 +849,7 @@ body {
 
 .sidebar[data-background-color="dark"] .nav .nav-item > a:hover, .sidebar[data-background-color="dark"] .nav .nav-item > a:focus, .sidebar[data-background-color="dark"] .nav .nav-item.submenu, .sidebar[data-background-color="dark2"] .nav .nav-item > a:hover, .sidebar[data-background-color="dark2"] .nav .nav-item > a:focus, .sidebar[data-background-color="dark2"] .nav .nav-item.submenu {
   background: rgba(0, 0, 0, 0.16); }
+
 .sidebar[data-background-color="dark"] .nav .nav-item.submenu > a, .sidebar[data-background-color="dark2"] .nav .nav-item.submenu > a {
   background: transparent !important; }
 .sidebar[data-background-color="dark"] .nav .nav-item.active > a, .sidebar[data-background-color="dark2"] .nav .nav-item.active > a {
