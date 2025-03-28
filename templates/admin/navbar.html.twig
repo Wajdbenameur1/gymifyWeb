@@ -22,15 +22,21 @@
         <div class="container-fluid">
         
             <form class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button type="submit" class="btn btn-search pe-1">
-                            <i class="fa fa-search search-icon"></i>
-                        </button>
-                    </div>
-                    <input type="text" placeholder="Search ..." class="form-control">
-                </div>
-            </form>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <button type="button" class="btn btn-search pe-1" id="searchButton">
+                <i class="fa fa-search search-icon"></i>
+            </button>
+        </div>
+        <input 
+            type="text" 
+            id="globalSearchInput" 
+            placeholder="Search activities..." 
+            class="form-control" 
+            aria-label="Search"
+        >
+    </div>
+</form>
 
             <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                 {# Menu utilisateur et notifications #}
