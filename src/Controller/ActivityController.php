@@ -85,19 +85,19 @@ class ActivityController extends AbstractController
         return $this->redirectToRoute('app_activity_new');
     }
     #[Route('/activity/edit/{id}', name: 'app_activity_edit')]
-public function edit(Request $request, Activité $activity, EntityManagerInterface $entityManager): Response
+    public function edit(int $id, ActivityRepository $repository): Response
 {
-    $form = $this->createForm(ActivityType::class, $activity);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->flush();
+    $activity = $repository->find($id);
+    
+    if (!$activity) {
+        $this->addFlash('error', 'Activity not found');
         return $this->redirectToRoute('app_activity_index');
     }
 
     return $this->render('activity/edit.html.twig', [
+        'page_title' => 'Edit Activity',
         'activity' => $activity,
-        'form' => $form,
+        'activity_types' => ActivityType::cases()
     ]);
 }
 
@@ -147,4 +147,51 @@ public function activity(ActivityRepository $activityRepository): Response
             ]
       ]);
   }
+  #[Route('/activity/update/{id}', name: 'app_activity_update', methods: ['POST'])]
+public function update(
+    Request $request, 
+    int $id, 
+    EntityManagerInterface $entityManager,
+    SluggerInterface $slugger
+): Response {
+    $activity = $entityManager->getRepository(Activité::class)->find($id);
+    
+    if (!$activity) {
+        $this->addFlash('error', 'Activity not found');
+        return $this->redirectToRoute('app_activity_index');
+    }
+
+    if (!$this->isCsrfTokenValid('update'.$activity->getId(), $request->request->get('_token'))) {
+        $this->addFlash('error', 'Invalid CSRF token');
+        return $this->redirectToRoute('app_activity_edit', ['id' => $id]);
+    }
+
+    // Gestion de la suppression d'image
+    if ($request->request->has('remove_image')) {
+        $this->removeImage($activity->getUrl());
+        $activity->setUrl(null);
+    }
+
+    // Traitement des données
+    $activity->setNom($request->request->get('nom'));
+    $activity->setDescription($request->request->get('description'));
+    $activity->setType(ActivityType::from($request->request->get('type')));
+
+    // Gestion de la nouvelle image
+    $imageFile = $request->files->get('activityImage');
+    if ($imageFile) {
+        // Supprimer l'ancienne image si elle existe
+        if ($activity->getUrl()) {
+            $this->removeImage($activity->getUrl());
+        }
+        
+        $newFilename = $this->uploadImage($imageFile, $slugger);
+        $activity->setUrl('/uploads/activities/'.$newFilename);
+    }
+
+    $entityManager->flush();
+
+    $this->addFlash('success', 'Activity updated successfully!');
+    return $this->redirectToRoute('app_activity_index');
+}
 }
