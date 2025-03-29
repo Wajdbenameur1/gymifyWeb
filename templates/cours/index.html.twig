@@ -11,7 +11,7 @@
             <h6 class="op-7 mb-2">Cours Monitoring Dashboard</h6>
         </div>
         <div class="ms-md-auto py-2 py-md-0 d-flex gap-2">
-            <a href="{{path('app_cours_new')}}" class="btn btn-primary btn-round">
+            <a href="{{ path('app_cours_new', {'idPlanning': app.request.get('idPlanning')}) }}" class="btn btn-primary btn-round">
                 <i class="fas fa-plus me-2"></i> Ajouter un cours
             </a>
         </div>

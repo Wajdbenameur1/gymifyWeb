@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CoursRepository;
+use App\Enum\ObjectifCours;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,8 +21,8 @@ class Cours
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $objectif = null;
+    #[ORM\Column(type: 'string',enumType: ObjectifCours::class,columnDefinition: "ENUM('PERTE_PROIDS','PRISE_DE_MASSE','ENDURANCE','RELAXATION')")]
+    private ?ObjectifCours $objectif = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateDebut = null;
@@ -73,12 +74,12 @@ class Cours
         return $this;
     }
 
-    public function getObjectif(): ?string
+    public function getObjectif(): ?ObjectifCours
     {
         return $this->objectif;
     }
 
-    public function setObjectif(string $objectif): static
+    public function setObjectif(ObjectifCours $objectif): static
     {
         $this->objectif = $objectif;
 
@@ -126,7 +127,7 @@ class Cours
         return $this->activité;
     }
 
-    public function setActivité(?Activité $activité_id): static
+    public function setActivité(?Activité $activité): static
     {
         $this->activité = $activité;
 

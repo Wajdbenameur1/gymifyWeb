@@ -24,7 +24,7 @@ class Equipe
     private ?string $image_url = null;
 
     #[ORM\Column(type: 'string',enumType: Niveau::class,/*columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')"*/)]
-    private ?Niveau $type = null;
+    private ?Niveau $niveau = null;
 
     #[ORM\Column]
     private ?int $nombre_membres = null;
