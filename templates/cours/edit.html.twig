@@ -1,6 +1,6 @@
 {% extends 'entraineur/homepageentraineur.html.twig' %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block title %}Modifier le cours - {{ cour.title }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -117,55 +117,6 @@
             z-index: 1000;
             max-width: 400px;
         }
-        
-        .alert {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border: none;
-            border-radius: 8px;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            animation: slideIn 0.3s forwards;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            margin-left: auto;
-            cursor: pointer;
-            color: inherit;
-        }
-        
-        .d-none {
-            display: none;
-        }
     </style>
 {% endblock %}
 
@@ -175,9 +126,7 @@
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
                 {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
         
@@ -185,39 +134,29 @@
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
                 {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        {% endfor %}
-        
-        {% for message in app.flashes('warning') %}
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
     </div>
 
     <div class="container py-4">
         <div class="form-header">
-            <h2 class="fw-bold mb-1">{{ page_title }}</h2>
-            <p class="text-muted mb-0">Planifiez un nouveau cours pour vos clients</p>
+            <h2 class="fw-bold mb-1">Modifier le cours : {{ cour.title }}</h2>
+            <p class="text-muted mb-0">Mettez à jour les informations du cours</p>
         </div>
 
         <div class="card form-card">
             <div class="card-body p-4">
-                <form method="post" action="{{ path('app_cours_create', {'idPlanning': app.request.get('idPlanning') }) }}" class="needs-validation" novalidate>
-                    <input type="hidden" name="token" value="{{ csrf_token('create_cours') }}">
+                <form method="post"  action= "{{path('app_cours_Update', {'id': cour.id})}}"class="needs-validation" novalidate>
+                    <input type="hidden" name="_token" value="{{ csrf_token('edit_cours_' ~ cour.id) }}">
                     
                     {# Champ select caché pour l'objectif #}
                     <select id="selected-objective" name="objectif" class="form-select d-none" required>
                         <option value="">Sélectionnez un objectif</option>
                         {% for objectif in objectifs %}
-                            <option value="{{ objectif.value }}">{{ objectif.label() }}</option>
+                            <option value="{{ objectif.value }}" {% if cour.objectif.value == objectif.value %}selected{% endif %}>
+                                {{ objectif.label() }}
+                            </option>
                         {% endfor %}
                     </select>
 
@@ -225,6 +164,7 @@
                         <div class="col-md-8">
                             <label for="title" class="form-label fw-bold">Titre du cours *</label>
                             <input type="text" id="title" name="title" class="form-control" 
+                                   value="{{ cour.title }}"
                                    placeholder="Ex: Séance cardio avancée" required maxlength="50">
                             <div class="invalid-feedback">Un titre est requis (50 caractères max)</div>
                         </div>
@@ -235,7 +175,7 @@
                         <div class="row g-3" id="objective-container">
                             {% for objectif in objectifs %}
                                 <div class="col-md-3 col-6">
-                                    <div class="objective-widget" 
+                                    <div class="objective-widget {% if cour.objectif.value == objectif.value %}active{% endif %}" 
                                          data-value="{{ objectif.value }}"
                                          title="{{ objectif.label() }}">
                                         <div class="objective-icon">
@@ -262,7 +202,7 @@
                     <div class="mb-4">
                         <label for="description" class="form-label fw-bold">Description détaillée *</label>
                         <textarea id="description" name="description" class="form-control" 
-                                  rows="4" placeholder="Décrivez le contenu du cours..." required></textarea>
+                                  rows="4" placeholder="Décrivez le contenu du cours..." required>{{ cour.description }}</textarea>
                         <div class="invalid-feedback">Une description est requise</div>
                     </div>
 
@@ -271,6 +211,7 @@
                             <label for="dateDebut" class="form-label fw-bold">Date *</label>
                             <input type="date" id="dateDebut" name="dateDebut" 
                                    class="form-control" 
+                                   value="{{ cour.dateDebut|date('Y-m-d') }}"
                                    min="{{ planning.dateDebut|date('Y-m-d') }}" 
                                    max="{{ planning.dateFin|date('Y-m-d') }}"
                                    required>
@@ -282,14 +223,18 @@
                         <div class="col-md-4">
                             <label for="heurDebut" class="form-label fw-bold">Heure de début *</label>
                             <input type="time" id="heurDebut" name="heurDebut" 
-                                   class="form-control" required>
+                                   class="form-control" 
+                                   value="{{ cour.heurDebut|date('H:i') }}"
+                                   required>
                             <div class="invalid-feedback">Heure requise</div>
                         </div>
                         
                         <div class="col-md-4">
                             <label for="heurFin" class="form-label fw-bold">Heure de fin *</label>
                             <input type="time" id="heurFin" name="heurFin" 
-                                   class="form-control" required>
+                                   class="form-control" 
+                                   value="{{ cour.heurFin|date('H:i') }}"
+                                   required>
                             <div class="invalid-feedback">Heure requise</div>
                         </div>
                     </div>
@@ -298,9 +243,11 @@
                         <div class="col-md-6">
                             <label for="activite" class="form-label fw-bold">Activité *</label>
                             <select id="activite" name="activite" class="form-select" required>
-                                <option value="" disabled selected>Sélectionnez...</option>
-                                {% for activite in activites %}
-                                    <option value="{{ activite.id }}">{{ activite.nom }}</option>
+                                <option value="" disabled>Sélectionnez...</option>
+                                {% for activité in activites %}
+                                    <option value="{{ activité.id }}" {% if cour.activité.id == activité.id %}selected{% endif %}>
+                                        {{ activité.nom }}
+                                    </option>
                                 {% endfor %}
                             </select>
                             <div class="invalid-feedback">Sélectionnez une activité</div>
@@ -309,9 +256,11 @@
                         <div class="col-md-6">
                             <label for="salle" class="form-label fw-bold">Salle *</label>
                             <select id="salle" name="salle" class="form-select" required>
-                                <option value="" disabled selected>Sélectionnez...</option>
+                                <option value="" disabled>Sélectionnez...</option>
                                 {% for salle in salles %}
-                                    <option value="{{ salle.id }}">{{ salle.nom }}</option>
+                                    <option value="{{ salle.id }}" {% if cour.salle.id == salle.id %}selected{% endif %}>
+                                        {{ salle.nom }}
+                                    </option>
                                 {% endfor %}
                             </select>
                             <div class="invalid-feedback">Sélectionnez une salle</div>
@@ -319,11 +268,9 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-3 pt-3 border-top">
-                        <a href="{{ path('app_cours_new', {'idPlanning': app.request.get('idPlanning') }) }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Annuler
-                        </a>
+                        
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Créer le cours
+                            <i class="fas fa-save me-2"></i>Enregistrer les modifications
                         </button>
                     </div>
                 </form>
@@ -331,113 +278,98 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Gestion des widgets d'objectifs
-        const objectiveWidgets = document.querySelectorAll('.objective-widget');
-        const objectiveSelect = document.getElementById('selected-objective');
-        const objectiveError = document.querySelector('.objective-error');
-        
-        objectiveWidgets.forEach(widget => {
-            widget.addEventListener('click', function() {
-                // Retirer la classe active de tous les widgets
-                objectiveWidgets.forEach(w => w.classList.remove('active'));
+    {% block javascripts %}
+        {{ parent() }}
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion des widgets d'objectifs
+            const objectiveWidgets = document.querySelectorAll('.objective-widget');
+            const objectiveSelect = document.getElementById('selected-objective');
+            const objectiveError = document.querySelector('.objective-error');
+            
+            objectiveWidgets.forEach(widget => {
+                widget.addEventListener('click', function() {
+                    // Retirer la classe active de tous les widgets
+                    objectiveWidgets.forEach(w => w.classList.remove('active'));
+                    
+                    // Ajouter la classe active au widget cliqué
+                    this.classList.add('active');
+                    
+                    // Mettre à jour la valeur du select
+                    const objectiveValue = this.dataset.value;
+                    objectiveSelect.value = objectiveValue;
+                    
+                    // Cacher l'erreur si elle était affichée
+                    objectiveError.style.display = 'none';
+                    
+                    // Validation visuelle
+                    if (objectiveSelect.value) {
+                        objectiveSelect.classList.remove('is-invalid');
+                    }
+                });
+            });
+            
+            // Validation du formulaire
+            const form = document.querySelector('.needs-validation');
+            const dateInput = document.getElementById('dateDebut');
+            const planningStart = '{{ planning.dateDebut|date('Y-m-d') }}';
+            const planningEnd = '{{ planning.dateFin|date('Y-m-d') }}';
+            
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
                 
-                // Ajouter la classe active au widget cliqué
-                this.classList.add('active');
+                let isValid = true;
                 
-                // Mettre à jour la valeur du select
-                const objectiveValue = this.dataset.value;
-                objectiveSelect.value = objectiveValue;
+                // Validation standard
+                if (!form.checkValidity()) {
+                    isValid = false;
+                }
                 
-                // Cacher l'erreur si elle était affichée
-                objectiveError.style.display = 'none';
+                // Validation personnalisée pour l'objectif
+                if (!objectiveSelect.value) {
+                    objectiveError.style.display = 'block';
+                    objectiveSelect.classList.add('is-invalid');
+                    isValid = false;
+                }
                 
-                // Validation visuelle
-                if (objectiveSelect.value) {
-                    objectiveSelect.classList.remove('is-invalid');
+                // Validation des heures
+                const heureDebut = document.getElementById('heurDebut').value;
+                const heureFin = document.getElementById('heurFin').value;
+                
+                if (heureDebut && heureFin && heureFin <= heureDebut) {
+                    document.getElementById('heurFin').classList.add('is-invalid');
+                    document.getElementById('heurFin').nextElementSibling.textContent = 
+                        "L'heure de fin doit être après l'heure de début";
+                    isValid = false;
+                }
+                
+                // Validation de la date par rapport au planning
+                if (dateInput.value < planningStart || dateInput.value > planningEnd) {
+                    dateInput.classList.add('is-invalid');
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    form.submit();
+                } else {
+                    form.classList.add('was-validated');
                 }
             });
-        });
-        
-        // Validation du formulaire
-        const form = document.querySelector('.needs-validation');
-        const dateInput = document.getElementById('dateDebut');
-        const planningStart = '{{ planning.dateDebut|date('Y-m-d') }}';
-        const planningEnd = '{{ planning.dateFin|date('Y-m-d') }}';
-        
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
             
-            let isValid = true;
-            
-            // Validation standard
-            if (!form.checkValidity()) {
-                isValid = false;
-            }
-            
-            // Validation personnalisée pour l'objectif
-            if (!objectiveSelect.value) {
-                objectiveError.style.display = 'block';
-                objectiveSelect.classList.add('is-invalid');
-                isValid = false;
-            }
-            
-            // Validation des heures
-            const heureDebut = document.getElementById('heurDebut').value;
-            const heureFin = document.getElementById('heurFin').value;
-            
-            if (heureDebut && heureFin && heureFin <= heureDebut) {
-                document.getElementById('heurFin').classList.add('is-invalid');
-                document.getElementById('heurFin').nextElementSibling.textContent = 
-                    "L'heure de fin doit être après l'heure de début";
-                isValid = false;
-            }
-            
-            // Validation de la date par rapport au planning
-            if (dateInput.value < planningStart || dateInput.value > planningEnd) {
-                dateInput.classList.add('is-invalid');
-                isValid = false;
-            }
-            
-            if (isValid) {
-                form.submit();
-            } else {
-                form.classList.add('was-validated');
-            }
-        });
-        
-        // Validation en temps réel
-        form.querySelectorAll('input, select, textarea').forEach(input => {
-            input.addEventListener('input', function() {
-                if (this.checkValidity()) {
-                    this.classList.remove('is-invalid');
-                }
+            // Fermer les messages flash
+            document.querySelectorAll('.alert .btn-close').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.alert').remove();
+                });
             });
+            
+            // Disparition automatique des messages flash après 5 secondes
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    alert.remove();
+                });
+            }, 5000);
         });
-        
-        // Validation de la date lors du changement
-        dateInput.addEventListener('change', function() {
-            if (this.value < planningStart || this.value > planningEnd) {
-                this.classList.add('is-invalid');
-            } else {
-                this.classList.remove('is-invalid');
-            }
-        });
-        
-        // Fermer les messages flash
-        document.querySelectorAll('.alert .close').forEach(button => {
-            button.addEventListener('click', function() {
-                this.closest('.alert').remove();
-            });
-        });
-        
-        // Disparition automatique des messages flash après 5 secondes
-        setTimeout(() => {
-            document.querySelectorAll('.alert').forEach(alert => {
-                alert.remove();
-            });
-        }, 5000);
-    });
-    </script>
+        </script>
+    {% endblock %}
 {% endblock %}

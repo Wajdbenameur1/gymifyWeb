@@ -2,19 +2,156 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
-
-
 {% block body %}
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-        <div>
-            <h3 class="fw-bold mb-3">{{ page_title }}</h3>
-            <h6 class="op-7 mb-2">Cours Monitoring Dashboard</h6>
-        </div>
-        <div class="ms-md-auto py-2 py-md-0 d-flex gap-2">
-            <a href="{{ path('app_cours_new', {'idPlanning': app.request.get('idPlanning')}) }}" class="btn btn-primary btn-round">
-                <i class="fas fa-plus me-2"></i> Ajouter un cours
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-bold mb-1">{{ page_title }}</h1>
+                <p class="text-muted mb-0">Gestion des cours</p>
+            </div>
+            <a href="{{ path('app_cours_new', {'idPlanning': idPlanning}) }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i> Nouveau cours
             </a>
         </div>
-    </div>
 
-    {% endblock %}
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="card-body p-0">
+                {% if cours|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 py-3">Titre</th>
+                                    <th class="py-3">Description</th>
+                                    <th class="py-3">Objectif</th>
+                                    <th class="py-3">Date</th>
+                                    <th class="py-3">Heures</th>
+                                    <th class="py-3">Activité</th>
+                                    <th class="py-3">Salle</th>
+                                    <th class="pe-4 py-3 text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cour in cours %}
+                                    <tr class="border-bottom">
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-shape icon-sm bg-primary-soft text-primary rounded-circle me-3">
+                                                    <i class="fas fa-book-open"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ cour.title }}</h6>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3">
+                                            <p class="text-sm text-muted mb-0">
+                                                {{ cour.description|slice(0, 50) }}{% if cour.description|length > 50 %}...{% endif %}
+                                            </p>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-primary-soft text-primary">
+                                                {{ cour.objectif.value }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="text-sm">{{ cour.dateDebut|date('d/m/Y') }}</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="text-sm">{{ cour.heurDebut|date('H:i') }} - {{ cour.heurFin|date('H:i') }}</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-info-soft text-info me-2">
+                                                    {{ cour.activité.nom }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="text-sm">{{ cour.salle.nom }}</span>
+                                        </td>
+                                        <td class="pe-4 py-3 text-end">
+                                            <div class="btn-group">
+                                                <a href=" {{path('app_cours_edit', {'id': cour.id})}} " 
+                                                   class="btn btn-sm btn-outline-primary rounded-circle me-1" 
+                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </a>
+                                                <form action="{{ path('app_cours_delete', {'id': cour.id}) }}" method="POST" class="d-inline">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cour.id) }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" 
+                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer"
+                                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="py-5">
+                            <i class="fas fa-book-open fa-4x text-muted mb-4"></i>
+                            <h4 class="fw-bold">Aucun cours trouvé</h4>
+                            <p class="text-muted">Commencez par ajouter un nouveau cours</p>
+                            
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .bg-primary-soft {
+            background-color: rgba(70, 127, 207, 0.1) !important;
+        }
+        .bg-info-soft {
+            background-color: rgba(23, 162, 184, 0.1) !important;
+        }
+        .icon-shape {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        .rounded-circle {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Activer les tooltips Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+{% endblock %}
