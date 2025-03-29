@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Entity;
-
+use App\Enum\Reward;
 use App\Repository\EventsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -35,14 +37,36 @@ class Events
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $reward = null;
+    #[ORM\Column(type: 'string',enumType: Reward::class,/*columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')"*/)]
+    private ?Reward $reward = null;
 
     #[ORM\Column]
     private ?float $latitude = null;
 
     #[ORM\Column]
     private ?float $longitude = null;
+
+    
+
+    /**
+     * @var Collection<int, EquipeEvent>
+     */
+    #[ORM\OneToMany(targetEntity: EquipeEvent::class, mappedBy: 'event')]
+    private Collection $event;
+
+    #[ORM\ManyToOne(inversedBy: 'salles')]
+    private ?salle $salle = null;
+
+    
+
+    
+
+    public function __construct()
+    {
+        $this->id_event = new ArrayCollection();
+        $this->id_equipe = new ArrayCollection();
+        $this->event = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -133,12 +157,12 @@ class Events
         return $this;
     }
 
-    public function getReward(): ?string
+    public function getReward(): ?Reward
     {
         return $this->reward;
     }
 
-    public function setReward(string $reward): static
+    public function setReward(Reward $reward): static
     {
         $this->reward = $reward;
 
@@ -168,4 +192,50 @@ class Events
 
         return $this;
     }
-}
+
+    
+
+    /**
+     * @return Collection<int, EquipeEvent>
+     */
+    public function getEvent(): Collection
+    {
+        return $this->event;
+    }
+
+    public function addEvent(EquipeEvent $event): static
+    {
+        if (!$this->event->contains($event)) {
+            $this->event->add($event);
+            $event->setEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvent(EquipeEvent $event): static
+    {
+        if ($this->event->removeElement($event)) {
+            // set the owning side to null (unless already changed)
+            if ($event->getEvent() === $this) {
+                $event->setEvent(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getSalle(): ?salle
+    {
+        return $this->salle;
+    }
+
+    public function setSalle(?salle $salle): static
+    {
+        $this->salle = $salle;
+
+        return $this;
+    }
+
+    
+  }

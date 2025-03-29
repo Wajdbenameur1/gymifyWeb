@@ -39,9 +39,19 @@ class Salle
     #[ORM\OneToMany(targetEntity: cours::class, mappedBy: 'salle')]
     private Collection $salle;
 
+    /**
+     * @var Collection<int, Events>
+     */
+    #[ORM\OneToMany(targetEntity: Events::class, mappedBy: 'salle')]
+    private Collection $salles;
+
+    
+
     public function __construct()
     {
         $this->salle = new ArrayCollection();
+        $this->id_salle = new ArrayCollection();
+        $this->salles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -150,4 +160,14 @@ class Salle
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Events>
+     */
+    public function getSalles(): Collection
+    {
+        return $this->salles;
+    }
+
+    
 }

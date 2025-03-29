@@ -48,6 +48,9 @@ class User
     #[ORM\OneToMany(targetEntity: cours::class, mappedBy: 'entaineur')]
     private Collection $entaineur;
 
+    #[ORM\ManyToOne(inversedBy: 'equipes')]
+    private ?equipe $equipe = null;
+
     public function __construct()
     {
         $this->entaineur = new ArrayCollection();
@@ -181,6 +184,18 @@ class User
                 $entaineur->setEntaineur(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getEquipe(): ?equipe
+    {
+        return $this->equipe;
+    }
+
+    public function setEquipe(?equipe $equipe): static
+    {
+        $this->equipe = $equipe;
 
         return $this;
     }

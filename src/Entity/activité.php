@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\ActivityType;
+use Doctrine\DBAL\Types\Types;
 use App\Repository\ActivityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -25,7 +26,7 @@ class Activité
     #[ORM\Column(length: 200)]
     private ?string $url = null;
 
-    #[ORM\Column(type: 'string',enumType: ActivityType::class,columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')")]
+    #[ORM\Column(type: 'string',enumType: ActivityType::class,/*columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')"*/)]
     private ?ActivityType $type = null;
 
     /**
