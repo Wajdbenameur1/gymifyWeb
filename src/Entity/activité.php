@@ -26,7 +26,7 @@ class Activité
     #[ORM\Column(length: 200)]
     private ?string $url = null;
 
-    #[ORM\Column(type: 'string',enumType: ActivityType::class,/*columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')"*/)]
+    #[ORM\Column(type: 'string',enumType: ActivityType::class,columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')")]
     private ?ActivityType $type = null;
 
     /**

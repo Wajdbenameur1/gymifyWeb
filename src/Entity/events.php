@@ -55,7 +55,7 @@ class Events
     private Collection $event;
 
     #[ORM\ManyToOne(inversedBy: 'salles')]
-    private ?salle $salle = null;
+    private ?Salle $salle = null;
 
     
 
@@ -225,12 +225,12 @@ class Events
         return $this;
     }
 
-    public function getSalle(): ?salle
+    public function getSalle(): ?Salle
     {
         return $this->salle;
     }
 
-    public function setSalle(?salle $salle): static
+    public function setSalle(?Salle $salle): static
     {
         $this->salle = $salle;
 

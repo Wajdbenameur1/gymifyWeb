@@ -14,34 +14,34 @@ class EquipeEvent
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'equipe')]
-    private ?equipe $equipe = null;
+    private ?Equipe $equipe = null;
 
     #[ORM\ManyToOne(inversedBy: 'event')]
-    private ?events $event = null;
+    private ?Events $event = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getEquipe(): ?equipe
+    public function getEquipe(): ?Equipe
     {
         return $this->equipe;
     }
 
-    public function setEquipe(?equipe $equipe): static
+    public function setEquipe(?Equipe $equipe): static
     {
         $this->equipe = $equipe;
 
         return $this;
     }
 
-    public function getEvent(): ?events
+    public function getEvent(): ?Events
     {
         return $this->event;
     }
 
-    public function setEvent(?events $event): static
+    public function setEvent(?Events $event): static
     {
         $this->event = $event;
 

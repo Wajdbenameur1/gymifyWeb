@@ -45,11 +45,11 @@ class User
     /**
      * @var Collection<int, cours>
      */
-    #[ORM\OneToMany(targetEntity: cours::class, mappedBy: 'entaineur')]
+    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
     private Collection $entaineur;
 
     #[ORM\ManyToOne(inversedBy: 'equipes')]
-    private ?equipe $equipe = null;
+    private ?Equipe $equipe = null;
 
     public function __construct()
     {

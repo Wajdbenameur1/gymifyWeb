@@ -132,14 +132,14 @@ class Salle
     }
 
     /**
-     * @return Collection<int, cours>
+     * @return Collection<int, Cours>
      */
     public function getSalle(): Collection
     {
         return $this->salle;
     }
 
-    public function addSalle(cours $salle): static
+    public function addSalle(Cours $salle): static
     {
         if (!$this->salle->contains($salle)) {
             $this->salle->add($salle);
@@ -149,7 +149,7 @@ class Salle
         return $this;
     }
 
-    public function removeSalle(cours $salle): static
+    public function removeSalle(Cours $salle): static
     {
         if ($this->salle->removeElement($salle)) {
             // set the owning side to null (unless already changed)
