@@ -8,6 +8,7 @@
     "jquery-sparkline": "^2.4.0",
     "jsvectormap": "^1.6.0",
     "sweetalert2": "^11.17.2",
+    "swiper": "^11.2.6",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
@@ -23,7 +24,6 @@
     "sass": "^1.86.0",
     "sass-loader": "^16.0.5",
     "stimulus": "^3.2.2",
-    "webpack": "^5.98.0",
-    "webpack-cli": "^6.0.1"
+    "webpack": "^5.98.0"
   }
 }

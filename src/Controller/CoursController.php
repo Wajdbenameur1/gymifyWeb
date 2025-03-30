@@ -19,26 +19,41 @@ use App\Repository\CoursRepository;
 final class CoursController extends AbstractController
 {
   #[Route('/cours/{idPlanning}', name: 'app_cours')]
-    public function index(Request $request, CoursRepository $coursRepository, 
-      PlanningRepository $planningRepository, 
-     $idPlanning = null): Response
-    {
-      $planning = $planningRepository->find($idPlanning);
-    
-      if (!$planning) {
-          throw $this->createNotFoundException('Planning non trouvé');
-      }
-  
-      // Récupérer les cours associés à ce planning
-      $cours = $coursRepository->findBy(['planning' => $planning]);
+public function index(Request $request, CoursRepository $coursRepository, 
+  PlanningRepository $planningRepository, 
+  $idPlanning = null): Response
+{
+    $planning = $planningRepository->find($idPlanning);
 
-        return $this->render('cours/index.html.twig', [
-            'page_title' => 'Liste des cours',
-            'cours' => $cours,
-            'planning' => $planning,
-            'idPlanning' => $idPlanning
-        ]);
+    if (!$planning) {
+        throw $this->createNotFoundException('Planning non trouvé');
     }
+
+    // Générer toutes les dates entre dateDebut et dateFin du planning
+    $joursCalendrier = [];
+    $dateDebut = $planning->getDateDebut();
+    $dateFin = $planning->getDateFin();
+    
+    // Vérifier que les dates sont valides
+    if ($dateDebut && $dateFin) {
+        $currentDate = clone $dateDebut;
+        while ($currentDate <= $dateFin) {
+            $joursCalendrier[] = clone $currentDate;
+            $currentDate->modify('+1 day');
+        }
+    }
+
+    // Récupérer les cours associés à ce planning
+    $cours = $coursRepository->findBy(['planning' => $planning]);
+
+    return $this->render('cours/index.html.twig', [
+        'page_title' => 'Liste des cours',
+        'cours' => $cours,
+        'planning' => $planning,
+        'joursCalendrier' => $joursCalendrier,
+        'idPlanning' => $idPlanning
+    ]);
+}
 
     
     #[Route('/cours/new/{idPlanning}', name: 'app_cours_new')]
