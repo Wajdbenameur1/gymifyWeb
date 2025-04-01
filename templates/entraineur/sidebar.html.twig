@@ -26,6 +26,12 @@
                         <p>Planning</p>
                     </a>
                 </li>
+                <li class="nav-item {{ app.request.get('_route') == 'app_calendar' ? 'active' }}">
+                    <a href="{{ path('app_calendar') }}">
+                        <i class="fas fa-calendar"></i><!-- Ou remplacez par le SVG -->
+                        <p>Calendrier</p>
+                    </a>
+                </li>
             </ul>
         </div>
 

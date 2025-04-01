@@ -243,6 +243,26 @@
     {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
+    function filterCourses() {
+    const searchTerm = document.getElementById('globalSearchInput').value.toLowerCase();
+    const selectedDate = document.querySelector('.calendar-day.active')?.getAttribute('data-date') || 'all';
+    
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const rowDate = row.getAttribute('data-date');
+        const rowText = row.textContent.toLowerCase();
+        
+        const dateMatch = selectedDate === 'all' || rowDate === selectedDate;
+        const searchMatch = rowText.includes(searchTerm);
+        
+        row.style.display = (dateMatch && searchMatch) ? '' : 'none';
+    });
+}
+
+// Écouteurs d'événements
+document.getElementById('globalSearchInput').addEventListener('input', filterCourses);
+document.querySelectorAll('.calendar-day').forEach(day => {
+    day.addEventListener('click', filterCourses);
+});
         document.addEventListener('DOMContentLoaded', function() {
             // Activer les tooltips Bootstrap
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
