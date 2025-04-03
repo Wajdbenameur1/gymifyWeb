@@ -11,7 +11,6 @@ import './styles/demo.css';
 import './styles/fonts.css';
 import './styles/fonts.min.css';
 
-import '../styles/app.css';
 
 
 
@@ -19,4 +18,3 @@ import '../styles/app.css';
 
 
 console.log('Hello Webpack Encore!');
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');

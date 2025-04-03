@@ -81,7 +81,7 @@ final class AdminController extends AbstractController
         #[Route('/admin/users', name:'app_users')]
        public function user()
        {
-        return $this->render('admin/users.html.twig', [ ]);
+        return $this->render('user/index.html.twig', [ ]);
         }
         #[Route('/admin/activity', name:'app_activity')]
        public function activity(ActivityRepository $activityRepository): Response

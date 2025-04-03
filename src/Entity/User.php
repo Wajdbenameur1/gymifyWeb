@@ -7,9 +7,21 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+#[ORM\Entity]
+#[ORM\Table(name: "user")]a
+#[ORM\InheritanceType("SINGLE_TABLE")]
+#[ORM\DiscriminatorColumn(name: "type", type: "string")]
+#[ORM\DiscriminatorMap([
+    "sportif" => Sportif::class,
+    "admin" => Admin::class,
+    "responsable_salle" => ReponsableSalle::class,
+    "entraineur"=>Entraineur::class
+])]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,7 +40,7 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', enumType: Role::class, columnDefinition: "ENUM('admin', 'responsable_salle', 'entraineur', 'sportif')")]
     private ?string $role = null;
 
     #[ORM\Column(length: 100)]
@@ -112,17 +124,19 @@ class User
         return $this;
     }
 
-    public function getRole(): ?string
+   
+    public function getRole(): ?ORole
     {
-        return $this->role;
+        return $this->Role;
     }
 
-    public function setRole(string $role): static
+    public function setRole(Role $Role): static
     {
-        $this->role = $role;
+        $this->Role = $Role;
 
         return $this;
     }
+
 
     public function getSpecialite(): ?string
     {
