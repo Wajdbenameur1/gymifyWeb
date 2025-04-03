@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'utilisateur{% endblock %}
+
+{% block body %}
+    <h1>Détails de l'utilisateur</h1>
+
+    <table>
+        <tr>
+            <th>Nom</th>
+            <td>{{ user.nom }}</td>
+        </tr>
+        <tr>
+            <th>Prénom</th>
+            <td>{{ user.prenom }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ user.email }}</td>
+        </tr>
+        <tr>
+            <th>Rôle</th>
+            <td>{{ user.role }}</td>
+        </tr>
+        <tr>
+            <th>Spécialité</th>
+            <td>{{ user.specialite ? user.specialite : 'Non spécifiée' }}</td>
+        </tr>
+        <tr>
+            <th>Image</th>
+            <td><img src="{{ user.imageUrl }}" alt="Image de l'utilisateur" width="100"></td>
+        </tr>
+        <tr>
+            <th>Date de naissance</th>
+            <td>{{ user.dateNaissance|date('d-m-Y') }}</td>
+        </tr>
+    </table>
+
+    <a href="{{ path('user_edit', {'id': user.id}) }}">Modifier</a>
+
+    <form action="{{ path('user_delete', {'id': user.id}) }}" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+        <button type="submit">Supprimer</button>
+    </form>
+
+    <a href="{{ path('user_index') }}">Retour à la liste des utilisateurs</a>
+{% endblock %}
