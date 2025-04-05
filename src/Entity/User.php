@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Entity]
-#[ORM\Table(name: "user")]a
+#[ORM\Table(name: "user")]
 #[ORM\InheritanceType("SINGLE_TABLE")]
 #[ORM\DiscriminatorColumn(name: "type", type: "string")]
 #[ORM\DiscriminatorMap([
@@ -68,7 +68,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->entaineur = new ArrayCollection();
     }
   
+    public function eraseCredentials() {}
 
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
     
 
     public function getId(): ?int
