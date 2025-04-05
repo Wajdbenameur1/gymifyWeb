@@ -1,39 +1,41 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Sportif;
-use App\Form\UserType;
+use App\Enum\Role;
+use App\Form\SportifType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class RegistrationController extends AbstractController
 {
-    #[Route('/register/sportif', name: 'register_sportif')]
-    public function register(
+    #[Route('/register/sportif', name: 'app_register_sportif')]
+    public function registerSportif(
         Request $request,
-        EntityManagerInterface $em,
+        EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher
     ): Response {
         $sportif = new Sportif();
-        $form = $this->createForm(UserType::class, $sportif);
+        $sportif->setRole(Role::SPORTIF); // Fixe automatiquement le rôle Sportif
 
+        $form = $this->createForm(SportifType::class, $sportif);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('password')->getData();
             $hashedPassword = $passwordHasher->hashPassword($sportif, $plainPassword);
             $sportif->setPassword($hashedPassword);
 
-            // définir le rôle
-            $sportif->setRole('sportif'); // ou selon votre enum Role::SPORTIF
+            $entityManager->persist($sportif);
+            $entityManager->flush();
 
-            $em->persist($sportif);
-            $em->flush();
+            $this->addFlash('success', 'Compte Sportif créé avec succès !');
 
-            $this->addFlash('success', 'Inscription réussie !');
             return $this->redirectToRoute('app_login');
         }
 
