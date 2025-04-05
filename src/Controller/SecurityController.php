@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,13 +35,14 @@ class SecurityController extends AbstractController
             return 'app_home';
         }
 
-        $role = $user->getRole(); // "admin", "sportif", etc.
+        // Récupérer les rôles et rediriger vers le tableau de bord approprié
+        $roles = $user->getRoles();
 
-        return match ($role) {
-            'admin' => 'app_admin',
-            'sportif' => 'home',
-            'entraineur' => 'app_entraineurr',
-            'responsable_salle' => 'dashboard_responsable_salle',
+        return match (true) {
+            in_array('ROLE_ADMIN', $roles) => 'dashboard_admin',
+            in_array('ROLE_SPORTIF', $roles) => 'dashboard_sportif',
+            in_array('ROLE_ENTRAINEUR', $roles) => 'dashboard_entraineur',
+            in_array('ROLE_RESPONSABLE_SALLE', $roles) => 'dashboard_responsable_salle',
             default => 'app_home',
         };
     }

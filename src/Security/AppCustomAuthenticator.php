@@ -1,7 +1,7 @@
 <?php
-
 namespace App\Security;
 
+use App\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,34 +44,33 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
             ]
         );
     }
+
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $user = $token->getUser();
         $roles = $user->getRoles(); // ✅ Récupérer les rôles
     
+        // Redirection en fonction des rôles
         if (in_array('ROLE_ADMIN', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_admin'));
         }
     
-        if (in_array('ROLE_PATIENT', $roles, true)) {
-            return new RedirectResponse($this->urlGenerator->generate('dashboard_patient'));
+        if (in_array('ROLE_SPORTIF', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('dashboard_sportif'));
         }
     
-        if (in_array('ROLE_PHARMACIEN', $roles, true)) {
-            return new RedirectResponse($this->urlGenerator->generate('dashboard_pharmacien'));
+        if (in_array('ROLE_ENTRAINEUR', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('dashboard_entraineur'));
         }
     
-        if (in_array('ROLE_MEDECIN', $roles, true)) {
-            return new RedirectResponse($this->urlGenerator->generate('dashboard_medecin'));
+        if (in_array('ROLE_RESPONSABLE_SALLE', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('dashboard_responsable_salle'));
         }
-        if (in_array('ROLE_STAFF', $roles, true)) {
-            return new RedirectResponse($this->urlGenerator->generate('dashboard_staff'));
-        }
-    return new RedirectResponse($this->urlGenerator->generate('app_clinique'));  
-    }
-    
 
-    
+        // Par défaut rediriger vers l'accueil ou une page générique
+        return new RedirectResponse($this->urlGenerator->generate('app_home'));
+    }
+
     protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);

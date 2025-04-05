@@ -26,13 +26,11 @@
                             <td>{{ user.prenom | capitalize }}</td>
                             <td>{{ user.email }}</td>
                             <td>
-                                {% for role in user.roles %}
-                                    <span class="badge bg-success">{{ role }}</span>
-                                {% endfor %}
+                                {{ user.roles | join(', ') }}
                             </td>
                             <td>
                                 <a href="{{ path('user_edit', { 'id': user.id }) }}" class="btn btn-primary btn-sm">Modifier</a>
-                                <form action="{{ path('user_delete', { 'id': user.id }) }}" method="POST" class="d-inline">
+                                <form action="{{ path('user_delete', { 'id': user.id }) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
                                     <input type="hidden" name="_method" value="DELETE">
                                     <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
                                 </form>
