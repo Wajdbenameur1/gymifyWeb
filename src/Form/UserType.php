@@ -1,9 +1,12 @@
 <?php
- namespace App\Form;
+ // src/Form/UserType.php
+
+namespace App\Form;
 
 use App\Entity\User;
 use App\Enum\Role;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -25,38 +28,21 @@ class UserType extends AbstractType
             ])
             ->add('password', PasswordType::class, [
                 'label' => 'Mot de passe',
-                'mapped' => false, // Empêche Doctrine de lier ce champ directement à l'entité
+                'mapped' => false,
                 'required' => true,
-                'attr' => [
-                    'autocomplete' => 'new-password',
-                ],
+                'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
                     new Assert\NotBlank(['message' => 'Le mot de passe est obligatoire.']),
-                    new Assert\Length([
-                        'min' => 8,
-                        'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères.',
-                    ]),
+                    new Assert\Length(['min' => 8, 'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères.']),
                 ],
             ])
             ->add('nom', TextType::class, [
                 'label' => 'Nom',
-                'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le nom est obligatoire.']),
-                    new Assert\Length([
-                        'max' => 50,
-                        'maxMessage' => 'Le nom ne doit pas dépasser 50 caractères.',
-                    ]),
-                ],
+                'constraints' => [new Assert\NotBlank(), new Assert\Length(['max' => 50])],
             ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom',
-                'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le prénom est obligatoire.']),
-                    new Assert\Length([
-                        'max' => 50,
-                        'maxMessage' => 'Le prénom ne doit pas dépasser 50 caractères.',
-                    ]),
-                ],
+                'constraints' => [new Assert\NotBlank(), new Assert\Length(['max' => 50])],
             ])
             ->add('role', ChoiceType::class, [
                 'choices' => [
@@ -65,23 +51,19 @@ class UserType extends AbstractType
                     'Entraîneur' => Role::ENTRAINEUR,
                     'Sportif' => Role::SPORTIF,
                 ],
-                'label' => 'Rôle de l\'utilisateur',
-                'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le rôle est obligatoire.']),
-                ],
+                'label' => 'Rôle',
+                'constraints' => [new Assert\NotBlank()],
+            ])
+            ->add('dateNaissance', DateType::class, [
+                'widget' => 'single_text',
+                'required' => true,
             ]);
 
-        // Ajout du champ spécialité uniquement si l'utilisateur est un entraîneur
         if ($options['is_entraineur']) {
             $builder->add('specialite', TextType::class, [
                 'label' => 'Spécialité',
                 'required' => false,
-                'constraints' => [
-                    new Assert\Length([
-                        'max' => 100,
-                        'maxMessage' => 'La spécialité ne doit pas dépasser 100 caractères.',
-                    ]),
-                ],
+                'constraints' => [new Assert\Length(['max' => 100])],
             ]);
         }
     }
@@ -90,7 +72,7 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
-            'is_entraineur' => false, // Par défaut, ce n'est pas un entraîneur
+            'is_entraineur' => false,
         ]);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Entity;
-
+use App\Enum\Role;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -40,8 +40,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(type: 'string', enumType: Role::class, columnDefinition: "ENUM('admin', 'responsable_salle', 'entraineur', 'sportif')")]
-    private ?string $role = null;
+    #[ORM\Column(type: 'string', enumType: Role::class)]
+    private ?Role $role = null;
 
     #[ORM\Column(length: 100)]
     private ?string $specialite = null;
@@ -68,13 +68,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->entaineur = new ArrayCollection();
     }
   
-    public function eraseCredentials() {}
-
-    public function getUserIdentifier(): string
+    public function eraseCredentials(): void
     {
-        return $this->email;
+        // Nettoyer les données sensibles ici si nécessaire (ex: plainPassword)
     }
-    
+      public function getUserIdentifier(): string
+      {
+          return $this->email;
+      }
 
     public function getId(): ?int
     {
@@ -130,19 +131,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
    
-    public function getRole(): ?ORole
+    public function getRole(): ?string
+{
+    return $this->role ? $this->role->value : null;
+}
+    
+    public function setRole(Role $role): static
+{
+    $this->role = $role;
+    return $this;
+} 
+    public function getRoles(): array
     {
-        return $this->Role;
+        return [$this->role ? 'ROLE_' . strtoupper($this->role->value) : 'ROLE_USER'];
     }
-
-    public function setRole(Role $Role): static
-    {
-        $this->Role = $Role;
-
-        return $this;
-    }
-
-
     public function getSpecialite(): ?string
     {
         return $this->specialite;

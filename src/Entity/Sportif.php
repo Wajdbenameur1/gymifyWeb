@@ -1,18 +1,18 @@
 <?php
 namespace App\Entity;
 
+use App\Enum\Role;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+
 class Sportif extends User
 {
-    #[ORM\Column(length: 50)]
-    private ?string $niveau = null;
+  
 
     public function __construct()
     {
         parent::__construct();
-        $this->setRole(Role::SPORTIF);
+        // Passez l'objet Role::SPORTIF ici
+        $this->setRole(Role::SPORTIF); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
     }
-
 }

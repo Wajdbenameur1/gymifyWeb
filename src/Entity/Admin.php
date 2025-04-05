@@ -1,35 +1,22 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\AdminRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+// On dit à Doctrine que Admin hérite de User
 #[ORM\Entity(repositoryClass: AdminRepository::class)]
-class Admin
+class Admin extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    // Pas besoin d'une nouvelle propriété ici, car Admin hérite déjà des propriétés de User
 
-    #[ORM\Column(length: 255)]
-    private ?string $admin = null;
-
-    public function getId(): ?int
+    public function __construct()
     {
-        return $this->id;
+        // Initialise le rôle d'admin
+        parent::__construct();
+        $this->setRole(Role::ADMIN->value); // Assurez-vous que Role::ADMIN existe et est valide
     }
 
-    public function getAdmin(): ?string
-    {
-        return $this->admin;
-    }
-
-    public function setAdmin(string $admin): static
-    {
-        $this->admin = $admin;
-
-        return $this;
-    }
+    // Vous pouvez ajouter des méthodes spécifiques à l'Admin si nécessaire.
+    // Exemple: getters/setters pour des propriétés spécifiques aux Admins.
 }
