@@ -30,33 +30,32 @@ class SecurityController extends AbstractController
     {
         // This method is intercepted by Symfony's firewall
     }
-
     private function getDashboardRouteByRole(): string
     {
         $user = $this->getUser();
-
+    
         if (!$user) {
             return 'app_home';
         }
-
-        $roles = $user->getRoles();
-
-        if (in_array(Role::ADMIN->value, $roles)) {
+    
+        $role = $user->getRole(); // ex: "admin", "entraineur", etc.
+    
+        if ($role === Role::ADMIN->value) {
             return 'dashboard_admin';
         }
-
-        if (in_array(Role::SPORTIF->value, $roles)) {
-            return 'home';
-        }
-
-        if (in_array(Role::ENTRAINEUR->value, $roles)) {
+    
+        if ($role === Role::ENTRAINEUR->value) {
             return 'dashboard_entraineur';
         }
-
-        if (in_array(Role::RESPONSABLE_SALLE->value, $roles)) {
+    
+        if ($role === Role::RESPONSABLE_SALLE->value) {
             return 'dashboard_responsable_salle';
         }
-
+    
+        if ($role === Role::SPORTIF->value) {
+            return 'home';
+        }
+    
         return 'app_home';
     }
 }

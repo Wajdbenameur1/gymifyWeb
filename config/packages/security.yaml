@@ -1,29 +1,40 @@
 security:
-    # Configure les hashers de mot de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
-    # Configure les providers de l'utilisateur
     providers:
-        users_in_memory:
-            memory: null
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
 
-    # Définition des firewalls
     firewalls:
         dev:
-            pattern: ^/
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            custom_authenticator: App\Security\AppCustomAuthenticator
             form_login:
                 login_path: app_login
                 check_path: app_login
-                username_parameter: email      # Utilise "email" au lieu de "_username"
-                password_parameter: password  # Utilise "password"
-                default_target_path: app_home
+                username_parameter: email  
+                password_parameter: password
+                enable_csrf: true
+                
+                
             logout:
                 path: app_logout
+                target: app_login
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 semaine
+                path: /
+            entry_point: App\Security\AppCustomAuthenticator  # ✅ On définit l'entrée
+            
+
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -32,21 +43,9 @@ security:
 
     # Contrôle d'accès pour certaines routes
     access_control:
-        - { path: ^/dashboard_admin, roles: ROLE_ADMIN }
-        - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
-        - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
-        - { path: ^/home, roles: ROLE_SPORTIF }
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-
-when@test:
-    security:
-        password_hashers:
-            # Par défaut, les hashers de mot de passe sont coûteux en ressources et prennent du temps. Cela
-            # est important pour générer des hashs de mots de passe sécurisés. Cependant, dans les tests,
-            # les hashs sécurisés ne sont pas importants, cela gaspille des ressources et augmente les temps de tests.
-            # La configuration suivante réduit le facteur de travail aux valeurs les plus basses possibles.
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4 # Valeur la plus basse pour bcrypt
-                time_cost: 3 # Valeur la plus basse pour argon
-                memory_cost: 10 # Valeur la plus basse pour argon
+    - { path: ^/dashboard_admin, roles: ROLE_ADMIN }
+    - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
+    - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
+    - { path: ^/home, roles: ROLE_SPORTIF }
+    - { path: ^/login, roles: PUBLIC_ACCESS }
+    - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

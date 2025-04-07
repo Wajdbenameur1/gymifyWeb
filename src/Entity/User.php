@@ -143,7 +143,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 public function getRoles(): array
 {
-    $roles = ['ROLE_USER'];  // On ajoute le rôle de base
+
     if ($this->role) {
         $roles[] = 'ROLE_' . strtoupper($this->role->value);
     }

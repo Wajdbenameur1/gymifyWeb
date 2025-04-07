@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Security;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -22,9 +21,7 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
-    {
-    }
+    public function __construct(private UrlGeneratorInterface $urlGenerator) {}
 
     public function authenticate(Request $request): Passport
     {
@@ -43,37 +40,36 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
             ]
         );
     }
-
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        // Affiche les rôles de l'utilisateur pour debug
+        $roles = $token->getUser()->getRoles();
+        ($roles);  // Cette ligne arrêtera l'exécution et affichera les rôles
+    
         $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
-        
+    
         if ($targetPath) {
             return new RedirectResponse($targetPath);
         }
-
-        $user = $token->getUser();
-        $roles = $user->getRoles();
-
+    
+        // Redirection selon les rôles
         if (in_array('ROLE_ADMIN', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_admin'));
         }
         if (in_array('ROLE_SPORTIF', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('home'));
         }
-
         if (in_array('ROLE_ENTRAINEUR', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_entraineur'));
         }
-
         if (in_array('ROLE_RESPONSABLE_SALLE', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_responsable_salle'));
         }
-
+    
         return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
-
-    protected function getLoginUrl(Request $request): string
+    
+  protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
