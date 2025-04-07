@@ -1,0 +1,353 @@
+{% extends 'admin/homepageadmin.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">{{ page_title }}</h3>
+            <h6 class="op-7 mb-2">Create a new activity</h6>
+        </div>
+    </div>
+
+    {# Flash messages #}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <div class="card card-round shadow-lg">
+        <div class="card-body p-5">
+            <form class="modern-form" enctype="multipart/form-data" action="{{ path('app_activity_create') }}" method="POST">
+                <input type="hidden" name="_token" value="{{ csrf_token('create_activity') }}">
+
+                <!-- Activity Name -->
+                <div class="form-group mb-4">
+                    <label for="activityName" class="form-label fw-bold text-muted small">ACTIVITY NAME</label>
+                    <input type="text" class="form-control form-control-lg border-0 bg-light rounded-3" 
+                           id="activityName" name="nom" placeholder="Enter activity name" required>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="form-group mb-4">
+                    <label class="form-label fw-bold text-muted small">ACTIVITY IMAGE</label>
+                    <div class="image-upload-container">
+                        <div class="image-preview-container text-center mb-3 position-relative" style="min-height: 200px;">
+                            <img id="imagePreview" src="" class="img-fluid rounded-3 shadow-sm mx-auto d-block" style="max-height: 300px; object-fit: contain; display: none;">
+                            <div id="placeholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light">
+                                <i class="fas fa-image fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted mb-0">No image selected</p>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column flex-md-row gap-3">
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control d-none" id="activityImage" name="activityImage" accept="image/*" required>
+                                <label for="activityImage" class="btn btn-outline-primary w-100 py-3 rounded-3">
+                                    <i class="fas fa-cloud-upload-alt me-2"></i> Choose Image
+                                </label>
+                            </div>
+                            <button type="button" id="removeImageBtn" class="btn btn-outline-danger py-3 rounded-3" style="display: none;">
+                                <i class="fas fa-trash-alt me-2"></i> Remove
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">Recommended size: 1200x800px (JPG, PNG or WEBP)</small>
+                    </div>
+                </div>
+
+                <!-- Activity Type Selector -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">ACTIVITY TYPE</label>
+                    <div class="row g-3">
+                        {% for type in activity_types %}
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" name="type" 
+                                   id="type-{{ type.name }}" value="{{ type.value }}" 
+                                   {{ loop.first ? 'checked' : '' }} required>
+                            <label class="btn btn-outline-primary w-100 h-100 p-3 rounded-3 d-flex flex-column align-items-center justify-content-center activity-type-card"
+                                   for="type-{{ type.name }}">
+                                <div class="activity-icon mb-2">
+                                    <i class="fas 
+                                        {% if type.value == 'PERSONAL_TRAINING' %}fa-user-tie
+                                        {% elseif type.value == 'GROUP_ACTIVITY' %}fa-users
+                                        {% else %}fa-comments{% endif %} 
+                                        fa-2x"></i>
+                                </div>
+                                <span class="text-center">{{ type.label() }}</span>
+                                <small class="text-muted mt-1">
+                                    {% if type.value == 'personal_training' %}
+                                        1-on-1 session
+                                    {% elseif type.value == 'group_activity' %}
+                                        Group classes
+                                    {% else %}
+                                        Professional advice
+                                    {% endif %}
+                                </small>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group mb-4">
+                    <label for="activityDescription" class="form-label fw-bold text-muted small">DESCRIPTION</label>
+                    <textarea class="form-control border-0 bg-light rounded-3" 
+                              id="activityDescription" name="description" rows="4"
+                              placeholder="Describe the activity..." required></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid gap-2 mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold" id="submitBtn">
+                        <i class="fas fa-save me-2"></i> Save Activity
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .navbar-form.nav-search { display: none !important; }
+        .navbar-header { justify-content: flex-end !important; }
+        .activity-type-card {
+            transition: all 0.3s ease;
+            min-height: 150px;
+        }
+        .activity-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .btn-check:checked + .activity-type-card {
+            background: linear-gradient(135deg, rgb(35, 132, 147), rgb(124, 148, 200));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 5px 20px rgba(118, 75, 162, 0.3);
+        }
+        .btn-check:checked + .activity-type-card .text-muted {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        .activity-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+        .modern-form .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+        .border-dashed { border: 2px dashed #dee2e6; }
+        .image-upload-container:hover .border-dashed { border-color: #3a7bd5; }
+        .image-preview-container {
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        .is-invalid {
+            border: 1px solid #dc3545 !important;
+        }
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875em;
+        }
+        .border-danger {
+            border-color: #dc3545 !important;
+        }
+        #submitBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('activityImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const placeholderText = document.getElementById('placeholderText');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const previewContainer = document.querySelector('.image-preview-container');
+        const form = document.querySelector('form');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Fonction pour afficher les erreurs
+        function showError(input, message) {
+            // Trouver le conteneur parent
+            let formGroup;
+            if (input === imageInput) {
+                formGroup = input.closest('.image-upload-container');
+            } else {
+                formGroup = input.closest('.form-group') || input.closest('.mb-4');
+            }
+            
+            // Créer ou trouver l'élément d'erreur
+            let errorElement = formGroup.querySelector('.invalid-feedback');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.className = 'invalid-feedback d-block';
+                formGroup.appendChild(errorElement);
+            }
+            
+            // Afficher le message d'erreur
+            errorElement.textContent = message;
+            input.classList.add('is-invalid');
+            
+            // Style spécial pour l'upload d'image
+            if (input === imageInput) {
+                placeholderText.classList.add('border-danger');
+                placeholderText.innerHTML = '<i class="fas fa-exclamation-circle fa-3x text-danger mb-3 d-block"></i><p class="text-danger">' + message + '</p>';
+            }
+        }
+
+        // Fonction pour effacer les erreurs
+        function clearError(input) {
+            let formGroup;
+            if (input === imageInput) {
+                formGroup = input.closest('.image-upload-container');
+                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
+                placeholderText.classList.remove('border-danger');
+            } else {
+                formGroup = input.closest('.form-group') || input.closest('.mb-4');
+            }
+            
+            const errorElement = formGroup.querySelector('.invalid-feedback');
+            if (errorElement) {
+                errorElement.remove();
+            }
+            
+            input.classList.remove('is-invalid');
+        }
+
+        // Validation en temps réel
+        function validateField(input) {
+            if (input === imageInput) {
+                if (!imageInput.files.length) {
+                    showError(imageInput, 'Please select an image');
+                    return false;
+                }
+            } else {
+                if (!input.value.trim()) {
+                    showError(input, `Please enter ${input.placeholder || 'a value'}`);
+                    return false;
+                }
+            }
+            clearError(input);
+            return true;
+        }
+
+        // Gestion de la sélection d'image
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    showError(imageInput, 'Please select a valid image file (JPG, PNG, WEBP)');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    placeholderText.style.display = 'none';
+                    removeImageBtn.style.display = 'block';
+                    clearError(imageInput);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Gestion du bouton de suppression
+        removeImageBtn.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.src = '';
+            imagePreview.style.display = 'none';
+            placeholderText.style.display = 'block';
+            removeImageBtn.style.display = 'none';
+            showError(imageInput, 'Please select an image');
+        });
+
+        // Drag and drop
+        previewContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            previewContainer.classList.add('border-primary');
+            placeholderText.innerHTML = '<i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3 d-block"></i><p class="text-primary">Drop image here</p>';
+        });
+
+        previewContainer.addEventListener('dragleave', () => {
+            previewContainer.classList.remove('border-primary');
+            if (!imageInput.files.length) {
+                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
+            }
+        });
+
+        previewContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            previewContainer.classList.remove('border-primary');
+
+            if (e.dataTransfer.files.length) {
+                const file = e.dataTransfer.files[0];
+                if (!file.type.match('image.*')) {
+                    showError(imageInput, 'Please select a valid image file (JPG, PNG, WEBP)');
+                    return;
+                }
+
+                imageInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                imageInput.dispatchEvent(event);
+            }
+        });
+
+        // Validation lors de la soumission
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Valider tous les champs
+            const fieldsToValidate = [
+                { input: document.getElementById('activityName'), required: true },
+                { input: imageInput, required: true },
+                { input: document.getElementById('activityDescription'), required: true }
+            ];
+            
+            fieldsToValidate.forEach(field => {
+                if (field.required && !validateField(field.input)) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                
+                // Trouver le premier champ invalide
+                const firstInvalid = form.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            } else {
+                // Désactiver le bouton pendant l'envoi
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            }
+        });
+
+        // Validation en temps réel
+        document.querySelectorAll('input[required], textarea[required]').forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+        });
+    });
+</script>
+
+{% endblock %}

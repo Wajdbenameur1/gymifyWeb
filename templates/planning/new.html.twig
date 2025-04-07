@@ -1,0 +1,152 @@
+{% extends 'entraineur/homepageentraineur.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- En-tête -->
+            <div class="text-center mb-5">
+                <h1 class="fw-bold text-primary">{{ page_title }}</h1>
+                <p class="lead text-muted">Planifiez vos événements sportifs</p>
+            </div>
+            {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show">
+            {{ message }}
+           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+           </div>
+           {% endfor %}
+
+            <!-- Formulaire HTML -->
+            <form method="post" action="{{ path('app_planning_create') }}" class="card shadow-sm border-0 p-4 needs-validation" novalidate>
+                <!-- Champ Titre -->
+                <div class="mb-3">
+                    <label for="title" class="form-label fw-bold">Titre de planning</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="fas fa-heading text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               id="title" 
+                               name="title" 
+                               required
+                               maxlength="50"
+                               placeholder="Planning">
+                    </div>
+                    <div class="invalid-feedback">
+                        Veuillez saisir un titre (50 caractères max).
+                    </div>
+                </div>
+
+                <!-- Champ Description -->
+                <div class="mb-3">
+                    <label for="description" class="form-label fw-bold">Description</label>
+                    <textarea class="form-control" 
+                              id="description" 
+                              name="description" 
+                              rows="4"
+                              placeholder="Détails de la séance..."></textarea>
+                </div>
+
+                <!-- Dates -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="dateDebut" class="form-label fw-bold">Date de début</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="far fa-calendar-alt text-primary"></i>
+                            </span>
+                            <input type="date" 
+                                   class="form-control datepicker" 
+                                   id="dateDebut" 
+                                   name="dateDebut"
+                                   required>
+                        </div>
+                        <div class="invalid-feedback">
+                            Sélectionnez une date valide.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="dateFin" class="form-label fw-bold">Date de fin</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="far fa-calendar-check text-primary"></i>
+                            </span>
+                            <input type="date" 
+                                   class="form-control datepicker" 
+                                   id="dateFin" 
+                                   name="dateFin"
+                                   required>
+                        </div>
+                        <div class="invalid-feedback">
+                            La date de fin doit être postérieure à la date de début.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CSRF Protection (essentiel avec Symfony) -->
+                <input type="hidden" name="token" value="{{ csrf_token('planning_form') }}">
+
+                <!-- Boutons -->
+                <div class="d-flex justify-content-end gap-3 mt-4">
+                    <a  class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-2"></i>Créer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Validation côté client -->
+<script>
+// Exemple de validation basique
+(function () {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+    
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+
+            // Validation personnalisée : dateFin > dateDebut
+            const dateDebut = new Date(document.getElementById('dateDebut').value)
+            const dateFin = new Date(document.getElementById('dateFin').value)
+            
+            if (dateFin <= dateDebut) {
+                document.getElementById('dateFin').classList.add('is-invalid')
+                event.preventDefault()
+            }
+
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+
+<!-- Style personnalisé -->
+<style>
+    .navbar-form.nav-search { display: none !important; }
+
+    .card {
+        border-radius: 12px;
+        border: none;
+    }
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+    .input-group-text {
+        min-width: 45px;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
