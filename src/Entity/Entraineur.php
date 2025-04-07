@@ -1,35 +1,22 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\EntraineurRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+// On dit à Doctrine que Admin hérite de User
 #[ORM\Entity(repositoryClass: EntraineurRepository::class)]
-class Entraineur
+class Entraineur extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    // Pas besoin d'une nouvelle propriété ici, car Admin hérite déjà des propriétés de User
 
-    #[ORM\Column(length: 255)]
-    private ?string $Entraineur = null;
-
-    public function getId(): ?int
+    public function __construct()
     {
-        return $this->id;
+        // Initialise le rôle d'admin
+        parent::__construct();
+        $this->setRole(Role::ENTRAINEUR); // Assurez-vous que Role::ADMIN existe et est valide
     }
 
-    public function getEntraineur(): ?string
-    {
-        return $this->Entraineur;
-    }
-
-    public function setEntraineur(string $Entraineur): static
-    {
-        $this->Entraineur = $Entraineur;
-
-        return $this;
-    }
+    // Vous pouvez ajouter des méthodes spécifiques à l'Admin si nécessaire.
+    // Exemple: getters/setters pour des propriétés spécifiques aux Admins.
 }

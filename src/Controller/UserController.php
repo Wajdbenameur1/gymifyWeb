@@ -25,11 +25,11 @@ class UserController extends AbstractController
     }
 
     // Afficher la liste des utilisateurs
-    #[Route('/admin/users', name: 'user_index')]
+    #[Route('/admin/user', name: 'user_index')]
     public function index(): Response
     {
         $users = $this->userRepository->findAll();
-        return $this->render('admin/users.html.twig', [
+        return $this->render('user/index.html.twig', [
             'users' => $users,
         ]);
     }

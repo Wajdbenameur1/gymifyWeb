@@ -2,34 +2,16 @@
 
 namespace App\Entity;
 
+use App\Enum\Role;
 use App\Repository\ResponsableSalleRepository;
 use Doctrine\ORM\Mapping as ORM;
-
 #[ORM\Entity(repositoryClass: ResponsableSalleRepository::class)]
-class ResponsableSalle
+class ResponsableSalle extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $ResponsableSalle = null;
-
-    public function getId(): ?int
+    public function __construct()
     {
-        return $this->id;
+        parent::__construct();
+        // Passez l'objet Role::SPORTIF ici
+        $this->setRole(Role::RESPONSABLESALLE); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
     }
-
-    public function getResponsableSalle(): ?string
-    {
-        return $this->ResponsableSalle;
-    }
-
-    public function setResponsableSalle(string $ResponsableSalle): static
-    {
-        $this->ResponsableSalle = $ResponsableSalle;
-
-        return $this;
-    }
-}
+} 

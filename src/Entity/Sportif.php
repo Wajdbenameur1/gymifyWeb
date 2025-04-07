@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Enum\Role;
 use App\Repository\SportifRepository;
 use Doctrine\ORM\Mapping as ORM;
-#[ORM\Entity]
 #[ORM\Entity(repositoryClass: SportifRepository::class)]
 class Sportif extends User
 {

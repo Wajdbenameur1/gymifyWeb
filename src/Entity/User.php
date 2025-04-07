@@ -11,14 +11,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Entity]
 #[ORM\Table(name: "user")]
 #[ORM\InheritanceType("SINGLE_TABLE")]
 #[ORM\DiscriminatorColumn(name: "type", type: "string")]
 #[ORM\DiscriminatorMap([
     "sportif" => Sportif::class,
     "admin" => Admin::class,
-    "responsable_salle" => ReponsableSalle::class,
+    "responsable_salle" => ResponsableSalle::class,
     "entraineur"=>Entraineur::class
 ])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -43,12 +42,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', enumType: Role::class)]
     private ?Role $role = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(length: 100, nullable: true)]
     private ?string $specialite = null;
 
     
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 100, nullable: true)]
     private ?string $imageUrl = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -72,10 +71,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // Nettoyer les données sensibles ici si nécessaire (ex: plainPassword)
     }
-      public function getUserIdentifier(): string
-      {
-          return $this->email;
-      }
+    public function getUserIdentifier(): string
+{
+    return $this->email;  // Utiliser l'email comme identifiant
+}
 
     public function getId(): ?int
     {
@@ -141,10 +140,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     $this->role = $role;
     return $this;
 } 
-    public function getRoles(): array
-    {
-        return [$this->role ? 'ROLE_' . strtoupper($this->role->value) : 'ROLE_USER'];
+  // Dans votre entité User
+public function getRoles(): array
+{
+    // Retourne toujours au moins ROLE_USER
+    $roles = ['ROLE_USER'];
+    
+    if ($this->role) {
+        $roles[] = 'ROLE_' . strtoupper($this->role->value);
     }
+    
+    return array_unique($roles);
+}
+
     public function getSpecialite(): ?string
     {
         return $this->specialite;
