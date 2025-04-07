@@ -6,17 +6,61 @@
     <h1>Modifier l'utilisateur</h1>
 
     {{ form_start(form) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.prenom) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.password) }}
-        {{ form_row(form.role) }}
-        {{ form_row(form.specialite) }}
-        {{ form_row(form.imageUrl) }}
-        {{ form_row(form.dateNaissance) }}
-        
-        <button type="submit">Enregistrer les modifications</button>
+    
+    <!-- Champs obligatoires -->
+    <div class="form-group">
+        {{ form_label(form.nom) }}
+        {{ form_widget(form.nom, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(form.nom) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.prenom) }}
+        {{ form_widget(form.prenom, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(form.prenom) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(form.email) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(form.password) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.role) }}
+        {{ form_widget(form.role, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(form.role) }}
+    </div>
+
+    {% if app.user.role == 'ENTRAINEUR' %}
+        <div class="form-group">
+            {{ form_label(form.specialite) }}
+            {{ form_widget(form.specialite, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_errors(form.specialite) }}
+        </div>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form_label(form.imageUrl) }}
+        {{ form_widget(form.imageUrl, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(form.imageUrl) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.dateNaissance) }}
+        {{ form_widget(form.dateNaissance, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(form.dateNaissance) }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+
     {{ form_end(form) }}
 
-    <a href="{{ path('user_index') }}">Retour à la liste des utilisateurs</a>
+    <a href="{{ path('user_index') }}" class="btn btn-secondary mt-3">Retour à la liste des utilisateurs</a>
 {% endblock %}

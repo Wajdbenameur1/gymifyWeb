@@ -1,6 +1,4 @@
 <?php
- // src/Form/UserType.php
-
 namespace App\Form;
 
 use App\Entity\User;
@@ -8,9 +6,9 @@ use App\Enum\Role;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -58,6 +56,18 @@ class UserType extends AbstractType
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
                 'required' => true,
+            ])
+            ->add('imageUrl', FileType::class, [
+                'label' => 'Image de profil',
+                'required' => false, // L'image est optionnelle
+                'mapped' => false,  // Cela indique qu'il ne sera pas mappé à une propriété de l'entité User
+                'constraints' => [
+                    new Assert\Image([
+                        'maxSize' => '1024k',
+                        'mimeTypes' => ['image/jpeg', 'image/png'],
+                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (jpeg ou png).',
+                    ])
+                ]
             ]);
 
         if ($options['is_entraineur']) {
