@@ -140,17 +140,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     $this->role = $role;
     return $this;
 } 
-  // Dans votre entité User
+
 public function getRoles(): array
 {
-    // Retourne toujours au moins ROLE_USER
-    $roles = ['ROLE_USER'];
-    
+    $roles = ['ROLE_USER'];  // On ajoute le rôle de base
     if ($this->role) {
         $roles[] = 'ROLE_' . strtoupper($this->role->value);
     }
-    
-    return array_unique($roles);
+    return array_unique($roles);  // Retourne les rôles sans doublons
 }
 
     public function getSpecialite(): ?string

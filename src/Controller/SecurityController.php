@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,12 +14,10 @@ class SecurityController extends AbstractController
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // Si l'utilisateur est déjà connecté, on le redirige vers le tableau de bord
         if ($this->getUser()) {
             return $this->redirectToRoute($this->getDashboardRouteByRole());
         }
 
-        // Sinon, on affiche la page de connexion avec des messages d'erreur ou le dernier nom d'utilisateur
         return $this->render('security/login.html.twig', [
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
@@ -28,8 +27,7 @@ class SecurityController extends AbstractController
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void
     {
-        // Cette méthode est interceptée par Symfony lors de la déconnexion
-        throw new \LogicException('Cette méthode peut rester vide — elle est interceptée par Symfony lors de la déconnexion.');
+        // This method is intercepted by Symfony's firewall
     }
 
     private function getDashboardRouteByRole(): string
@@ -40,28 +38,24 @@ class SecurityController extends AbstractController
             return 'app_home';
         }
 
-        // On récupère le premier rôle de l'utilisateur (assumant que l'utilisateur a un seul rôle majeur)
-        $role = $user->getRoles();
+        $roles = $user->getRoles();
 
-        // Comparaison du rôle et redirection vers le tableau de bord approprié
-        // Vérification des rôles définis dans l'énumération Role
-        if (in_array(Role::ADMIN->value, $role)) {
-            return 'app_admin';
+        if (in_array(Role::ADMIN->value, $roles)) {
+            return 'dashboard_admin';
         }
-        
-        if (in_array(Role::SPORTIF->value, $role)) {
-            return 'app_admin';
+
+        if (in_array(Role::SPORTIF->value, $roles)) {
+            return 'home';
         }
-        
-        if (in_array(Role::ENTRAINEUR->value, $role)) {
+
+        if (in_array(Role::ENTRAINEUR->value, $roles)) {
             return 'dashboard_entraineur';
         }
-        
-        if (in_array(Role::RESPONSABLE_SALLE->value, $role)) {
+
+        if (in_array(Role::RESPONSABLE_SALLE->value, $roles)) {
             return 'dashboard_responsable_salle';
         }
 
-        // Si aucun rôle spécifique n'est trouvé, on redirige vers la page d'accueil
         return 'app_home';
     }
 }
