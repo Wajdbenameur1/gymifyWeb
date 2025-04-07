@@ -58,6 +58,9 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
         if (in_array('ROLE_ADMIN', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_admin'));
         }
+        if (in_array('ROLE_SPORTIF', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('home'));
+        }
 
         if (in_array('ROLE_ENTRAINEUR', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_entraineur'));
