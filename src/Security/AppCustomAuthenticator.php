@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Security;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -40,18 +41,19 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
             ]
         );
     }
+
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // Affiche les rôles de l'utilisateur pour debug
+        // Afficher les rôles pour déboguer
         $roles = $token->getUser()->getRoles();
-        ($roles);  // Cette ligne arrêtera l'exécution et affichera les rôles
-    
+        dump($roles);  // Utilise dump() pour afficher les rôles dans le Symfony Profiler
+
         $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
-    
+
         if ($targetPath) {
             return new RedirectResponse($targetPath);
         }
-    
+
         // Redirection selon les rôles
         if (in_array('ROLE_ADMIN', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_admin'));
@@ -65,11 +67,11 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
         if (in_array('ROLE_RESPONSABLE_SALLE', $roles, true)) {
             return new RedirectResponse($this->urlGenerator->generate('dashboard_responsable_salle'));
         }
-    
+
         return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
-    
-  protected function getLoginUrl(Request $request): string
+
+    protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
