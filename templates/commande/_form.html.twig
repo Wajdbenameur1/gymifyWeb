@@ -1,0 +1,97 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.userId) }}
+                {{ form_widget(form.userId, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.userId) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.statut) }}
+                {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.statut) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.dateC) }}
+                {{ form_widget(form.dateC, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateC) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.total) }}
+                {{ form_widget(form.total, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.total) }}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h3>Order Items</h3>
+            <div class="mb-3" id="commande_produits_list"
+                 data-prototype="{{ form_widget(form.commandeProduits.vars.prototype)|e('html_attr') }}">
+                {% for commandeProduitForm in form.commandeProduits %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="mb-2">
+                                {{ form_label(commandeProduitForm.produit) }}
+                                {{ form_widget(commandeProduitForm.produit, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(commandeProduitForm.produit) }}
+                            </div>
+                            <div class="mb-2">
+                                {{ form_label(commandeProduitForm.quantite) }}
+                                {{ form_widget(commandeProduitForm.quantite, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(commandeProduitForm.quantite) }}
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-success" id="add_item_btn">
+                <i class="fas fa-plus"></i> Add Item
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">{{ button_label|default('Save') }}</button>
+        <a href="{{ path('app_commande_index') }}" class="btn btn-secondary">Back to list</a>
+    </div>
+{{ form_end(form) }}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let itemList = document.getElementById('commande_produits_list');
+    let addButton = document.getElementById('add_item_btn');
+    let index = itemList.children.length;
+
+    addButton.addEventListener('click', function() {
+        let prototype = itemList.dataset.prototype;
+        let newForm = prototype.replace(/__name__/g, index);
+        let div = document.createElement('div');
+        div.innerHTML = newForm;
+        div.classList.add('card', 'mb-3');
+        
+        let removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn btn-danger btn-sm remove-item';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', function() {
+            div.remove();
+        });
+        
+        div.querySelector('.card-body').appendChild(removeBtn);
+        itemList.appendChild(div);
+        index++;
+    });
+
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.card').remove();
+        });
+    });
+});
+</script>
+{% endblock %} 
