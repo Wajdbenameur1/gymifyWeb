@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Entity;
+
 use App\Enum\Role;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -9,17 +10,22 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;  // Ajouter cet import
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "user")]
 #[ORM\InheritanceType("SINGLE_TABLE")]
 #[ORM\DiscriminatorColumn(name: "type", type: "string")]
-#[ORM\DiscriminatorMap([
-    "sportif" => Sportif::class,
-    "admin" => Admin::class,
-    "responsable_salle" => ResponsableSalle::class,
-    "entraineur"=>Entraineur::class
+#[ORM\DiscriminatorMap([ 
+    "sportif" => Sportif::class, 
+    "admin" => Admin::class, 
+    "responsable_salle" => ResponsableSalle::class, 
+    "entraineur"=>Entraineur::class 
 ])]
+/**
+ * @UniqueEntity("email", message="L'email {{ value }} est déjà utilisé.")  // Ajoutez la contrainte UniqueEntity ici
+ */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -33,7 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(length: 100, unique: true)]  // L'email est unique dans la base de données
+    #[Assert\NotBlank(message: "L'email est obligatoire.")]
+    #[Assert\Email(message: "Veuillez entrer une adresse email valide.")]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
@@ -45,17 +53,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $specialite = null;
 
-    
-
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $imageUrl = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateNaissance = null;
 
-    /**
-     * @var Collection<int, cours>
-     */
     #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
     private Collection $entaineur;
 
@@ -71,10 +74,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // Nettoyer les données sensibles ici si nécessaire (ex: plainPassword)
     }
+
     public function getUserIdentifier(): string
-{
-    return $this->email;  // Utiliser l'email comme identifiant
-}
+    {
+        return $this->email;  // Utiliser l'email comme identifiant
+    }
+
 
     public function getId(): ?int
     {
@@ -155,10 +160,9 @@ public function getRoles(): array
         return $this->specialite;
     }
 
-    public function setSpecialite(string $specialite): static
+    public function setSpecialite(?string $specialite): static
     {
         $this->specialite = $specialite;
-
         return $this;
     }
     public function getDateNaissance(): ?\DateTimeInterface
@@ -168,14 +172,16 @@ public function getRoles(): array
     
     
 
-    public function setImageUrl(string $imageUrl): static
+    public function getImageUrl(): ?string
     {
-        $this->imageUrl = $imageUrl;
-
-        return $this;
+        return $this->imageUrl;
     }
 
-   
+    public function setImageUrl(?string $imageUrl): self
+    {
+        $this->imageUrl = $imageUrl;
+        return $this;
+    }
 
     public function setDateNaissance(\DateTimeInterface $dateNaissance): static
     {

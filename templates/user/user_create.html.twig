@@ -1,112 +1,136 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/homepageadmin.html.twig' %}
 
 {% block title %}Créer un utilisateur{% endblock %}
 
 {% block body %}
-    <h1 class="text-center my-4 text-orange">Créer un nouvel utilisateur</h1>
-
-    <style>
-        .form-container {
-            max-width: 500px;
-            margin: auto;
-            background: #fff3e0;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 2px solid #ff9800;
-        }
-
-        .form-group {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            min-width: 140px;
-            font-weight: bold;
-            text-align: left;
-            color: #e65100;
-            white-space: nowrap;
-            margin-right: 10px;
-        }
-
-        .form-group input,
-        .form-group select {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ff9800;
-            border-radius: 5px;
-            width: 100%;
-            background: #fff;
-        }
-
-        .btn-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .btn-primary {
-            background-color: #ff9800;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease-in-out;
-        }
-
-        .btn-primary:hover {
-            background-color: #e65100;
-        }
-
-        .text-orange {
-            color: #e65100;
-        }
-    </style>
-
-    <div class="form-container">
-        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-
-            <div class="form-group">
-                <label for="{{ form.email.vars.id }}">{{ form_label(form.email) }}</label>
-                {{ form_widget(form.email) }}
-                {{ form_errors(form.email) }}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.password.vars.id }}">{{ form_label(form.password) }}</label>
-                {{ form_widget(form.password, { 'attr': {'autocomplete': 'new-password'} }) }}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.nom.vars.id }}">{{ form_label(form.nom) }}</label>
-                {{ form_widget(form.nom) }}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.prenom.vars.id }}">{{ form_label(form.prenom) }}</label>
-                {{ form_widget(form.prenom) }}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.role.vars.id }}">{{ form_label(form.role) }}</label>
-                {{ form_widget(form.role) }}
-            </div>
-
-            {% if form.specialite is defined %}
-                <div class="form-group">
-                    <label for="{{ form.specialite.vars.id }}">{{ form_label(form.specialite) }}</label>
-                    {{ form_widget(form.specialite) }}
-                </div>
-            {% endif %}
-
-            <div class="btn-container">
-                <button type="submit" class="btn-primary">Créer</button>
-            </div>
-            
-        {{ form_errors(form) }}
-        {{ form_end(form) }}
+<div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">Créer un utilisateur</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('user_index') }}">Utilisateurs</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Créer</li>
+                </ol>
+            </nav>
+        </div>
     </div>
+
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i> Informations de l'utilisateur</h5>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+            <div class="row g-5">
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        <img id="imagePreview" 
+                             src="{{ asset('uploads/users/default.png') }}" 
+                             alt="Aperçu de l'image" 
+                             class="rounded-circle shadow-sm" 
+                             style="width: 200px; height: 200px; object-fit: cover;">
+                    </div>
+                    <div class="form-group">
+                        {{ form_label(form.imageUrl, 'Image de profil', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control', 'onchange': 'previewImage(event)'}}) }}
+                        <div class="form-text">Formats acceptés : JPG, PNG, max 2 Mo</div>
+                        {{ form_errors(form.imageUrl) }}
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nom</label>
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.nom) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Prénom</label>
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.prenom) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Email</label>
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.email) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Mot de passe</label>
+                            {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.password) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Rôle</label>
+                            {{ form_widget(form.role, {'attr': {'class': 'form-select', 'onchange': 'toggleSpecialiteField()'}}) }}
+                            {{ form_errors(form.role) }}
+                        </div>
+
+                        <div class="col-md-6" id="specialiteField" style="display: none;">
+                            <label class="form-label fw-bold">Spécialité</label>
+                            {{ form_widget(form.specialite, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.specialite) }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Date de naissance</label>
+                            {{ form_widget(form.dateNaissance, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'type': 'date'
+                                }
+                            }) }}
+                            {{ form_errors(form.dateNaissance) }}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-end gap-3">
+                        <a href="{{ path('user_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check me-1"></i> Créer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        const input = event.target;
+        const preview = document.getElementById('imagePreview');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function toggleSpecialiteField() {
+        const roleField = document.getElementById('form_role');
+        const specialiteField = document.getElementById('specialiteField');
+
+        if (roleField && roleField.value === 'ENTRAINEUR') {
+            specialiteField.style.display = 'block';
+        } else {
+            specialiteField.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleSpecialiteField();
+    });
+</script>
 {% endblock %}
