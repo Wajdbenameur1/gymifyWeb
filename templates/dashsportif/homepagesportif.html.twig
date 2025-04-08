@@ -46,10 +46,10 @@
 </head>
 <body>
     <div class="wrapper">
-        {% include 'admin/sidebar.html.twig' %}
+        {% include 'entraineur/sidebar.html.twig' %}
         
         <div class="main-panel">
-            {% include 'admin/navbar.html.twig' %}
+            {% include 'entraineur/navbar.html.twig' %}
             
             <div class="container">
                 <div class="page-inner">
@@ -57,11 +57,11 @@
                 </div>
             </div>
             
-            {% include 'admin/footer.html.twig' %}
+            {% include 'entraineur/footer.html.twig' %}
         </div>
     </div>
 
-    {% include 'admin/scripts.html.twig' %}
+    {% include 'entraineur/scripts.html.twig' %}
     
     {% block javascripts %}
         <script src="{{ asset('js/script.js') }}"></script>
