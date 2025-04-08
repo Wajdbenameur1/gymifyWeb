@@ -16,7 +16,7 @@ class SecurityController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_home');
+            return $this->redirectToRoute($this->getDashboardRouteByRole());
         }
     
         return $this->render('security/login.html.twig', [
@@ -24,32 +24,7 @@ class SecurityController extends AbstractController
             'last_username' => $authenticationUtils->getLastUsername(),
         ]);
     }
-    #[Route(path: '/register/sportif', name: 'app_register_sportif')]
-    public function registerSportif(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
-        $sportif = new Sportif();
-        $sportif->setRole(Role::SPORTIF); // Fixe automatiquement le rôle Sportif
-    
-        $form = $this->createForm(SportifType::class, $sportif);
-        $form->handleRequest($request);
-    
-        if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('password')->getData();
-            $hashedPassword = $passwordHasher->hashPassword($sportif, $plainPassword);
-            $sportif->setPassword($hashedPassword);
-    
-            $entityManager->persist($sportif);
-            $entityManager->flush();
-    
-            $this->addFlash('success', 'Compte Sportif créé avec succès !');
-    
-            return $this->redirectToRoute('app_login');
-        }
-    
-        return $this->render('security/register_sportif.html.twig', [
-            'form' => $form->createView(),
-        ]);
-    }
+
     
 
     #[Route(path: '/logout', name: 'app_logout')]

@@ -48,4 +48,5 @@ security:
     - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
     - { path: ^/home, roles: ROLE_SPORTIF }
     - { path: ^/login, roles: PUBLIC_ACCESS }
+    - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
     - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

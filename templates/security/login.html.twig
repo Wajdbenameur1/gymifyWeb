@@ -253,15 +253,15 @@
                 </button>
             </div>
 
-            <div class="divider">
-                <span>Nouveau membre ?</span>
-            </div>
+           <div class="divider">
+    <span>Nouveau membre ?</span>
+</div>
 
-            <div class="d-grid">
-                <a href="{{ path('app_register_sportif') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-user-plus me-2"></i>Créer un compte
-                </a>
-            </div>
+<div class="d-grid">
+    {% if not app.user %}
+        <p>Pas encore de compte ? <a href="{{ path('app_register_sportif') }}">Créer un compte</a></p>
+    {% endif %}
+</div>
 
             <div class="footer-text">
                 En continuant, vous acceptez nos <a href="#">Conditions d'utilisation</a> et notre <a href="#">Politique de confidentialité</a>.
