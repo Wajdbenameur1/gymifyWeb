@@ -36,7 +36,7 @@ class Salle
     /**
      * @var Collection<int, cours>
      */
-    #[ORM\OneToMany(targetEntity: cours::class, mappedBy: 'salle')]
+    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'salle')]
     private Collection $salle;
 
     /**
