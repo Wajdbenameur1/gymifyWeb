@@ -1,45 +1,118 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\Role;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use App\Service\EmailUniquenessValidator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\String\Slugger\SluggerInterface;
+
 class UserController extends AbstractController
 {
+    private $emailUniquenessValidator;
     private $userRepository;
     private $entityManager;
     private $passwordHasher;
 
-    public function __construct(UserRepository $userRepository, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
-    {
+    public function __construct(
+        EmailUniquenessValidator $emailUniquenessValidator,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ) {
+        $this->emailUniquenessValidator = $emailUniquenessValidator;
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
     }
 
-    // Afficher la liste des utilisateurs
     #[Route('/admin/user', name: 'user_index')]
-    #[IsGranted('ROLE_ADMIN')]
     public function index(): Response
     {
         $users = $this->userRepository->findAll();
+
         return $this->render('user/index.html.twig', [
+            'page_title' => 'Gestion des utilisateurs',
             'users' => $users,
         ]);
     }
 
-    // Créer un nouvel utilisateur
+<<<<<<< Updated upstream
     #[Route('/admin/user/create', name: 'user_create')]
+    public function create(Request $request, SluggerInterface $slugger): Response
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Vérification CSRF
+            $submittedToken = $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('create_user', $submittedToken)) {
+                $this->addFlash('error', 'Token CSRF invalide');
+                return $this->redirectToRoute('user_create');
+            }
+    
+            // Encoder le mot de passe avant de l'enregistrer
+            if (!empty($user->getPassword())) {
+                $encodedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
+                $user->setPassword($encodedPassword);
+            } else {
+                $this->addFlash('error', 'Le mot de passe ne peut pas être vide.');
+                return $this->render('user/user_create.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+    
+            // Gestion de l'image (photo de profil)
+            $imageFile = $request->files->get('userImage');
+            if ($imageFile) {
+                try {
+                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+    
+                    $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/users';
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+    
+                    $imageFile->move($uploadDir, $newFilename);
+                    $user->setProfilePicture('/uploads/users/'.$newFilename);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Erreur lors du téléchargement de l\'image: ' . $e->getMessage());
+                    return $this->render('user/user_create.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
+            }
+    
+            // Sauvegarder l'utilisateur dans la base de données
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+    
+            // Ajouter un message flash de succès
+            $this->addFlash('success', 'Utilisateur créé avec succès.');
+    
+            // Redirection vers la liste des utilisateurs
+            return $this->redirectToRoute('user_index');
+        }
+    
+        // Afficher le formulaire de création
+        return $this->render('user/user_create.html.twig', [
+            'form' => $form->createView(),
+        ]);
+=======
+    // Créer un nouvel utilisateur
+#[Route('/admin/user/create', name: 'user_create')]
 #[IsGranted('ROLE_ADMIN')]
 public function create(Request $request): Response
 {
@@ -55,72 +128,74 @@ public function create(Request $request): Response
         $this->entityManager->flush();
 
         return $this->redirectToRoute('user_index');
+>>>>>>> Stashed changes
     }
+    
 
-    return $this->render('user/user_create.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
+    #[Route('/admin/user/{id}/edit', name: 'app_user_update')]
+    public function update(Request $request, User $user): Response
+    {
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
 
-#[Route('/admin/user/{id}/edit', name: 'user_edit')]
-public function edit(Request $request, User $user, SluggerInterface $slugger): Response
-{
-    // Créer le formulaire pour l'utilisateur
-    $form = $this->createForm(UserType::class, $user, [
-        'is_entraineur' => $user->getRole() === Role::ENTRAINEUR ? true : false,
-    ]);
-    $form->handleRequest($request);
-
-    // Si le formulaire est soumis et valide
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Gestion de l'image
-        /** @var UploadedFile $imageFile */
-        $imageFile = $form->get('imageUrl')->getData();
-
-        if ($imageFile) {
-            $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-
-            // Déplace le fichier dans le répertoire où les images sont stockées
-            try {
-                $imageFile->move(
-                    $this->getParameter('images_directory'), // Chemin dans le service.yaml
-                    $newFilename
-                );
-            } catch (FileException $e) {
-                // Gérer l'exception si le fichier ne peut pas être déplacé
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Vérification unicité de l'email
+            $email = $user->getEmail();
+            if ($this->emailUniquenessValidator->emailExists($email)) {
+                $this->addFlash('error', 'L\'email est déjà utilisé.');
+                return $this->render('user/edit.html.twig', ['form' => $form->createView()]);
             }
 
-            // Mettre à jour l'URL de l'image dans l'entité
-            $user->setImageUrl($newFilename);
+            // Hachage du mot de passe si modifié
+            $rawPassword = $user->getPassword();
+            if ($rawPassword) {
+                $hashedPassword = $this->passwordHasher->hashPassword($user, $rawPassword);
+                $user->setPassword($hashedPassword);
+            }
+
+            // Gestion de l'image de profil
+            $profilePicture = $form->get('imageUrl')->getData();
+            if ($profilePicture) {
+                $newFilename = uniqid() . '.' . $profilePicture->guessExtension();
+                $profilePicture->move(
+                    $this->getParameter('users_images_directory'),
+                    $newFilename
+                );
+                $user->setImageUrl($newFilename);
+            }
+
+            // Sauvegarde de l'utilisateur mis à jour
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'L\'utilisateur a été mis à jour avec succès.');
+            return $this->redirectToRoute('user_index');
         }
 
-        // Enregistrer les modifications dans la base de données
-        $this->entityManager->flush();
-
-        // Redirection après la modification
-        return $this->redirectToRoute('user_index');
+        return $this->render('user/edit.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
-    // Retourner le formulaire à la vue
-    return $this->render('user/edit.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
-
-
-    // Supprimer un utilisateur
     #[Route('/admin/user/{id}/delete', name: 'user_delete')]
     public function delete(User $user): Response
     {
+        // Suppression de l'image si elle existe
+        if ($user->getImageUrl()) {
+            $imagePath = $this->getParameter('users_images_directory') . '/' . $user->getImageUrl();
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+
+        // Suppression de l'utilisateur
         $this->entityManager->remove($user);
         $this->entityManager->flush();
+
+        $this->addFlash('success', 'Utilisateur supprimé avec succès.');
 
         return $this->redirectToRoute('user_index');
     }
 
-    // Afficher les détails d'un utilisateur
     #[Route('/admin/user/{id}', name: 'user_show')]
     public function show(User $user): Response
     {

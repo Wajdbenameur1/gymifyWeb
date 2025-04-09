@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\User;
 use App\Enum\Role;
+use App\Service\EmailUniquenessValidator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -12,9 +14,18 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class UserType extends AbstractType
 {
+    private $emailUniquenessValidator;
+
+    public function __construct(EmailUniquenessValidator $emailUniquenessValidator)
+    {
+        $this->emailUniquenessValidator = $emailUniquenessValidator;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -58,24 +69,32 @@ class UserType extends AbstractType
                 'required' => true,
             ])
             ->add('imageUrl', FileType::class, [
-                'label' => 'Image de profil',
-                'required' => false, // L'image est optionnelle
-                'mapped' => false,  // Cela indique qu'il ne sera pas mappé à une propriété de l'entité User
+                'label' => 'Photo de profil',
+                'required' => false,
+                'mapped' => false,
                 'constraints' => [
-                    new Assert\Image([
-                        'maxSize' => '1024k',
+                    new Assert\File([
+                        'maxSize' => '2M',
                         'mimeTypes' => ['image/jpeg', 'image/png'],
-                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (jpeg ou png).',
-                    ])
-                ]
-            ]);
-
-        if ($options['is_entraineur']) {
-            $builder->add('specialite', TextType::class, [
+                        'mimeTypesMessage' => 'Veuillez importer une image JPG ou PNG',
+                    ]),
+                ],
+            ])
+            ->add('specialite', TextType::class, [
                 'label' => 'Spécialité',
                 'required' => false,
-                'constraints' => [new Assert\Length(['max' => 100])],
+                'attr' => [
+                    'placeholder' => 'Spécialité de l\'entraîneur'
+                ],
             ]);
+    }
+
+    public function validateEmailUniqueness($email, ExecutionContextInterface $context)
+    {
+        if ($this->emailUniquenessValidator->validate($email)) {
+            $context->buildViolation('L\'email {{ value }} est déjà utilisé.')
+                ->setParameter('{{ value }}', $email)
+                ->addViolation();
         }
     }
 
@@ -83,7 +102,6 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
-            'is_entraineur' => false,
         ]);
     }
 }
