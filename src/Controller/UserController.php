@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class UserController extends AbstractController
 {
@@ -45,14 +46,14 @@ class UserController extends AbstractController
         ]);
     }
 
-<<<<<<< Updated upstream
     #[Route('/admin/user/create', name: 'user_create')]
+    #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, SluggerInterface $slugger): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-    
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Vérification CSRF
             $submittedToken = $request->request->get('_token');
@@ -60,8 +61,8 @@ class UserController extends AbstractController
                 $this->addFlash('error', 'Token CSRF invalide');
                 return $this->redirectToRoute('user_create');
             }
-    
-            // Encoder le mot de passe avant de l'enregistrer
+
+            // Encoder le mot de passe
             if (!empty($user->getPassword())) {
                 $encodedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
                 $user->setPassword($encodedPassword);
@@ -71,20 +72,20 @@ class UserController extends AbstractController
                     'form' => $form->createView(),
                 ]);
             }
-    
-            // Gestion de l'image (photo de profil)
+
+            // Gestion de l'image
             $imageFile = $request->files->get('userImage');
             if ($imageFile) {
                 try {
                     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = $slugger->slug($originalFilename);
                     $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-    
+
                     $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/users';
                     if (!file_exists($uploadDir)) {
                         mkdir($uploadDir, 0777, true);
                     }
-    
+
                     $imageFile->move($uploadDir, $newFilename);
                     $user->setProfilePicture('/uploads/users/'.$newFilename);
                 } catch (\Exception $e) {
@@ -94,43 +95,20 @@ class UserController extends AbstractController
                     ]);
                 }
             }
-    
-            // Sauvegarder l'utilisateur dans la base de données
+
+            // Enregistrement
             $this->entityManager->persist($user);
             $this->entityManager->flush();
-    
-            // Ajouter un message flash de succès
+
             $this->addFlash('success', 'Utilisateur créé avec succès.');
-    
-            // Redirection vers la liste des utilisateurs
+
             return $this->redirectToRoute('user_index');
         }
-    
-        // Afficher le formulaire de création
+
         return $this->render('user/user_create.html.twig', [
             'form' => $form->createView(),
         ]);
-=======
-    // Créer un nouvel utilisateur
-#[Route('/admin/user/create', name: 'user_create')]
-#[IsGranted('ROLE_ADMIN')]
-public function create(Request $request): Response
-{
-    $user = new User();
-    $form = $this->createForm(UserType::class, $user);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
-        $user->setPassword($hashedPassword);
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return $this->redirectToRoute('user_index');
->>>>>>> Stashed changes
     }
-    
 
     #[Route('/admin/user/{id}/edit', name: 'app_user_update')]
     public function update(Request $request, User $user): Response
@@ -139,21 +117,18 @@ public function create(Request $request): Response
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Vérification unicité de l'email
             $email = $user->getEmail();
             if ($this->emailUniquenessValidator->emailExists($email)) {
                 $this->addFlash('error', 'L\'email est déjà utilisé.');
                 return $this->render('user/edit.html.twig', ['form' => $form->createView()]);
             }
 
-            // Hachage du mot de passe si modifié
             $rawPassword = $user->getPassword();
             if ($rawPassword) {
                 $hashedPassword = $this->passwordHasher->hashPassword($user, $rawPassword);
                 $user->setPassword($hashedPassword);
             }
 
-            // Gestion de l'image de profil
             $profilePicture = $form->get('imageUrl')->getData();
             if ($profilePicture) {
                 $newFilename = uniqid() . '.' . $profilePicture->guessExtension();
@@ -164,7 +139,6 @@ public function create(Request $request): Response
                 $user->setImageUrl($newFilename);
             }
 
-            // Sauvegarde de l'utilisateur mis à jour
             $this->entityManager->flush();
 
             $this->addFlash('success', 'L\'utilisateur a été mis à jour avec succès.');
@@ -179,7 +153,6 @@ public function create(Request $request): Response
     #[Route('/admin/user/{id}/delete', name: 'user_delete')]
     public function delete(User $user): Response
     {
-        // Suppression de l'image si elle existe
         if ($user->getImageUrl()) {
             $imagePath = $this->getParameter('users_images_directory') . '/' . $user->getImageUrl();
             if (file_exists($imagePath)) {
@@ -187,7 +160,6 @@ public function create(Request $request): Response
             }
         }
 
-        // Suppression de l'utilisateur
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 
