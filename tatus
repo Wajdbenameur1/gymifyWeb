@@ -1,0 +1,389 @@
+[33m1140067[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mGestionProduit[m[33m, [m[1;31morigin/GestionProduit[m[33m)[m ajout front et ajout crud produit
+[33m9a993d0[m[33m ([m[1;33mtag: [m[1;33mv6.4.99[m[33m, [m[1;31morigin/6.4[m[33m)[m 6.4 is stable \o/
+[33m97a8774[m 6.4 dev
+[33md58bfa8[m Merge branch '6.3' into 6.4
+[33m4b266b2[m[33m ([m[1;33mtag: [m[1;33mv6.3.99[m[33m, [m[1;31morigin/6.3[m[33m)[m 6.3 stable
+[33m31b9730[m Hello branch 6.4
+[33m7d3c950[m Merge branch '6.2' into 6.3
+[33mea81bea[m[33m ([m[1;33mtag: [m[1;33mv6.2.99[m[33m, [m[1;31morigin/6.2[m[33m)[m Merge branch '5.4' into 6.2
+[33m1dd7f03[m[33m ([m[1;33mtag: [m[1;33mv5.4.99[m[33m, [m[1;31morigin/5.4[m[33m)[m Allow php-http/discovery as a composer plugin
+[33m104435a[m Fix require part for 6.3 version
+[33m3f1275f[m 6.3 dev
+[33mbc3d45e[m Merge branch '6.2' into 6.3
+[33meed3db5[m 6.2 stable
+[33mb9f2d6b[m minor #212 Revert "Merge pull request #180 from lyrixx/composer-autoload-optimize" (nicolas-grekas)
+[33md6c7b56[m Revert "Merge pull request #180 from lyrixx/composer-autoload-optimize"
+[33m119cc87[m minor #210  Remove composer/package-versions-deprecated from allowed plugins  (nicolas-grekas)
+[33ma3258a7[m Remove composer/package-versions-deprecated from allowed plugins
+[33m5b400af[m minor #206 Remove preferred-install configuration as it is the default (MatTheCat)
+[33me3a4533[m Remove preferred-install configuration as it is the default
+[33med03d55[m 6.2 dev
+[33m530bbce[m Merge branch '6.1' into 6.2
+[33m948939f[m[33m ([m[1;33mtag: [m[1;33mv6.1.99[m[33m, [m[1;31morigin/6.1[m[33m)[m 6.1 stable
+[33m62f0a72[m Require PHP 8.1
+[33m8223b6c[m Merge branch '6.0' into 6.1
+[33m9c9454d[m[33m ([m[1;33mtag: [m[1;33mv6.0.99[m[33m, [m[1;31morigin/6.0[m[33m)[m Merge branch '5.4' into 6.0
+[33m4eeabe4[m Merge branch '5.3' into 5.4
+[33m5300388[m[33m ([m[1;33mtag: [m[1;33mv5.3.99[m[33m, [m[1;31morigin/5.3[m[33m)[m Merge branch '5.2' into 5.3
+[33m47c9a4f[m[33m ([m[1;33mtag: [m[1;33mv5.2.99[m[33m, [m[1;31morigin/5.2[m[33m)[m Merge branch '4.4' into 5.2
+[33mc6fe0d8[m[33m ([m[1;33mtag: [m[1;33mv4.4.99[m[33m, [m[1;31morigin/4.4[m[33m)[m Allow plugin "composer/package-versions-deprecated"
+[33me93d6d0[m Merge branch '6.0' into 6.1
+[33md6ec281[m Merge branch '5.4' into 6.0
+[33mc8747f7[m Merge branch '5.3' into 5.4
+[33mb446f5f[m Merge branch '5.2' into 5.3
+[33mfceddc9[m Merge branch '4.4' into 5.2
+[33mfa3062f[m minor #201 Add allow-plugins in the skeleton config (stof)
+[33mf757a29[m Add allow-plugins in the skeleton config
+[33mbbf25cb[m Prepare for 6.1-dev
+[33ma215de3[m Add replace rules for PHP <= 8.0
+[33m3f9d375[m Merge branch '5.4' into 6.0
+[33m7144fb1[m Set minimum-stability to stable
+[33m4b63c49[m Merge branch '5.4' into 6.0
+[33m94ccb96[m Merge "Declare compat with flex v2"
+[33mab552db[m Declare compat with flex v2
+[33m46f1e89[m Merge branch '5.4' into 6.0
+[33mf3d0c84[m minor #198 Bump Flex to 1.17 (derrabus)
+[33m2ded5af[m Bump Flex to 1.17
+[33m0530397[m Merge branch '5.4' into 6.0
+[33m8e15422[m Revert "Set minimum-stability=stable by default"
+[33mde11da6[m Merge branch '5.3' into 5.4
+[33ma0770a7[m Merge branch '5.2' into 5.3
+[33m82df707[m Set minimum-stability=stable by default
+[33m02d72c5[m Bump for 6.0
+[33md5449b6[m Bump for 5.4
+[33mcd1cd3b[m Merge branch '5.3' into 5.4
+[33m6ac5c1d[m Prepare for 5.3
+[33m0df7933[m feature #195 Add Runtime component (Nyholm)
+[33m54c44b6[m Add Runtime component
+[33m8912d3d[m Merge branch '5.2' into 5.x
+[33m5215ec9[m Add minimum-stability=dev & prefer-stable=true
+[33m077880e[m Merge branch '5.2' into 5.x
+[33m1a94f01[m Clean up "replace" section
+[33m7fcda97[m Prepare for branch 5.x
+[33m0c457fd[m Prepare for branch 5.2
+[33mdf26139[m Merge branch '5.1'
+[33m8d16142[m[33m ([m[1;33mtag: [m[1;33mv5.1.99[m[33m, [m[1;31morigin/5.1[m[33m)[m Merge branch '4.4' into 5.1
+[33m1d596be[m Merge branch '3.4' into 4.4
+[33m61e2a49[m[33m ([m[1;33mtag: [m[1;33mv3.4.99[m[33m, [m[1;31morigin/3.4[m[33m)[m Allow more PHP versions
+[33mbddaf2f[m Merge branch '5.1'
+[33m15022d7[m Bump branch-alias to 5.2
+[33m8677273[m Prepare for stable release
+[33m51138df[m Create LICENSE
+[33m4f2f1e3[m minor #182 Add missing branch-alias (dunglas)
+[33m0830569[m Add missing branch-alias
+[33mef88b9d[m Merge pull request #180 from lyrixx/composer-autoload-optimize
+[33mf34b8e6[m [Composer] Use an optimized autoloader
+[33m29d693d[m Merge branch '5.0'
+[33m1727f6f[m[33m ([m[1;33mtag: [m[1;33mv5.0.99[m[33m, [m[1;31morigin/5.0[m[33m)[m Merge branch '4.4' into 5.0
+[33m10ac60d[m minor #178 Prepare for stable release (nicolas-grekas)
+[33m5083740[m Merge branch '5.0'
+[33m893cf3a[m minor #179 Update to ^7.2.5 (nicolas-grekas)
+[33m69e213b[m Update to ^7.2.5
+[33mfa272c8[m Prepare for stable release
+[33ma6e53a0[m Bump branch-alias to 5.1
+[33mcd58faa[m Merge branch '4.4'
+[33mc4ef9ad[m Merge branch '4.3' into 4.4
+[33m0b5eb26[m[33m ([m[1;33mtag: [m[1;33mv4.3.99[m[33m, [m[1;31morigin/4.3[m[33m)[m Merge branch '4.2' into 4.3
+[33md33fc91[m[33m ([m[1;33mtag: [m[1;33mv4.2.99[m[33m, [m[1;31morigin/4.2[m[33m)[m Merge branch '4.1' into 4.2
+[33me676ceb[m[33m ([m[1;33mtag: [m[1;33mv4.1.99[m[33m, [m[1;31morigin/4.1[m[33m)[m Merge branch '4.0' into 4.1
+[33mebdcd10[m[33m ([m[1;33mtag: [m[1;33mv4.0.99[m[33m, [m[1;31morigin/4.0[m[33m)[m Merge branch '3.4' into 4.0
+[33mac80887[m Merge branch '3.3' into 3.4
+[33m8662c77[m[33m ([m[1;33mtag: [m[1;33mv3.3.99[m[33m, [m[1;31morigin/3.3[m[33m)[m Add empty "require-dev" to force its order
+[33m4758dc2[m Merge branch '4.4'
+[33md103e18[m Merge branch '4.3' into 4.4
+[33mc35e4f3[m Merge branch '4.2' into 4.3
+[33m114ba6e[m Merge branch '4.1' into 4.2
+[33m175f3ea[m Merge branch '4.0' into 4.1
+[33md5d09e6[m Merge branch '3.4' into 4.0
+[33m5c523eb[m Merge branch '3.3' into 3.4
+[33mca805fa[m Adopt "flex-require" from v1.3
+[33m16b89fa[m Merge branch '4.4'
+[33mdd56d3c[m Merge branch '4.3' into 4.4
+[33m8d62bad[m Merge branch '4.2' into 4.3
+[33m8fa395f[m Merge branch '3.4' into 4.2
+[33m22ee00f[m Adopt "flex-require" from v1.3
+[33m36f9618[m Merge branch '4.4'
+[33m0228d31[m Move to flex-require
+[33md19a627[m Update dependencies - v4.3.1.3
+[33mfc9f4e9[m Update dependencies - v4.2.9.4
+[33m46d80a3[m Update dependencies - v4.3.1.2
+[33m843f942[m Update dependencies - v4.2.9.3
+[33m099233d[m Update dependencies - v3.4.28.3
+[33mb3485c3[m Update dependencies - v4.3.1.1
+[33m79deb8f[m Update dependencies - v4.2.9.2
+[33m5c6969e[m Update dependencies - v3.4.28.2
+[33m010e549[m Update dependencies - v4.3.0.2-RC1
+[33me013d06[m [5.0] bump to PHP 7.2
+[33m0701a5d[m Merge branch '4.4'
+[33m92d5293[m Merge branch '4.3' into 4.4
+[33m942e5d7[m [4.3] Remove minimum-stability: dev
+[33m273f52f[m Update dependencies - v4.3.0.1-RC1
+[33m90c074d[m Update dependencies - v4.2.9.1
+[33m2d11919[m Update dependencies - v3.4.28.1
+[33m52a63c6[m updated version to 5.0
+[33mf085c57[m Update dependencies - v4.3.0.1-BETA2
+[33mb7a4de1[m composer up
+[33m0e22961[m Update dependencies - v4.2.8.3
+[33m919dd56[m Merge branch '4.3'
+[33mb89d70c[m [4.3] composer up
+[33m76f6c35[m Merge branch '4.2' into '4.3'
+[33m72dcd5c[m Fix dotenv dep
+[33m57f40a8[m updated version to 4.4
+[33m65769ad[m Update dependencies - v4.2.8.2
+[33m46cd44d[m Update dependencies - v3.4.27.2
+[33m8f83e11[m Update dependencies - v4.2.8.1
+[33mc376cd0[m Update dependencies - v3.4.27.1
+[33m98a4d78[m Update dependencies - v4.2.7.1
+[33mc25d1ad[m Update dependencies - v3.4.26.1
+[33m2dafb35[m Update dependencies - v4.2.5.2
+[33m81fd0ed[m Update dependencies - v3.4.24.2
+[33m34bb2fb[m Update dependencies - v4.2.5.1
+[33m3413959[m Update dependencies - v3.4.24.1
+[33m266db46[m Update dependencies - v4.2.4.2
+[33mbcd8fd5[m Update dependencies - v3.4.23.2
+[33me8b61ac[m Update dependencies - v4.2.4.1
+[33me7e8370[m Update dependencies - v3.4.23.1
+[33mee29740[m Update dependencies - v4.2.3.2
+[33m1c9fee6[m Update dependencies - v3.4.22.2
+[33m7f0c4be[m Update dependencies - v4.2.3.1
+[33m527315d[m Update dependencies - v3.4.22.1
+[33mb50325e[m Update dependencies - v4.2.2.1
+[33m0bead03[m Update dependencies - v4.1.10.1
+[33m4bbb1b8[m Update dependencies - v3.4.21.1
+[33m61f0acc[m Update dependencies - v4.2.1.1
+[33m9da5388[m Update dependencies - v4.1.9.1
+[33m7bcb2a4[m Update dependencies - v3.4.20.1
+[33m6c19c66[m Merge pull request #134 from symfony-skeleton-bot/composer-update-v4.2.0.1
+[33m7802a6b[m Update dependencies - v4.2.0.1
+[33m349c3f2[m Update dependencies - v4.2.0.1
+[33mbc8bb54[m Update dependencies - v4.1.8.2
+[33me426ea2[m Update dependencies - v3.4.19.2
+[33mb5c97d1[m Merge branch '4.2'
+[33m51f87ac[m Merge branch '4.1' into 4.2
+[33md510ce7[m Merge branch '3.4' into 4.1
+[33m65e4e0a[m bug #122 Move dotenv to "require" (nicolas-grekas)
+[33m1065640[m updated version to 4.3
+[33mc8b86fa[m Merge pull request #128 from symfony-skeleton-bot/composer-update-v4.1.8.1
+[33mb6eb68f[m Update dependencies - v4.1.8.1
+[33m2a4cf34[m Merge pull request #127 from symfony-skeleton-bot/composer-update-v3.4.19.1
+[33m98ab416[m Update dependencies - v3.4.19.1
+[33m052bf7a[m Merge pull request #126 from symfony-skeleton-bot/composer-update-v4.1.7.5
+[33m42081ef[m Update dependencies - v4.1.7.5
+[33ma638ab2[m Merge pull request #125 from symfony-skeleton-bot/composer-update-v3.4.18.5
+[33mc378b76[m Update dependencies - v3.4.18.5
+[33m2be9f96[m Merge pull request #124 from symfony-skeleton-bot/composer-update-v4.1.7.4
+[33m88fe5ff[m Update dependencies - v4.1.7.4
+[33m66fa55e[m Merge pull request #123 from symfony-skeleton-bot/composer-update-v3.4.18.4
+[33me6c78e4[m Update dependencies - v3.4.18.4
+[33m5cd4dd8[m Move dotenv to "require"
+[33m4e75ed4[m Merge pull request #121 from symfony-skeleton-bot/composer-update-v4.1.7.3
+[33maf5b229[m Update dependencies - v4.1.7.3
+[33m87496fd[m Merge pull request #120 from symfony-skeleton-bot/composer-update-v3.4.18.3
+[33m061d77c[m Update dependencies - v3.4.18.3
+[33mc1b6f83[m Merge pull request #119 from symfony-skeleton-bot/composer-update-v4.1.7.2
+[33made177b[m Update dependencies - v4.1.7.2
+[33maab700b[m Merge pull request #118 from symfony-skeleton-bot/composer-update-v3.4.18.2
+[33m53d0fd6[m Update dependencies - v3.4.18.2
+[33mfaa5ec6[m Merge pull request #117 from symfony-skeleton-bot/composer-update-v4.1.7.1
+[33me45ce7c[m Update dependencies - v4.1.7.1
+[33m602b6a3[m Merge pull request #116 from symfony-skeleton-bot/composer-update-v3.4.18.1
+[33m1af7947[m Update dependencies - v3.4.18.1
+[33m7bf07e2[m Merge pull request #115 from symfony-skeleton-bot/composer-update-v4.1.6.1
+[33mad65c7f[m Update dependencies - v4.1.6.1
+[33me63c090[m Merge pull request #114 from symfony-skeleton-bot/composer-update-v3.4.17.2
+[33m2cf6be7[m Update dependencies - v3.4.17.2
+[33m56e5d5d[m Merge pull request #113 from symfony-skeleton-bot/composer-update-
+[33mae62ee5[m Update dependencies -
+[33m9700d5d[m Merge pull request #112 from symfony-skeleton-bot/composer-update-
+[33m65d64ab[m Update dependencies -
+[33m119338f[m Merge pull request #111 from symfony-skeleton-bot/composer-update-v4.1.5.3
+[33m6cc9208[m Update dependencies - v4.1.5.3
+[33mb36b78e[m Merge pull request #110 from symfony-skeleton-bot/composer-update-v3.4.17.1
+[33m8b380a0[m Update dependencies - v3.4.17.1
+[33m8a0ee46[m Merge pull request #109 from symfony-skeleton-bot/composer-update-v4.1.5.2
+[33m27be18c[m Update dependencies - v4.1.5.2
+[33m4422b66[m Merge pull request #108 from symfony-skeleton-bot/composer-update-v4.1.5.1
+[33mcb6f826[m Update dependencies - v4.1.5.1
+[33mb482390[m Merge pull request #107 from symfony-skeleton-bot/composer-update-v3.4.16.1
+[33m8fb09b7[m Update dependencies - v3.4.16.1
+[33mee87ff8[m Merge branch '4.1'
+[33m505ba2a[m Merge branch '3.4' into 4.1
+[33ma77faa2[m minor #105 replace only the special random compat version (xabbuh)
+[33ma7d1738[m replace only the special random compat version
+[33m1d06775[m Merge pull request #104 from symfony-skeleton-bot/composer-update-v4.1.4.2
+[33m00ae529[m Update dependencies - v4.1.4.2
+[33m6565f8d[m Merge pull request #103 from symfony-skeleton-bot/composer-update-v3.4.15.3
+[33ma203bcc[m Update dependencies - v3.4.15.3
+[33m9b7c654[m Merge pull request #102 from symfony-skeleton-bot/composer-update-v4.1.4.1
+[33m6c93aa7[m Update dependencies - v4.1.4.1
+[33me9ecb93[m Merge pull request #101 from symfony-skeleton-bot/composer-update-v3.4.15.2
+[33m9d74d81[m Update dependencies - v3.4.15.2
+[33mebdce8c[m Merge pull request #100 from symfony-skeleton-bot/composer-update-v4.1.3.5
+[33me06bbf5[m Update dependencies - v4.1.3.5
+[33m006d1cc[m Merge pull request #99 from symfony-skeleton-bot/composer-update-v3.4.15.1
+[33m743cd05[m Update dependencies - v3.4.15.1
+[33mb4f8c31[m Merge branch '4.1'
+[33m1b7f28a[m Merge branch '3.4' into 4.1
+[33mfea2392[m minor #98 "replace" paragonie/random_compat (nicolas-grekas)
+[33mfe0082e[m "replace" paragonie/random_compat
+[33m97a14ed[m Merge pull request #97 from symfony-skeleton-bot/composer-update-v4.1.3.4
+[33m1bf1d9f[m Update dependencies - v4.1.3.4
+[33m062ff1d[m Merge pull request #96 from symfony-skeleton-bot/composer-update-v3.4.14.5
+[33m152f9a8[m Update dependencies - v3.4.14.5
+[33m2b2c5c2[m Merge pull request #95 from symfony-skeleton-bot/composer-update-v4.1.3.3
+[33m29dc0d2[m Update dependencies - v4.1.3.3
+[33m17a72d3[m Merge pull request #94 from symfony-skeleton-bot/composer-update-v3.4.14.4
+[33m93d8558[m Update dependencies - v3.4.14.4
+[33m9b9106b[m Merge branch '4.1'
+[33mff0afb0[m Merge branch '3.4' into 4.1
+[33me4b7bcf[m minor #93 Use extra.symfony.require to restrict versions of symfony/* (nicolas-grekas)
+[33m32dec7e[m Use extra.symfony.require to restrict versions of symfony/*
+[33mabee8ba[m Merge pull request #92 from symfony-skeleton-bot/composer-update-v4.1.3.2
+[33m8c43f6c[m Update dependencies - v4.1.3.2
+[33m9e7e1f2[m Merge pull request #91 from symfony-skeleton-bot/composer-update-v3.4.14.3
+[33m25b3fb5[m Update dependencies - v3.4.14.3
+[33m18a3865[m Merge pull request #90 from symfony-skeleton-bot/composer-update-v3.4.14.2
+[33m46ea6af[m Update dependencies - v3.4.14.2
+[33md05d1ab[m Merge pull request #89 from symfony-skeleton-bot/composer-update-v4.1.3.1
+[33m1a9f747[m Update dependencies - v4.1.3.1
+[33mbdca25c[m Merge pull request #88 from symfony-skeleton-bot/composer-update-v3.4.14.1
+[33m867c602[m Update dependencies - v3.4.14.1
+[33ma5ffa85[m Merge pull request #87 from symfony-skeleton-bot/composer-update-v4.1.2.5
+[33m3d11161[m Update dependencies - v4.1.2.5
+[33ma4c52c3[m Merge pull request #86 from symfony-skeleton-bot/composer-update-v3.4.13.5
+[33m801b5a0[m Update dependencies - v3.4.13.5
+[33m8ff8b5a[m Merge pull request #85 from symfony-skeleton-bot/composer-update-v4.1.2.4
+[33ma8aba20[m Update dependencies - v4.1.2.4
+[33m9521fe0[m Merge pull request #84 from symfony-skeleton-bot/composer-update-v3.4.13.4
+[33md85587d[m Update dependencies - v3.4.13.4
+[33mc52e825[m Merge pull request #83 from symfony-skeleton-bot/composer-update-v4.1.2.3
+[33mbeab35e[m Update dependencies - v4.1.2.3
+[33m93e487f[m Merge pull request #82 from symfony-skeleton-bot/composer-update-v3.4.13.3
+[33m6747f78[m Update dependencies - v3.4.13.3
+[33m07a1e13[m Merge pull request #81 from symfony-skeleton-bot/composer-update-v4.1.2.2
+[33m35515de[m Update dependencies - v4.1.2.2
+[33m4a457fc[m Merge pull request #80 from symfony-skeleton-bot/composer-update-v3.4.13.2
+[33m9bcc72d[m Update dependencies - v3.4.13.2
+[33m49efd76[m Merge pull request #79 from symfony-skeleton-bot/composer-update-v4.1.2.1
+[33md0c433c[m Update dependencies - v4.1.2.1
+[33m376340a[m Merge pull request #78 from symfony-skeleton-bot/composer-update-v4.0.13.1
+[33m521c037[m Update dependencies - v4.0.13.1
+[33m831aadb[m Merge pull request #77 from symfony-skeleton-bot/composer-update-v3.4.13.1
+[33m078c51b[m Update dependencies - v3.4.13.1
+[33md086c3e[m Merge branch '4.1'
+[33m43db8dc[m Merge branch '4.0' into 4.1
+[33m513392f[m Merge branch '3.4' into 4.0
+[33m15a9e6d[m Merge pull request #76 from symfony-skeleton-bot/composer-update-v4.1.1.3
+[33m8e3b0a8[m Update dependencies - v4.1.1.3
+[33mb233d4c[m Merge pull request #75 from symfony-skeleton-bot/composer-update-v4.0.12.3
+[33md3a22d8[m Update dependencies - v4.0.12.3
+[33me158dea[m Merge pull request #74 from symfony-skeleton-bot/composer-update-v3.4.12.3
+[33m6e240a7[m Update dependencies - v3.4.12.3
+[33me36b32d[m Merge pull request #73 from symfony-skeleton-bot/composer-update-v4.1.1.2
+[33m178e6e5[m Update dependencies - v4.1.1.2
+[33m2ab7c97[m Merge pull request #72 from symfony-skeleton-bot/composer-update-v4.0.12.2
+[33md944165[m Update dependencies - v4.0.12.2
+[33m80c2a31[m Merge pull request #71 from symfony-skeleton-bot/composer-update-v3.4.12.2
+[33me3b738a[m Update dependencies - v3.4.12.2
+[33m45430b1[m Merge pull request #69 from symfony-skeleton-bot/composer-update-v4.1.1.1
+[33ma669795[m Update dependencies - v4.1.1.1
+[33m5b89db4[m Merge pull request #68 from symfony-skeleton-bot/composer-update-v4.0.12.1
+[33m2595b12[m Update dependencies - v4.0.12.1
+[33m8fef19c[m Merge pull request #67 from symfony-skeleton-bot/composer-update-v3.4.12.1
+[33m6a5b7d3[m Update dependencies - v3.4.12.1
+[33mf53a61a[m Merge branch '4.1'
+[33mf452077[m removed beta
+[33mc59a5d0[m Merge branch '4.1'
+[33m33e0c14[m Merge branch '4.0' into 4.1
+[33m8251d21[m Merge branch '3.4' into 4.0
+[33mc0dbe4d[m minor #62 Add ext-ctype as required dependency (nicolas-grekas)
+[33ma900787[m Add ext-ctype as required dependency
+[33m75f8b72[m Merge branch '4.1'
+[33mc97e244[m [4.1] Set minimum-stability to beta
+[33m9ae899c[m removed force-lowest dep, added lts dep
+[33m7ef6ba9[m updated version to 4.2
+[33m4c4f5b6[m Merge branch '4.0'
+[33m0cfd6f1[m Merge branch '3.4' into 4.0
+[33ma02718b[m Merge branch '3.3' into 3.4
+[33md800333[m removed id in composer.json
+[33mdc18054[m feature #61 [master-only] Replace symfony/lts by symfony/force-lowest (nicolas-grekas)
+[33mefe1e0e[m [master-only] Replace symfony/lts by symfony/force-lowest
+[33m80fd071[m Merge branch '4.0'
+[33m77749ac[m Merge branch '3.4' into 4.0
+[33mbb1af1a[m Merge branch '3.3' into 3.4
+[33m8a9584b[m feature #49 Move symfony/thanks to Flex (nicolas-grekas)
+[33m5191475[m Move symfony/thanks to Flex
+[33mde1ec4a[m Merge branch '4.0'
+[33m0b11854[m Merge branch '3.4' into 4.0
+[33mcf33c02[m Merge branch '3.3' into 3.4
+[33m769416b[m added symfony/thanks
+[33mae40abe[m Merge branch '4.0'
+[33ma2c7e15[m Merge branch '3.4' into 4.0
+[33m00a3be6[m Merge branch '3.3' into 3.4
+[33m21a6c60[m changed license to MIT
+[33m8aaa35b[m Merge branch '3.3' into 3.4
+[33m266b3f1[m feature #46 Use symfony/lts for 3.3 branch too (ostrolucky)
+[33m411e5d6[m Use symfony/lts for 3.3 branch too
+[33md0bedc0[m Merge branch '4.0'
+[33m4d4d446[m Merge branch '3.4' into 4.0
+[33me93eecf[m Merge branch '3.3' into 3.4
+[33ma081fda[m bug #45 "replace" polyfill-iconv, but not polyfill-apcu (nicolas-grekas)
+[33m2ff9a14[m "replace" polyfill-iconv, but not polyfill-apcu
+[33md1f2365[m Merge branch '4.0'
+[33m35d1016[m Merge branch '3.4' into 4.0
+[33meba9680[m Merge branch '3.3' into 3.4
+[33mad7818a[m bug #43 "replace" 7.0 & 5.6 polyfills (nicolas-grekas)
+[33mbbee2c3[m "replace" 7.0 & 5.6 polyfills
+[33mc9f4cb8[m Merge branch '3.4' into 4.0
+[33m33ac4fd[m bumped version 3.4 to stable
+[33m8e33fe6[m bumped version to 4.1
+[33m592f0da[m Merge branch '3.4' into 4.0
+[33mc8769cd[m bumped min stability to rc
+[33m455c4f6[m bug #34 Fix minimum required PHP version for Symfony4 (fre5h)
+[33m7431190[m Fix minimum required PHP version for Symfony4
+[33m8725c24[m Merge branch '3.4'
+[33mcf167fd[m Merge branch '3.3' into 3.4
+[33m5470b17[m Merge pull request #31 from BPScott/alphabetise
+[33m1da1ef3[m Alphabetise require declarations.
+[33m1a88508[m feature #29 Require symfony/lts ^4 (nicolas-grekas)
+[33m012f719[m Require symfony/lts ^4@dev
+[33m9c37ea6[m minor #28 Require symfony/lts ^3 (nicolas-grekas)
+[33m9e90f96[m Require symfony/lts ^3
+[33ma78fd8a[m Merge branch '3.4'
+[33mbede808[m removed id
+[33me8e5ac0[m Merge branch '3.4'
+[33m8ec5fb5[m mvoed to beta
+[33mb4c3a51[m Merge branch '3.3' into 3.4
+[33m3a6879e[m Merge branch '3.4'
+[33m2fe0d22[m Merge branch '3.3' into 3.4
+[33mf1a4048[m moved flex to require instead of require-dev
+[33m81989d3[m Merge branch '3.4'
+[33mbacc857[m Merge branch '3.3' into 3.4
+[33m082c60c[m feature #27 Add console as a hard requirement (fabpot)
+[33m859a995[m added console as a hard requirement
+[33m9ff5d87[m Merge pull request #26 from symfony/fabpot-patch-1
+[33m91f3408[m Flex is not a dev req
+[33m15a08b0[m bumped version to 3.4@dev
+[33mc046dc5[m moved flex to require-dev
+[33me70d913[m updated min PHP version to 7.0.8
+[33m5a78a7d[m bug #14 Remove Composer "platform" config (teohhanhui)
+[33mb0b54ed[m Remove Composer "platform" config
+[33m49c0c15[m bug #13 Conflict with symfony/symfony (any version) to prevent project self-destruct (teohhanhui)
+[33m8ff4d0c[m Conflict with symfony/symfony (any version) to prevent project self-destruct
+[33m3ef76bb[m removed min stability
+[33me5df2af[m bug #9 Change platform to 7.1.3 (dunglas)
+[33m4817d43[m Change platform to 7.1.3
+[33m19daacf[m bumped Flex req to ^1.0
+[33maeca2f2[m switched back to dev for now
+[33m6d0ac3e[m bumped min stability to beta and fix constraints
+[33m153e79a[m renamed the flex section to symfony
+[33me1c67b9[m minor #5 Remove useless conflict (curry684)
+[33m95d854e[m reworked the flex section under extra
+[33m6958a71[m Remove useless conflict
+[33mc12debb[m bumped min version to 7.1
+[33m2c1dbbb[m bug #4 Move flex-id to extra settings (Pierstoval)
+[33md97e8a3[m Move flex-id to extra settings
+[33m5e6a09b[m bug #3 Autoload tests only in the dev environment (stof)
+[33m69c465d[m Autoload tests only in the dev environment
+[33mfa4fbc0[m added preferred-install to dist
+[33mbeb77b8[m added the first version of the skeleton
