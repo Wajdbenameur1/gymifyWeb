@@ -42,9 +42,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', enumType: Role::class)]
     private ?Role $role = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $specialite = null;
-
+   #[ORM\Column(length: 100, nullable: true)]
+private ?string $specialite = null;
     
 
     #[ORM\Column(length: 100, nullable: true)]
