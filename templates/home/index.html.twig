@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - Product Management{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="mb-4">Dashboard</h1>
+
+    <div class="row">
+        {# Total Products Card #}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-box text-primary"></i>
+                        Total Products
+                    </h5>
+                    <p class="card-text display-4">{{ totalProducts }}</p>
+                    <a href="{{ path('app_produit_index') }}" class="btn btn-primary">
+                        View All Products
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# Low Stock Products Card #}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        Low Stock Products
+                    </h5>
+                    <p class="card-text">
+                        {% if lowStockProducts|length > 0 %}
+                            <ul class="list-unstyled">
+                            {% for produit in lowStockProducts %}
+                                <li>
+                                    <a href="{{ path('app_produit_show', {'id': produit.id}) }}" class="text-decoration-none">
+                                        {{ produit.nom }} - Stock: {{ produit.stock }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No products with low stock.</p>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {# Recent Orders Card #}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-shopping-cart text-success"></i>
+                        Recent Orders
+                    </h5>
+                    <p class="card-text">
+                        {% if recentOrders|length > 0 %}
+                            <ul class="list-unstyled">
+                            {% for commande in recentOrders %}
+                                <li>
+                                    <a href="{{ path('app_commande_show', {'id': commande.id}) }}" class="text-decoration-none">
+                                        Order #{{ commande.id }} - {{ commande.dateC|date('Y-m-d') }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No recent orders.</p>
+                        {% endif %}
+                    </p>
+                    <a href="{{ path('app_commande_index') }}" class="btn btn-success">
+                        View All Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Product - GestionProduit{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="h3 mb-0">Edit Product</h1>
+        </div>
+        <div class="card-body">
+            {{ include('product/_form.html.twig', {'button_label': 'Update'}) }}
+        </div>
+    </div>
+{% endblock %} 

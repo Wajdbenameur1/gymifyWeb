@@ -1,0 +1,109 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1 class="mb-4">Shopping Cart</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if cart.items|length > 0 %}
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart.items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.produit.imagePath %}
+                                                <img src="{{ asset(item.produit.imagePath) }}" 
+                                                     alt="{{ item.produit.nom }}" 
+                                                     class="img-thumbnail me-3" 
+                                                     style="max-width: 50px">
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ item.produit.nom }}</h6>
+                                                <small class="text-muted">{{ item.produit.categorie }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>€{{ item.price|number_format(2) }}</td>
+                                    <td style="width: 200px;">
+                                        <form action="{{ path('app_cart_update', {'id': item.id}) }}" method="post" class="d-flex align-items-center">
+                                            <input type="number" name="quantity" value="{{ item.quantity }}" 
+                                                   min="0" max="{{ item.produit.stock }}" 
+                                                   class="form-control form-control-sm me-2" 
+                                                   style="width: 80px">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>€{{ item.subtotal|number_format(2) }}</td>
+                                    <td>
+                                        <form action="{{ path('app_cart_remove', {'id': item.id}) }}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('Are you sure you want to remove this item?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>€{{ cart.total|number_format(2) }}</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <form action="{{ path('app_cart_clear') }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger" 
+                                onclick="return confirm('Are you sure you want to clear your cart?')">
+                            <i class="fas fa-trash-alt"></i> Clear Cart
+                        </button>
+                    </form>
+                    <div>
+                        <a href="{{ path('app_front_home') }}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left"></i> Continue Shopping
+                        </a>
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart"></i> Proceed to Checkout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <h3>Your cart is empty</h3>
+            <p class="text-muted">Add some products to your cart and they will appear here.</p>
+            <a href="{{ path('app_front_home') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Continue Shopping
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Payment Details{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Payment Details</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Payment #{{ payment.id }}</h5>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Order:</th>
+                            <td>
+                                {% if payment.commande %}
+                                    <a href="{{ path('app_commande_show', {'id': payment.commande.id}) }}">
+                                        Order #{{ payment.commande.id }}
+                                    </a>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Amount:</th>
+                            <td>{{ payment.amount|format_currency('EUR') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Payment Method:</th>
+                            <td>{{ payment.paymentMethod|title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                <span class="badge {% if payment.status == 'completed' %}bg-success
+                                      {% elseif payment.status == 'processing' %}bg-info
+                                      {% elseif payment.status == 'failed' %}bg-danger
+                                      {% elseif payment.status == 'refunded' %}bg-warning
+                                      {% else %}bg-secondary{% endif %}">
+                                    {{ payment.status|title }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Payment Date:</th>
+                            <td>{{ payment.paymentDate|date('Y-m-d H:i:s') }}</td>
+                        </tr>
+                        {% if payment.transactionId %}
+                        <tr>
+                            <th>Transaction ID:</th>
+                            <td>{{ payment.transactionId }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <div class="mt-4">
+                    <a href="{{ path('app_payment_edit', {'id': payment.id}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{{ path('app_payment_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> Back to list
+                    </a>
+                    <form method="post" action="{{ path('app_payment_delete', {'id': payment.id}) }}" onsubmit="return confirm('Are you sure you want to delete this payment?');" style="display: inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ payment.id) }}">
+                        <button class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

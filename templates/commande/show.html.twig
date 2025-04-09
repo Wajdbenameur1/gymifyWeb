@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>Order Details</h1>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Order #{{ commande.id }}</h5>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ commande.dateC|date('Y-m-d H:i:s') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        <span class="badge {% if commande.statut == 'completed' %}bg-success
+                                              {% elseif commande.statut == 'processing' %}bg-info
+                                              {% elseif commande.statut == 'cancelled' %}bg-danger
+                                              {% else %}bg-warning{% endif %}">
+                                            {{ commande.statut|title }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>User ID:</th>
+                                    <td>{{ commande.userId }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Total Amount:</th>
+                                    <td>{{ commande.total|format_currency('EUR') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Order Items</h5>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in commande.commandeProduits %}
+                                        <tr>
+                                            <td>{{ item.produit.nom }}</td>
+                                            <td>€{{ item.produit.prix|number_format(2) }}</td>
+                                            <td>{{ item.quantite }}</td>
+                                            <td>€{{ (item.produit.prix * item.quantite)|number_format(2) }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">No items found</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ path('app_commande_edit', {'id': commande.id}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{{ path('app_commande_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> Back to list
+                    </a>
+                    <form method="post" action="{{ path('app_commande_delete', {'id': commande.id}) }}" onsubmit="return confirm('Are you sure you want to delete this order?');" style="display: inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commande.id) }}">
+                        <button class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if commande.payment %}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Payment Information</h5>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Amount:</th>
+                                    <td>{{ commande.payment.amount|format_currency('EUR') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Method:</th>
+                                    <td>{{ commande.payment.paymentMethod }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        <span class="badge {% if commande.payment.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ commande.payment.status|title }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ commande.payment.paymentDate|date('Y-m-d H:i:s') }}</td>
+                                </tr>
+                                {% if commande.payment.transactionId %}
+                                <tr>
+                                    <th>Transaction ID:</th>
+                                    <td>{{ commande.payment.transactionId }}</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %} 
