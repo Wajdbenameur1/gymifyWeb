@@ -80,6 +80,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;  // Utiliser l'email comme identifiant
     }
 
+    // Dans la classe User (classe parent)
+    public function getUsername(): string
+    {
+    return $this->email;  // Ou toute autre propriété qui représente le nom d'utilisateur
+    }
 
     public function getId(): ?int
     {

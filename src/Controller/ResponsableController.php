@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ResponsableController extends AbstractController
 {
-    #[Route('/responsable', name: 'app_responsable')]
+    #[Route('/responsable', name: 'dashboard_responsable_salle')]
     public function index(): Response
     {
         $stats = [
