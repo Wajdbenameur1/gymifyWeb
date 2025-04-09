@@ -1,0 +1,124 @@
+{% extends 'sportif/base.html.twig' %}
+
+{% block title %}{{ salle.nom }} | Gym{% endblock %}
+
+{% block body %}
+    <section class="salle-details-section spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="salle-image">
+                        {% if salle.urlPhoto %}
+                            <img src="{{ asset('uploads/images/' ~ salle.urlPhoto) }}" alt="{{ salle.nom }}">
+                        {% else %}
+                            <img src="{{ asset('img/placeholder-gym.jpg') }}" alt="Default Gym Image">
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="salle-content">
+                        <h2>{{ salle.nom }}</h2>
+                        <p>{{ salle.details }}</p>
+                        <ul class="salle-meta">
+                            <li><i class="fa fa-map-marker"></i> {{ salle.adresse }}</li>
+                            <li><i class="fa fa-user"></i> {{ salle.responsable }}</li>
+                            <li><i class="fa fa-phone"></i> {{ salle.numTel }}</li>
+                            <li><i class="fa fa-envelope"></i> {{ salle.email }}</li>
+                        </ul>
+                        <a href="{{ path('home') }}" class="primary-btn">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .salle-details-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .salle-image img {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .salle-content {
+            padding: 20px;
+        }
+
+        .salle-content h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 20px;
+        }
+
+        .salle-content p {
+            font-family: 'Muli', sans-serif;
+            font-size: 16px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .salle-meta {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .salle-meta li {
+            font-family: 'Muli', sans-serif;
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .salle-meta i {
+            color: #f36100;
+        }
+
+        .primary-btn {
+            background: #f36100;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.3s ease;
+        }
+
+        .primary-btn:hover {
+            background: #e04e00;
+        }
+
+        @media (max-width: 768px) {
+            .salle-content h2 {
+                font-size: 28px;
+            }
+
+            .salle-content p {
+                font-size: 14px;
+            }
+
+            .salle-meta li {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .salle-content h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+{% endblock %}

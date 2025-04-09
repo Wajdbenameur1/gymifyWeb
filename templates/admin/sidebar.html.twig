@@ -38,6 +38,12 @@
                  <p>Utilisateurs</p>
                </a>
              </li>
+              <li class="nav-item {{ app.request.get('_route') == 'user_index' ? 'active' }}">
+              <a href="{{ path('admin_salle_index') }}">
+                 <i class="fas fa-dumbbell"></i>
+                 <p>Gym</p>
+               </a>
+             </li>
                 {# Ajoutez ici les autres éléments du menu #}
                 
             </ul>

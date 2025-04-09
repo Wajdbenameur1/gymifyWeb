@@ -45,6 +45,7 @@ class UserController extends AbstractController
         ]);
     }
 
+<<<<<<< Updated upstream
     #[Route('/admin/user/create', name: 'user_create')]
     public function create(Request $request, SluggerInterface $slugger): Response
     {
@@ -109,6 +110,25 @@ class UserController extends AbstractController
         return $this->render('user/user_create.html.twig', [
             'form' => $form->createView(),
         ]);
+=======
+    // Créer un nouvel utilisateur
+#[Route('/admin/user/create', name: 'user_create')]
+#[IsGranted('ROLE_ADMIN')]
+public function create(Request $request): Response
+{
+    $user = new User();
+    $form = $this->createForm(UserType::class, $user);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
+        $user->setPassword($hashedPassword);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('user_index');
+>>>>>>> Stashed changes
     }
     
 
