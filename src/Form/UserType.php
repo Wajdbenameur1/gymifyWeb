@@ -12,14 +12,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormEvent;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class UserType extends AbstractType
 {
-    private $emailUniquenessValidator;
+    private EmailUniquenessValidator $emailUniquenessValidator;
 
     public function __construct(EmailUniquenessValidator $emailUniquenessValidator)
     {
@@ -63,6 +63,7 @@ class UserType extends AbstractType
                 ],
                 'label' => 'Rôle',
                 'constraints' => [new Assert\NotBlank()],
+                'attr' => ['id' => 'user_role'],
             ])
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
@@ -80,22 +81,34 @@ class UserType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('specialite', TextType::class, [
-                'label' => 'Spécialité',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'Spécialité de l\'entraîneur'
-                ],
-            ]);
-    }
 
-    public function validateEmailUniqueness($email, ExecutionContextInterface $context)
-    {
-        if ($this->emailUniquenessValidator->validate($email)) {
-            $context->buildViolation('L\'email {{ value }} est déjà utilisé.')
-                ->setParameter('{{ value }}', $email)
-                ->addViolation();
-        }
+        // Ajout dynamique du champ "specialite" si rôle = ENTRAINEUR (utile pour l’édition)
+        ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            $form = $event->getForm();
+            $data = $event->getData();
+
+            // Si le rôle est "Entraîneur", ajouter le champ spécialité
+            if ($data && $data->getRole() === 'entraineur') {
+                $form->add('specialite');
+            }
+        });
+
+        // Pour gestion côté création (nouvel utilisateur)
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+            $data = $event->getData();
+            $form = $event->getForm();
+
+            if (isset($data['role']) && $data['role'] === Role::ENTRAINEUR) {
+                $form->add('specialite', TextType::class, [
+                    'label' => 'Spécialité',
+                    'required' => true,
+                    'attr' => ['placeholder' => 'Spécialité de l\'entraîneur', 'id' => 'user_specialite'],
+                    'constraints' => [
+                        new Assert\NotBlank(['message' => 'La spécialité est obligatoire pour un entraîneur.']),
+                    ],
+                ]);
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver)
