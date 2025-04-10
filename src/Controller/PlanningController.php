@@ -11,7 +11,7 @@ use App\Repository\PlanningRepository;
 
 use Symfony\Component\Routing\Attribute\Route;
 use App\Form\PlanningType;// Assurez-vous d'importer votre form type
-
+use Symfony\Component\Security\Core\Security;
 
 
 final class PlanningController extends AbstractController
@@ -19,7 +19,9 @@ final class PlanningController extends AbstractController
     #[Route('/planning', name: 'app_planning')]
     public function index(EntityManagerInterface $entityManager): Response
 {
-    $plannings = $entityManager->getRepository(Planning::class)->findAll();
+  /** @var \App\Entity\User|null $user */
+  $user = $this->getUser();
+    $plannings = $entityManager->getRepository(Planning::class)->findBy(['entaineur' => $user]);
     
     return $this->render('planning/index.html.twig', [
         'plannings' => $plannings,
@@ -39,7 +41,7 @@ final class PlanningController extends AbstractController
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
-        //Security $security
+        Security $security
     ): Response {
         // 1. Vérifier le token CSRF
         $submittedToken = $request->request->get('token');
@@ -50,13 +52,13 @@ final class PlanningController extends AbstractController
 
         // 2. Récupérer l'utilisateur connecté (entraîneur)
         /** @var User $user */
-        //$user = $security->getUser();
+        $user = $security->getUser();
         $planning = new Planning();
         $planning->setTitle($request->request->get('title'));
         $planning->setDescription($request->request->get('description'));
         $planning->setDateDebut(new \DateTime($request->request->get('dateDebut')));
         $planning->setDateFin(new \DateTime($request->request->get('dateFin')));
-        //$planning->setEntraineur($user);
+        $planning->setEntaineur($user);
 
         // 4. Enregistrer en base de données
         $entityManager->persist($planning);
