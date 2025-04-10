@@ -44,68 +44,52 @@ class UserController extends AbstractController
             'users' => $users,
         ]);
     }
-
     #[Route('/admin/user/create', name: 'user_create')]
-public function create(Request $request, SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
 {
     $user = new User();
     $form = $this->createForm(UserType::class, $user);
+
     $form->handleRequest($request);
-
-    if ($form->isSubmitted()) {
-        if (!$form->isValid()) {
-            dump($form->getErrors(true, true)); // Débogage des erreurs de validation
-        }
-    }
-
     if ($form->isSubmitted() && $form->isValid()) {
-        // Récupérer le mot de passe brut depuis le formulaire (non mappé)
-        $plainPassword = $form->get('password')->getData();
-        if ($plainPassword) {
-            $encodedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
-            $user->setPassword($encodedPassword);
+        $role = $user->getRole();
+    
+        // Si le rôle est "Entraîneur", on garde la spécialité
+        if ($role === Role::ENTRAINEUR) {
+            $specialite = $form->get('specialite')->getData();
+            $user->setSpecialite($specialite);
         } else {
-            $this->addFlash('error', 'Le mot de passe ne peut pas être vide.');
-            return $this->render('user/user_create.html.twig', [
-                'form' => $form->createView(),
-            ]);
+            $user->setSpecialite(null); // Sinon, on vide la spécialité
         }
 
-        // Gestion de l'image (photo de profil)
+        // Hash du mot de passe
+        $user->setPassword(
+            $passwordHasher->hashPassword($user, $user->getPassword())
+        );
+
+        // Gestion de l'image
         $imageFile = $form->get('imageUrl')->getData();
         if ($imageFile) {
+            $newFilename = uniqid() . '.' . $imageFile->guessExtension();
             try {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-                $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/users';
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-
-                $imageFile->move($uploadDir, $newFilename);
-                $user->setImageUrl('/uploads/users/'.$newFilename);
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Erreur lors du téléchargement de l\'image : ' . $e->getMessage());
-                return $this->render('user/user_create.html.twig', [
-                    'form' => $form->createView(),
-                ]);
+                $imageFile->move($this->getParameter('upload_directory'), $newFilename);
+                $user->setImageUrl($newFilename);
+            } catch (FileException $e) {
+                // Gérer l'exception
             }
         }
 
-        // Sauvegarder l'utilisateur dans la base de données
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $em->persist($user);
+        $em->flush();
 
-        $this->addFlash('success', 'Utilisateur créé avec succès.');
         return $this->redirectToRoute('user_index');
     }
 
     return $this->render('user/user_create.html.twig', [
         'form' => $form->createView(),
     ]);
-} 
+}
+
  #[Route('/admin/user/{id}/edit', name: 'app_user_update')]
     public function update(Request $request, User $user, SluggerInterface $slugger): Response
     {
@@ -168,11 +152,33 @@ public function create(Request $request, SluggerInterface $slugger): Response
         return $this->redirectToRoute('user_index');
     }
 
-    #[Route('/admin/user/{id}', name: 'user_show')]
-    public function show(User $user): Response
+    #[Route('/admin/user/{id}', name: 'user_show', requirements: ['id' => '\d+'])]
+    public function showById(int $id, UserRepository $userRepository): Response
     {
+        $user = $userRepository->find($id);
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable.");
+        }
+    
         return $this->render('user/show.html.twig', [
             'user' => $user,
         ]);
     }
+    
+    #[Route('/admin/user/email/{email}', name: 'admin_user_show')]
+    public function showByEmail(string $email, UserRepository $userRepository): Response
+    {
+        $user = $userRepository->findOneBy(['email' => $email]);
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable.");
+        }
+    
+        return $this->render('user/show.html.twig', [
+            'user' => $user,
+        ]);
+    }
+    
+    
 }

@@ -1,111 +1,37 @@
-{% extends 'admin/homepageadmin.html.twig' %}
-
-{% block title %}Créer un utilisateur{% endblock %}
+{% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-dark text-white text-center py-3">
-                    <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i> Créer un nouvel utilisateur</h5>
-                </div>
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'id': 'userForm', 'class': 'needs-validation', 'novalidate': true}}) }}
+    <h1>Ajouter un utilisateur</h1>
+    {{ form_start(form) }}
+        {{ form_row(form.nom) }}
+        {{ form_row(form.prenom) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.password) }}
+        {{ form_row(form.role) }}
+        {{ form_row(form.specialite) }}
+          <button class="btn btn-success">Ajouter</button>
+    {{ form_end(form) }}
 
-                    {% for message in app.flashes('success') %}
-                        <div class="alert alert-success" role="alert">{{ message }}</div>
-                    {% endfor %}
-                    {% for message in app.flashes('error') %}
-                        <div class="alert alert-danger" role="alert">{{ message }}</div>
-                    {% endfor %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const roleField = document.querySelector('#user_role'); // Id du champ role
+            const specialiteField = document.querySelector('#user_specialite'); // Id du champ spécialité
 
-                    {# Champ image de profil avec aperçu #}
-                    <div class="text-center mb-4">
-                        <img id="imagePreview" 
-                             src="{{ asset('uploads/users/default.png') }}" 
-                             alt="Aperçu de l'image" 
-                             class="rounded-circle shadow-sm mb-3" 
-                             style="width: 120px; height: 120px; object-fit: cover;">
-                        <div class="mb-3">
-                            {{ form_label(form.imageUrl, 'Photo de profil') }}
-                            {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control', 'onchange': 'previewImage(event)'}}) }}
-                            <div class="form-text">Formats acceptés : JPG, PNG, max 2 Mo</div>
-                            {{ form_errors(form.imageUrl) }}
-                        </div>
-                    </div>
+            // Fonction pour mettre à jour l'état du champ spécialité
+            function toggleSpecialiteField() {
+                if (roleField.value === 'entraineur') {
+                    specialiteField.disabled = false; // Activer le champ spécialité
+                } else {
+                    specialiteField.disabled = true; // Désactiver le champ spécialité
+                    specialiteField.value = ''; // Effacer la valeur si le rôle n'est pas Entraîneur
+                }
+            }
 
-                    {# Champs principaux #}
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            {{ form_row(form.nom, {'attr': {'class': 'form-control', 'required': true}}) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_row(form.prenom, {'attr': {'class': 'form-control', 'required': true}}) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_row(form.email, {'attr': {'class': 'form-control', 'required': true}}) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_label(form.password) }}
-                            {{ form_widget(form.password, {'attr': {'class': 'form-control', 'required': true}}) }}
-                            {{ form_errors(form.password) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_row(form.role, {'attr': {'class': 'form-select', 'id': 'user_role'}}) }}
-                        </div>
+            // Initialiser la fonction lorsque la page est chargée
+            toggleSpecialiteField();
 
-                        {# Affichage conditionnel du champ spécialité #}
-                        <div class="col-md-6" id="specialiteField" style="display: none;">
-                            {% if form.specialite is defined %}
-                                {{ form_label(form.specialite) }}
-                                {{ form_widget(form.specialite, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.specialite) }}
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-6">
-                            {{ form_row(form.dateNaissance, {'attr': {'class': 'form-control', 'required': true}}) }}
-                        </div>
-                    </div>
-
-                    {# Boutons #}
-                    <div class="mt-4 d-flex justify-content-between">
-                        <a href="{{ path('user_index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i> Retour
-                        </a>
-                        <button type="submit" class="btn btn-dark">
-                            <i class="fas fa-check me-1"></i> Créer
-                        </button>
-                    </div>
-
-                    {{ form_end(form) }}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Fonction pour afficher ou masquer le champ spécialité en fonction du rôle sélectionné
-    function toggleSpecialiteField() {
-        const roleField = document.querySelector('#user_role');
-        const specialiteField = document.getElementById('specialiteField');
-        if (roleField && specialiteField) {
-            // Affiche ou cache le champ spécialité selon que le rôle sélectionné soit "Entraîneur"
-            specialiteField.style.display = roleField.value === 'entraineur' ? 'block' : 'none';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const roleField = document.querySelector('#user_role');
-        const specialiteField = document.querySelector('#user_specialite');
-
-        if (roleField) {
-            // Ajoute un événement au changement de rôle
+            // Ajouter un écouteur d'événements pour changer le rôle
             roleField.addEventListener('change', toggleSpecialiteField);
-            toggleSpecialiteField();  // Applique immédiatement au chargement de la page
-        }
-    });
-</script>
+        });
+    </script>
 {% endblock %}

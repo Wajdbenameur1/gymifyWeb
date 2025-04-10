@@ -50,8 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', enumType: Role::class)]
     private ?Role $role = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $specialite = null;
+  
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $imageUrl = null;
@@ -79,7 +78,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->email;  // Utiliser l'email comme identifiant
     }
-
+   
 
     public function getId(): ?int
     {
@@ -133,8 +132,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    #[ORM\Column(type: 'string', length: 100, nullable: true)] // Add nullable if specialite is optional
+    private ?string $specialite;
+    
+    public function getSpecialite(): ?string
+    {
+        return $this->specialite;
+    }
+    
+    public function setSpecialite(?string $specialite): static
+    {
+        $this->specialite = $specialite;
+        return $this;
+    }
+    public function getSpecialiteIfEntraineur(): ?string
+    {
+        // Vérifie si l'utilisateur est un Entraineur et retourne sa spécialité
+        if ($this instanceof Entraineur) {
+            return $this->getSpecialite();
+        }
 
-   
+        return null;  // Retourne null si ce n'est pas un Entraineur
+    }
     public function getRole(): ?string
 {
     return $this->role ? $this->role->value : null;
@@ -148,23 +167,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 public function getRoles(): array
 {
-
+    $roles = [];
     if ($this->role) {
-        $roles[] = 'ROLE_' . strtoupper($this->role->value);
+        $roles[] = 'ROLE_' . $this->role->value;
     }
-    return array_unique($roles);  // Retourne les rôles sans doublons
+    return array_unique($roles);
 }
 
-    public function getSpecialite(): ?string
-    {
-        return $this->specialite;
-    }
-
-    public function setSpecialite(?string $specialite): static
-    {
-        $this->specialite = $specialite;
-        return $this;
-    }
+   
     public function getDateNaissance(): ?\DateTimeInterface
     {
         return $this->dateNaissance;
