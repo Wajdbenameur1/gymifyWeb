@@ -32,7 +32,12 @@
                         <p>Events</p>
                     </a>
                 </li>
-                
+                <li class="nav-item {{ app.request.get('_route') == 'app_equipe_index' ? 'active' : '' }}">
+                    <a href="{{ path('app_equipe_index') }}">
+                        <i class="fas fa-users"></i>
+                        <p>Teams</p>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
