@@ -1,0 +1,90 @@
+{% extends 'responsable/homepage_responsable.html.twig' %}
+
+{% block title %}Gestion des abonnements{% endblock %}
+
+{% block body %}
+<div class="container animate__animated animate__fadeIn">
+    <h1 class="text-gradient mb-4">Gestion des abonnements</h1>
+
+    <div class="card card-round shadow-lg border-0 overflow-hidden">
+        <div class="card-header bg-transparent">
+            <div class="card-head-row justify-content-between align-items-center">
+                <div class="card-title text-gradient h4">Liste des abonnements</div>
+                <div class="card-tools">
+                    <a href="{{ path('responsable_abonnement_new') }}" class="btn btn-primary btn-gradient px-4 py-2 rounded-pill shadow">
+                        <i class="fas fa-plus me-2"></i> Ajouter
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3">ID</th>
+                            <th class="py-3">Type</th>
+                            <th class="py-3">Tarif</th>
+                            <th class="py-3">Activité</th>
+                            <th class="py-3 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for abonnement in abonnements %}
+                        <tr class="animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index * 0.05 }}s">
+                            <td class="fw-bold">{{ abonnement.id }}</td>
+                            <td>
+                                <span class="badge bg-primary bg-gradient rounded-pill px-3 py-1">
+                                    {{ abonnement.type.getLabel() }}
+                                </span>
+                            </td>
+                            <td class="fw-bold text-success">{{ abonnement.tarif }} €</td>
+                            <td>{{ abonnement.activite.nom }}</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+
+                                    <a href="{{ path('responsable_abonnement_edit', {'id': abonnement.id}) }}" 
+                                       class="btn btn-sm btn-warning rounded-circle shadow-sm"
+                                       data-bs-toggle="tooltip"
+                                       title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('responsable_abonnement_delete', {'id': abonnement.id}) }}" 
+                                          style="display: inline-block;" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet abonnement?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ abonnement.id) }}">
+                                        <button class="btn btn-sm btn-danger rounded-circle shadow-sm"
+                                                data-bs-toggle="tooltip"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i><br>
+                                Aucun abonnement trouvé
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(63, 81, 181, 0.05);
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+    .badge.bg-gradient {
+        background: linear-gradient(45deg, #3f51b5, #2196f3);
+    }
+</style>
+{% endblock %}
