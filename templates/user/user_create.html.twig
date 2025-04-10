@@ -1,37 +1,182 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/homepageadmin.html.twig' %}
+
+{% block title %}Ajouter un utilisateur{% endblock %}
 
 {% block body %}
-    <h1>Ajouter un utilisateur</h1>
-    {{ form_start(form) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.prenom) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.password) }}
-        {{ form_row(form.role) }}
-        {{ form_row(form.specialite) }}
-          <button class="btn btn-success">Ajouter</button>
-    {{ form_end(form) }}
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="fw-bold mb-2">{{ page_title }}</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('user_index') }}">Users</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Ajouter</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
 
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i> Ajouter un utilisateur</h5>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+
+                {# Informations personnelles #}
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-id-card me-2"></i> Informations personnelles</h6>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom', 'required': 'required'}}) }}
+                            {{ form_label(form.nom) }}
+                            <div class="invalid-feedback">{{ form_errors(form.nom) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom', 'required': 'required'}}) }}
+                            {{ form_label(form.prenom) }}
+                            <div class="invalid-feedback">{{ form_errors(form.prenom) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email', 'required': 'required'}}) }}
+                            {{ form_label(form.email) }}
+                            <div class="invalid-feedback">{{ form_errors(form.email) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control', 'placeholder': 'Date de naissance', 'required': 'required'}}) }}
+                            {{ form_label(form.dateNaissance) }}
+                            <div class="invalid-feedback">{{ form_errors(form.dateNaissance) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Sécurité du compte #}
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-lock me-2"></i> Sécurité du compte</h6>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form_widget(form.password, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe', 'autocomplete': 'new-password'}}) }}
+                            {{ form_label(form.password) }}
+                            <div class="invalid-feedback">{{ form_errors(form.password) }}</div>
+                            <small class="text-muted mt-1 d-block">Laissez vide pour garder le mot de passe actuel</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form_widget(form.role, {'attr': {'class': 'form-select', 'required': 'required'}}) }}
+                            {{ form_label(form.role) }}
+                            <div class="invalid-feedback">{{ form_errors(form.role) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Image de profil #}
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-image me-2"></i> Image de profil</h6>
+                        <div class="image-upload-container border rounded-3 p-4">
+                            <div class="image-preview-container text-center mb-4 position-relative" style="min-height: 200px;">
+                                <div id="placeholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light">
+                                    <i class="fas fa-image fa-3x text-muted mb-3 d-block"></i>
+                                    <p class="text-muted mb-0">Pas d'image sélectionnée</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column flex-md-row gap-3">
+                                <div class="flex-grow-1">
+                                    {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control d-none', 'accept': 'image/jpeg,image/png,image/webp'}}) }}
+                                    <label for="{{ form.imageUrl.vars.id }}" class="btn btn-primary w-100 py-3 rounded-3">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i> Choisir une image
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="invalid-feedback">{{ form_errors(form.imageUrl) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Spécialité (conditionnel pour les entraîneurs) #}
+                <div id="specialite_container" style="display: none;">
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <h6 class="fw-bold text-primary mb-3"><i class="fas fa-certificate me-2"></i> Spécialité de l'entraîneur</h6>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                {{ form_widget(form.specialite, {'attr': {'class': 'form-control', 'placeholder': 'Spécialité'}}) }}
+                                {{ form_label(form.specialite) }}
+                                <div class="invalid-feedback">{{ form_errors(form.specialite) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Actions du formulaire #}
+                <div class="row g-4 mt-5">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{{ path('user_index') }}" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                                <i class="fas fa-times me-2"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3" id="submitBtn">
+                                <i class="fas fa-save me-2"></i> Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const roleField = document.querySelector('#user_role'); // Id du champ role
-            const specialiteField = document.querySelector('#user_specialite'); // Id du champ spécialité
+    // Récupérer le champ 'role' et le conteneur de la spécialité
+    const roleField = document.getElementById('user_role');
+    const specialiteContainer = document.getElementById('specialite_container');
 
-            // Fonction pour mettre à jour l'état du champ spécialité
-            function toggleSpecialiteField() {
-                if (roleField.value === 'entraineur') {
-                    specialiteField.disabled = false; // Activer le champ spécialité
-                } else {
-                    specialiteField.disabled = true; // Désactiver le champ spécialité
-                    specialiteField.value = ''; // Effacer la valeur si le rôle n'est pas Entraîneur
-                }
-            }
+    // Fonction pour afficher ou cacher la spécialité en fonction du rôle
+    function toggleSpecialite() {
+        if (roleField.value === 'entraineur') {
+            specialiteContainer.style.display = 'block';
+        } else {
+            specialiteContainer.style.display = 'none';
+            document.getElementById('specialite_field').value = '';  // Réinitialiser le champ spécialité
+        }
+    }
 
-            // Initialiser la fonction lorsque la page est chargée
-            toggleSpecialiteField();
+    // Ajouter un écouteur d'événements pour changer l'affichage
+    roleField.addEventListener('change', toggleSpecialite);
+    
+    // Exécuter lors du chargement de la page pour afficher ou masquer la spécialité
+    window.addEventListener('DOMContentLoaded', toggleSpecialite);
+</script>
 
-            // Ajouter un écouteur d'événements pour changer le rôle
-            roleField.addEventListener('change', toggleSpecialiteField);
-        });
-    </script>
 {% endblock %}

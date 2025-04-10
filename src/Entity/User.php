@@ -145,34 +145,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->specialite = $specialite;
         return $this;
     }
-    public function getSpecialiteIfEntraineur(): ?string
+    public function getRole(): ?Role
     {
-        // Vérifie si l'utilisateur est un Entraineur et retourne sa spécialité
-        if ($this instanceof Entraineur) {
-            return $this->getSpecialite();
+        // Si $this->role est une instance de Role, renvoyer directement
+        if ($this->role instanceof Role) {
+            return $this->role;
         }
-
-        return null;  // Retourne null si ce n'est pas un Entraineur
-    }
-    public function getRole(): ?string
-{
-    return $this->role ? $this->role->value : null;
-}
     
-    public function setRole(Role $role): static
-{
-    $this->role = $role;
-    return $this;
-} 
-
-public function getRoles(): array
-{
-    $roles = [];
-    if ($this->role) {
-        $roles[] = 'ROLE_' . $this->role->value;
+        // Sinon, convertir la valeur en Enum
+        return $this->role ? Role::from($this->role) : null;
     }
-    return array_unique($roles);
+public function setRole($role): self
+{
+    // Si le rôle est une chaîne, on le transforme en un objet Role
+    if (is_string($role)) {
+        $role = Role::from($role); // Utilisez la méthode native `from()` pour créer un objet Role
+    }
+
+    $this->role = $role; // Assurez-vous que $role est bien un objet de type Role
+    return $this;
 }
+
+    public function getRoles(): array
+    {
+        $roles = [];
+    
+        if ($this->role) {
+            $roles[] = 'ROLE_' . strtoupper($this->role->value);  // Convertit l'Enum en chaîne de caractères
+        }
+    
+        return array_unique($roles);  // Retourne les rôles uniques
+    }
+    
 
    
     public function getDateNaissance(): ?\DateTimeInterface
@@ -223,7 +227,7 @@ public function getRoles(): array
             // set the owning side to null (unless already changed)
             if ($entaineur->getEntaineur() === $this) {
                 $entaineur->setEntaineur(null);
-            }
+            }    
         }
 
         return $this;

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\Role;
 use App\Form\UserType;
+use App\Service\EmailService;
 use App\Repository\UserRepository;
 use App\Service\EmailUniquenessValidator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,69 +27,81 @@ class UserController extends AbstractController
         EmailUniquenessValidator $emailUniquenessValidator,
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        SluggerInterface $slugger // Injecter dans le constructeur
     ) {
         $this->emailUniquenessValidator = $emailUniquenessValidator;
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
+        $this->slugger = $slugger; // Initialisation de la propriété
     }
+    private SluggerInterface $slugger;
 
+  
     #[Route('/admin/user', name: 'user_index')]
-    public function index(): Response
+    public function index(EntityManagerInterface $em): Response
     {
-        $users = $this->userRepository->findAll();
+        // Récupérer tous les utilisateurs depuis la base de données
+        $users = $em->getRepository(User::class)->findAll();
 
-        return $this->render('user/index.html.twig', [
-            'page_title' => 'Gestion des utilisateurs',
-            'users' => $users,
+        // Afficher la liste des utilisateurs dans la vue Twig
+        return $this->render('/user/index.html.twig', [
+            'users' => $users, // Liste des utilisateurs
+            'page_title' => 'Gestion des utilisateurs', // Titre de la page
         ]);
-    }
+    } 
     #[Route('/admin/user/create', name: 'user_create')]
-    public function new(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
+    
+
+    public function addUser(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher, EmailService $emailService): Response
 {
     $user = new User();
     $form = $this->createForm(UserType::class, $user);
-
     $form->handleRequest($request);
+
     if ($form->isSubmitted() && $form->isValid()) {
-        $role = $user->getRole();
-    
-        // Si le rôle est "Entraîneur", on garde la spécialité
-        if ($role === Role::ENTRAINEUR) {
-            $specialite = $form->get('specialite')->getData();
-            $user->setSpecialite($specialite);
-        } else {
-            $user->setSpecialite(null); // Sinon, on vide la spécialité
-        }
-
-        // Hash du mot de passe
-        $user->setPassword(
-            $passwordHasher->hashPassword($user, $user->getPassword())
-        );
-
-        // Gestion de l'image
-        $imageFile = $form->get('imageUrl')->getData();
-        if ($imageFile) {
-            $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-            try {
-                $imageFile->move($this->getParameter('upload_directory'), $newFilename);
-                $user->setImageUrl($newFilename);
-            } catch (FileException $e) {
-                // Gérer l'exception
+       
+            $imageFile = $form->get('imageUrl')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $this->slugger->slug($originalFilename);  // Access the slugger as a class property
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+            
+                $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/users';
+                $imageFile->move($uploadDir, $newFilename);
+                $user->setImageUrl('/uploads/users/'.$newFilename);
             }
+        // Vérification de la spécialité pour les entraîneurs
+        if ($user->getRole() === Role::ENTRAINEUR && empty($user->getSpecialite())) {
+            $this->addFlash('danger', 'La spécialité est requise pour les entraîneurs.');
+        } else {
+            // Hachage du mot de passe
+            $hashedPassword = $hasher->hashPassword($user, $user->getPassword());
+            $user->setPassword($hashedPassword);
+
+            // Persister l'utilisateur
+            $em->persist($user);
+            dump($users); // Vérifie les données récupérées
+die();
+            var_dump($user);
+            $em->flush();
+            // Envoyer l'email
+            $emailService->sendRegistrationEmail($user);
+
+            $users = $em->getRepository(User::class)->findAll();
+            $this->addFlash('success', 'Utilisateur ajouté avec succès!');
+            return $this->redirectToRoute('user_index');
         }
-
-        $em->persist($user);
-        $em->flush();
-
-        return $this->redirectToRoute('user_index');
     }
 
     return $this->render('user/user_create.html.twig', [
         'form' => $form->createView(),
+        'page_title' => 'Ajouter un utilisateur',
     ]);
-}
+    }
+
+  
 
  #[Route('/admin/user/{id}/edit', name: 'app_user_update')]
     public function update(Request $request, User $user, SluggerInterface $slugger): Response
