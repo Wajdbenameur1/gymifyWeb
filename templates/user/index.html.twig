@@ -97,7 +97,7 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>{{ user.id }}</td>
+                            <td>{{ user.id }}</td> <!-- Affichage de l'ID -->
                             <td>
                                 {% if user.imageUrl %}
                                     <img src="{{ asset('uploads/images/' ~ user.imageUrl) }}" 
@@ -114,14 +114,6 @@
                             <td>{{ user.nom|capitalize }}</td>
                             <td>{{ user.prenom|capitalize }}</td>
                             <td>{{ user.email }}</td>
-                            <td>
-    {% if user.role == constant('App\\Enum\\Role::ENTRAINEUR') %}
-        {{ user.specialite }}
-    {% else %}
-        -
-    {% endif %}
-</td>
-
                             <td>
                                 {% for role in user.roles %}
                                     <span class="badge 

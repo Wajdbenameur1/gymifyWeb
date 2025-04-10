@@ -17,6 +17,7 @@ final class AdminController extends AbstractController
     #[Route('/admin', name: 'app_admin')]
     public function index(): Response
     {
+       $this->denyAccessUnlessGranted('ROLE_ADMIN');
       $stats = [
         'visitors' => 1294,
         'subscribers' => 1303,
@@ -30,10 +31,10 @@ final class AdminController extends AbstractController
     ]);
     }
     #[Route('/home', name: 'app_home')]
-      public function home()
-      {
-    // Your controller code
-       }
+    public function home(): Response
+    {
+        return new Response('Welcome to the home page');
+    }
        #[Route('/dashboard', name:'app_dashboard')]
       public function dashboard()
       {
