@@ -6,6 +6,43 @@
 <div class="container animate__animated animate__fadeIn">
     <h1 class="text-gradient mb-4">Gestion des abonnements</h1>
 
+    <!-- Filtres -->
+    <div class="card filter-card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="type" class="form-label">Type d'abonnement</label>
+<select name="type" id="type" class="form-select">
+    <option value="">Tous les types</option>
+    <option value="mois" {{ current_type_filter == 'mois' ? 'selected' : '' }}>Mensuel</option>
+    <option value="trimestre" {{ current_type_filter == 'trimestre' ? 'selected' : '' }}>Trimestriel</option>
+    <option value="année" {{ current_type_filter == 'année' ? 'selected' : '' }}>Annuel</option>
+</select>
+                </div>
+                <div class="col-md-4">
+                    <label for="activity" class="form-label">Activité</label>
+                    <select name="activity" id="activity" class="form-select">
+                        <option value="">Toutes les activités</option>
+                        {% for activity in activities %}
+                            <option value="{{ activity.id }}" {{ current_activity_filter == activity.id ? 'selected' : '' }}>
+                                {{ activity.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter me-1"></i> Filtrer
+                    </button>
+                    <a href="{{ path('responsable_abonnement_index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tableau des abonnements -->
     <div class="card card-round shadow-lg border-0 overflow-hidden">
         <div class="card-header bg-transparent">
             <div class="card-head-row justify-content-between align-items-center">
@@ -23,9 +60,13 @@
                     <thead class="bg-light">
                         <tr>
                             <th class="py-3">ID</th>
-                            <th class="py-3">Type</th>
+                            <th class="py-3 sortable" data-sort="type">
+                                Type <i class="fas fa-sort ms-1"></i>
+                            </th>
                             <th class="py-3">Tarif</th>
-                            <th class="py-3">Activité</th>
+                            <th class="py-3 sortable" data-sort="activite">
+                                Activité <i class="fas fa-sort ms-1"></i>
+                            </th>
                             <th class="py-3 text-end">Actions</th>
                         </tr>
                     </thead>
@@ -42,7 +83,6 @@
                             <td>{{ abonnement.activite.nom }}</td>
                             <td class="text-end">
                                 <div class="d-flex gap-2 justify-content-end">
-
                                     <a href="{{ path('responsable_abonnement_edit', {'id': abonnement.id}) }}" 
                                        class="btn btn-sm btn-warning rounded-circle shadow-sm"
                                        data-bs-toggle="tooltip"
@@ -86,5 +126,53 @@
     .badge.bg-gradient {
         background: linear-gradient(45deg, #3f51b5, #2196f3);
     }
+    /* Filtres */
+    .card.filter-card {
+        border: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        border-radius: 10px;
+    }
+    .form-select {
+        border-radius: 8px;
+        padding: 10px 15px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    .form-select:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
+    }
+    .sortable {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .sortable:hover {
+        color: #3f51b5;
+    }
 </style>
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Tri des colonnes
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', () => {
+            const sortBy = header.dataset.sort;
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', sortBy);
+            url.searchParams.set('direction', 
+                url.searchParams.get('direction') === 'asc' ? 'desc' : 'asc');
+            window.location.href = url.toString();
+        });
+    });
+
+    // Initialisation des tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %}

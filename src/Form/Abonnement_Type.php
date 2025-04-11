@@ -24,7 +24,7 @@ class AbonnementType extends AbstractType
                 'label' => 'Type d\'abonnement'
             ])
             ->add('tarif', NumberType::class, [
-                'label' => 'Tarif (€)'
+                'label' => 'Tarif (DT)'
             ])
             ->add('activite', EntityType::class, [
                 'class' => Activité::class,

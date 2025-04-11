@@ -199,28 +199,29 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <h4 class="mb-3 animate__animated animate__fadeIn">Quick Access</h4>
-            <div class="quick-actions animate__animated animate__fadeInUp">
-                <a href="{{ path('app_events_index') }}" class="quick-action-btn">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Events</span>
-                </a>
-                <a href="#" class="quick-action-btn">
-                    <i class="fas fa-users"></i>
-                    <span>Teams</span>
-                </a>
-                <a href="#" class="quick-action-btn">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Statistics</span>
-                </a>
-                <a href="#" class="quick-action-btn">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
-            </div>
-        </div>
+           <!-- Quick Actions -->
+<h4 class="mb-3 animate__animated animate__fadeIn">Quick Access</h4>
+<div class="quick-actions animate__animated animate__fadeInUp">
+    <a href="{{ path('app_events_index') }}" class="quick-action-btn">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Events</span>
+    </a>
 
+        <a href="{{ path('responsable_abonnement_index') }}" class="quick-action-btn">
+            <i class="fas fa-id-card"></i>
+            <span>Subscriptions</span>
+        </a>
+ 
+    <a href="#" class="quick-action-btn">
+        <i class="fas fa-chart-line"></i>
+        <span>Statistics</span>
+    </a>
+    <a href="#" class="quick-action-btn">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+    </a>
+</div>
+   </div>
         <!-- Secondary column - Statistics -->
         <div class="col-lg-4 animate__animated animate__fadeInRight">
             <div class="stat-card">

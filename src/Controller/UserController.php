@@ -82,8 +82,7 @@ class UserController extends AbstractController
 
             // Persister l'utilisateur
             $em->persist($user);
-            dump($users); // Vérifie les données récupérées
-die();
+
             var_dump($user);
             $em->flush();
             // Envoyer l'email

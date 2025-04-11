@@ -29,6 +29,8 @@ class SalleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $currentSalleId = $options['current_salle_id'] ?? null;
+
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom de la Salle*',
@@ -108,11 +110,23 @@ class SalleType extends AbstractType
                 'choice_label' => function(ResponsableSalle $responsable) {
                     return $responsable->getNom() . ' ' . $responsable->getPrenom();
                 },
-                'query_builder' => function () {
-                    return $this->entityManager->getRepository(ResponsableSalle::class)
+                'query_builder' => function () use ($currentSalleId) {
+                    $qb = $this->entityManager->getRepository(ResponsableSalle::class)
                         ->createQueryBuilder('r')
                         ->where('r.role = :role')
-                        ->setParameter('role', Role::RESPONSABLE_SALLE);
+                        ->setParameter('role', Role::RESPONSABLE_SALLE)
+                        ->leftJoin('r.salle', 's'); // Jointure explicite
+
+                    if ($currentSalleId) {
+                        // Inclure le responsable actuel de la salle ou les responsables non associés
+                        $qb->andWhere('s.id IS NULL OR s.id = :currentSalleId')
+                           ->setParameter('currentSalleId', $currentSalleId);
+                    } else {
+                        // Exclure tous les responsables associés à une salle
+                        $qb->andWhere('s.id IS NULL');
+                    }
+
+                    return $qb;
                 },
                 'label' => 'Responsable de la salle*',
                 'placeholder' => 'Choisir un responsable',
@@ -141,6 +155,7 @@ class SalleType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Salle::class,
+            'current_salle_id' => null,
         ]);
     }
 }

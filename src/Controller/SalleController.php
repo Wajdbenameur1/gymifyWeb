@@ -68,45 +68,43 @@ class SalleController extends AbstractController
         ]);
     }
 
-   // src/Controller/Admin/SalleController.php
+    #[Route('/{id}/edit', name: 'admin_salle_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Salle $salle, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(SalleType::class, $salle, [
+            'current_salle_id' => $salle->getId(),
+        ]);
+        $form->handleRequest($request);
 
-#[Route('/salle/{id}/edit', name: 'admin_salle_edit')]
-public function edit(Request $request, Salle $salle, EntityManagerInterface $em): Response
-{
-    $form = $this->createForm(SalleType::class, $salle);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Gestion de l'image
-        $imageFile = $form->get('image')->getData();
-        if ($imageFile) {
-            $newFilename = uniqid().'.'.$imageFile->guessExtension();
-            $imageFile->move(
-                $this->getParameter('salles_directory'),
-                $newFilename
-            );
-            // Supprimer l'ancienne image si elle existe
-            if ($salle->getImage()) {
-                $oldImage = $this->getParameter('salles_directory').'/'.$salle->getImage();
-                if (file_exists($oldImage)) {
-                    unlink($oldImage);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $imageFile->move(
+                    $this->getParameter('salles_directory'),
+                    $newFilename
+                );
+                // Supprimer l'ancienne image si elle existe
+                if ($salle->getImage()) {
+                    $oldImage = $this->getParameter('salles_directory').'/'.$salle->getImage();
+                    if (file_exists($oldImage)) {
+                        unlink($oldImage);
+                    }
                 }
+                $salle->setImage($newFilename);
             }
-            $salle->setImage($newFilename);
+
+            $em->flush();
+            $this->addFlash('success', 'La salle a été modifiée avec succès');
+            return $this->redirectToRoute('admin_salle_index');
         }
 
-        $em->flush();
-        $this->addFlash('success', 'La salle a été modifiée avec succès');
-        return $this->redirectToRoute('admin_salle_index');
+        return $this->render('salle/edit.html.twig', [
+            'form' => $form->createView(),
+            'salle' => $salle,
+        ]);
     }
 
-    return $this->render('salle/edit.html.twig', [
-        'form' => $form->createView(),
-        'salle' => $salle,
-    ]);
-}
-
-    // Nouvelle méthode pour supprimer une salle
     #[Route('/{id}', name: 'admin_salle_delete', methods: ['POST'])]
     public function delete(Request $request, Salle $salle, EntityManagerInterface $em): Response
     {

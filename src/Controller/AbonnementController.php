@@ -18,15 +18,42 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 class AbonnementController extends AbstractController
 {
     #[Route('/', name: 'responsable_abonnement_index', methods: ['GET'])]
-    public function index(AbonnementRepository $abonnementRepository): Response
-    {
-        $salle = $this->getUser()->getSalle();
-        $abonnements = $abonnementRepository->findBySalle($salle);
+public function index(
+    AbonnementRepository $abonnementRepository,
+    Request $request,
+    ActivityRepository $activityRepository
+): Response {
+    $salle = $this->getUser()->getSalle();
+    
+    // Récupérer les paramètres de filtrage
+    $typeFilter = $request->query->get('type');
+    $activityFilter = $request->query->get('activity');
+    
+    // Convertir la valeur si nécessaire (ex: 'Mensuel' -> 'mois')
+    $typeFilterValue = match($typeFilter) {
+        'Mensuel' => 'mois',
+        'Trimestriel' => 'trimestre',
+        'Annuel' => 'année',
+        default => $typeFilter
+    };
+    
+    // Récupérer les abonnements filtrés
+    $abonnements = $abonnementRepository->findByFilters(
+        $salle,
+        $typeFilterValue,
+        $activityFilter
+    );
+    
+    // Récupérer toutes les activités pour le filtre
+    $activities = $activityRepository->findAll();
 
-        return $this->render('abonnement/index.html.twig', [
-            'abonnements' => $abonnements,
-        ]);
-    }
+    return $this->render('abonnement/index.html.twig', [
+        'abonnements' => $abonnements,
+        'activities' => $activities,
+        'current_type_filter' => $typeFilter,
+        'current_activity_filter' => $activityFilter,
+    ]);
+}
 
     #[Route('/new', name: 'responsable_abonnement_new', methods: ['GET', 'POST'])]
     public function new(
