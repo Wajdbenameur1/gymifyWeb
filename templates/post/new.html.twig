@@ -1,11 +1,49 @@
-{% extends 'base.html.twig' %}
+{% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
 {% block title %}New Post{% endblock %}
 
 {% block body %}
-    <h1>Create new Post</h1>
+    <div class="container mt-5">
+        <h1>Create new Post</h1>
 
-    {{ include('post/_form.html.twig') }}
+        {# Afficher le formulaire #}
+        <form method="post">
+            {{ form_start(form) }}
+            
+            <div class="mb-3">
+                {{ form_label(form.title) }}
+                {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.title) }}
+            </div>
 
-    <a href="{{ path('app_post_index') }}">back to list</a>
+            <div class="mb-3">
+                {{ form_label(form.content) }}
+                {{ form_widget(form.content, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.content) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.image_url) }}
+                {{ form_widget(form.image_url, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.image_url) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.createdAt) }}
+                {{ form_widget(form.createdAt, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.createdAt) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.user) }}
+                {{ form_widget(form.user, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.user) }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            {{ form_end(form) }}
+        </form>
+
+        <a href="{{ path('app_post_index') }}" class="btn btn-secondary mt-3">Back to list</a>
+    </div>
 {% endblock %}
