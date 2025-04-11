@@ -14,7 +14,7 @@ security:
             security: false
 
         main:
-            lazy: true
+            lazy: false # Changé à false pour forcer l'authentification
             provider: app_user_provider
             custom_authenticator: App\Security\AppCustomAuthenticator
             form_login:
@@ -23,8 +23,6 @@ security:
                 username_parameter: email  
                 password_parameter: password
                 enable_csrf: true
-                
-                
             logout:
                 path: app_logout
                 target: app_login
@@ -32,21 +30,15 @@ security:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 semaine
                 path: /
-            entry_point: App\Security\AppCustomAuthenticator  # ✅ On définit l'entrée
-            
+            entry_point: App\Security\AppCustomAuthenticator
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-
-    # Contrôle d'accès pour certaines routes
     access_control:
-    - { path: ^/dashboard_admin, roles: ROLE_ADMIN }
-    - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
-    - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
-    - { path: ^/home, roles: ROLE_SPORTIF }
-    - { path: ^/login, roles: PUBLIC_ACCESS }
-    - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
-    - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/dashboard_admin, roles: ROLE_ADMIN }
+        - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
+        - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
+        - { path: ^/responsable, roles: ROLE_RESPONSABLE_SALLE } # Ajouté pour protéger /responsable
+        - { path: ^/home, roles: ROLE_SPORTIF }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
+        # Supprimé : - { path: ^/, roles: IS_AUTHENTICATED_FULLY } 
+        # Remplacé par des règles spécifiques ci-dessus

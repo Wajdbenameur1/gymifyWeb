@@ -22,9 +22,20 @@ class EquipeController extends AbstractController
     }
 
     #[Route('/equipe', name: 'app_equipe_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $equipes = $this->entityManager->getRepository(Equipe::class)->findAll();
+        $searchTerm = $request->query->get('search', '');
+
+        $qb = $this->entityManager->getRepository(Equipe::class)->createQueryBuilder('e');
+
+        if ($searchTerm) {
+            $qb->where('LOWER(e.nom) LIKE LOWER(:search)')
+               ->orWhere('LOWER(e.niveau) LIKE LOWER(:search)')
+               ->setParameter('search', '%'.$searchTerm.'%');
+            $equipes = $qb->getQuery()->getResult();
+        } else {
+            $equipes = $this->entityManager->getRepository(Equipe::class)->findAll();
+        }
 
         return $this->render('equipe/index.html.twig', [
             'equipes' => $equipes,

@@ -23,9 +23,22 @@ class EventsController extends AbstractController
     }
 
     #[Route('/events', name: 'app_events_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $events = $entityManager->getRepository(Events::class)->findAll();
+        $searchTerm = $request->query->get('search', '');
+
+        $qb = $entityManager->getRepository(Events::class)->createQueryBuilder('e');
+
+        if ($searchTerm) {
+            $qb->where('LOWER(e.nom) LIKE LOWER(:search)')
+               ->orWhere('LOWER(e.lieu) LIKE LOWER(:search)')
+               ->orWhere('LOWER(e.type) LIKE LOWER(:search)')
+               ->orWhere('LOWER(e.reward) LIKE LOWER(:search)')
+               ->setParameter('search', '%'.$searchTerm.'%');
+            $events = $qb->getQuery()->getResult();
+        } else {
+            $events = $entityManager->getRepository(Events::class)->findAll();
+        }
 
         return $this->render('events/index.html.twig', [
             'events' => $events,

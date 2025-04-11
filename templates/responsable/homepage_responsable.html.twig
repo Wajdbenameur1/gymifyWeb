@@ -75,6 +75,48 @@
         <script src="{{ asset('js/plugin/sweetalert/sweetalert.min.js') }}"></script>
         <!-- Kaiadmin JS -->
         <script src="{{ asset('js/kaiadmin.min.js') }}"></script>
+        <script>
+            $(document).ready(function() {
+                const searchInput = $('#globalSearchInput');
+                const searchButton = $('#searchButton');
+
+                function performSearch() {
+                    const searchTerm = searchInput.val().trim();
+                    const currentPath = window.location.pathname;
+
+                    // Recherche pour la page des équipes
+                    if (currentPath === '/equipe') {
+                        if (searchTerm) {
+                            window.location.href = "{{ path('app_equipe_index') }}?search=" + encodeURIComponent(searchTerm);
+                        } else {
+                            window.location.href = "{{ path('app_equipe_index') }}";
+                        }
+                    }
+                    // Recherche pour la page des événements
+                    else if (currentPath === '/events') {
+                        if (searchTerm) {
+                            window.location.href = "{{ path('app_events_index') }}?search=" + encodeURIComponent(searchTerm);
+                        } else {
+                            window.location.href = "{{ path('app_events_index') }}";
+                        }
+                    }
+                }
+
+                // Recherche en cliquant sur le bouton
+                searchButton.on('click', function(e) {
+                    e.preventDefault();
+                    performSearch();
+                });
+
+                // Recherche en appuyant sur "Entrée"
+                searchInput.on('keypress', function(e) {
+                    if (e.which === 13) { // Touche "Entrée"
+                        e.preventDefault();
+                        performSearch();
+                    }
+                });
+            });
+        </script>
     {% endblock %}
 </body>
 </html>

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Enum\EventType;
 use App\Enum\Reward;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -59,6 +61,17 @@ class Events
     #[ORM\ManyToOne(targetEntity: Salle::class)]
     #[ORM\JoinColumn(nullable: true)]
     private ?Salle $salle = null;
+
+    /**
+     * @var Collection<int, EquipeEvent>
+     */
+    #[ORM\OneToMany(targetEntity: EquipeEvent::class, mappedBy: 'event', cascade: ['persist', 'remove'])]
+    private Collection $equipeEvents;
+
+    public function __construct()
+    {
+        $this->equipeEvents = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -194,6 +207,33 @@ class Events
     public function setSalle(?Salle $salle): self
     {
         $this->salle = $salle;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EquipeEvent>
+     */
+    public function getEquipeEvents(): Collection
+    {
+        return $this->equipeEvents;
+    }
+
+    public function addEquipeEvent(EquipeEvent $equipeEvent): self
+    {
+        if (!$this->equipeEvents->contains($equipeEvent)) {
+            $this->equipeEvents->add($equipeEvent);
+            $equipeEvent->setEvent($this);
+        }
+        return $this;
+    }
+
+    public function removeEquipeEvent(EquipeEvent $equipeEvent): self
+    {
+        if ($this->equipeEvents->removeElement($equipeEvent)) {
+            if ($equipeEvent->getEvent() === $this) {
+                $equipeEvent->setEvent(null);
+            }
+        }
         return $this;
     }
 }
