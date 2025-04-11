@@ -79,7 +79,7 @@ final class AdminController extends AbstractController
        {
      
         }
-        #[Route('/admin/users', name:'app_users')]
+        #[Route('/admin/user', name:'user_index')]
        public function user()
        {
         return $this->render('user/index.html.twig', [ ]);

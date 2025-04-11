@@ -43,19 +43,9 @@ class UserController extends AbstractController
     #[Route('/admin/user', name: 'user_index')]
     public function index(): Response
     {
-        // Test avec findAll()
-        $usersFindAll = $this->userRepository->findAll();
-        $this->logger->info('Utilisateurs via findAll()', [
-            'count' => count($usersFindAll),
-            'users' => array_map(fn($u) => $u->getEmail(), $usersFindAll)
-        ]);
+        $users = $this->userRepository->findAll();
 
-        // Test avec la méthode de débogage
-        $users = $this->userRepository->findAllUsersDebug();
-        $this->logger->info('Utilisateurs via findAllUsersDebug()', [
-            'count' => count($users),
-            'users' => array_map(fn($u) => $u->getEmail(), $users)
-        ]);
+        $this->logger->info('Utilisateurs récupérés', ['count' => count($users)]);
 
         if (empty($users)) {
             $this->addFlash('info', 'Aucun utilisateur trouvé dans la base de données.');
@@ -76,43 +66,55 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
+                // Vérification de l'email existant
                 $existingUser = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
                 if ($existingUser) {
                     $this->addFlash('danger', 'Cet email est déjà utilisé.');
-                    return $this->render('user/user_create.html.twig', [
+                    return $this->render('user/create.html.twig', [
                         'form' => $form->createView(),
                         'page_title' => 'Ajouter un utilisateur',
                     ]);
                 }
 
+                // Gestion de l'image
                 $imageFile = $form->get('imageUrl')->getData();
                 if ($imageFile) {
                     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = $this->slugger->slug($originalFilename);
-                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-                    $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/users';
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+                    $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/users';
                     $imageFile->move($uploadDir, $newFilename);
                     $user->setImageUrl($newFilename);
                 }
 
+                // Validation spécialité pour les entraîneurs
                 if ($user->getRole() === Role::ENTRAINEUR && !$user->getSpecialite()) {
                     $this->addFlash('danger', 'La spécialité est requise pour les entraîneurs.');
-                    return $this->render('user/user_create.html.twig', [
+                    return $this->render('user/create.html.twig', [
                         'form' => $form->createView(),
                         'page_title' => 'Ajouter un utilisateur',
                     ]);
                 }
 
-                $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
-                $user->setPassword($hashedPassword);
+                // Hash du mot de passe
+                $plainPassword = $form->get('password')->getData();
+                if ($plainPassword) {
+                    $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+                    $user->setPassword($hashedPassword);
+                } else {
+                    throw new \Exception('Le mot de passe est requis.');
+                }
 
+                // Sauvegarde de l'utilisateur
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
+
                 $this->logger->info('Utilisateur ajouté', [
                     'id' => $user->getId(),
                     'email' => $user->getEmail()
                 ]);
 
+                // Envoi d'email
                 $this->emailService->sendRegistrationEmail($user);
 
                 $this->addFlash('success', 'Utilisateur ajouté avec succès !');
@@ -120,18 +122,17 @@ class UserController extends AbstractController
             } catch (\Exception $e) {
                 $this->logger->error('Erreur lors de l\'ajout', [
                     'message' => $e->getMessage(),
-                    'email' => $user->getEmail()
+                    'email' => $user->getEmail() ?? 'N/A'
                 ]);
-                $this->addFlash('danger', 'Erreur lors de l\'ajout : ' . $e->getMessage());
+                $this->addFlash('danger', 'Erreur lors de l\'ajout : '.$e->getMessage());
             }
         }
 
-        return $this->render('user/user_create.html.twig', [
+        return $this->render('user/create.html.twig', [
             'form' => $form->createView(),
             'page_title' => 'Ajouter un utilisateur',
         ]);
     }
-
     // Les autres méthodes restent inchangées pour l'instant
     #[Route('/admin/user/{id}/edit', name: 'app_user_update', methods: ['GET', 'POST'])]
     public function update(Request $request, User $user): Response

@@ -48,6 +48,7 @@ security:
 
     # Contrôle d'accès pour certaines routes
     access_control:
+    - { path: ^/admin/user, roles: ROLE_ADMIN }
     - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
     - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }

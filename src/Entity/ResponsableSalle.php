@@ -12,6 +12,6 @@ class ResponsableSalle extends User
     {
         parent::__construct();
         // Passez l'objet Role::SPORTIF ici
-        $this->setRole(Role::RESPONSABLESALLE); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
+        $this->setRole(\App\Enum\Role::RESPONSABLESALLE); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
     }
 } 

@@ -39,5 +39,8 @@ class UserRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
-
+public function findAll(): array
+    {
+        return $this->findBy([], ['id' => 'ASC']);
+    }
 }
