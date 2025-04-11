@@ -3,212 +3,154 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block body %}
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-        <div>
-            <h3 class="fw-bold mb-3">{{ page_title }}</h3>
-            <h6 class="op-7 mb-2">Tableau de bord d'administration des utilisateurs</h6>
-        </div>
-        <div class="ms-md-auto py-2 py-md-0">
-            <a href="{{ path('user_create') }}" class="btn btn-primary btn-round">
-                <i class="fas fa-plus me-2"></i> Ajouter un Utilisateur
-            </a>
-        </div>
-    </div>
-
-    {# Messages flash #}
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-
-    {# Statistiques #}
-    <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="card card-round shadow-sm bg-gradient-primary">
-                <div class="card-body py-4">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape icon-lg bg-white rounded-3 text-primary me-3">
-                            <i class="fas fa-users fa-2x"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-white mb-0">Utilisateurs Totaux</h6>
-                            <h3 class="text-white mb-0">{{ users|length }}</h3>
-                        </div>
-                    </div>
-                </div>
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="fw-bold mb-2">{{ page_title }}</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Utilisateurs</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a href="{{ path('user_create') }}" class="btn btn-primary btn-round">
+                    <i class="fas fa-plus me-2"></i> Ajouter un utilisateur
+                </a>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card card-round shadow-sm bg-gradient-success">
-                <div class="card-body py-4">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape icon-lg bg-white rounded-3 text-success me-3">
-                            <i class="fas fa-user-shield fa-2x"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-white mb-0">Administrateurs</h6>
-                            <h3 class="text-white mb-0">{{ users|filter(u => 'ROLE_ADMIN' in u.roles)|length }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card card-round shadow-sm bg-gradient-info">
-                <div class="card-body py-4">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape icon-lg bg-white rounded-3 text-info me-3">
-                            <i class="fas fa-user fa-2x"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-white mb-0">Utilisateurs Standards</h6>
-                            <h3 class="text-white mb-0">{{ users|filter(u => 'ROLE_ADMIN' not in u.roles)|length }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {# Tableau des utilisateurs #}
-    <div class="card card-round shadow-lg">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Image</th>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Email</th>
-                            <th>Rôles</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td>{{ user.id }}</td> <!-- Affichage de l'ID -->
-                            <td>
-                                {% if user.imageUrl %}
-                                    <img src="{{ asset('uploads/images/' ~ user.imageUrl) }}" 
-                                         alt="{{ user.nom }}" 
-                                         class="rounded-circle" 
-                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                {% else %}
-                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" 
-                                         style="width: 50px; height: 50px;">
-                                        <i class="fas fa-user text-muted"></i>
-                                    </div>
-                                {% endif %}
-                            </td>
-                            <td>{{ user.nom|capitalize }}</td>
-                            <td>{{ user.prenom|capitalize }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>
-                                {% for role in user.roles %}
-                                    <span class="badge 
-                                        {% if role == 'ROLE_ADMIN' %}bg-danger
-                                        {% elseif role == 'ROLE_ENTRAINEUR' %}bg-warning
-                                        {% elseif role == 'ROLE_USER' %}bg-primary
-                                        {% else %}bg-secondary{% endif %}">
-                                        {{ role|replace({'ROLE_': ''})|lower|capitalize }}
-                                    </span>
-                                {% endfor %}
-                            </td>
-                            <td class="text-end">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="{{ path('user_show', {'id': user.id}) }}" 
-                                       class="btn btn-sm btn-outline-info rounded-pill"
-                                       data-bs-toggle="tooltip" 
-                                       title="Voir">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ path('app_user_update', {'id': user.id}) }}" 
-                                       class="btn btn-sm btn-outline-primary rounded-pill"
-                                       data-bs-toggle="tooltip" 
-                                       title="Modifier">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ path('user_delete', {'id': user.id}) }}" 
-                                          method="POST" 
-                                          class="d-inline">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-                                        <button type="submit" 
-                                                class="btn btn-sm btn-outline-danger rounded-pill"
-                                                data-bs-toggle="tooltip" 
-                                                title="Supprimer"
-                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                <i class="fas fa-info-circle me-2"></i> Aucun utilisateur trouvé
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        {# Messages flash #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# Tableau des utilisateurs #}
+        <div class="card card-round shadow-lg">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i> Liste des utilisateurs</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        {% if user.imageUrl %}
+                                            <img src="{{ asset('uploads/users/' ~ user.imageUrl) }}"
+                                                 alt="{{ user.nom|capitalize }} {{ user.prenom|capitalize }}"
+                                                 class="rounded-circle"
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-user text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.nom|capitalize }}</td>
+                                    <td>{{ user.prenom|capitalize }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if user.role %}
+                                            <span class="badge
+                                                {% if user.role.value == 'admin' %}bg-danger
+                                                {% elseif user.role.value == 'entraineur' %}bg-warning
+                                                {% elseif user.role.value == 'sportif' %}bg-primary
+                                                {% elseif user.role.value == 'responsable_salle' %}bg-info
+                                                {% else %}bg-secondary{% endif %}">
+                                                {{ user.role.value|replace({'_': ' '})|capitalize }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Aucun rôle</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ path('user_show', {'id': user.id}) }}"
+                                               class="btn btn-sm btn-outline-info rounded-pill"
+                                               data-bs-toggle="tooltip"
+                                               title="Voir">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_user_update', {'id': user.id}) }}"
+                                               class="btn btn-sm btn-outline-primary rounded-pill"
+                                               data-bs-toggle="tooltip"
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ path('user_delete', {'id': user.id}) }}"
+                                                  method="POST"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger rounded-pill"
+                                                        data-bs-toggle="tooltip"
+                                                        title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle me-2"></i> Aucun utilisateur trouvé
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
+    {# Styles personnalisés #}
     <style>
-        .icon-shape {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
-        }
-        .bg-gradient-success {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-        }
-        .bg-gradient-info {
-            background: linear-gradient(135deg, #396afc, #2948ff);
-        }
-        .bg-gradient-warning {
-            background: linear-gradient(135deg, #f46b45, #eea849);
+        .card-round {
+            border-radius: 1rem;
         }
         .table th {
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             color: #6c757d;
-        }
-        .card-round {
-            border-radius: 1rem;
         }
         .badge {
             font-weight: 500;
-            margin-right: 4px;
+            padding: 0.5em 0.75em;
         }
     </style>
 
+    {# Script pour les tooltips #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Activation des tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
     </script>
