@@ -1,22 +1,37 @@
 <?php
+
 namespace App\Entity;
 
 use App\Repository\EntraineurRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\Role; // Assurez-vous que Role est bien importé
 
-// On dit à Doctrine que Admin hérite de User
+// On dit à Doctrine que Entraineur hérite de User
 #[ORM\Entity(repositoryClass: EntraineurRepository::class)]
 class Entraineur extends User
 {
-    // Pas besoin d'une nouvelle propriété ici, car Admin hérite déjà des propriétés de User
+    // Définition de la colonne 'specialite' dans la base de données
+  // Spécialité de l'entraîneur, optionnelle
 
+    // Le constructeur définit le rôle d'Entraîneur
     public function __construct()
     {
-        // Initialise le rôle d'admin
+        // Appel du constructeur parent pour initialiser les propriétés héritées de User
         parent::__construct();
-        $this->setRole(Role::ENTRAINEUR); // Assurez-vous que Role::ADMIN existe et est valide
+        $this->setRole(Role::ENTRAINEUR); // Assurez-vous que Role::ENTRAINEUR est valide
     }
 
-    // Vous pouvez ajouter des méthodes spécifiques à l'Admin si nécessaire.
-    // Exemple: getters/setters pour des propriétés spécifiques aux Admins.
+    // Getter pour la spécialité
+    public function getSpecialite(): ?string
+    {
+        return $this->specialite;
+    }
+
+    public function setSpecialite(?string $specialite): static
+    {
+        $this->specialite = $specialite;
+        return $this;
+    }
+
+    // Méthode spécifique à l'entraîneur si nécessaire, par exemple pour ajouter des comportements ou des validations.
 }

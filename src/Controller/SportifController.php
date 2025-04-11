@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Controller;
-
+use App\Repository\AbonnementRepository;
+use App\Repository\EventsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,12 +18,10 @@ final class SportifController extends AbstractController
     public function sportif(SalleRepository $salleRepository): Response
     {
         $salles = $salleRepository->findAll();
-
         return $this->render('sportif/index.html.twig', [
             'salles' => $salles,
         ]);
     }
-  
     #[Route('/sportif/planning', name: 'plan')]
     public function index(CoursRepository $coursRepository): Response
     {
@@ -50,12 +49,17 @@ final class SportifController extends AbstractController
 
     // New action for salle details
     #[Route('/sportif/salle/{id}', name: 'sportif_salle_details')]
-    public function salleDetails(Salle $salle): Response
-    {
-        return $this->render('sportif/salle_details.html.twig', [
-            'salle' => $salle,
-        ]);
-    }
+public function salleDetails(Salle $salle, AbonnementRepository $abonnementRepository, EventsRepository $eventsRepository): Response
+{
+    $abonnements = $abonnementRepository->findBy(['salle' => $salle]);
+    $evenements = $eventsRepository->findBy(['salle' => $salle]);
+    
+    return $this->render('sportif/salle_details.html.twig', [
+        'salle' => $salle,
+        'abonnements' => $abonnements,
+        'evenements' => $evenements,
+    ]);
+}
 
     private function mergeDateTime(\DateTimeInterface $date, \DateTimeInterface $time): string
     {
@@ -79,5 +83,16 @@ final class SportifController extends AbstractController
             ObjectifCours::RELAXATION => '#F033FF',
             default => '#CCCCCC',
         };
+    }
+    #[Route('/sportif/abonnement/souscrire/{id}', name: 'abonnement_souscrire', methods: ['GET'])]
+    public function souscrire(Abonnement $abonnement): Response
+    {
+        // Check if user is logged in (Sportif role assumed)
+        $this->denyAccessUnlessGranted('ROLE_SPORTIF', null, 'Vous devez être connecté en tant que sportif pour vous abonner.');
+
+        // Placeholder logic: render a subscription confirmation page
+        return $this->render('sportif/souscrire.html.twig', [
+            'abonnement' => $abonnement,
+        ]);
     }
 }

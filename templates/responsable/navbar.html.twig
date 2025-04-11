@@ -41,53 +41,63 @@
                 <li class="nav-item topbar-user dropdown hidden-caret">
                     <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                         <div class="avatar-sm">
-                            <img src="{{ asset('img/kaiadmin/profile.jpg') }}" alt="..." class="avatar-img rounded-circle">
+                            <img src="{{ asset('img/kaiadmin/profile.jpg') }}" alt="..." class="avatar-img rounded-circle shadow-sm">
                         </div>
-                        <span class="profile-username">
+                        <span class="profile-username ms-2">
                             <span class="op-7">Hi,</span>
-                            <span class="fw-bold">
+                            <span class="fw-bold text-gradient">
                                 {% if app.user %}
-                                    {{ app.user.username }}
+                                    {{ app.user.email|split('@')[0] }} {# Show name part of email #}
+                                    {# OR if you have a 'nom' property: #}
+                                    {# {{ app.user.nom }} #}
                                 {% else %}
                                     Guest
                                 {% endif %}
                             </span>
                         </span>
                     </a>
-                    <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <ul class="dropdown-menu dropdown-user animated fadeIn shadow-lg">
                         <div class="dropdown-user-scroll scrollbar-outer">
                             <li>
-                                <div class="user-box">
-                                    <div class="avatar-lg">
-                                        <img src="{{ asset('img/kaiadmin/profile.jpg') }}" alt="image profile" class="avatar-img rounded">
+                                <div class="user-box p-3">
+                                    <div class="avatar-lg mb-3">
+                                        <img src="{{ asset('img/kaiadmin/profile.jpg') }}" alt="profile" class="avatar-img rounded shadow">
                                     </div>
-                                    <div class="u-text">
-                                        <h4>
+                                    <div class="u-text text-center">
+                                        <h4 class="text-gradient mb-1">
                                             {% if app.user %}
-                                                {{ app.user.username }}
+                                                {{ app.user.email|split('@')[0] }}
                                             {% else %}
                                                 Guest
                                             {% endif %}
                                         </h4>
-                                        <p class="text-muted">
+                                        <p class="text-muted small mb-3">
                                             {% if app.user %}
                                                 {{ app.user.email }}
                                             {% else %}
                                                 guest@example.com
                                             {% endif %}
                                         </p>
-                                        <a href="{{ path('app_responsable_profile') }}" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                        <a href="{{ path('app_responsable_profile') }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                            View Profile
+                                        </a>
                                     </div>
                                 </div>
                             </li>
                             <li>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ path('app_responsable_profile') }}">My Profile</a>
+                                <a class="dropdown-item" href="{{ path('app_responsable_profile') }}">
+                                    <i class="fas fa-user-circle me-2"></i>My Profile
+                                </a>
                                 <div class="dropdown-divider"></div>
                                 {% if app.user %}
-                                    <a class="dropdown-item" href="{{ path('app_logout') }}">Logout</a>
+                                    <a class="dropdown-item text-danger" href="{{ path('app_logout') }}">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a>
                                 {% else %}
-                                    <a class="dropdown-item" href="{{ path('app_responsable_login') }}">Login</a>
+                                    <a class="dropdown-item" href="{{ path('app_responsable_login') }}">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                                    </a>
                                 {% endif %}
                             </li>
                         </div>
@@ -97,3 +107,26 @@
         </div>
     </nav>
 </div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(45deg, #3f51b5, #2196f3);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    .dropdown-user {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .avatar-img {
+        transition: all 0.3s ease;
+    }
+    .avatar-img:hover {
+        transform: scale(1.05);
+    }
+    .profile-pic:hover .avatar-img {
+        box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+    }
+</style>

@@ -1,0 +1,36 @@
+{% extends 'responsable/homepage_responsable.html.twig' %}
+
+{% block title %}Nouvel abonnement{% endblock %}
+
+{% block body %}
+<div class="container animate__animated animate__fadeIn">
+    <h1 class="text-gradient mb-4">Créer un nouvel abonnement</h1>
+
+    <div class="card card-round shadow-lg border-0">
+        <div class="card-body p-5">
+            {{ form_start(form) }}
+                <div class="form-group mb-4">
+                    {{ form_label(form.type, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.type, {'attr': {'class': 'form-control shadow-sm'}}) }}
+                </div>
+                <div class="form-group mb-4">
+                    {{ form_label(form.tarif, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.tarif, {'attr': {'class': 'form-control shadow-sm'}}) }}
+                </div>
+                <div class="form-group mb-4">
+                    {{ form_label(form.activite, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.activite, {'attr': {'class': 'form-control shadow-sm'}}) }}
+                </div>
+                <div class="d-flex gap-3 mt-5">
+                    <button class="btn btn-primary btn-gradient px-4 py-2 rounded-pill shadow">
+                        <i class="fas fa-save me-2"></i>Enregistrer
+                    </button>
+                    <a href="{{ path('responsable_abonnement_index') }}" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

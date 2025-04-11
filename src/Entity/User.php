@@ -50,9 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', enumType: Role::class)]
     private ?Role $role = null;
 
-   #[ORM\Column(length: 100, nullable: true)]
-private ?string $specialite = null;
-    
+  
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $imageUrl = null;
@@ -80,12 +78,7 @@ private ?string $specialite = null;
     {
         return $this->email;  // Utiliser l'email comme identifiant
     }
-
-    // Dans la classe User (classe parent)
-    public function getUsername(): string
-    {
-    return $this->email;  // Ou toute autre propriété qui représente le nom d'utilisateur
-    }
+   
 
     public function getId(): ?int
     {
@@ -139,38 +132,53 @@ private ?string $specialite = null;
 
         return $this;
     }
-
-   
-    public function getRole(): ?string
-{
-    return $this->role ? $this->role->value : null;
-}
+    #[ORM\Column(type: 'string', length: 100, nullable: true)] // Add nullable if specialite is optional
+    private ?string $specialite;
     
-    public function setRole(Role $role): static
-{
-    $this->role = $role;
-    return $this;
-} 
-
-public function getRoles(): array
-{
-
-    if ($this->role) {
-        $roles[] = 'ROLE_' . strtoupper($this->role->value);
-    }
-    return array_unique($roles);  // Retourne les rôles sans doublons
-}
-
     public function getSpecialite(): ?string
     {
         return $this->specialite;
     }
-
+    
     public function setSpecialite(?string $specialite): static
     {
         $this->specialite = $specialite;
         return $this;
     }
+    public function getRole(): ?Role
+    {
+        // Si $this->role est une instance de Role, renvoyer directement
+        if ($this->role instanceof Role) {
+            return $this->role;
+        }
+    
+        // Sinon, convertir la valeur en Enum
+        return $this->role ? Role::from($this->role) : null;
+    }
+public function setRole($role): self
+{
+    // Si le rôle est une chaîne, on le transforme en un objet Role
+    if (is_string($role)) {
+        $role = Role::from($role); // Utilisez la méthode native `from()` pour créer un objet Role
+    }
+
+    $this->role = $role; // Assurez-vous que $role est bien un objet de type Role
+    return $this;
+}
+
+    public function getRoles(): array
+    {
+        $roles = [];
+    
+        if ($this->role) {
+            $roles[] = 'ROLE_' . strtoupper($this->role->value);  // Convertit l'Enum en chaîne de caractères
+        }
+    
+        return array_unique($roles);  // Retourne les rôles uniques
+    }
+    
+
+   
     public function getDateNaissance(): ?\DateTimeInterface
     {
         return $this->dateNaissance;
@@ -219,7 +227,7 @@ public function getRoles(): array
             // set the owning side to null (unless already changed)
             if ($entaineur->getEntaineur() === $this) {
                 $entaineur->setEntaineur(null);
-            }
+            }    
         }
 
         return $this;

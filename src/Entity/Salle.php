@@ -39,6 +39,8 @@ class Salle
     #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'salle')]
     private Collection $cours;
 
+    #[ORM\OneToMany(targetEntity: Activité::class, mappedBy: 'salle')]
+    private Collection $activites;
     /**
      * @var Collection<int, Events>
      */
@@ -53,6 +55,7 @@ class Salle
     {
         $this->cours = new ArrayCollection();
         $this->events = new ArrayCollection();
+        $this->activites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -196,4 +199,37 @@ class Salle
     {
         return $this->nom ?? '';
     }
+
+    public function getActivites(): Collection
+    {
+        return $this->activites;
+    }
+
+    public function addActivite(Activité $activite): static
+    {
+        if (!$this->activites->contains($activite)) {
+            $this->activites->add($activite);
+            $activite->setSalle($this);
+        }
+        return $this;
+    }
+
+    public function removeActivite(Activité $activite): static
+    {
+        if ($this->activites->removeElement($activite)) {
+            $activite->setSalle(null);
+        }
+        return $this;
+    }
+    // Ajoutez cette méthode pour récupérer les abonnements via les activités
+public function getAbonnements(): array
+{
+    $abonnements = [];
+    foreach ($this->activites as $activite) {
+        foreach ($activite->getAbonnements() as $abonnement) {
+            $abonnements[] = $abonnement;
+        }
+    }
+    return $abonnements;
+}
 }
