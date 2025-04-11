@@ -36,7 +36,6 @@ security:
                 path: /
             entry_point: App\Security\AppCustomAuthenticator
 
-<<<<<<< HEAD
     access_control:
         - { path: ^/dashboard_admin, roles: ROLE_ADMIN }
         - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
@@ -47,7 +46,7 @@ security:
         - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
         # Supprimé : - { path: ^/, roles: IS_AUTHENTICATED_FULLY } 
         # Remplacé par des règles spécifiques ci-dessus
-=======
+
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -64,4 +63,4 @@ security:
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
     - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
->>>>>>> 57b5517c1316a2c4e4c997c64e8a3c9f70dc8608
+
