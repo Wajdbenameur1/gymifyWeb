@@ -14,6 +14,7 @@ use App\Repository\ActivityRepository;
 use App\Repository\SalleRepository;
 use App\Repository\CoursRepository;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 
@@ -64,7 +65,8 @@ public function index(Request $request, CoursRepository $coursRepository,
         EntityManagerInterface $entityManager, $idPlanning = null,
         SalleRepository $salleRepository,
         PlanningRepository $planningRepository,
-        ActivityRepository $activityRepository
+        ActivityRepository $activityRepository,
+
     ): Response {
       $planning = $planningRepository->find($idPlanning);
 
@@ -89,7 +91,7 @@ public function index(Request $request, CoursRepository $coursRepository,
     ActivityRepository $activiteRepo,
     SalleRepository $salleRepo,
     Security $security,
-
+    ValidatorInterface $validator,
     $idPlanning = null): Response {
     // 1. Vérifier l'utilisateur connecté
     
@@ -117,6 +119,13 @@ public function index(Request $request, CoursRepository $coursRepository,
     $cours->setSalle($salleRepo->find($request->request->get('salle')));
     $cours->setEntaineur($user);
     $cours->setPlanning($planning);
+    $errors = $validator->validate($activity);
+         if (count($errors) > 0) {
+        foreach ($errors as $error) {
+            $this->addFlash('error', $error->getMessage());
+        }
+        return $this->redirectToRoute('app_cours_new');
+        }
 
     // 5. Enregistrer
     $entityManager->persist($cours);
@@ -179,7 +188,8 @@ public function update(
     Cours $cours, 
     EntityManagerInterface $entityManager,
     ActivityRepository $activiteRepo,
-    SalleRepository $salleRepo
+    SalleRepository $salleRepo,
+    ValidatorInterface $validator,
 ): Response {
     // Récupérer les données du formulaire
     $title = $request->request->get('title');
@@ -196,6 +206,13 @@ public function update(
     $cours->setDateDebut($dateDebut);
     $cours->setHeurDebut($heurDebut);
     $cours->setHeurFin($heurFin);
+    $errors = $validator->validate($activity);
+    if (count($errors) > 0) {
+   foreach ($errors as $error) {
+       $this->addFlash('error', $error->getMessage());
+   }
+   return $this->redirectToRoute('app_cours_edit', ['id' => $cours->getId()]);
+   }
     
     // Gestion des relations
     $activiteId = $request->request->get('activite');

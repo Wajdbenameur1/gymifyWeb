@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PlanningRepository::class)]
 class Planning
@@ -17,15 +18,25 @@ class Planning
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: "La date de début est obligatoire")]
+    
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(length: 300)]
+    #[Assert\NotBlank(message: "La description est obligatoire")]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre est obligatoire")]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: "La date de fin est obligatoire")]
+    #[Assert\GreaterThan(
+      propertyPath: "dateDebut",
+      message: "La date de fin doit être postérieure à la date de début"
+  )]
+
     private ?\DateTimeInterface $dateFin = null;
     #[ORM\ManyToOne(inversedBy: 'entaineur')]
     private ?User $entaineur = null;
