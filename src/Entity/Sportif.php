@@ -11,7 +11,6 @@ class Sportif extends User
     public function __construct()
     {
         parent::__construct();
-        // Passez l'objet Role::SPORTIF ici
-        $this->setRole(Role::SPORTIF); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
+      $this->setRole(\App\Enum\Role::SPORTIF); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
     }
 }

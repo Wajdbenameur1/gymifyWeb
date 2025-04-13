@@ -7,7 +7,11 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
-
+    role_hierarchy:
+        ROLE_ADMIN:       [ROLE_USER]
+        ROLE_ENTRAINEUR:  [ROLE_USER]
+        ROLE_RESPONSABLE_SALLE: [ROLE_USER]
+        ROLE_SPORTIF:     [ROLE_USER]
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -40,10 +44,12 @@ security:
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
+      
 
     # Contrôle d'accès pour certaines routes
     access_control:
-    - { path: ^/dashboard_admin, roles: ROLE_ADMIN }
+    - { path: ^/admin/user, roles: ROLE_ADMIN }
+    - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
     - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
     - { path: ^/home, roles: ROLE_SPORTIF }

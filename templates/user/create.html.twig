@@ -1,0 +1,101 @@
+{% extends 'admin/homepageadmin.html.twig' %}
+
+{% block title %}Ajouter un utilisateur{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="fw-bold mb-2">Ajouter un utilisateur</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('user_index') }}">Utilisateurs</a></li>
+                        <li class="breadcrumb-item active">Ajouter</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i> Nouvel utilisateur</h5>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form_row(form.nom) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.prenom) }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form_row(form.email) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.dateNaissance) }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form_row(form.password) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.role) }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_row(form.imageUrl) }}
+                </div>
+
+                <div id="specialite_container" class="mb-3" style="display: none;">
+                    {{ form_row(form.specialite) }}
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a href="{{ path('user_index') }}" class="btn btn-secondary me-2">
+                        <i class="fas fa-times me-2"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i> Enregistrer
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('{{ form.role.vars.id }}');
+            const specialiteContainer = document.getElementById('specialite_container');
+
+            function toggleSpecialite() {
+                if (roleSelect.value === 'entraineur') {
+                    specialiteContainer.style.display = 'block';
+                } else {
+                    specialiteContainer.style.display = 'none';
+                }
+            }
+
+            roleSelect.addEventListener('change', toggleSpecialite);
+            toggleSpecialite(); // Initial call
+        });
+    </script>
+{% endblock %}
