@@ -1,0 +1,47 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}Nos produits{% endblock %}
+
+{% block body %}
+    <h1 class="mb-4">Nos produits</h1>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for produit in produits %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if produit.imagePath %}
+                        <img src="{{ asset('uploads/products/' ~ produit.imagePath) }}" class="card-img-top" alt="{{ produit.nomP }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ produit.nomP }}</h5>
+                        <p class="card-text">
+                            <strong>Prix:</strong> {{ produit.prixP }} €<br>
+                            <strong>Catégorie:</strong> {{ produit.categorieP }}
+                        </p>
+                        {% if produit.stockP > 0 %}
+                            <form action="{{ path('shop_cart_add', {'id': produit.idP}) }}" method="post">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-cart-plus"></i> Ajouter au panier
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>
+                                <i class="bi bi-x-circle"></i> Rupture de stock
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Aucun produit disponible pour le moment.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %} 
