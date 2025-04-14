@@ -21,77 +21,58 @@ class ActivityController extends AbstractController
     #[Route('/activity/new', name: 'app_activity_new')]
     public function new(): Response
     {
+      $activity = new Activite();
+       $form = $this->createForm(ActivityFormType::class, $activity);
+
         return $this->render('activity/new.html.twig', [
             'page_title' => 'Add New Activity',
-            'activity_types' => ActivityType::cases()
+            'form' => $form->createView()
+
         ]);
     }
 
+    
     #[Route('/activity/add', name: 'app_activity_create', methods: ['POST'])]
-    public function create(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        SluggerInterface $slugger,
-        ValidatorInterface $validator
-    ): Response {
-        // Vérification CSRF
-        $submittedToken = $request->request->get('_token');
-        if (!$this->isCsrfTokenValid('create_activity', $submittedToken)) {
-            $this->addFlash('error', 'Invalid CSRF token');
-            return $this->redirectToRoute('app_activity_new');
-        }
+public function create(
+    Request $request,
+    EntityManagerInterface $entityManager,
+    SluggerInterface $slugger
+): Response {
+    $activity = new Activite();
+    $form = $this->createForm(ActivityType::class, $activity);
+    $form->handleRequest($request);
 
-        $activity = new Activité();
-        $activity->setNom($request->request->get('nom'));
-        $activity->setDescription($request->request->get('description'));
-
-        try {
-            $activity->setType(ActivityType::from($request->request->get('type')));
-        } catch (\ValueError $e) {
-            $this->addFlash('error', 'Invalid activity type selected');
-            return $this->redirectToRoute('app_activity_new');
-        }
-        $errors = $validator->validate($activity);
-         if (count($errors) > 0) {
-        foreach ($errors as $error) {
-            $this->addFlash('error', $error->getMessage());
-        }
-        return $this->redirectToRoute('app_activity_new');
-        }
-
+    if ($form->isSubmitted() && $form->isValid()) {
         // Gestion de l'image
-        $imageFile = $request->files->get('activityImage');
+        $imageFile = $form->get('imageFile')->getData();
         if ($imageFile) {
-            try {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-                
-                // Chemin par défaut si le paramètre n'existe pas
-                $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/activities';
-                
-                // Création du dossier s'il n'existe pas
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                
-                $imageFile->move(
-                    $uploadDir,
-                    $newFilename
-                );
-                $activity->setUrl('/uploads/activities/'.$newFilename);
-            } catch (FileException $e) {
-                $this->addFlash('error', 'Error uploading image');
-                return $this->redirectToRoute('app_activity_new');
-            }
-        }
+            $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+            
+            $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/activities';
+            if (!file_exists($uploadDir)) {
+              mkdir($uploadDir, 0777, true);
+          }
+          
+          $imageFile->move($uploadDir, $newFilename);
+          $activity->setUrl('/uploads/activities/'.$newFilename);
+      }
 
-        $entityManager->persist($activity);
-        $entityManager->flush();
+      $entityManager->persist($activity);
+      $entityManager->flush();
 
-        $this->addFlash('success', 'Activity created successfully!');
-        return $this->redirectToRoute('app_activity_new');
-    }
+      $this->addFlash('success', 'Activity created successfully!');
+      return $this->redirectToRoute('app_activity_show', ['id' => $activity->getId()]);
+  }
+
+  // Si le formulaire n'est pas valide
+  foreach ($form->getErrors(true) as $error) {
+      $this->addFlash('error', $error->getMessage());
+  }
+  return $this->redirectToRoute('app_activity_new');
+}
+      
 
 
 
