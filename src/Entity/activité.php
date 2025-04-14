@@ -8,6 +8,8 @@ use App\Repository\ActivityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: ActivityRepository::class)]
 class Activité
@@ -18,12 +20,17 @@ class Activité
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le nom de l'activité ne peut pas être vide")]
+
     private ?string $nom = null;
 
     #[ORM\Column(length: 300)]
+    #[Assert\NotBlank(message: "La description ne peut pas être vide")]
+
     private ?string $description = null;
 
     #[ORM\Column(length: 200)]
+    #[Assert\NotBlank(message: "L'URL ne peut pas être vide")]
     private ?string $url = null;
 
     #[ORM\Column(type: 'string',enumType: ActivityType::class,columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')")]
