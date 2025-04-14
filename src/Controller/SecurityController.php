@@ -46,7 +46,7 @@ class SecurityController extends AbstractController
     
         return match ($role) {
             Role::ADMIN->value => 'app_admin',
-            Role::ENTRAINEUR->value => 'dashboard_entraineur',
+            Role::ENTRAINEUR->value => 'app_entraineur',
             Role::RESPONSABLE_SALLE->value => 'dashboard_responsable_salle',
             Role::SPORTIF->value => 'home',
             default => 'app_home',

@@ -29,12 +29,14 @@ class UserType extends AbstractType
                 'required' => false,
             ])
             ->add('role', ChoiceType::class, [
-                'choices' => [
-                    'Sportif' => Role::SPORTIF->value,
-                    'Admin' => Role::ADMIN->value,
-                    'Responsable Salle' => Role::RESPONSABLE_SALLE->value,
-                    'Entraineur' => Role::ENTRAINEUR->value,
-                ],
+                'choices' => Role::cases(), // Donne toutes les valeurs possibles de l'enum
+                'choice_label' => fn(Role $role) => match($role) {
+                    Role::ADMIN => 'Admin',
+                    Role::SPORTIF => 'Sportif',
+                    Role::RESPONSABLE_SALLE => 'Responsable Salle',
+                    Role::ENTRAINEUR => 'Entraîneur',
+                },
+                'choice_value' => fn(?Role $role) => $role?->value,
                 'required' => true,
             ])
             ->add('specialite', TextType::class, [

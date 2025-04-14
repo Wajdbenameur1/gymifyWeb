@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Activité; // Changé de 'activité' à 'Activite'
 use App\Enum\ActivityType;
 use App\Repository\ActivityRepository; 
-
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +31,8 @@ class ActivityController extends AbstractController
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
-        SluggerInterface $slugger
+        SluggerInterface $slugger,
+        ValidatorInterface $validator
     ): Response {
         // Vérification CSRF
         $submittedToken = $request->request->get('_token');
@@ -49,6 +50,13 @@ class ActivityController extends AbstractController
         } catch (\ValueError $e) {
             $this->addFlash('error', 'Invalid activity type selected');
             return $this->redirectToRoute('app_activity_new');
+        }
+        $errors = $validator->validate($activity);
+         if (count($errors) > 0) {
+        foreach ($errors as $error) {
+            $this->addFlash('error', $error->getMessage());
+        }
+        return $this->redirectToRoute('app_activity_new');
         }
 
         // Gestion de l'image
@@ -84,6 +92,10 @@ class ActivityController extends AbstractController
         $this->addFlash('success', 'Activity created successfully!');
         return $this->redirectToRoute('app_activity_new');
     }
+
+
+
+
     #[Route('/activity/edit/{id}', name: 'app_activity_edit')]
     public function edit(int $id, ActivityRepository $repository): Response
 {
@@ -152,7 +164,8 @@ public function update(
     Request $request, 
     int $id, 
     EntityManagerInterface $entityManager,
-    SluggerInterface $slugger
+    SluggerInterface $slugger,
+    ValidatorInterface $validator
 ): Response {
     $activity = $entityManager->getRepository(Activité::class)->find($id);
     
@@ -161,32 +174,35 @@ public function update(
         return $this->redirectToRoute('app_activity_index');
     }
 
-    if (!$this->isCsrfTokenValid('update'.$activity->getId(), $request->request->get('_token'))) {
+    // CSRF token validation
+    if (!$this->isCsrfTokenValid('update_activity_'.$activity->getId(), $request->request->get('_token'))) {
         $this->addFlash('error', 'Invalid CSRF token');
         return $this->redirectToRoute('app_activity_edit', ['id' => $id]);
     }
 
-    // Gestion de la suppression d'image
-    if ($request->request->has('remove_image')) {
-        $this->removeImage($activity->getUrl());
-        $activity->setUrl(null);
+    // Handle image removal
+    if ($request->request->get('remove_image') === '1') {
+        $this->handleImageRemoval($activity);
     }
 
-    // Traitement des données
+    // Update activity data
     $activity->setNom($request->request->get('nom'));
     $activity->setDescription($request->request->get('description'));
     $activity->setType(ActivityType::from($request->request->get('type')));
 
-    // Gestion de la nouvelle image
+    // Validate the activity
+    $errors = $validator->validate($activity);
+    if (count($errors) > 0) {
+        foreach ($errors as $error) {
+            $this->addFlash('error', $error->getMessage());
+        }
+        return $this->redirectToRoute('app_activity_edit', ['id' => $id]);
+    }
+
+    // Handle new image upload
     $imageFile = $request->files->get('activityImage');
     if ($imageFile) {
-        // Supprimer l'ancienne image si elle existe
-        if ($activity->getUrl()) {
-            $this->removeImage($activity->getUrl());
-        }
-        
-        $newFilename = $this->uploadImage($imageFile, $slugger);
-        $activity->setUrl('/uploads/activities/'.$newFilename);
+        $this->handleImageUpload($activity, $imageFile, $slugger);
     }
 
     $entityManager->flush();
@@ -195,4 +211,35 @@ public function update(
     return $this->redirectToRoute('app_activity_index');
 }
 
+private function handleImageRemoval(Activité $activity): void
+{
+    $imagePath = $activity->getUrl();
+    if ($imagePath) {
+        $fullPath = $this->getParameter('kernel.project_dir').'/public'.$imagePath;
+        if (file_exists($fullPath)) {
+            unlink($fullPath);
+        }
+        $activity->setUrl(null);
+    }
+}
+
+private function handleImageUpload(Activité $activity, UploadedFile $imageFile, SluggerInterface $slugger): void
+{
+    // Remove old image if exists
+    if ($activity->getUrl()) {
+        $this->handleImageRemoval($activity);
+    }
+
+    // Generate unique filename
+    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+    $safeFilename = $slugger->slug($originalFilename);
+    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+    // Move the file to uploads directory
+    $uploadsDirectory = $this->getParameter('kernel.project_dir').'/public/uploads/activities/';
+    $imageFile->move($uploadsDirectory, $newFilename);
+
+    // Update activity with new image path
+    $activity->setUrl('/uploads/activities/'.$newFilename);
+}
 }

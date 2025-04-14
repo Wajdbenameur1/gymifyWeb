@@ -18,7 +18,7 @@ class Entraineur extends User
     {
         // Appel du constructeur parent pour initialiser les propriétés héritées de User
         parent::__construct();
-        $this->setRole(Role::ENTRAINEUR); // Assurez-vous que Role::ENTRAINEUR est valide
+        $this->setRole(\App\Enum\Role::ENTRAINEUR); // Assurez-vous que Role::ENTRAINEUR est valide
     }
 
     // Getter pour la spécialité

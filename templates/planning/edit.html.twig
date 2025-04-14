@@ -12,14 +12,21 @@
                 <p class="lead text-muted">Modifiez votre événement sportif</p>
             </div>
             
+            <!-- Messages flash -->
             {% for message in app.flashes('success') %}
                 <div class="alert alert-success alert-dismissible fade show">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
 
-            <!-- Formulaire HTML -->
+            <!-- Formulaire -->
             <form method="post" action="{{ path('app_planning_update', {'id': planning.id}) }}" class="card shadow-sm border-0 p-4 needs-validation" novalidate>
                 <!-- Champ Titre -->
                 <div class="mb-3">
@@ -29,27 +36,36 @@
                             <i class="fas fa-heading text-primary"></i>
                         </span>
                         <input type="text" 
-                               class="form-control" 
+                               class="form-control {% if app.request.method == 'POST' and not app.request.request.get('title') %}is-invalid{% endif %}" 
                                id="title" 
                                name="title" 
                                required
+                               minlength="3"
                                maxlength="50"
-                               value="{{ planning.title }}"
-                               placeholder="Planning">
+                               value="{{ app.request.method == 'POST' ? app.request.request.get('title') : planning.title }}"
+                               placeholder="Ex: Planning Janvier 2023">
                     </div>
                     <div class="invalid-feedback">
-                        Veuillez saisir un titre (50 caractères max).
+                        Le titre est obligatoire (entre 3 et 50 caractères).
                     </div>
                 </div>
 
                 <!-- Champ Description -->
                 <div class="mb-3">
                     <label for="description" class="form-label fw-bold">Description</label>
-                    <textarea class="form-control" 
+                    <textarea class="form-control {% if app.request.method == 'POST' and not app.request.request.get('description') %}is-invalid{% endif %}" 
                               id="description" 
                               name="description" 
                               rows="4"
-                              placeholder="Détails de la séance...">{{ planning.description }}</textarea>
+                              required
+                              maxlength="300"
+                              placeholder="Détails de la séance...">{{ app.request.method == 'POST' ? app.request.request.get('description') : planning.description }}</textarea>
+                    <div class="invalid-feedback">
+                        La description est obligatoire (300 caractères max).
+                    </div>
+                    <div class="form-text text-end">
+                        <span id="desc-counter">0</span>/300 caractères
+                    </div>
                 </div>
 
                 <!-- Dates -->
@@ -60,15 +76,15 @@
                             <span class="input-group-text bg-light">
                                 <i class="far fa-calendar-alt text-primary"></i>
                             </span>
-                            <input type="datetime-local" 
-                                   class="form-control datepicker" 
+                            <input type="date" 
+                                   class="form-control {% if app.request.method == 'POST' and not app.request.request.get('dateDebut') %}is-invalid{% endif %}" 
                                    id="dateDebut" 
                                    name="dateDebut"
-                                   value="{{ planning.dateDebut|date('Y-m-d\\TH:i') }}"
-                                   required>
+                                   required
+                                   value="{{ app.request.method == 'POST' ? app.request.request.get('dateDebut') : planning.dateDebut|date('Y-m-d') }}">
                         </div>
                         <div class="invalid-feedback">
-                            Sélectionnez une date valide.
+                            La date de début est obligatoire.
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -77,14 +93,14 @@
                             <span class="input-group-text bg-light">
                                 <i class="far fa-calendar-check text-primary"></i>
                             </span>
-                            <input type="datetime-local" 
-                                   class="form-control datepicker" 
+                            <input type="date" 
+                                   class="form-control {% if app.request.method == 'POST' and not app.request.request.get('dateFin') %}is-invalid{% endif %}" 
                                    id="dateFin" 
                                    name="dateFin"
-                                   value="{{ planning.dateFin|date('Y-m-d\\TH:i') }}"
-                                   required>
+                                   required
+                                   value="{{ app.request.method == 'POST' ? app.request.request.get('dateFin') : planning.dateFin|date('Y-m-d') }}">
                         </div>
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback" id="dateFinError">
                             La date de fin doit être postérieure à la date de début.
                         </div>
                     </div>
@@ -109,37 +125,77 @@
 
 <!-- Validation côté client -->
 <script>
-(function () {
-    'use strict'
-    const forms = document.querySelectorAll('.needs-validation')
-    
-    Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialisation
+    const form = document.querySelector('.needs-validation');
+    const dateDebut = document.getElementById('dateDebut');
+    const dateFin = document.getElementById('dateFin');
+    const dateFinError = document.getElementById('dateFinError');
+    const descTextarea = document.getElementById('description');
+    const descCounter = document.getElementById('desc-counter');
 
-            // Validation personnalisée : dateFin > dateDebut
-            const dateDebut = new Date(document.getElementById('dateDebut').value)
-            const dateFin = new Date(document.getElementById('dateFin').value)
+    // Compteur de caractères pour la description
+    if (descTextarea && descCounter) {
+        descTextarea.addEventListener('input', function() {
+            descCounter.textContent = this.value.length;
+        });
+        descCounter.textContent = descTextarea.value.length;
+    }
+
+    // Validation des dates
+    function validateDates() {
+        if (dateDebut.value && dateFin.value) {
+            const debut = new Date(dateDebut.value);
+            const fin = new Date(dateFin.value);
             
-            if (dateFin <= dateDebut) {
-                document.getElementById('dateFin').classList.add('is-invalid')
-                event.preventDefault()
+            if (fin <= debut) {
+                dateFin.classList.add('is-invalid');
+                dateFinError.style.display = 'block';
+                return false;
+            } else {
+                dateFin.classList.remove('is-invalid');
+                dateFinError.style.display = 'none';
+                return true;
             }
+        }
+        return true;
+    }
 
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+    // Écouteurs d'événements pour validation en temps réel
+    dateDebut.addEventListener('change', validateDates);
+    dateFin.addEventListener('change', validateDates);
+
+    // Validation à la soumission
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Validation standard
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+        
+        // Validation personnalisée des dates
+        if (!validateDates()) {
+            form.classList.add('was-validated');
+            return;
+        }
+        
+        // Si tout est valide, soumettre le formulaire
+        form.submit();
+    });
+});
 </script>
 
+<!-- Style personnalisé -->
 <style>
     .navbar-form.nav-search { display: none !important; }
+
     .card {
         border-radius: 12px;
         border: none;
+        background-color: #f8f9fa;
     }
     .form-control:focus {
         border-color: #86b7fe;
@@ -148,6 +204,31 @@
     .input-group-text {
         min-width: 45px;
         justify-content: center;
+        background-color: #e9ecef;
+    }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    .is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .invalid-feedback {
+        display: none;
+        color: #dc3545;
+        font-size: 0.875em;
+    }
+    .was-validated .form-control:invalid ~ .invalid-feedback,
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
     }
 </style>
 {% endblock %}
