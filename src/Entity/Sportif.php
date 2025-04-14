@@ -12,6 +12,6 @@ class Sportif extends User
   public function __construct()
   {
       parent::__construct();
-      $this->setRole('sportif'); // Sets role to 'admin', which getRoles() will transform to ROLE_ADMIN
-  }
+      $this->setRole(Role::SPORTIF);  // Définir le rôle en utilisant l'Enum
+     }
 }

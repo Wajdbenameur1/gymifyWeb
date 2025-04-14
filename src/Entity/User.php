@@ -1,6 +1,6 @@
 <?php
 namespace App\Entity;
-
+use App\Enum\Role;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -14,6 +14,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "user")]
 #[UniqueEntity("email", message: "L'email {{ value }} est déjà utilisé.")]
+#[ORM\InheritanceType("SINGLE_TABLE")]
+#[ORM\DiscriminatorColumn(name: "role", type: "string")]
+#[ORM\DiscriminatorMap([
+    "sportif" => \App\Entity\Sportif::class,
+    "admin" => \App\Entity\Admin::class,
+    "responsable_salle" => \App\Entity\ResponsableSalle::class,
+    "entraineur" => \App\Entity\Entraineur::class,])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -47,9 +54,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
     private Collection $entaineur;
 
-    #[ORM\Column(length: 20)]
-    private string $role;
-
+   
     #[ORM\ManyToOne(inversedBy: 'equipes')]
     private ?Equipe $equipe = null;
 
@@ -176,12 +181,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRole(): ?string
+    public function getRole(): Role
     {
         return $this->role;
     }
 
-    public function setRole(string $role): static
+    public function setRole(Role $role): static
     {
         $this->role = $role;
         return $this;
@@ -189,11 +194,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        // Prefix the role with ROLE_ and convert to uppercase to match security.yaml
-        $role = $this->role ? 'ROLE_' . strtoupper($this->role) : 'ROLE_USER';
-        return [$role];
+        return match (true) {
+            $this instanceof \App\Entity\Admin => ['ROLE_ADMIN'],
+            $this instanceof \App\Entity\Sportif => ['ROLE_SPORTIF'],
+            $this instanceof \App\Entity\ResponsableSalle => ['ROLE_RESPONSABLE_SALLE'],
+            $this instanceof \App\Entity\Entraineur => ['ROLE_ENTRAINEUR'],
+            default => ['ROLE_USER'],
+        };
     }
-
     public function eraseCredentials(): void
     {
         // No sensitive data to erase

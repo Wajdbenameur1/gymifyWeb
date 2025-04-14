@@ -1,6 +1,6 @@
 <?php
 namespace App\Controller;
-
+use App\Enum\Role;
 use App\Entity\Sportif;
 use App\Form\SportifType;
 use App\Repository\UserRepository;
@@ -21,7 +21,7 @@ class RegistrationController extends AbstractController
         UserRepository $userRepository
     ): Response {
         $sportif = new Sportif();
-        $sportif->setRole('sportif');
+        $sportif->setRole(Role::SPORTIF);
 
         $form = $this->createForm(SportifType::class, $sportif);
         $form->handleRequest($request);
