@@ -1,6 +1,10 @@
 <?php
 namespace App\Controller;
-
+use App\Entity\Admin;
+use App\Entity\Sportif;
+use App\Entity\ResponsableSalle;
+use App\Entity\Entraineur;
+use App\Enum\Role;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Service\EmailService;
@@ -57,69 +61,81 @@ class UserController extends AbstractController
     }
    
     #[Route('/admin/user/create', name: 'user_create', methods: ['GET', 'POST'])]
-    public function addUser(Request $request): Response
-    {
-        $user = new User();
+    
+public function addUser(Request $request): Response
+{
+    // Utilisé uniquement pour le formulaire vide au départ
+    $user = new Sportif(); // valeur par défaut (car le formulaire a `data` => Role::SPORTIF)
+    $form = $this->createForm(UserType::class, $user);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Récupère la valeur de rôle sélectionnée dans le formulaire
+        /** @var Role $selectedRole */
+        $selectedRole = $form->get('role')->getData();
+
+        // Crée dynamiquement la bonne instance selon le rôle choisi
+        $userClass = match ($selectedRole) {
+            Role::SPORTIF => Sportif::class,
+            Role::ENTRAINEUR => Entraineur::class,
+            Role::ADMIN => Admin::class,
+            Role::RESPONSABLE_SALLE => ResponsableSalle::class,
+            default => User::class,
+        };
+
+        /** @var User $user */
+        $user = new $userClass();
+
+        // Remplit les données depuis le formulaire vers le bon objet (car le formulaire initial était basé sur Sportif)
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $existingUser = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
-                if ($existingUser) {
-                    $this->addFlash('danger', 'Cet email est déjà utilisé.');
-                    return $this->render('user/create.html.twig', [
-                        'form' => $form->createView(),
-                        'page_title' => 'Ajouter un utilisateur',
-                    ]);
-                }
-
-                $plainPassword = $form->get('password')->getData();
-                if (!$plainPassword) {
-                    $this->addFlash('danger', 'Le mot de passe est requis.');
-                    return $this->render('user/create.html.twig', [
-                        'form' => $form->createView(),
-                        'page_title' => 'Ajouter un utilisateur',
-                    ]);
-                }
-                $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
-                $user->setPassword($hashedPassword);
-
-                $imageFile = $form->get('imageUrl')->getData();
-                if ($imageFile) {
-                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $safeFilename = $this->slugger->slug($originalFilename);
-                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-                    $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/users';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0777, true);
-                    }
-                    $imageFile->move($uploadDir, $newFilename);
-                    $user->setImageUrl($newFilename);
-                }
-
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-
-                $this->emailService->sendRegistrationEmail($user);
-
-                $this->addFlash('success', 'Utilisateur ajouté avec succès !');
-                return $this->redirectToRoute('user_index');
-            } catch (\Exception $e) {
-                $this->logger->error('Erreur lors de l\'ajout de l\'utilisateur', [
-                    'message' => $e->getMessage(),
-                    'email' => $user->getEmail() ?? 'N/A',
-                ]);
-                $this->addFlash('danger', 'Une erreur est survenue lors de l\'ajout de l\'utilisateur.');
-            }
+        // Vérifie si l'email existe déjà
+        $existingUser = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
+        if ($existingUser) {
+            $this->addFlash('danger', 'Cet email est déjà utilisé.');
+            return $this->render('user/create.html.twig', [
+                'form' => $form->createView(),
+                'page_title' => 'Ajouter un utilisateur',
+            ]);
         }
 
-        return $this->render('user/create.html.twig', [
-            'form' => $form->createView(),
-            'page_title' => 'Ajouter un utilisateur',
-        ]);
+        // Hash du mot de passe
+        $plainPassword = $form->get('password')->getData();
+        if (!$plainPassword) {
+            $this->addFlash('danger', 'Le mot de passe est requis.');
+            return $this->render('user/create.html.twig', [
+                'form' => $form->createView(),
+                'page_title' => 'Ajouter un utilisateur',
+            ]);
+        }
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+        $user->setPassword($hashedPassword);
+
+        // Image upload
+        $imageFile = $form->get('imageUrl')->getData();
+        if ($imageFile) {
+            $newFilename = uniqid().'.'.$imageFile->guessExtension();
+            $imageFile->move(
+                $this->getParameter('upload_directory'),
+                $newFilename
+            );
+            $user->setImageUrl($newFilename);
+        }
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Utilisateur ajouté avec succès !');
+
+        return $this->redirectToRoute('user_index');
     }
 
+    return $this->render('user/create.html.twig', [
+        'form' => $form->createView(),
+        'page_title' => 'Ajouter un utilisateur',
+    ]);
+}
     #[Route('/admin/user/{id}/edit', name: 'app_user_update', methods: ['GET', 'POST'])]
     public function update(Request $request, User $user): Response
     {

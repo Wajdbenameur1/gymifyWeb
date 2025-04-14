@@ -24,7 +24,11 @@ final class ResponsableController extends AbstractController
             'page_title' => 'Tableau de bord Responsable'
         ]);
     }
-
+    #[Route('/admin/user', name:'user_index')]
+    public function user()
+    {
+     return $this->render('user/index.html.twig', [ ]);
+     }
     #[Route('/responsable/home', name: 'app_responsable_home')]
     public function home(): Response
     {
@@ -47,22 +51,27 @@ final class ResponsableController extends AbstractController
             'page_title' => 'Tableau de bord Responsable'
         ]);
     }
-
-    #[Route('/responsable/profile', name: 'app_responsable_profile')]
+    #[Route('/profile', name: 'app_profile')]
     public function profile(): Response
     {
-        return $this->render('responsable/profile.html.twig', [
-            'page_title' => 'Profil Responsable'
-        ]);
-    }
+        $user = $this->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour voir votre profil.');
+        }
 
-    #[Route('/responsable/login', name: 'app_responsable_login')]
-    public function login(): Response
-    {
-        return $this->render('responsable/login.html.twig', [
-            'page_title' => 'Connexion Responsable'
+        return $this->render('user/show.html.twig', [
+            'user' => $user,
+            'page_title' => 'Mon Profil'
         ]);
     }
+    #[Route('/login', name:'app_login')]
+   public function login()
+   {
+ 
+    }
+   
+
+  
 
     #[Route('/responsable/about', name: 'app_responsable_about')]
     public function about(): Response

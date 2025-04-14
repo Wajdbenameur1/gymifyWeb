@@ -1,163 +1,419 @@
 {% extends 'admin/homepageadmin.html.twig' %}
 
-{% block title %}Ajouter un utilisateur{% endblock %}
+{% block title %}Ajouter un utilisateur - Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --gradient-primary: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        }
+
+        /* Card Styling */
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 2rem rgba(58, 59, 69, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.75rem 2.5rem rgba(58, 59, 69, 0.25);
+        }
+
+        .card-header {
+            background: var(--gradient-primary);
+            border-radius: 1rem 1rem 0 0 !important;
+            color: white;
+            padding: 1.5rem;
+        }
+
+        /* Form Inputs */
+        .form-control, .custom-select {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d3e2;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .custom-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2e2e2e;
+        }
+
+        .invalid-feedback {
+            font-size: 0.85rem;
+            color: var(--danger-color);
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        /* Image Upload Section */
+        .image-upload-container {
+            position: relative;
+            margin-top: 1rem;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            background: #f8f9fc;
+            border: 2px dashed #d1d3e2;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .image-upload-container:hover, .image-upload-container.dragover {
+            border-color: var(--primary-color);
+            background: #e6f0ff;
+        }
+
+        .image-upload-placeholder {
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .image-upload-placeholder i {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+            transition: color 0.3s ease;
+        }
+
+        .image-upload-container:hover .image-upload-placeholder i,
+        .image-upload-container.dragover .image-upload-placeholder i {
+            color: var(--primary-color);
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+            display: none;
+            object-fit: cover;
+            margin: 0 auto;
+        }
+
+        .image-action-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .image-action-btn.add-image {
+            background: var(--primary-color);
+        }
+
+        .image-action-btn.remove-image {
+            background: var(--danger-color);
+        }
+
+        .image-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+        }
+
+        .image-action-btn i {
+            font-size: 1rem;
+        }
+
+        .image-error {
+            font-size: 0.85rem;
+            color: var(--danger-color);
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(46, 89, 217, 0.2);
+        }
+
+        .btn-secondary {
+            background: #858796;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #6c757d;
+            transform: translateY(-2px);
+        }
+
+        /* Flash Alerts */
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            border-radius: 0.5rem;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s 3s forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 0.5rem;
+        }
+
+        .progress {
+            height: 5px;
+            border-radius: 2.5px;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+
+        .strength-text {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .image-upload-container {
+                padding: 1rem;
+            }
+
+            .image-preview {
+                max-width: 150px;
+                max-height: 150px;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
     <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold text-gradient">
-                <i class="fas fa-user-plus me-2"></i>Ajouter un utilisateur
-            </h1>
-            <a href="{{ path('user_index') }}" class="btn btn-outline-secondary rounded-pill hover-scale">
-                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 py-3">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-user-plus mr-2 text-primary"></i> Ajouter un utilisateur
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent p-0">
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('app_admin') }}" class="text-primary"><i class="fas fa-home mr-1"></i> Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('user_index') }}" class="text-primary"><i class="fas fa-users mr-1"></i> Utilisateurs</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            <i class="fas fa-plus mr-1"></i> Ajouter
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="{{ path('user_index') }}" class="btn btn-secondary btn-icon-split shadow-sm">
+                <span class="icon text-white-50">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span class="text">Retour à la liste</span>
             </a>
         </div>
 
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb bg-white p-3 rounded-3 shadow-sm">
-                <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none"><i class="fas fa-home me-1"></i> Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ path('user_index') }}" class="text-decoration-none"><i class="fas fa-users me-1"></i> Utilisateurs</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-plus me-1"></i> Ajouter</li>
-            </ol>
-        </nav>
-
+        <!-- Flash Messages -->
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm floating-alert" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-triangle' }} me-2"></i>
+                        <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-triangle' }} mr-2"></i>
                         <span>{{ message }}</span>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="close ml-auto" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
                     </div>
                 </div>
             {% endfor %}
         {% endfor %}
 
-        <div class="card border-0 shadow-lg overflow-hidden glass-morphism">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-primary">
-                    <i class="fas fa-user-plus me-2"></i>Formulaire de création
-                </h5>
-                <div class="badge bg-primary-subtle text-primary rounded-pill">
-                    <i class="fas fa-info-circle me-1"></i> Tous les champs marqués (*) sont obligatoires
-                </div>
+        <!-- Form Card -->
+        <div class="card shadow-lg mb-4">
+            <div class="card-header py-3 bg-gradient-primary text-white">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="fas fa-user-edit mr-2"></i> Formulaire d'ajout
+                </h6>
             </div>
-            <div class="card-body p-4 p-md-5">
+            <div class="card-body p-4">
                 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': '', 'id': 'user-form'}}) }}
                 
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.nom, {'attr': {'class': 'form-control floating-input', 'placeholder': ' '}}) }}
-                            {{ form_label(form.nom, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
+                <div class="row">
+                 <!-- Photo de profil -->
+                <div class="form-group">
+                    {{ form_label(form.imageUrl, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="image-upload-container" id="imageUploadContainer">
+                        <div class="image-upload-placeholder" id="imageUploadPlaceholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Glisser-déposer ou cliquer pour ajouter une image</p>
+                        </div>
+                        {% if form.vars.has_image %}
+                            <img id="image-preview" class="image-preview" src="{{ asset(form.vars.data.imageUrl) }}" alt="Aperçu de l'image" style="display: block;" />
+                        {% else %}
+                            <img id="image-preview" class="image-preview" src="#" alt="Aperçu de l'image" />
+                        {% endif %}
+                        {{ form_widget(form.imageUrl) }}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="form-text text-muted">Formats acceptés: JPG, PNG, WebP, GIF, SVG (max 2MB)</small>
+                        <button type="button" class="image-action-btn {{ form.vars.has_image ? 'remove-image' : 'add-image' }}" id="imageActionBtn">
+                            <i class="fas {{ form.vars.has_image ? 'fa-trash-alt' : 'fa-upload' }}"></i>
+                            {{ form.vars.has_image ? 'Supprimer l\'image' : 'Ajouter une image' }}
+                        </button>
+                    </div>
+                    <div class="image-error" id="imageError"></div>
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.imageUrl) }}
+                    </div>
+                </div>
+
+                    <!-- Left Column -->
+                    <div class="col-lg-6">
+                        <!-- Nom -->
+                        <div class="form-group">
+                            {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control' ~ (form.nom.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            <div class="invalid-feedback">
                                 {{ form_errors(form.nom) }}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control floating-input', 'placeholder': ' '}}) }}
-                            {{ form_label(form.prenom, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
+
+                        <!-- Prénom -->
+                        <div class="form-group">
+                            {{ form_label(form.prenom, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control' ~ (form.prenom.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            <div class="invalid-feedback">
                                 {{ form_errors(form.prenom) }}
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control floating-input', 'placeholder': ' '}}) }}
-                            {{ form_label(form.email, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
+                        <!-- Email -->
+                        <div class="form-group">
+                            {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            <div class="invalid-feedback">
                                 {{ form_errors(form.email) }}
-                            </div>
-                            <div class="valid-feedback animated-feedback">
-                                <i class="fas fa-check-circle me-1"></i> Email valide
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control floating-input datepicker', 'placeholder': ' '}}) }}
-                            {{ form_label(form.dateNaissance, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
+
+                    <!-- Right Column -->
+                    <div class="col-lg-6">
+                        <!-- Date de naissance -->
+                        <div class="form-group">
+                            {{ form_label(form.dateNaissance, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control' ~ (form.dateNaissance.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            <div class="invalid-feedback">
                                 {{ form_errors(form.dateNaissance) }}
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.password, {'attr': {'class': 'form-control floating-input password-input', 'placeholder': ' '}}) }}
-                            {{ form_label(form.password, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.password) }}
-                            </div>
-                            <div class="password-strength mt-2">
-                                <div class="progress" style="height: 5px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                                </div>
-                                <small class="form-text text-muted d-block mt-1">
-                                    <span class="password-strength-text">Faible</span>
-                                    <span class="float-end"><i class="fas fa-eye-slash toggle-password" style="cursor: pointer;"></i></span>
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.role, {'attr': {'class': 'form-select floating-input role-select', 'placeholder': ' '}}) }}
-                            {{ form_label(form.role, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
+                        <!-- Rôle -->
+                        <div class="form-group">
+                            {{ form_label(form.role, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.role, {'attr': {'class': 'form-control' ~ (form.role.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            <div class="invalid-feedback">
                                 {{ form_errors(form.role) }}
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="form-floating mb-4 floating-label-group" id="specialite_container" style="display: none;">
-                    {{ form_widget(form.specialite, {'attr': {'class': 'form-control floating-input', 'placeholder': ' '}}) }}
-                    {{ form_label(form.specialite, null, {'label_attr': {'class': 'floating-label'}}) }}
-                    <div class="invalid-feedback animated-feedback">
-                        {{ form_errors(form.specialite) }}
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-semibold d-flex align-items-center">
-                        <i class="fas fa-camera me-2"></i> Photo de profil
-                        <span class="badge bg-secondary-subtle text-secondary ms-2">Optionnel</span>
-                    </label>
-                    <div class="file-upload-wrapper">
-                        <div class="dropzone" id="imageDropzone">
-                            <div class="dz-message" data-dz-message>
-                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                                <h5>Glissez-déposez votre image ici</h5>
-                                <span class="text-muted">ou cliquez pour sélectionner</span>
+                        <!-- Spécialité (conditionnelle) -->
+                        <div class="form-group" id="specialite-container" style="display: none;">
+                            {{ form_label(form.specialite, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.specialite, {'attr': {'class': 'form-control' ~ (form.specialite.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.specialite) }}
                             </div>
-                            {{ form_widget(form.imageUrl, {'attr': {'class': 'd-none'}}) }}
-                        </div>
-                        <div class="mt-3 text-center position-relative">
-                            <img id="image-preview" class="rounded-circle shadow object-fit-cover preview-image" alt="Aperçu de l'image">
-                            <button id="remove-image" class="btn btn-danger btn-sm rounded-circle position-absolute remove-image-btn">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="form-text text-muted mt-2">
-                            Formats acceptés: JPG, PNG, WebP, GIF (max 2Mo)
                         </div>
                     </div>
-                    <div class="invalid-feedback" id="image-error"></div>
+                    
+                    <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            {{ form_label(form.password, null, {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.password, {'attr': {
+                                    'class': 'form-control' ~ (form.password.vars.errors|length ? ' is-invalid' : ''),
+                                    'data-toggle': 'password'
+                                }}) }}
+                                <div class="input-group-append">
+                                    <span class="input-group-text password-toggle">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.password) }}
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 caractères</small>
+                            <div class="password-strength mt-2">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="strength-text">Force du mot de passe: <span class="strength-value">Faible</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 </div>
 
-                <div class="d-flex justify-content-end mt-5">
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 py-2 shadow-sm hover-scale">
-                        <i class="fas fa-save me-2"></i>Enregistrer
+              
+                
+
+               
+                <!-- Bouton de soumission -->
+                <div class="form-group mt-5">
+                    <button type="submit" class="btn btn-primary btn-icon-split shadow">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-save"></i>
+                        </span>
+                        <span class="text">Enregistrer</span>
                     </button>
                 </div>
 
@@ -165,243 +421,107 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-        
-        .text-gradient {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-        }
-        
-        .glass-morphism {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        
-        .card {
-            border-radius: 1rem;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-        
-        .floating-label-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-        
-        .floating-input:focus ~ .floating-label,
-        .floating-input:not(:placeholder-shown) ~ .floating-label {
-            top: -10px;
-            left: 15px;
-            font-size: 12px;
-            opacity: 1;
-            background: white;
-            padding: 0 5px;
-            color: #667eea;
-        }
-        
-        .floating-label {
-            position: absolute;
-            top: 50%;
-            left: 15px;
-            transform: translateY(-50%);
-            transition: all 0.3s ease;
-            pointer-events: none;
-            color: #6c757d;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-        }
-        
-        .file-upload-wrapper {
-            position: relative;
-        }
-        
-        .dropzone {
-            border: 2px dashed #d1d5db;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background-color: #f8f9fa;
-        }
-        
-        .dropzone:hover, .dropzone.dz-drag-hover {
-            border-color: #667eea;
-            background-color: #f0f5ff;
-        }
-        
-        .dropzone.dz-drag-hover {
-            background-color: #e6f0ff;
-        }
-        
-        .invalid-feedback {
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-        
-        .animated-feedback {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .is-invalid ~ .invalid-feedback {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-        
-        .btn-primary:hover::after {
-            transform: translateX(0);
-        }
-        
-        .preview-image {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-            border: 3px solid #fff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-        
-        .remove-image-btn {
-            width: 30px;
-            height: 30px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            top: 10px;
-            right: calc(50% - 75px);
-            border: 2px solid #fff;
-        }
-        
-        .remove-image-btn:hover {
-            background-color: #dc3545 !important;
-        }
-        
-        .dz-message h5 {
-            margin-bottom: 0.5rem;
-            color: #495057;
-        }
-        
-        .dz-message span {
-            font-size: 0.875rem;
-            color: #6c757d;
-        }
-        
-        .hover-scale {
-            transition: transform 0.3s ease;
-        }
-        
-        .hover-scale:hover {
-            transform: scale(1.05);
-        }
-        
-        .floating-alert {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1100;
-            animation: slideIn 0.5s forwards, fadeOut 0.5s 3s forwards;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        .password-strength .progress-bar {
-            transition: width 0.5s ease, background-color 0.5s ease;
-        }
-        
-        .datepicker {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 16px 16px;
-        }
-    </style>
-
+{% block javascripts %}
+    {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Gestion de la spécialité selon le rôle
-            const roleSelect = document.querySelector('#user_role');
-            const specialiteContainer = document.querySelector('#specialite_container');
-            
-            const toggleSpecialite = () => {
-                const isEntraineur = roleSelect.value === 'entraineur';
-                specialiteContainer.style.display = isEntraineur ? 'block' : 'none';
-                document.querySelector('#user_specialite').required = isEntraineur;
-            };
+            // Afficher/masquer la spécialité selon le rôle
+            const roleSelect = document.getElementById('user_role');
+            const specialiteContainer = document.getElementById('specialite-container');
+
+            function toggleSpecialite() {
+                if (roleSelect.value === 'entraineur') {
+                    specialiteContainer.style.display = 'block';
+                    document.getElementById('user_specialite').required = true;
+                } else {
+                    specialiteContainer.style.display = 'none';
+                    document.getElementById('user_specialite').required = false;
+                }
+            }
 
             roleSelect.addEventListener('change', toggleSpecialite);
             toggleSpecialite();
 
-            // Gestion de l'upload d'image
-            const imageInput = document.querySelector('#user_imageUrl');
-            const imagePreview = document.querySelector('#image-preview');
-            const removeImageBtn = document.querySelector('#remove-image');
-            const dropzone = document.querySelector('#imageDropzone');
-            const imageError = document.querySelector('#image-error');
+            // Basculer la visibilité du mot de passe
+            const passwordInput = document.querySelector('[data-toggle="password"]');
+            const passwordToggle = document.querySelector('.password-toggle');
 
-            // Initialisation si image existante
-            if (imageInput.files.length > 0) {
-                updateImagePreview();
+            if (passwordToggle) {
+                passwordToggle.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
             }
 
-            // Gestion du click sur la dropzone
-            dropzone.addEventListener('click', () => imageInput.click());
-            
-            // Gestion du drag and drop
+            // Force du mot de passe
+            if (passwordInput) {
+                const progressBar = document.querySelector('.progress-bar');
+                const strengthValue = document.querySelector('.strength-value');
+
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    let strength = 0;
+
+                    if (password.length >= 8) strength += 1;
+                    if (password.length >= 12) strength += 1;
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    if (/[0-9]/.test(password)) strength += 1;
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+                    const width = strength * 20;
+                    progressBar.style.width = `${width}%`;
+
+                    let color, text;
+                    if (strength <= 1) {
+                        color = '#e74a3b';
+                        text = 'Faible';
+                    } else if (strength <= 3) {
+                        color = '#f6c23e';
+                        text = 'Moyen';
+                    } else {
+                        color = '#1cc88a';
+                        text = 'Fort';
+                    }
+
+                    progressBar.style.backgroundColor = color;
+                    strengthValue.textContent = text;
+                    strengthValue.style.color = color;
+                });
+            }
+
+            // Image Upload Handling (Click and Drag-and-Drop)
+            const imageInput = document.getElementById('user_imageUrl');
+            const imagePreview = document.getElementById('image-preview');
+            const imageUploadContainer = document.getElementById('imageUploadContainer');
+            const imageUploadPlaceholder = document.getElementById('imageUploadPlaceholder');
+            const imageActionBtn = document.getElementById('imageActionBtn');
+            const imageError = document.getElementById('imageError');
+
+            // Method 1: Click to Upload
+            imageActionBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (this.classList.contains('add-image')) {
+                    imageInput.click();
+                } else {
+                    // Remove image
+                    imageInput.value = '';
+                    imagePreview.src = '#';
+                    imagePreview.style.display = 'none';
+                    imageUploadPlaceholder.style.display = 'block';
+                    this.classList.remove('remove-image');
+                    this.classList.add('add-image');
+                    this.innerHTML = '<i class="fas fa-upload"></i> Ajouter une image';
+                    imageError.style.display = 'none';
+                }
+            });
+
+            // Method 2: Drag-and-Drop
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, preventDefaults, false);
+                imageUploadContainer.addEventListener(eventName, preventDefaults, false);
             });
 
             function preventDefaults(e) {
@@ -410,155 +530,78 @@
             }
 
             ['dragenter', 'dragover'].forEach(eventName => {
-                dropzone.addEventListener(eventName, highlight, false);
+                imageUploadContainer.addEventListener(eventName, () => {
+                    imageUploadContainer.classList.add('dragover');
+                }, false);
             });
 
             ['dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, unhighlight, false);
+                imageUploadContainer.addEventListener(eventName, () => {
+                    imageUploadContainer.classList.remove('dragover');
+                }, false);
             });
 
-            function highlight() {
-                dropzone.classList.add('dz-drag-hover');
-            }
-
-            function unhighlight() {
-                dropzone.classList.remove('dz-drag-hover');
-            }
-
-            dropzone.addEventListener('drop', handleDrop, false);
+            imageUploadContainer.addEventListener('drop', handleDrop, false);
 
             function handleDrop(e) {
                 const dt = e.dataTransfer;
                 const files = dt.files;
-                
                 if (files.length) {
                     handleFiles(files);
                 }
             }
 
+            // Click-to-Upload also triggers this
+            imageInput.addEventListener('change', function() {
+                if (this.files.length) {
+                    handleFiles(this.files);
+                }
+            });
+
             function handleFiles(files) {
                 const file = files[0];
-                
-                // Validation du type de fichier
-                if (!file.type.match('image.*')) {
-                    showImageError('Veuillez sélectionner un fichier image valide');
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+                const maxSize = 2 * 1024 * 1024; // 2MB
+
+                // Validation
+                if (!allowedTypes.includes(file.type)) {
+                    showImageError('Veuillez sélectionner un fichier image valide (JPEG, PNG, WebP, GIF, SVG).');
                     return;
                 }
-                
-                // Validation de la taille
-                if (file.size > 2 * 1024 * 1024) {
-                    showImageError('La taille de l\'image ne doit pas dépasser 2MB');
+
+                if (file.size > maxSize) {
+                    showImageError('La taille de l\'image ne doit pas dépasser 2MB.');
                     return;
                 }
-                
+
                 imageInput.files = files;
-                updateImagePreview();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    imageUploadPlaceholder.style.display = 'none';
+                    imageActionBtn.classList.remove('add-image');
+                    imageActionBtn.classList.add('remove-image');
+                    imageActionBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Supprimer l\'image';
+                    imageError.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
             }
 
             function showImageError(message) {
                 imageError.textContent = message;
                 imageError.style.display = 'block';
-                setTimeout(() => {
-                    imageError.style.opacity = '1';
-                }, 10);
-            }
-
-            function hideImageError() {
-                imageError.style.opacity = '0';
-                setTimeout(() => {
-                    imageError.style.display = 'none';
-                }, 300);
-            }
-
-            imageInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    handleFiles(this.files);
-                }
-            });
-
-            function updateImagePreview() {
-                const file = imageInput.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.style.display = 'block';
-                        removeImageBtn.style.display = 'flex';
-                        hideImageError();
-                    };
-                    
-                    reader.readAsDataURL(file);
-                }
-            }
-
-            removeImageBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                imageInput.value = '';
-                imagePreview.style.display = 'none';
-                this.style.display = 'none';
-            });
-
-            // Gestion de la force du mot de passe
-            const passwordInput = document.querySelector('.password-input');
-            if (passwordInput) {
-                const progressBar = document.querySelector('.password-strength .progress-bar');
-                const strengthText = document.querySelector('.password-strength-text');
-                
-                passwordInput.addEventListener('input', function() {
-                    const password = this.value;
-                    let strength = 0;
-                    
-                    if (password.length >= 8) strength += 1;
-                    if (password.length >= 12) strength += 1;
-                    if (/[A-Z]/.test(password)) strength += 1;
-                    if (/[0-9]/.test(password)) strength += 1;
-                    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-                    
-                    const width = strength * 20;
-                    progressBar.style.width = `${width}%`;
-                    
-                    let color, text;
-                    if (strength <= 1) {
-                        color = '#dc3545';
-                        text = 'Faible';
-                    } else if (strength <= 3) {
-                        color = '#fd7e14';
-                        text = 'Moyen';
-                    } else {
-                        color = '#28a745';
-                        text = 'Fort';
-                    }
-                    
-                    progressBar.style.backgroundColor = color;
-                    strengthText.textContent = text;
-                    strengthText.style.color = color;
-                });
-            }
-
-            // Basculer la visibilité du mot de passe
-            const togglePassword = document.querySelector('.toggle-password');
-            if (togglePassword) {
-                togglePassword.addEventListener('click', function() {
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
-                    this.classList.toggle('fa-eye-slash');
-                    this.classList.toggle('fa-eye');
-                });
             }
 
             // Validation du formulaire
-            const form = document.querySelector('#user-form');
-            if (form) {
-                form.addEventListener('submit', function(event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    
-                    form.classList.add('was-validated');
-                }, false);
-            }
+            const form = document.getElementById('user-form');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
         });
     </script>
 {% endblock %}

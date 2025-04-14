@@ -61,6 +61,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->entaineur = new ArrayCollection();
+        $this->role = Role::SPORTIF->value;  // Vous pouvez choisir un autre rôle par défaut ici
+
     }
 
     public function getId(): ?int
@@ -181,16 +183,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRole(): Role
+    public function getRole(): string
     {
-        return $this->role;
+        return match (true) {
+            $this instanceof \App\Entity\Admin => 'admin',
+            $this instanceof \App\Entity\Sportif => 'sportif',
+            $this instanceof \App\Entity\ResponsableSalle => 'responsable_salle',
+            $this instanceof \App\Entity\Entraineur => 'entraineur',
+            default => 'utilisateur',
+        };
     }
+    
 
     public function setRole(Role $role): static
     {
         $this->role = $role;
         return $this;
     }
+    
 
     public function getRoles(): array
     {
@@ -200,6 +210,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $this instanceof \App\Entity\ResponsableSalle => ['ROLE_RESPONSABLE_SALLE'],
             $this instanceof \App\Entity\Entraineur => ['ROLE_ENTRAINEUR'],
             default => ['ROLE_USER'],
+        };
+    }
+    public function getEnumRole(): Role
+    {
+        return match (true) {
+            $this instanceof \App\Entity\Admin => Role::ADMIN,
+            $this instanceof \App\Entity\Sportif => Role::SPORTIF,
+            $this instanceof \App\Entity\ResponsableSalle => Role::RESPONSABLE_SALLE,
+            $this instanceof \App\Entity\Entraineur => Role::ENTRAINEUR,
+            default => Role::UTILISATEUR,
         };
     }
     public function eraseCredentials(): void

@@ -66,16 +66,17 @@
                                     <td>{{ user.nom|capitalize }}</td>
                                     <td>{{ user.prenom|capitalize }}</td>
                                     <td>{{ user.email }}</td>
-                                    <td>
-                                        <span class="badge
-                                            {% if user.role == 'admin' %}bg-danger
-                                            {% elseif user.role == 'entraineur' %}bg-warning
-                                            {% elseif user.role == 'sportif' %}bg-primary
-                                            {% elseif user.role == 'responsable_salle' %}bg-info
-                                            {% else %}bg-secondary{% endif %}">
-                                            {{ user.role|capitalize }}
-                                        </span>
-                                    </td>
+                                   <td>
+    <span class="badge
+        {% if user.role == 'admin' %}bg-danger
+        {% elseif user.role == 'entraineur' %}bg-warning
+        {% elseif user.role == 'sportif' %}bg-primary
+        {% elseif user.role == 'responsable_salle' %}bg-info
+        {% else %}bg-secondary{% endif %}">
+        {{ user.role|capitalize }}
+    </span>
+</td>
+
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
                                             <a href="{{ path('user_show', {'id': user.id}) }}"
