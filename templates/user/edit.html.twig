@@ -1,236 +1,143 @@
 {% extends 'admin/homepageadmin.html.twig' %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block title %}Modifier un utilisateur{% endblock %}
 
 {% block body %}
-    <div class="container-fluid px-4">
-        {# Header Section #}
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <div>
-                <h1 class="fw-bold mb-2">{{ page_title }}</h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ path('user_index') }}">Users</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Edit</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
+    <div class="container-fluid px-4 py-5">
+        <h1 class="fw-bold mb-4 text-primary"><i class="fas fa-user-edit me-2"></i>Modifier un utilisateur</h1>
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-light p-2 rounded shadow-sm">
+                <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('user_index') }}" class="text-decoration-none">Utilisateurs</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+            </ol>
+        </nav>
 
-        {# Flash Messages #}
         {% for label, messages in app.flashes %}
-    {% for message in messages %}
-        <div class="alert alert-{{ label }}">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endfor %}
-        {# Main Form Card #}
-        <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
-            <div class="card-header bg-primary text-white py-3">
-                <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i> User Information</h5>
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-gradient-primary text-white py-3 rounded-top-4">
+                <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Modifier {{ user.prenom }} {{ user.nom }}</h5>
             </div>
-            
-            <div class="card-body p-4 p-md-5">
-                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-
-                {# Personal Information Section #}
+            <div class="card-body p-5">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
+                
                 <div class="row g-4 mb-4">
-                    <div class="col-12">
-                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-id-card me-2"></i> Personal Information</h6>
-                    </div>
-                    
                     <div class="col-md-6">
-                        <div class="form-floating">
-                            {{ form_widget(form.nom, {
-                                'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Nom',
-                                    'required': 'required'
-                                }
-                            }) }}
-                            {{ form_label(form.nom) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.nom) }}
+                        <div class="form-group position-relative">
+                            {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+                                {{ form_widget(form.nom) }}
                             </div>
+                            <div class="invalid-feedback mt-1"></div>
+                            {{ form_errors(form.nom) }}
                         </div>
                     </div>
-                    
                     <div class="col-md-6">
-                        <div class="form-floating">
-                            {{ form_widget(form.prenom, {
-                                'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Prénom',
-                                    'required': 'required'
-                                }
-                            }) }}
-                            {{ form_label(form.prenom) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.prenom) }}
+                        <div class="form-group position-relative">
+                            {{ form_label(form.prenom, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+                                {{ form_widget(form.prenom) }}
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            {{ form_widget(form.email, {
-                                'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Email',
-                                    'required': 'required'
-                                }
-                            }) }}
-                            {{ form_label(form.email) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.email) }}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            {{ form_widget(form.dateNaissance, {
-                                'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Date de naissance',
-                                    'required': 'required'
-                                }
-                            }) }}
-                            {{ form_label(form.dateNaissance) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.dateNaissance) }}
-                            </div>
+                            <div class="invalid-feedback mt-1"></div>
+                            {{ form_errors(form.prenom) }}
                         </div>
                     </div>
                 </div>
 
-                {# Account Security Section #}
                 <div class="row g-4 mb-4">
-                    <div class="col-12">
-                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-lock me-2"></i> Account Security</h6>
-                    </div>
-                    
                     <div class="col-md-6">
-                        <div class="form-floating">
-                            {{ form_widget(form.password, {
-                                'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Password',
-                                    'autocomplete': 'new-password'
-                                }
-                            }) }}
-                            {{ form_label(form.password) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.password) }}
+                        <div class="form-group position-relative">
+                            <label class="form-label fw-semibold">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-envelope"></i></span>
+                                <input type="text" class="form-control" value="{{ user.email }}" readonly>
                             </div>
-                            <small class="text-muted mt-1 d-block">Leave blank to keep current password</small>
                         </div>
                     </div>
-                    
                     <div class="col-md-6">
-                        <div class="form-floating">
-                            {{ form_widget(form.role, {
-                                'attr': {
-                                    'class': 'form-select',
-                                    'required': 'required'
-                                }
-                            }) }}
-                            {{ form_label(form.role) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.role) }}
+                        <div class="form-group position-relative">
+                            {{ form_label(form.dateNaissance, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-calendar-alt"></i></span>
+                                {{ form_widget(form.dateNaissance) }}
                             </div>
+                            <div class="invalid-feedback mt-1"></div>
+                            {{ form_errors(form.dateNaissance) }}
                         </div>
                     </div>
                 </div>
 
-                {# Profile Image Section #}
                 <div class="row g-4 mb-4">
-                    <div class="col-12">
-                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-image me-2"></i> Profile Image</h6>
-                        
-                        <div class="image-upload-container border rounded-3 p-4">
-                            <div class="image-preview-container text-center mb-4 position-relative" style="min-height: 200px;">
-                                {% if user.imageUrl %}
-                                    <img id="imagePreview" src="{{ asset('uploads/images/' ~ user.imageUrl) }}" 
-                                         class="img-fluid rounded-3 shadow-sm mx-auto d-block" 
-                                         style="max-height: 300px; object-fit: cover;">
-                                    <div id="placeholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light" style="display: none;">
-                                        <i class="fas fa-image fa-3x text-muted mb-3 d-block"></i>
-                                        <p class="text-muted mb-0">No image selected</p>
-                                    </div>
-                                {% else %}
-                                    <img id="imagePreview" src="" class="img-fluid rounded-3 shadow-sm mx-auto d-block" style="max-height: 300px; object-fit: cover; display: none;">
-                                    <div id="placeholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light">
-                                        <i class="fas fa-image fa-3x text-muted mb-3 d-block"></i>
-                                        <p class="text-muted mb-0">Drag & drop or click to upload</p>
-                                        <small class="text-muted">(Max 2MB, JPG/PNG/WEBP)</small>
-                                    </div>
-                                {% endif %}
+                    <div class="col-md-6">
+                        <div class="form-group position-relative">
+                            <label class="form-label fw-semibold">Mot de passe actuel</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
+                                <input type="text" class="form-control" value="{{ user.password|slice(0, 20) }}..." readonly>
                             </div>
-                            
-                            <div class="d-flex flex-column flex-md-row gap-3">
-                                <div class="flex-grow-1">
-                                    {{ form_widget(form.imageUrl, {
-                                        'attr': {
-                                            'class': 'form-control d-none',
-                                            'accept': 'image/jpeg,image/png,image/webp'
-                                        }
-                                    }) }}
-                                    <label for="{{ form.imageUrl.vars.id }}" class="btn btn-primary w-100 py-3 rounded-3">
-                                        <i class="fas fa-cloud-upload-alt me-2"></i> Choose Image
-                                    </label>
-                                </div>
-                                {% if user.imageUrl %}
-                                    <button type="button" id="removeImageBtn" class="btn btn-outline-danger py-3 rounded-3">
-                                        <i class="fas fa-trash-alt me-2"></i> Remove
-                                    </button>
-                                {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group position-relative">
+                            {{ form_label(form.role, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-users-cog"></i></span>
+                                {{ form_widget(form.role) }}
                             </div>
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.imageUrl) }}
-                            </div>
+                            <div class="invalid-feedback mt-1"></div>
+                            {{ form_errors(form.role) }}
                         </div>
                     </div>
                 </div>
 
-                {# Specialization Section (Conditional) #}
-                {% if form.specialite is defined %}
-                <div class="row g-4 mb-4">
-                    <div class="col-12">
-                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-certificate me-2"></i> Trainer Specialization</h6>
+                <div class="form-group mb-4" id="specialite_container" style="display: {% if form.role.vars.data == 'entraineur' %}block{% else %}none{% endif %};">
+                    {{ form_label(form.specialite, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fas fa-tools"></i></span>
+                        {{ form_widget(form.specialite) }}
                     </div>
-                    
-                    <div class="col-md-12">
-                        <div class="form-floating">
-                            {{ form_widget(form.specialite, {
-                                'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Specialization'
-                                }
-                            }) }}
-                            {{ form_label(form.specialite) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.specialite) }}
-                            </div>
+                    <div class="invalid-feedback mt-1"></div>
+                    {{ form_errors(form.specialite) }}
+                </div>
+
+                <div class="form-group mb-4">
+                    {{ form_label(form.imageUrl, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                    {% if user.imageUrl %}
+                        <div class="mb-2">
+                            <img src="{{ asset('uploads/users/' ~ user.imageUrl) }}"
+                                 class="rounded shadow-sm"
+                                 style="max-width: 200px;"
+                                 alt="Image actuelle">
                         </div>
+                    {% endif %}
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fas fa-image"></i></span>
+                        {{ form_widget(form.imageUrl) }}
+                    </div>
+                    <div class="invalid-feedback mt-1"></div>
+                    {{ form_errors(form.imageUrl) }}
+                    <div class="mt-3">
+                        <img id="image-preview" class="rounded shadow-sm" style="max-width: 200px; display: none;" alt="Aperçu de la nouvelle image">
                     </div>
                 </div>
-                {% endif %}
 
-                {# Form Actions #}
-                <div class="row g-4 mt-5">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-end gap-3">
-                            <a href="{{ path('user_index') }}" class="btn btn-outline-secondary px-4 py-2 rounded-3">
-                                <i class="fas fa-times me-2"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3" id="submitBtn">
-                                <i class="fas fa-save me-2"></i> Save Changes
-                            </button>
-                        </div>
-                    </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ path('user_index') }}" class="btn btn-outline-secondary btn-lg rounded-pill">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                        <i class="fas fa-save me-2"></i>Enregistrer
+                    </button>
                 </div>
 
                 {{ form_end(form) }}
@@ -238,152 +145,183 @@
         </div>
     </div>
 
-    {# Styles #}
     <style>
-        .form-floating label {
-            color: #6c757d;
-            padding: 1rem 0.75rem;
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #00bcd4);
         }
-        
-        .form-control, .form-select {
-            border-radius: 0.375rem;
-            padding: 1rem 0.75rem;
-            border: 1px solid #dee2e6;
-            transition: all 0.15s ease-in-out;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-        
-        .image-upload-container {
-            background-color: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-        
-        .image-upload-container:hover {
-            background-color: #f1f8ff;
-        }
-        
-        .invalid-feedback {
-            font-size: 0.85rem;
-        }
-        
-        .was-validated .form-control:invalid, 
-        .was-validated .form-control:invalid:focus {
+        .form-control.is-invalid, .form-select.is-invalid {
             border-color: #dc3545;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+            background-image: none;
         }
-        
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            display: block;
+        }
+        .input-group .form-control.is-invalid {
+            z-index: 0;
+        }
         .card {
-            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+        }
+        .form-group .invalid-feedback:empty {
+            display: none;
         }
     </style>
 
-    {# JavaScript #}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Image Upload Handling
-        const imageInput = document.getElementById('{{ form.imageUrl.vars.id }}');
-        const imagePreview = document.getElementById('imagePreview');
-        const placeholderText = document.getElementById('placeholderText');
-        const removeImageBtn = document.getElementById('removeImageBtn');
-        const previewContainer = document.querySelector('.image-preview-container');
-        
-        // Handle image selection
-        imageInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('File is too large. Max size is 2MB.');
-                    return;
-                }
-                
-                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-                    alert('Only JPG, PNG, and WEBP images are allowed.');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    placeholderText.style.display = 'none';
-                    if (removeImageBtn) removeImageBtn.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            }
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('.needs-validation');
+            const inputs = form.querySelectorAll('[data-validate="true"]');
+            const specialiteContainer = document.querySelector('#specialite_container');
+            const roleSelect = document.querySelector('#user_role');
+            const imageInput = document.querySelector('#user_imageUrl');
+            const imagePreview = document.querySelector('#image-preview');
 
-        // Handle image removal
-        if (removeImageBtn) {
-            removeImageBtn.addEventListener('click', function() {
-                imageInput.value = '';
-                imagePreview.src = '';
-                imagePreview.style.display = 'none';
-                placeholderText.style.display = 'block';
-                this.style.display = 'none';
-                
-                // Add hidden field to indicate image removal
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'remove_image';
-                input.value = '1';
-                form.appendChild(input);
+            // Toggle specialite field
+            const toggleSpecialite = () => {
+                const isEntraineur = roleSelect.value === 'entraineur';
+                specialiteContainer.style.display = isEntraineur ? 'block' : 'none';
+                const specialiteInput = document.querySelector('#specialite_field');
+                if (specialiteInput) specialiteInput.required = isEntraineur;
+                if (!isEntraineur && specialiteInput) {
+                    specialiteInput.classList.remove('is-invalid');
+                    specialiteInput.closest('.form-group').querySelector('.invalid-feedback').textContent = '';
+                }
+            };
+
+            roleSelect.addEventListener('change', () => {
+                toggleSpecialite();
+                validateField(roleSelect);
             });
-        }
+            toggleSpecialite();
 
-        // Drag and drop functionality
-        previewContainer.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            previewContainer.classList.add('border-primary');
-            placeholderText.innerHTML = '<i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3 d-block"></i><p class="text-primary">Drop image here</p>';
-        });
+            // Validation function
+            const validateField = async (input) => {
+                const errorElement = input.closest('.form-group').querySelector('.invalid-feedback');
+                const name = input.id.replace('user_', '');
+                errorElement.textContent = '';
 
-        previewContainer.addEventListener('dragleave', () => {
-            previewContainer.classList.remove('border-primary');
-            if (!imageInput.files.length && !imagePreview.src) {
-                placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
-            }
-        });
-
-        previewContainer.addEventListener('drop', (e) => {
-            e.preventDefault();
-            previewContainer.classList.remove('border-primary');
-
-            if (e.dataTransfer.files.length) {
-                imageInput.files = e.dataTransfer.files;
-                const event = new Event('change');
-                imageInput.dispatchEvent(event);
-            }
-        });
-
-        // Form validation
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            form.classList.add('was-validated');
-            
-            if (!form.checkValidity()) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Focus on first invalid field
-                const firstInvalid = form.querySelector(':invalid');
-                if (firstInvalid) {
-                    firstInvalid.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
-                    });
-                    firstInvalid.focus();
+                if (name === 'nom' || name === 'prenom') {
+                    if (!input.value.trim()) {
+                        input.classList.add('is-invalid');
+                        errorElement.textContent = `Le ${name} est requis.`;
+                    } else if (input.value.length > 50) {
+                        input.classList.add('is-invalid');
+                        errorElement.textContent = `Le ${name} ne peut dépasser 50 caractères.`;
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                } else if (name === 'dateNaissance') {
+                    if (!input.value) {
+                        input.classList.add('is-invalid');
+                        errorElement.textContent = 'La date de naissance est requise.';
+                    } else {
+                        const birthDate = new Date(input.value);
+                        const today = new Date();
+                        let age = today.getFullYear() - birthDate.getFullYear();
+                        const monthDiff = today.getMonth() - birthDate.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                        if (age < 12) {
+                            input.classList.add('is-invalid');
+                            errorElement.textContent = 'Vous devez avoir au moins 12 ans.';
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    }
+                } else if (name === 'role') {
+                    if (!input.value) {
+                        input.classList.add('is-invalid');
+                        errorElement.textContent = 'Le rôle est requis.';
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                } else if (name === 'specialite_field') {
+                    if (roleSelect.value === 'entraineur') {
+                        if (!input.value.trim()) {
+                            input.classList.add('is-invalid');
+                            errorElement.textContent = 'La spécialité est requise pour les entraîneurs.';
+                        } else if (input.value.length > 100) {
+                            input.classList.add('is-invalid');
+                            errorElement.textContent = 'La spécialité ne peut dépasser 100 caractères.';
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                } else if (name === 'imageUrl') {
+                    const file = input.files[0];
+                    if (file) {
+                        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                        if (!validTypes.includes(file.type)) {
+                            input.classList.add('is-invalid');
+                            errorElement.textContent = 'Veuillez uploader une image valide (JPEG, PNG, WebP).';
+                        } else if (file.size > 2 * 1024 * 1024) {
+                            input.classList.add('is-invalid');
+                            errorElement.textContent = 'L\'image ne doit pas dépasser 2 Mo.';
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
                 }
-            } else {
-                // Disable submit button to prevent double submission
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Saving...';
-            }
-        }, false);
-    });
+            };
+
+            // Validate on blur and input
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => validateField(input));
+                if (input.type !== 'file') {
+                    input.addEventListener('input', () => validateField(input));
+                } else {
+                    input.addEventListener('change', () => validateField(input));
+                }
+            });
+
+            // Image preview
+            imageInput.addEventListener('change', () => {
+                validateField(imageInput);
+                const file = imageInput.files[0];
+                if (file && !imageInput.classList.contains('is-invalid')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.src = '';
+                    imagePreview.style.display = 'none';
+                }
+            });
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                let hasErrors = false;
+                for (const input of inputs) {
+                    await validateField(input);
+                    if (input.classList.contains('is-invalid')) {
+                        hasErrors = true;
+                    }
+                }
+                if (hasErrors) {
+                    e.preventDefault();
+                    const firstError = form.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.focus();
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+        });
     </script>
 {% endblock %}

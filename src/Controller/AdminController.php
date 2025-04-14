@@ -54,10 +54,18 @@ final class AdminController extends AbstractController
        }
 
 
-       #[Route('/profile', name:'app_profile')]
-      public function profile()
-      {
-    
+       #[Route('/profile', name: 'app_profile')]
+       public function profile(): Response
+       {
+           $user = $this->getUser();
+           if (!$user) {
+               throw $this->createAccessDeniedException('Vous devez être connecté pour voir votre profil.');
+           }
+   
+           return $this->render('user/show.html.twig', [
+               'user' => $user,
+               'page_title' => 'Mon Profil'
+           ]);
        }
        #[Route('/login', name:'app_login')]
       public function login()

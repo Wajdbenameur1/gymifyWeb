@@ -14,12 +14,13 @@ class Entraineur extends User
   // Spécialité de l'entraîneur, optionnelle
 
     // Le constructeur définit le rôle d'Entraîneur
-    public function __construct()
-    {
-        // Appel du constructeur parent pour initialiser les propriétés héritées de User
-        parent::__construct();
-        $this->setRole(\App\Enum\Role::ENTRAINEUR); // Assurez-vous que Role::ENTRAINEUR est valide
-    }
+   
+            public function __construct()
+            {
+                parent::__construct();
+                $this->setRole('entraineur'); // Sets role to 'admin', which getRoles() will transform to ROLE_ADMIN
+            }
+    
 
     // Getter pour la spécialité
     public function getSpecialite(): ?string
