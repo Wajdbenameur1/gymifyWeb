@@ -9,16 +9,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ResponsableSalleRepository::class)]
 class ResponsableSalle extends User
 {
-<<<<<<< HEAD
-  
-    public function __construct()
-    {
-        parent::__construct();
-        $this->setRole('responsable_salle'); // Sets role to 'admin', which getRoles() will transform to ROLE_ADMIN
-    }
-    
-} 
-=======
     #[ORM\OneToOne(mappedBy: 'responsable', targetEntity: Salle::class)]
     private ?Salle $salle = null;
 
@@ -26,8 +16,7 @@ class ResponsableSalle extends User
     {
         parent::__construct();
         // Passez l'objet Role::SPORTIF ici
-        $this->setRole(\App\Enum\Role::RESPONSABLESALLE); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
-        $this->setRole(Role::RESPONSABLE_SALLE);  // Définit le rôle comme responsable de salle
+       $this->setRole(Role::RESPONSABLE_SALLE);  // Définit le rôle comme responsable de salle
     }
 
     /**
@@ -62,4 +51,4 @@ class ResponsableSalle extends User
         return $this;
     }
 }
->>>>>>> 16960c84429d02f49257e87628dc1f67241c901c
+
