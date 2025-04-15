@@ -9,6 +9,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
+
+
 #[ORM\Entity(repositoryClass: ActivityRepository::class)]
 class Activité
 {
@@ -18,22 +22,32 @@ class Activité
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+
+    #[Assert\NotBlank(message: "Le nom de l'activité ne peut pas être vide")]
+
     private ?string $nom = null;
 
     #[ORM\Column(length: 300)]
+    #[Assert\NotBlank(message: "La description ne peut pas être vide")]
+
     private ?string $description = null;
 
     #[ORM\Column(length: 200)]
+    #[Assert\NotBlank(message: "L'URL ne peut pas être vide")]
+
     private ?string $url = null;
 
     #[ORM\Column(type: 'string',enumType: ActivityType::class,columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')")]
     private ?ActivityType $type = null;
 
+
+
     /**
      * @var Collection<int, abonnement>
      */
-    #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'activite')]
-    private Collection $activite;
+    #[ORM\OneToMany(mappedBy: 'activite', targetEntity: Abonnement::class)]
+    private Collection $abonnements;
+
 
     /**
      * @var Collection<int, cours>
@@ -44,7 +58,11 @@ class Activité
     public function __construct()
     {
         $this->activite = new ArrayCollection();
+
         $this->activité = new ArrayCollection();
+
+        $this->abonnements = new ArrayCollection();
+
     }
 
     public function getId(): ?int
@@ -155,4 +173,30 @@ class Activité
 
         return $this;
     }
+
+ 
+    public function getAbonnements(): Collection
+    {
+        return $this->abonnements;
+    }
+
+    public function addAbonnement(Abonnement $abonnement): static
+    {
+        if (!$this->abonnements->contains($abonnement)) {
+            $this->abonnements->add($abonnement);
+            $abonnement->setActivite($this);
+        }
+        return $this;
+    }
+
+    public function removeAbonnement(Abonnement $abonnement): static
+    {
+        if ($this->abonnements->removeElement($abonnement)) {
+            if ($abonnement->getActivite() === $this) {
+                $abonnement->setActivite(null);
+            }
+        }
+        return $this;
+    }
+
 }

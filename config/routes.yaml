@@ -3,3 +3,15 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+<<<<<<< HEAD
+=======
+app_login:
+    path: /login
+    controller: App\Controller\SecurityController::login
+
+app_logout:
+    path: /logout
+    controller: App\Controller\SecurityController::logout
+
+
+>>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
