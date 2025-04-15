@@ -149,16 +149,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getSpecialite(): ?string
-    {
-        return $this->specialite;
-    }
-
-    public function setSpecialite(?string $specialite): static
-    {
-        $this->specialite = $specialite;
-        return $this;
-    }
+    
 
     /**
      * @return Collection<int, Cours>
@@ -185,8 +176,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    return $this;
-}
+  
+
 public function getRole(): Role
 {
     return match (true) {
