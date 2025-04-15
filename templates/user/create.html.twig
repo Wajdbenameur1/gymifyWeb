@@ -354,14 +354,15 @@
                             </div>
                         </div>
 
-                        <!-- Rôle -->
-                        <div class="form-group">
-                            {{ form_label(form.role, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.role, {'attr': {'class': 'form-control' ~ (form.role.vars.errors|length ? ' is-invalid' : '')}}) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.role) }}
-                            </div>
-                        </div>
+                     <!-- Rôle -->
+<div class="form-group">
+    {{ form_label(form.role, null, {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.role, {'attr': {'class': 'form-control' ~ (form.role.vars.errors|length ? ' is-invalid' : '')}}) }}
+    <div class="invalid-feedback">
+        {{ form_errors(form.role) }}
+    </div>
+</div>
+
 
                         <!-- Spécialité (conditionnelle) -->
                         <div class="form-group" id="specialite-container" style="display: none;">

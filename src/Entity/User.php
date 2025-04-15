@@ -54,14 +54,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
     private Collection $entaineur;
 
-   
+
     #[ORM\ManyToOne(inversedBy: 'equipes')]
     private ?Equipe $equipe = null;
 
     public function __construct()
     {
         $this->entaineur = new ArrayCollection();
-        $this->role = Role::SPORTIF->value;  // Vous pouvez choisir un autre rôle par défaut ici
+   
 
     }
 
@@ -195,11 +195,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
     
 
-    public function setRole(Role $role): static
-    {
-        $this->role = $role;
-        return $this;
-    }
+  
+public function setRole(Role $role): self
+{
+    $this->role = $role;
+    return $this;
+}
     
 
     public function getRoles(): array
@@ -212,16 +213,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             default => ['ROLE_USER'],
         };
     }
-    public function getEnumRole(): Role
-    {
-        return match (true) {
-            $this instanceof \App\Entity\Admin => Role::ADMIN,
-            $this instanceof \App\Entity\Sportif => Role::SPORTIF,
-            $this instanceof \App\Entity\ResponsableSalle => Role::RESPONSABLE_SALLE,
-            $this instanceof \App\Entity\Entraineur => Role::ENTRAINEUR,
-            default => Role::UTILISATEUR,
-        };
-    }
+
     public function eraseCredentials(): void
     {
         // No sensitive data to erase

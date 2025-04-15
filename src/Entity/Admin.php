@@ -1,5 +1,6 @@
 <?php
 namespace App\Entity;
+use App\Enum\Role;
 
 use App\Repository\AdminRepository;
 use Doctrine\ORM\Mapping as ORM;

@@ -97,25 +97,18 @@ class UserType extends AbstractType
                 'attr' => ['class' => 'form-control'],
             ])
             ->add('role', ChoiceType::class, [
-                'choices' => (function () use ($options) {
-                    $currentUserRole = $options['current_user_role'];
-                    if ($currentUserRole === Role::RESPONSABLE_SALLE) {
-                        return [
-                            Role::SPORTIF,
-                            Role::ENTRAINEUR,
-                        ];
-                    }
-                    return array_filter(Role::cases(), fn(Role $role) => $role !== Role::UTILISATEUR);
-                })(),
-                'choice_label' => fn(Role $role) => $role->label(),
-                'choice_value' => fn(?Role $role) => $role?->value,
-                'placeholder' => 'Sélectionner un rôle',
-                'required' => true,
-                'constraints' => [
-                    new NotBlank(['message' => 'Le rôle est requis.']),
+                'choices' => [
+                    'Sportif' => Role::SPORTIF,
+                    'Admin' => Role::ADMIN,
+                    'Responsable Salle' => Role::RESPONSABLE_SALLE,
+                    'Entraineur' => Role::ENTRAINEUR,
                 ],
-                'attr' => ['class' => 'form-control'],
+                'required' => true,
+                'choice_label' => function ($choice, $key, $value) {
+                    return $choice->value; // This will return the string value of the enum
+                },
             ])
+            
             ->add('specialite', TextType::class, [
                 'required' => false,
                 'constraints' => [

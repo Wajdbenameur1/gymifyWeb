@@ -67,14 +67,15 @@
                                     <td>{{ user.prenom|capitalize }}</td>
                                     <td>{{ user.email }}</td>
                                    <td>
-    <span class="badge
-        {% if user.role == 'admin' %}bg-danger
-        {% elseif user.role == 'entraineur' %}bg-warning
-        {% elseif user.role == 'sportif' %}bg-primary
-        {% elseif user.role == 'responsable_salle' %}bg-info
-        {% else %}bg-secondary{% endif %}">
-        {{ user.role|capitalize }}
-    </span>
+                                    <span class="badge
+    {% if user.role.value == 'admin' %}bg-danger
+    {% elseif user.role.value == 'entraineur' %}bg-warning
+    {% elseif user.role.value == 'sportif' %}bg-primary
+    {% elseif user.role.value == 'responsable_salle' %}bg-info
+    {% else %}bg-secondary{% endif %}">
+    {{ user.role.value|capitalize }}
+</span>
+
 </td>
 
                                     <td class="text-end">

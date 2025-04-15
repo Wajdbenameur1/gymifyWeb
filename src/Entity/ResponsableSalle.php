@@ -44,8 +44,7 @@ class ResponsableSalle extends User
 
         // Si la salle est assignée, nous nous assurons qu'elle est bien associée au responsable
         if ($salle !== null && $salle->getResponsable() !== $this) {
-            $salle->setResponsable($this);
-        }
+             }
 
         $this->salle = $salle;
         return $this;

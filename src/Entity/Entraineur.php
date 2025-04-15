@@ -18,7 +18,7 @@ class Entraineur extends User
             public function __construct()
             {
                 parent::__construct();
-                $this->setRole('entraineur'); // Sets role to 'admin', which getRoles() will transform to ROLE_ADMIN
+                $this->setRole(Role::ENTRAINEUR); // Sets role to 'admin', which getRoles() will transform to ROLE_ADMIN
             }
     
 
