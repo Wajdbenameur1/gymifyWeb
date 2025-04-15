@@ -3,24 +3,13 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <h1 class="fw-bold">{{ page_title }}</h1>
-    </div>
-
-    {# Flash messages #}
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="container-fluid">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+            <div>
+                <h3 class="fw-bold mb-3">{{ page_title }}</h3>
+                <h6 class="op-7 mb-2">Edit existing activity</h6>
+            </div>
         </div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    {% endfor %}
 
     <div class="card shadow-lg">
         <div class="card-body p-4">
@@ -156,7 +145,6 @@
             {{ form_end(form) }}
         </div>
     </div>
-</div>
 
 <style>
     .navbar-form.nav-search { display: none !important; }
@@ -212,9 +200,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const file = this.files[0];
             const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
             
-            if (!validTypes.includes(file.type)) {
-                showError(imageInput, 'activity.image.invalid_type');
-                return;
+            let errorElement = formGroup.querySelector('.invalid-feedback');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.className = 'invalid-feedback d-block';
+                formGroup.appendChild(errorElement);
             }
 
             const reader = new FileReader();
@@ -283,8 +273,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (errorElement) {
             errorElement.style.display = 'block';
             input.classList.add('is-invalid');
+            
+            if (input === imageInput) {
+                placeholderText.classList.add('border-danger');
+                placeholderText.innerHTML = '<i class="fas fa-exclamation-circle fa-3x text-danger mb-3 d-block"></i><p class="text-danger">' + message + '</p>';
+            }
         }
-    }
 
     function clearError(input) {
         const formGroup = input.closest('.mb-4') || input.closest('.image-upload-container');
@@ -316,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return false;
                 }
             }
+            clearError(input);
             return true;
         }
 
@@ -354,22 +349,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        if (!isValid) {
-            e.preventDefault();
-            const firstError = form.querySelector('.is-invalid');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        } else {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Saving...';
+        // Gestion du bouton de suppression
+        if (removeImageBtn) {
+            removeImageBtn.addEventListener('click', function() {
+                imageInput.value = '';
+                imagePreview.src = '';
+                imagePreview.style.display = 'none';
+                placeholderText.style.display = 'block';
+                this.style.display = 'none';
+                
+                // Ajouter un champ caché pour indiquer la suppression de l'image
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'remove_image';
+                input.value = '1';
+                form.appendChild(input);
+            });
         }
-    });
 
     // Real-time validation
     [nameInput, descInput].forEach(input => {
         input.addEventListener('blur', () => validateField(input));
     });
-});
-</script>
+    </script>
 {% endblock %}

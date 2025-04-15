@@ -81,7 +81,6 @@ final class PlanningController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
     #[Route('/planning/edit/{id}', name: 'app_planning_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Planning $planning, EntityManagerInterface $entityManager): Response
     {

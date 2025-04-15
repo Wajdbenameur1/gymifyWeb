@@ -13,9 +13,6 @@ use App\Repository\PlanningRepository;
 use App\Repository\ActivityRepository;
 use App\Repository\SalleRepository;
 use App\Repository\CoursRepository;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 
 
 
@@ -72,8 +69,7 @@ public function index(Request $request, CoursRepository $coursRepository,
         EntityManagerInterface $entityManager, $idPlanning = null,
         SalleRepository $salleRepository,
         PlanningRepository $planningRepository,
-        ActivityRepository $activityRepository,
-
+        ActivityRepository $activityRepository
     ): Response {
       $planning = $planningRepository->find($idPlanning);
 
@@ -97,11 +93,13 @@ public function index(Request $request, CoursRepository $coursRepository,
     PlanningRepository $planningRepo,
     ActivityRepository $activiteRepo,
     SalleRepository $salleRepo,
-    Security $security,
-    ValidatorInterface $validator,
     $idPlanning = null): Response {
     // 1. Vérifier l'utilisateur connecté
-    
+    /*$user = $this->getUser();
+    if (!$user) {
+        throw $this->createAccessDeniedException();
+    }*/
+
     // 2. Récupérer le planning
     $planning = $planningRepo->find($idPlanning);
     if (!$planning) {
@@ -109,10 +107,6 @@ public function index(Request $request, CoursRepository $coursRepository,
     }
 
     // 3. Créer le cours
-    /** @var User $user */
-    $user = $security->getUser();
-
-
     $cours = new Cours();
     $cours->setTitle($request->request->get('title'));
     $cours->setDescription($request->request->get('description'));
@@ -124,7 +118,7 @@ public function index(Request $request, CoursRepository $coursRepository,
     // 4. Associer les relations
     $cours->setActivité($activiteRepo->find($request->request->get('activite')));
     $cours->setSalle($salleRepo->find($request->request->get('salle')));
-    $cours->setEntaineur($user);
+    //$cours->setEntraineur($user);
     $cours->setPlanning($planning);
     $errors = $validator->validate($cours);
          if (count($errors) > 0) {
@@ -195,8 +189,7 @@ public function update(
     Cours $cours, 
     EntityManagerInterface $entityManager,
     ActivityRepository $activiteRepo,
-    SalleRepository $salleRepo,
-    ValidatorInterface $validator,
+    SalleRepository $salleRepo
 ): Response {
     // Récupérer les données du formulaire
     $title = $request->request->get('title');

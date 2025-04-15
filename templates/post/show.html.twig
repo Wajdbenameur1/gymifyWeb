@@ -1,0 +1,26 @@
+
+<h1>{{ post.title }}</h1>
+<p>{{ post.content }}</p>
+<p><strong>Imaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaage :</strong> {{ post.imageUrl }}</p>
+<p><strong>Date :</strong> {{ post.createdAt ? post.createdAt|date('Y-m-d H:i') : 'N/A' }}</p>
+
+<h3>Auteur</h3>
+<p>{{ post.user.username }}</p>
+
+<h3>Commentaires</h3>
+<ul>
+    {% for comment in post.comments %}
+        <li>{{ comment.content }} (par {{ comment.user.username }})</li>
+    {% else %}
+        <li>Aucun commentaire</li>
+    {% endfor %}
+</ul>
+
+<h3>Réactions</h3>
+<ul>
+    {% for reaction in post.reactions %}
+        <li>{{ reaction.type }} par {{ reaction.user.username }}</li>
+    {% else %}
+        <li>Aucune réaction</li>
+    {% endfor %}
+</ul>

@@ -305,7 +305,7 @@
                     const activityId = this.getAttribute('data-activity-id');
                     const csrfToken = this.getAttribute('data-csrf-token');
                     
-                    deleteForm.action = `{{ path('app_activity_delete', {'id': '__ID__'}) }}`.replace('__ID__', activityId);
+                    deleteForm.action = `/admin/activity/${activityId}/delete`;
                     deleteForm.querySelector('input[name="_token"]').value = csrfToken;
                     deleteConfirmationModal.show();
                 });

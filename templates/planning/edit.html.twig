@@ -12,15 +12,8 @@
                 <p class="lead text-muted">Modifiez votre événement sportif</p>
             </div>
             
-            <!-- Messages flash -->
             {% for message in app.flashes('success') %}
                 <div class="alert alert-success alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-            {% for message in app.flashes('error') %}
-                <div class="alert alert-danger alert-dismissible fade show">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -139,45 +132,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 dateFinError.style.display = 'none';
                 return true;
             }
-        }
-        return true;
-    }
 
-    // Écouteurs d'événements pour validation en temps réel
-    dateDebut.addEventListener('change', validateDates);
-    dateFin.addEventListener('change', validateDates);
+            // Validation personnalisée : dateFin > dateDebut
+            const dateDebut = new Date(document.getElementById('dateDebut').value)
+            const dateFin = new Date(document.getElementById('dateFin').value)
+            
+            if (dateFin <= dateDebut) {
+                document.getElementById('dateFin').classList.add('is-invalid')
+                event.preventDefault()
+            }
 
-    // Validation à la soumission
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        
-        // Validation standard
-        if (!form.checkValidity()) {
-            form.classList.add('was-validated');
-            return;
-        }
-        
-        // Validation personnalisée des dates
-        if (!validateDates()) {
-            form.classList.add('was-validated');
-            return;
-        }
-        
-        // Si tout est valide, soumettre le formulaire
-        form.submit();
-    });
-});
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
 </script>
 
-<!-- Style personnalisé -->
 <style>
     .navbar-form.nav-search { display: none !important; }
-
     .card {
         border-radius: 12px;
         border: none;
-        background-color: #f8f9fa;
     }
     .form-control:focus {
         border-color: #86b7fe;
@@ -186,31 +161,6 @@ document.addEventListener('DOMContentLoaded', function() {
     .input-group-text {
         min-width: 45px;
         justify-content: center;
-        background-color: #e9ecef;
-    }
-    .is-invalid {
-        border-color: #dc3545;
-    }
-    .is-invalid:focus {
-        border-color: #dc3545;
-        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
-    }
-    .invalid-feedback {
-        display: none;
-        color: #dc3545;
-        font-size: 0.875em;
-    }
-    .was-validated .form-control:invalid ~ .invalid-feedback,
-    .form-control.is-invalid ~ .invalid-feedback {
-        display: block;
-    }
-    .btn-primary {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-    .btn-primary:hover {
-        background-color: #0b5ed7;
-        border-color: #0a58ca;
     }
 </style>
 {% endblock %}
