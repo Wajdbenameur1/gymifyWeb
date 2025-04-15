@@ -79,4 +79,4 @@ final class PostController extends AbstractController
 
         return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
     }
-}
+}  
