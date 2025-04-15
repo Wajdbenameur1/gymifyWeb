@@ -15,7 +15,10 @@ class UserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, User::class);
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
 //    /**
 //     * @return User[] Returns an array of User objects
 //     */
@@ -40,4 +43,11 @@ class UserRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+<<<<<<< HEAD
+=======
+public function findAll(): array
+    {
+        return $this->findBy([], ['id' => 'ASC']);
+    }
+>>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
 }

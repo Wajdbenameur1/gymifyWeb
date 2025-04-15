@@ -74,7 +74,13 @@ public function calendar(
   #[Route('/entraineur', name: 'app_entraineur')]
   public function index(EntityManagerInterface $entityManager): Response
 {
+<<<<<<< HEAD
     $plannings = $entityManager->getRepository(Planning::class)->findAll();
+=======
+  /** @var \App\Entity\User|null $user */
+  $user = $this->getUser();
+    $plannings = $entityManager->getRepository(Planning::class)->findBy(['entaineur' => $user]);
+>>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
     
     return $this->render('planning/index.html.twig', [
         'plannings' => $plannings,

@@ -4,6 +4,10 @@ framework:
     annotations: false
     http_method_override: false
     handle_all_throwables: true
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.
@@ -12,7 +16,12 @@ framework:
         cookie_secure: auto
         cookie_samesite: lax
 
+<<<<<<< HEAD
 
+=======
+    csrf_protection:
+        enabled: true
+>>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
     #esi: true
     #fragments: true
     php_errors:
