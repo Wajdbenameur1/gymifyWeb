@@ -33,23 +33,21 @@ class SecurityController extends AbstractController
         // This method is intercepted by Symfony's firewall
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
-
     private function getDashboardRouteByRole(): string
     {
         $user = $this->getUser();
-    
         if (!$user) {
             return 'app_home';
         }
     
-        $role = $user->getRole();
-    
-        return match ($role) {
+        $routes = [
             Role::ADMIN->value => 'app_admin',
             Role::ENTRAINEUR->value => 'app_entraineur',
             Role::RESPONSABLE_SALLE->value => 'dashboard_responsable_salle',
             Role::SPORTIF->value => 'home',
-            default => 'app_home',
-        };
+        ];
+    
+        return $routes[$user->getRole()] ?? 'app_home';
     }
+    
 }
