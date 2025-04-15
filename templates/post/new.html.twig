@@ -39,7 +39,14 @@
 
     <div class="mb-3">
         {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+        {{ form_widget(form.title, {
+            'attr': {
+                'class': 'form-control',
+                'data-parsley-trigger': 'keyup',
+                'data-parsley-minlength': '3',  
+                'data-parsley-minlength-message': 'Le titre doit contenir au moins 3 caractères.'
+            }
+        }) }}
         <div class="text-danger">
             {{ form_errors(form.title) }}
         </div>
@@ -47,7 +54,14 @@
 
     <div class="mb-3">
         {{ form_label(form.content, 'Contenu', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.content, {'attr': {'class': 'form-control'}}) }}
+        {{ form_widget(form.content, {
+            'attr': {
+                'class': 'form-control',
+                'data-parsley-trigger': 'keyup',
+                'data-parsley-minlength': '10',  
+                'data-parsley-minlength-message': 'Le contenu doit contenir au moins 10 caractères.'
+            }
+        }) }}
         <div class="text-danger">
             {{ form_errors(form.content) }}
         </div>
@@ -55,7 +69,13 @@
 
     <div class="mb-3">
         {{ form_label(form.image_url, 'Image (URL)', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.image_url, {'attr': {'class': 'form-control'}}) }}
+        {{ form_widget(form.image_url, {
+            'attr': {
+                'class': 'form-control',
+                'data-parsley-type': 'url',
+                'data-parsley-trigger': 'keyup'
+            }
+        }) }}
         <div class="text-danger">
             {{ form_errors(form.image_url) }}
         </div>
@@ -65,6 +85,15 @@
 
     {{ form_end(form) }}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {# Inclusion du script ParsleyJS #}
+    {# Inclusion du script ParsleyJS #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" integrity="sha512-ey..." crossorigin="anonymous"></script>
+
 {% endblock %}
 
 {% block javascripts %}

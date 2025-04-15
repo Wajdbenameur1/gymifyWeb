@@ -33,7 +33,10 @@ public function blogs(PostRepository $postRepository): Response
         return $this->redirectToRoute('app_post_new');
     }
     
-    
+
+       }
+  
+
 
        
-}
+

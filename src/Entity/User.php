@@ -49,14 +49,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateNaissance = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
-    private ?string $specialite = null;
+    // Relation OneToMany avec Post (Les posts d'un utilisateur)
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Post::class)]
+    private Collection $posts;
 
-    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
-    private Collection $entaineur;
+   #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
+private Collection $comments;
 
-    #[ORM\ManyToOne(inversedBy: 'equipes')]
-    private ?Equipe $equipe = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+private Collection $reactions;
+
 
     public function __construct()
     {
@@ -68,8 +71,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     }
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
-    private Collection $reactions;
+    
 
 
     
