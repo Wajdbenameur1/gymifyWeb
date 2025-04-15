@@ -29,6 +29,8 @@ final class PostController extends AbstractController{
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $post->setCreatedAt(new \DateTime()); // Ajoute une date de création
+
             $entityManager->persist($post);
             $entityManager->flush();
 
@@ -36,10 +38,10 @@ final class PostController extends AbstractController{
         }
 
         return $this->render('post/new.html.twig', [
-            'post' => $post,
             'form' => $form,
         ]);
     }
+
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
     public function show(Post $post): Response
