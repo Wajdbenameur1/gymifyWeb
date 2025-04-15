@@ -7,11 +7,11 @@ use App\Repository\SportifRepository;
 use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: SportifRepository::class)]
 class Sportif extends User
+
 {
-    public function __construct()
-    {
-        parent::__construct();
-        // Passez l'objet Role::SPORTIF ici
-        $this->setRole(Role::SPORTIF); // Assurez-vous que Role::SPORTIF est un objet de l'énumération Role
-    }
+  public function __construct()
+  {
+      parent::__construct();
+      $this->setRole(Role::SPORTIF);  // Définir le rôle en utilisant l'Enum
+     }
 }

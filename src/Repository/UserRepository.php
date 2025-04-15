@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-
+use App\Enum\Role;
 /**
  * @extends ServiceEntityRepository<User>
  */
@@ -40,4 +40,27 @@ class UserRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+public function findAll(): array
+    {
+        return $this->findBy([], ['id' => 'ASC']);
+    }
+
+
+    public function findByAllowedRoles(array $roles): array
+    {
+        $qb = $this->createQueryBuilder('u');
+        $qb->where($qb->expr()->in('u.role', ':roles'))
+           ->setParameter('roles', array_map(fn($r) => $r->value, $roles));
+
+        return $qb->getQuery()->getResult();
+    }
+    public function findByRole(array $roles): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.role IN (:roles)')
+            ->setParameter('roles', $roles)
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -16,11 +16,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity("email", message: "L'email {{ value }} est déjà utilisé.")]
 #[ORM\InheritanceType("SINGLE_TABLE")]
 #[ORM\DiscriminatorColumn(name: "role", type: "string")]
-#[ORM\DiscriminatorMap([
-    "sportif" => \App\Entity\Sportif::class,
-    "admin" => \App\Entity\Admin::class,
-    "responsable_salle" => \App\Entity\ResponsableSalle::class,
-    "entraineur" => \App\Entity\Entraineur::class,])]
+#[ORM\DiscriminatorMap([ 
+    "sportif" => Sportif::class, 
+    "admin" => Admin::class, 
+    "responsable_salle" => ResponsableSalle::class, 
+    "entraineur" => Entraineur::class 
+])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -54,14 +55,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
     private Collection $entaineur;
 
-   
     #[ORM\ManyToOne(inversedBy: 'equipes')]
     private ?Equipe $equipe = null;
 
     public function __construct()
     {
         $this->entaineur = new ArrayCollection();
+        $this->posts = new ArrayCollection();
+        $this->reactions = new ArrayCollection();
+    
+
     }
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+    private Collection $reactions;
+
+
+    
+
+   
 
     public function getId(): ?int
     {
@@ -112,14 +124,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getImageUrl(): ?string
+    
+
+  
+    public function getSpecialite(): ?string
     {
-        return $this->imageUrl;
+        return $this->specialite;
     }
 
-    public function setImageUrl(?string $imageUrl): self
+    public function setSpecialite(string $specialite): static
     {
-        $this->imageUrl = $imageUrl;
+        $this->specialite = $specialite;
         return $this;
     }
 
@@ -170,27 +185,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getEquipe(): ?Equipe
-    {
-        return $this->equipe;
-    }
+    return $this;
+}
+public function getRole(): Role
+{
+    return match (true) {
+        $this instanceof \App\Entity\Admin => Role::ADMIN,
+        $this instanceof \App\Entity\Sportif => Role::SPORTIF,
+        $this instanceof \App\Entity\ResponsableSalle => Role::RESPONSABLE_SALLE,
+        $this instanceof \App\Entity\Entraineur => Role::ENTRAINEUR,
+        default => Role::USER,
+    };
+}
 
-    public function setEquipe(?Equipe $equipe): static
-    {
-        $this->equipe = $equipe;
-        return $this;
-    }
-
-    public function getRole(): Role
-    {
-        return $this->role;
-    }
-
-    public function setRole(Role $role): static
-    {
-        $this->role = $role;
-        return $this;
-    }
+public function setRole(Role $role): self
+{
+    $this->role = $role;
+    return $this;
+}
+    
 
     public function getRoles(): array
     {
@@ -212,3 +225,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 }
+
+
+
