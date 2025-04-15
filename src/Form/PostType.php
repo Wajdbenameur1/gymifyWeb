@@ -9,32 +9,23 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\UrlType; // <-- AJOUTE CETTE LIGNE !!
 
 class PostType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title', TextType::class, [
-                'attr' => ['class' => 'form-control'], // Classe Bootstrap pour les champs de texte
-            ])
-            ->add('content', TextType::class, [
-                'attr' => ['class' => 'form-control'], // Classe Bootstrap pour le contenu
-            ])
-            ->add('image_url', TextType::class, [
-                'required' => false,
-                'attr' => ['class' => 'form-control'], // Classe Bootstrap pour l'URL de l'image
-            ])
-            ->add('createdAt', DateTimeType::class, [
-                'widget' => 'single_text',
-                'required' => false,
-                'attr' => ['class' => 'form-control'], // Classe Bootstrap pour le champ de date/heure
-            ])
-            ->add('user', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'username', // ou 'email', 'nom', etc.
-                'placeholder' => 'Choisir un utilisateur',
-                'attr' => ['class' => 'form-control'], // Classe Bootstrap pour le champ d'utilisateur
+        ->add('title', TextType::class, [
+            'label' => 'Titre du post',
+        ])
+        ->add('content', TextType::class, [
+            'label' => 'Contenu du post',
+        ])
+        ->add('image_url', UrlType::class, [
+            'label' => 'Image (URL)',
+            'required' => false,
+        
             ]);
     }
 

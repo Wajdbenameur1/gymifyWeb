@@ -5,7 +5,9 @@ namespace App\Entity;
 use App\Repository\PostRepository;
 use App\Entity\User;  // Ajout de l'entité User
 use App\Entity\Comment;  // Ajout de l'entité Comment
+use App\Entity\Reactions;
 use Doctrine\DBAL\Types\Types;
+
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -19,13 +21,43 @@ class Post
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $title = null;
+#[Assert\NotBlank(message: 'Le titre est obligatoire.')]
+#[Assert\Length(
+    min: 3,
+    max: 100,
+    minMessage: 'Le titre doit contenir au moins {{ limit }} caractères.',
+    maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères.'
+)]
+#[Assert\Regex(
+    pattern: '/^(?!.*\b(spam|arnaque|insulte)\b).*/i',
+    message: 'Le titre contient un mot interdit.'
+)]
+private ?string $title = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $content = null;
+#[ORM\Column(length: 1000)]
+#[Assert\NotBlank(message: 'Le contenu est obligatoire.')]
+#[Assert\Length(
+    min: 10,
+    max: 1000,
+    minMessage: 'Le contenu doit contenir au moins {{ limit }} caractères.',
+    maxMessage: 'Le contenu ne peut pas dépasser {{ limit }} caractères.'
+)]
+#[Assert\Regex(
+    pattern: '/^(?!.*\b(spam|arnaque|insulte)\b).*/i',
+    message: 'Le contenu contient un mot interdit.'
+)]
+private ?string $content = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image_url = null;
+#[ORM\Column(length: 255, nullable: true)]
+#[Assert\Url(message: 'Veuillez saisir une URL valide (http(s)://...) pour l’image.')]
+#[Assert\Regex(
+    pattern: '/\.(jpg|jpeg|png|gif)$/i',
+    message: 'L’URL de l’image doit se terminer par .jpg, .jpeg, .png ou .gif'
+)]
+private ?string $image_url = null;
+
+
+
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
@@ -38,12 +70,11 @@ class Post
     // Relation OneToMany avec Comment
     #[ORM\OneToMany(mappedBy: 'post', targetEntity: Comment::class)]
     private Collection $comments;
+    
+    //reactions
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+private Collection $reactions;
 
-    /**
-     * @var Collection<int, Reactions>
-     */
-    #[ORM\OneToMany(targetEntity: Reactions::class, mappedBy: 'post')]
-    private Collection $reactions;
 
   
 
@@ -52,6 +83,7 @@ class Post
     {
         $this->comments = new ArrayCollection();
         $this->reactions = new ArrayCollection();
+
        
         
     }
@@ -143,35 +175,32 @@ class Post
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reactions>
-     */
+
     public function getReactions(): Collection
-    {
-        return $this->reactions;
+{
+    return $this->reactions;
+}
+
+public function addReaction(Reactions $reaction): static
+{
+    if (!$this->reactions->contains($reaction)) {
+        $this->reactions->add($reaction);
+        $reaction->setPost($this);
     }
 
-    public function addReaction(Reactions $reaction): static
-    {
-        if (!$this->reactions->contains($reaction)) {
-            $this->reactions->add($reaction);
-            $reaction->setPost($this);
+    return $this;
+}
+
+public function removeReaction(Reactions $reaction): static
+{
+    if ($this->reactions->removeElement($reaction)) {
+        if ($reaction->getPost() === $this) {
+            $reaction->setPost(null);
         }
-
-        return $this;
     }
 
-    public function removeReaction(Reactions $reaction): static
-    {
-        if ($this->reactions->removeElement($reaction)) {
-            // set the owning side to null (unless already changed)
-            if ($reaction->getPost() === $this) {
-                $reaction->setPost(null);
-            }
-        }
-
-        return $this;
-    }
+    return $this;
+}
 
    
 
