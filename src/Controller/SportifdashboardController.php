@@ -32,14 +32,11 @@ public function blogs(PostRepository $postRepository): Response
         // Redirection vers la route de création de post
         return $this->redirectToRoute('app_post_new');
     }
-    #[Route('/profile', name:'app_profile')]
-      public function profile()
-      {
     
+
        }
   
-    
-       }
+
 
        
 

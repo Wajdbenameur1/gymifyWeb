@@ -58,11 +58,34 @@ class UserType extends AbstractType
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
                 'required' => true,
+
+                'constraints' => [
+                    new NotBlank(['message' => 'Date de naissance requise.']),
+                    new Callback([$this, 'validateAge']),
+                ],
+                'attr' => ['class' => 'form-control'],
+            ])
+            ->add('role', ChoiceType::class, [
+                'choices' => [
+                    'Sportif' => Role::SPORTIF,
+                    'Admin' => Role::ADMIN,
+                    'Responsable Salle' => Role::RESPONSABLE_SALLE,
+                    'Entraineur' => Role::ENTRAINEUR,
+                ],
+                'required' => true,
+                'choice_label' => function ($choice, $key, $value) {
+                    return $choice->value; // This will return the string value of the enum
+                },
+            ])
+            
+            ->add('specialite', TextType::class, [
+
             ]);
 
         if ($options['is_entraineur']) {
             $builder->add('specialite', TextType::class, [
                 'label' => 'Spécialité',
+
                 'required' => false,
                 'constraints' => [new Assert\Length(['max' => 100])],
             ]);
