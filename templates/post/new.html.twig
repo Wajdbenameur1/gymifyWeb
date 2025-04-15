@@ -1,10 +1,41 @@
 {% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {# Inclusion des styles ParsleyJS #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.css" integrity="sha512-ey..." crossorigin="anonymous" />
+    <style>
+        /* Bordure rouge pour les erreurs Parsley */
+        input.parsley-error,
+        select.parsley-error,
+        textarea.parsley-error {
+            border-color: #ff0000 !important;
+        }
+
+        /* Bordure verte lorsque la validation est correcte */
+        input.parsley-success,
+        select.parsley-success,
+        textarea.parsley-success {
+            border-color: #00cc00 !important; /* vous pouvez ajuster la nuance de vert */
+        }
+
+        /* Style pour la liste d'erreurs si besoin */
+        .parsley-errors-list {
+            margin: 2px 0 0;
+            padding: 0;
+            list-style: none;
+            color: #ff0000;
+            font-size: 0.9em;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <div class="container mt-5">
     <h1 class="mb-4">Créer un nouveau post</h1>
 
-    {{ form_start(form) }}
+    {# Ajout de l'attribut data-parsley-validate pour activer la validation ParsleyJS #}
+    {{ form_start(form, {'attr': {'data-parsley-validate': ''}}) }}
 
     <div class="mb-3">
         {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}}) }}
@@ -34,4 +65,10 @@
 
     {{ form_end(form) }}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {# Inclusion du script ParsleyJS #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" integrity="sha512-ey..." crossorigin="anonymous"></script>
 {% endblock %}
