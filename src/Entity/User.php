@@ -60,6 +60,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
+        $this->role = Role::SPORTIF; 
         $this->entaineur = new ArrayCollection();
         $this->posts = new ArrayCollection();
         $this->reactions = new ArrayCollection();
@@ -124,7 +125,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    
+        public function getImageUrl(): ?string
+    {
+        return $this->imageUrl;
+    }
+
+    public function setImageUrl(?string $imageUrl): self
+    {
+        $this->imageUrl = $imageUrl;
+        return $this;
+    }
 
   
     public function getSpecialite(): ?string
@@ -185,7 +195,7 @@ public function getRole(): Role
         $this instanceof \App\Entity\Sportif => Role::SPORTIF,
         $this instanceof \App\Entity\ResponsableSalle => Role::RESPONSABLE_SALLE,
         $this instanceof \App\Entity\Entraineur => Role::ENTRAINEUR,
-        default => Role::USER,
+        default => Role::SPORTIF,
     };
 }
 

@@ -37,20 +37,21 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            custom_authenticator: App\Security\AppCustomAuthenticator
             form_login:
                 login_path: app_login
                 check_path: app_login
                 username_parameter: email
                 password_parameter: password
-                default_target_path: app_home
+                enable_csrf: true
             logout:
                 path: app_logout
                 target: app_login
             remember_me:
                 secret: '%kernel.secret%'
-                lifetime: 604800
+                lifetime: 604800  # 1 semaine
                 path: /
-            entry_point: App\Security\AppCustomAuthenticator
+            entry_point: App\Security\AppCustomAuthenticator  # Définir l'entrée de l'authentification
 
     access_control:
         - { path: ^/admin/user, roles: ROLE_ADMIN }
@@ -60,5 +61,5 @@ security:
         - { path: ^/home, roles: ROLE_SPORTIF }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
-        - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY } # Explicit rule
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

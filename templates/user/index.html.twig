@@ -1,10 +1,23 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/homepageadmin.html.twig' %}
 
-{% block title %}Gestion des Utilisateurs{% endblock %}
+{% block title %}Liste des utilisateurs{% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
-        <h1 class="text-center mb-4 text-primary">Liste des Utilisateurs</h1>
+    <div class="container-fluid px-4 py-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="fw-bold mb-2 text-primary"><i class="fas fa-users me-2"></i>Liste des utilisateurs</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-light p-2 rounded shadow-sm">
+                        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Utilisateurs</li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="{{ path('user_create') }}" class="btn btn-primary btn-lg rounded-pill">
+                <i class="fas fa-plus me-2"></i>Ajouter un utilisateur
+            </a>
+        </div>
 
         {% for label, messages in app.flashes %}
             {% for message in messages %}
@@ -53,7 +66,7 @@
                                     <td>{{ user.nom|capitalize }}</td>
                                     <td>{{ user.prenom|capitalize }}</td>
                                     <td>{{ user.email }}</td>
-                                   <td>
+                                                                       <td>
                                     <span class="badge
     {% if user.role.value == 'admin' %}bg-danger
     {% elseif user.role.value == 'entraineur' %}bg-warning
@@ -64,7 +77,6 @@
 </span>
 
 </td>
-
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
                                             <a href="{{ path('user_show', {'id': user.id}) }}"
@@ -105,45 +117,34 @@
                     </table>
                 </div>
             </div>
-
-        <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered table-sm text-center">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Email</th>
-                        <th>Rôles</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.nom | capitalize }}</td>
-                            <td>{{ user.prenom | capitalize }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>
-                                {{ user.roles | join(', ') }}
-                            </td>
-                            <td>
-                                <a href="{{ path('user_edit', { 'id': user.id }) }}" class="btn btn-primary btn-sm">Modifier</a>
-                                <form action="{{ path('user_delete', { 'id': user.id }) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="6" class="text-muted">Aucun utilisateur trouvé.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
         </div>
     </div>
+
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #00bcd4);
+        }
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+        }
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
 {% endblock %}
