@@ -2,33 +2,32 @@
 
 namespace App\Entity;
 
+use App\Enum\Role;
 use App\Repository\ResponsableSalleRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ResponsableSalleRepository::class)]
-class ResponsableSalle
+class ResponsableSalle extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\OneToOne(mappedBy: 'responsable', targetEntity: Salle::class)]
+    private ?Salle $salle = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $ResponsableSalle = null;
-
-    public function getId(): ?int
+    public function __construct()
     {
-        return $this->id;
+        parent::__construct();
+        // Passez l'objet Role::SPORTIF ici
+       $this->setRole(Role::RESPONSABLE_SALLE);  // Définit le rôle comme responsable de salle
     }
 
-    public function getResponsableSalle(): ?string
+    /**
+     * Récupère la salle associée au responsable.
+     *
+     * @return Salle|null
+     */
+    public function getSalle(): ?Salle
     {
-        return $this->ResponsableSalle;
+        return $this->salle;
     }
-
-    public function setResponsableSalle(string $ResponsableSalle): static
-    {
-        $this->ResponsableSalle = $ResponsableSalle;
 
     /**
      * Associe une salle au responsable de salle.
@@ -45,9 +44,11 @@ class ResponsableSalle
 
         // Si la salle est assignée, nous nous assurons qu'elle est bien associée au responsable
         if ($salle !== null && $salle->getResponsable() !== $this) {
-             }
+            $salle->setResponsable($this);
+        }
 
         $this->salle = $salle;
         return $this;
     }
 }
+
