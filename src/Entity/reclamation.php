@@ -17,7 +17,6 @@ class Reclamation
     #[ORM\Column(length: 255)]
     private ?string $sujet = null;
 
-<<<<<<< HEAD
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
@@ -26,21 +25,6 @@ class Reclamation
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_creation = null;
-=======
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
-
-    #[ORM\Column(length: 50)]
-    private ?string $statut = 'En attente';
-
-    #[ORM\Column(name: 'dateCreation', type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateCreation = null;
-    
-
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
-    private ?User $user = null;
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
 
     public function getId(): ?int
     {
@@ -52,16 +36,10 @@ class Reclamation
         return $this->sujet;
     }
 
-<<<<<<< HEAD
     public function setSujet(string $sujet): static
     {
         $this->sujet = $sujet;
 
-=======
-    public function setSujet(string $sujet): self
-    {
-        $this->sujet = $sujet;
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
         return $this;
     }
 
@@ -70,16 +48,10 @@ class Reclamation
         return $this->description;
     }
 
-<<<<<<< HEAD
     public function setDescription(string $description): static
     {
         $this->description = $description;
 
-=======
-    public function setDescription(string $description): self
-    {
-        $this->description = $description;
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
         return $this;
     }
 
@@ -88,7 +60,6 @@ class Reclamation
         return $this->statut;
     }
 
-<<<<<<< HEAD
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
@@ -108,37 +79,3 @@ class Reclamation
         return $this;
     }
 }
-=======
-    public function setStatut(string $statut): self
-    {
-        $this->statut = $statut;
-        return $this;
-    }
-    public function __construct()
-{
-    $this->dateCreation = new \DateTime();
-}
-
-    public function getDateCreation(): ?\DateTimeInterface
-    {
-        return $this->dateCreation;
-    }
-
-    public function setDateCreation(\DateTimeInterface $dateCreation): self
-    {
-        $this->dateCreation = $dateCreation;
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-        return $this;
-    }
-}
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc

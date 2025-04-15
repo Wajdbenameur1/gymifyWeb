@@ -1,0 +1,311 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs{% endblock %}
+
+{% block body %}
+<style>
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+    }
+
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    
+    .chatbot-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        font-family: 'Arial', sans-serif;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        background: #007bff;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .chat-messages {
+        height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        background: #f8f9fa;
+    }
+
+    .user-message, .bot-message {
+        padding: 8px 12px;
+        margin: 5px;
+        border-radius: 10px;
+        max-width: 80%;
+    }
+
+    .user-message {
+        background: #007bff;
+        color: white;
+        align-self: flex-end;
+        text-align: right;
+    }
+
+    .bot-message {
+        background: #e9ecef;
+        color: black;
+        align-self: flex-start;
+    }
+
+    .chat-input-container {
+        display: flex;
+        border-top: 1px solid #ccc;
+        padding: 5px;
+    }
+
+    #chat-input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        outline: none;
+    }
+
+    .send-button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        margin-left: 5px;
+        cursor: pointer;
+    }
+</style>
+<div class="chatbot-container">
+    <div class="chat-header">💬 Chatbot</div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Écrivez un message..." onkeypress="handleKeyPress(event)">
+        <button class="send-button" onclick="sendMessage()">➤</button>
+    </div>
+</div>
+<div class="container mt-5">
+    <h1 class="text-center mb-4 text-primary">📋 Liste des Utilisateurs</h1>
+
+    <!-- Barre de recherche et filtre -->
+    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
+        <input type="text" id="searchInput" class="form-control w-25 shadow-lg border-0 rounded-pill py-2 px-3" placeholder="Rechercher par nom..." />
+        <select id="roleFilter" class="form-select w-25 shadow-lg border-0 rounded-pill py-2">
+            <option value="">Tous les rôles</option>
+            <option value="ROLE_PATIENT">Patient</option>
+            <option value="ROLE_MEDECIN">Médecin</option>
+            <option value="ROLE_PHARMACIEN">Pharmacien</option>
+            <option value="ROLE_STAFF">Staff</option>
+            <option value="ROLE_USER">Utilisateur</option>
+        </select>
+        <a href="{{ path('user_create') }}" class="btn btn-success btn-lg rounded-pill py-3 px-5 shadow-lg hover-shadow-lg">+ Ajouter un utilisateur</a>
+    </div>
+
+    <!-- Tableau des utilisateurs -->
+    <div class="table-responsive">
+        <table class="table table-hover table-striped table-bordered table-sm text-center shadow-lg rounded-3">
+            <thead class="table-dark rounded-3">
+                <tr>
+                    <th>ID</th>
+                    <th>👤 Nom</th>
+                    <th>👤 Prénom</th>
+                    <th>✉ Email</th>
+                    <th>🔑 Rôles</th>
+                    <th>📌 Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                {% for user in users %}
+                    <tr class="border-bottom hover-shadow-sm">
+                        <td>{{ user.id }}</td>
+                        <td class="user-name">{{ user.nom | capitalize }}</td>
+                        <td>{{ user.prenom | capitalize }}</td>
+                        <td>{{ user.email }}</td>
+                        <td class="user-roles">
+                            {% for role in user.roles %}
+                                <span class="badge bg-success">{{ role }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% if user.getType is defined %}
+                                <span class="badge bg-warning text-dark">{{ user.getType() }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Non défini</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('user_edit', { 'id': user.id }) }}" class="btn btn-primary btn-sm shadow-lg rounded-3 px-4 py-2 hover-shadow-lg">Modifier</a>
+                            <form action="{{ path('user_delete', { 'id': user.id }) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger btn-sm shadow-lg rounded-3 px-4 py-2 hover-shadow-lg">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr id="noResult">
+                        <td colspan="7" class="text-muted">Aucun utilisateur trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Statistiques -->
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary">📊 Statistiques des Utilisateurs</h2>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-gradient shadow-lg rounded-3 p-4 hover-shadow-lg" style="background: linear-gradient(to right, #00b4d8, #1e40af);">
+                <h5>Total</h5>
+                <p class="fs-2">{{ stats.total }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-gradient bg-success shadow-lg rounded-3 p-4 hover-shadow-lg">
+                <h5>Patients</h5>
+                <p class="fs-2">{{ stats.patients }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-gradient bg-warning shadow-lg rounded-3 p-4 hover-shadow-lg">
+                <h5>Médecins</h5>
+                <p class="fs-2">{{ stats.medecins }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-gradient bg-danger shadow-lg rounded-3 p-4 hover-shadow-lg">
+                <h5>Pharmaciens</h5>
+                <p class="fs-2">{{ stats.pharmaciens }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphique -->
+<div class="container mt-5">
+    <canvas id="userChart"></canvas>
+</div>
+
+<!-- JavaScript pour le filtrage -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let searchInput = document.getElementById('searchInput');
+        let roleFilter = document.getElementById('roleFilter');
+        let rows = document.querySelectorAll('#userTable tr');
+
+        function filterUsers() {
+            let searchText = searchInput.value.toLowerCase();
+            let selectedRole = roleFilter.value;
+            let hasResult = false;
+
+            rows.forEach(row => {
+                let nameCell = row.querySelector('.user-name');
+                let roleCell = row.querySelector('.user-roles');
+
+                if (nameCell && roleCell) {
+                    let name = nameCell.textContent.toLowerCase();
+                    let roles = Array.from(roleCell.getElementsByTagName('span')).map(span => span.textContent);
+
+                    let matchName = name.includes(searchText);
+                    let matchRole = selectedRole === "" || roles.includes(selectedRole);
+
+                    row.style.display = matchName && matchRole ? "" : "none";
+                    hasResult ||= matchName && matchRole;
+                }
+            });
+
+            document.getElementById('noResult').style.display = hasResult ? "none" : "";
+        }
+
+        searchInput.addEventListener('keyup', filterUsers);
+        roleFilter.addEventListener('change', filterUsers);
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var ctx = document.getElementById('userChart').getContext('2d');
+        var userChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Patients', 'Médecins', 'Pharmaciens', 'Staff'],
+                datasets: [{
+                    data: [{{ stats.patients }}, {{ stats.medecins }}, {{ stats.pharmaciens }}, {{ stats.staff }}],
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+</script>
+
+<!-- JavaScript pour gérer le chatbot -->
+<script>
+function handleKeyPress(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+}
+
+function sendMessage() {
+    let input = document.getElementById("chat-input");
+    let message = input.value.trim();
+    if (message === "") return;
+
+    let chatMessages = document.getElementById("chat-messages");
+
+    let userMessage = document.createElement("div");
+    userMessage.classList.add("user-message");
+    userMessage.textContent = "👤 " + message;
+    chatMessages.appendChild(userMessage);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        let botMessage = document.createElement("div");
+        botMessage.classList.add("bot-message");
+        botMessage.textContent = "🤖 " + data.response;
+        chatMessages.appendChild(botMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    })
+    .catch(error => console.error("Erreur:", error));
+
+    input.value = "";
+}
+</script>
+
+
+{% endblock %}

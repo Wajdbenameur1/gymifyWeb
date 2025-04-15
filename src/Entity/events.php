@@ -1,21 +1,14 @@
 <?php
 
 namespace App\Entity;
-
-
+use App\Enum\Reward;
 use App\Repository\EventsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
-
-
-use App\Enum\EventType;
-use App\Enum\Reward;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
-
+#[ORM\Entity(repositoryClass: EventsRepository::class)]
 class Events
 {
     #[ORM\Id]
@@ -24,51 +17,56 @@ class Events
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-
-    #[Assert\NotBlank]
     private ?string $nom = null;
 
-    #[ORM\Column(type: 'text')]
-    #[Assert\NotBlank]
-    private ?string $description = null;
-
-    #[ORM\Column(type: 'date')]
-    #[Assert\NotNull]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column(type: 'datetime')]
-    #[Assert\NotNull]
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heure_debut = null;
 
-    #[ORM\Column(type: 'datetime')]
-    #[Assert\NotNull]
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heure_fin = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 500)]
     private ?string $image_url = null;
 
-    #[ORM\Column(type: 'string', enumType: EventType::class)]
-    #[Assert\NotNull]
-    private ?EventType $type = null;
+    #[ORM\Column(length: 255)]
+    private ?string $type = null;
 
-    #[ORM\Column(type: 'string', enumType: Reward::class)]
-    #[Assert\NotNull]
+    #[ORM\Column(type: 'string',enumType: Reward::class,/*columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')"*/)]
     private ?Reward $reward = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    private ?string $lieu = null;
-
-    #[ORM\Column(type: 'float', nullable: true)]
+    #[ORM\Column]
     private ?float $latitude = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
+    #[ORM\Column]
     private ?float $longitude = null;
 
-    #[ORM\ManyToOne(targetEntity: Salle::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    
+
+    /**
+     * @var Collection<int, EquipeEvent>
+     */
+    #[ORM\OneToMany(targetEntity: EquipeEvent::class, mappedBy: 'event')]
+    private Collection $event;
+
+    #[ORM\ManyToOne(inversedBy: 'salles')]
     private ?Salle $salle = null;
 
+    
+
+    
+
+    public function __construct()
+    {
+        $this->id_event = new ArrayCollection();
+        $this->id_equipe = new ArrayCollection();
+        $this->event = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -79,7 +77,6 @@ class Events
     {
         return $this->nom;
     }
-
 
     public function setNom(string $nom): static
     {
@@ -121,11 +118,6 @@ class Events
     {
         $this->heure_fin = $heure_fin;
 
-
-    public function setNom(string $nom): self
-    {
-        $this->nom = $nom;
-
         return $this;
     }
 
@@ -134,43 +126,9 @@ class Events
         return $this->description;
     }
 
-
-    public function setDescription(string $description): self
+    public function setDescription(string $description): static
     {
         $this->description = $description;
-        return $this;
-    }
-
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
-
-    public function setDate(\DateTimeInterface $date): self
-    {
-        $this->date = $date;
-        return $this;
-    }
-
-    public function getHeureDebut(): ?\DateTimeInterface
-    {
-        return $this->heure_debut;
-    }
-
-    public function setHeureDebut(\DateTimeInterface $heure_debut): self
-    {
-        $this->heure_debut = $heure_debut;
-        return $this;
-    }
-
-    public function getHeureFin(): ?\DateTimeInterface
-    {
-        return $this->heure_fin;
-    }
-
-    public function setHeureFin(\DateTimeInterface $heure_fin): self
-    {
-        $this->heure_fin = $heure_fin;
 
         return $this;
     }
@@ -180,21 +138,19 @@ class Events
         return $this->image_url;
     }
 
-
-    public function setImageUrl(?string $image_url): self
+    public function setImageUrl(string $image_url): static
     {
         $this->image_url = $image_url;
+
         return $this;
     }
 
-    public function getType(): ?EventType
-
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-
-    public function setType(?EventType $type): self
+    public function setType(string $type): static
     {
         $this->type = $type;
 
@@ -206,21 +162,9 @@ class Events
         return $this->reward;
     }
 
-
-    public function setReward(Reward $reward): self
+    public function setReward(Reward $reward): static
     {
         $this->reward = $reward;
-        return $this;
-    }
-
-    public function getLieu(): ?string
-    {
-        return $this->lieu;
-    }
-
-    public function setLieu(string $lieu): self
-    {
-        $this->lieu = $lieu;
 
         return $this;
     }
@@ -230,8 +174,7 @@ class Events
         return $this->latitude;
     }
 
-
-    public function setLatitude(?float $latitude): self
+    public function setLatitude(float $latitude): static
     {
         $this->latitude = $latitude;
 
@@ -243,10 +186,41 @@ class Events
         return $this->longitude;
     }
 
-
-    public function setLongitude(?float $longitude): self
+    public function setLongitude(float $longitude): static
     {
         $this->longitude = $longitude;
+
+        return $this;
+    }
+
+    
+
+    /**
+     * @return Collection<int, EquipeEvent>
+     */
+    public function getEvent(): Collection
+    {
+        return $this->event;
+    }
+
+    public function addEvent(EquipeEvent $event): static
+    {
+        if (!$this->event->contains($event)) {
+            $this->event->add($event);
+            $event->setEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvent(EquipeEvent $event): static
+    {
+        if ($this->event->removeElement($event)) {
+            // set the owning side to null (unless already changed)
+            if ($event->getEvent() === $this) {
+                $event->setEvent(null);
+            }
+        }
 
         return $this;
     }
@@ -256,11 +230,12 @@ class Events
         return $this->salle;
     }
 
-
-    public function setSalle(?Salle $salle): self
+    public function setSalle(?Salle $salle): static
     {
         $this->salle = $salle;
+
         return $this;
     }
-}
 
+    
+  }
