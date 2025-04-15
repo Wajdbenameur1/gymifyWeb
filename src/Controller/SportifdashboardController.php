@@ -37,11 +37,9 @@ public function blogs(PostRepository $postRepository): Response
       {
     
        }
-       #[Route('/login', name:'app_login')]
-      public function login()
-      {
+  
     
        }
 
        
-}
+

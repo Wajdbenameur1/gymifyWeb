@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller;
-
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use App\Entity\Sportif;
 use App\Enum\Role;
 use App\Form\SportifType;
@@ -36,7 +36,7 @@ class RegistrationController extends AbstractController
 
             $this->addFlash('success', 'Compte Sportif créé avec succès !');
 
-            return $this->redirectToRoute('app_login');
+            return new RedirectResponse($this->generateUrl('app_login'));
         }
 
         return $this->render('registration/register.html.twig', [

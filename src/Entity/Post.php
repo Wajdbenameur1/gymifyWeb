@@ -17,8 +17,8 @@ use Doctrine\Common\Collections\Collection;
 class Post
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+#[ORM\GeneratedValue(strategy: "AUTO")]
+#[ORM\Column(type: "integer")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

@@ -59,7 +59,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Post::class)]
     private Collection $posts;
 
-   
+   #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
+private Collection $comments;
+
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
 private Collection $reactions;

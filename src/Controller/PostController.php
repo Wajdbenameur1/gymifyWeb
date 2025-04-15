@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controller;
+use App\Entity\User;
 
 use App\Entity\Post;
 use App\Form\PostType;
@@ -26,22 +27,48 @@ final class PostController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $post = new Post();
-        $form = $this->createForm(PostType::class, $post);
-        $form->handleRequest($request);
+        $post->setTitle('Test');
+        $post->setContent('Contenu test');
+        $post->setCreatedAt(new \DateTime());
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $post->setCreatedAt(new \DateTime());
+        // Vérifiez si un utilisateur est connecté
+        $user = $this->getUser();
 
-            $entityManager->persist($post);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+        // Si l'utilisateur n'est pas connecté, affectez un utilisateur par défaut (id = 1)
+        if (!$user) {
+            dump($entityManager->getRepository(User::class)); die;
+            throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
+            // Vérifiez si l'utilisateur avec l'ID 1 existe
+            if (!$user) {
+                // Si l'utilisateur par défaut n'existe pas, gérez l'exception
+                throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
+            }
         }
 
-        return $this->render('post/new.html.twig', [
-            'form' => $form,
-        ]);
+        // Affecte l'id_User au post
+        $post->setUser($user);
+
+        // Persiste l'entité post dans la base de données
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        // Ajouter un message flash pour confirmer la création du post
+        $this->addFlash('success', 'Le post a été créé avec succès.');
+
+        return $this->redirectToRoute('app_post_index');
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
     public function show(Post $post): Response
@@ -50,6 +77,18 @@ final class PostController extends AbstractController
             'post' => $post,
         ]);
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
