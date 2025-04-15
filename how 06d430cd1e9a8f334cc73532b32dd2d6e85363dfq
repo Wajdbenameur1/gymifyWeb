@@ -1,0 +1,499 @@
+[33mcommit 06d430cd1e9a8f334cc73532b32dd2d6e85363df[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin2/main[m[33m)[m
+Merge: e6042e49 6b77a136
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Tue Apr 15 12:08:15 2025 +0100
+
+    Merge pull request #2 from Wajdbenameur1/gestion_blogs
+    
+    v15/mai
+
+[33mcommit e6042e493018d16ccf602d632c62fef640827454[m
+Merge: 61f3e5b0 1e2a521f
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Tue Apr 15 12:06:45 2025 +0100
+
+    new v
+
+[33mcommit 6b77a1360a21b3db61fdac358db1128830e59f62[m[33m ([m[1;31morigin2/gestion_blogs[m[33m, [m[1;31morigin/gestion_blogs[m[33m, [m[1;32mgestion_blogs[m[33m)[m
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Tue Apr 15 11:17:08 2025 +0100
+
+    v15/mai
+
+[33mcommit 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Tue Apr 15 10:47:16 2025 +0100
+
+    jihen
+
+[33mcommit 85e8c514d902ba37bbf8d50e2152394f5400971c[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Tue Apr 15 00:44:35 2025 +0100
+
+    jihen
+
+[33mcommit 9e166c4086b570bafe101a34e48ae06344a691d6[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 14 22:11:59 2025 +0100
+
+    JIHEN
+
+[33mcommit bea6936675fddbf0fe2d02ba1f2a8a3db7451c9a[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 14 22:09:56 2025 +0100
+
+    jihen
+
+[33mcommit a744871a0d2f4ffc680dca86ff4571520fc1134d[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 14 20:55:37 2025 +0100
+
+    jihen
+
+[33mcommit 637d0570677580d13d3da8d0c925d53a67fb4092[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 14 20:34:11 2025 +0100
+
+    jihen
+
+[33mcommit 526c8296052293b37578904024a55e04df00a973[m
+Merge: 42afb170 16960c84
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 14 20:01:08 2025 +0100
+
+    jihen
+
+[33mcommit 42afb170a76deb4158b703502be5b6071fe491bd[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 14 20:00:04 2025 +0100
+
+    jihen
+
+[33mcommit 16960c84429d02f49257e87628dc1f67241c901c[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Mon Apr 14 15:55:41 2025 +0100
+
+    wajd
+
+[33mcommit 4608887da051839cdd39ebe3e933563a108eb984[m
+Merge: 050dada6 4f121365
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Mon Apr 14 15:34:42 2025 +0100
+
+    Merge branch 'main' of https://github.com/Wajdbenameur1/gymifyWeb
+
+[33mcommit 050dada60d5f8d32ded7a6030d0893262ab842b3[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Mon Apr 14 15:29:19 2025 +0100
+
+    ss
+
+[33mcommit 4f121365402f424130fbb47513484db5da8520c0[m
+Merge: 57b5517c 727cdad8
+Author: alouiamani <alouiamani48@gmail.com>
+Date:   Mon Apr 14 16:24:06 2025 +0200
+
+    Merge branch 'main' of https://github.com/Wajdbenameur1/gymifyWeb
+
+[33mcommit 727cdad853a0b353fc5a9a3453f9780c13ca5119[m
+Merge: 421b380b c4051c19
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sun Apr 13 11:04:10 2025 +0100
+
+    Merge branch 'main' of https://github.com/Wajdbenameur1/gymifyWeb
+
+[33mcommit 421b380b7aac22a566863fd4e2fc4d51413519c7[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sun Apr 13 11:04:06 2025 +0100
+
+    wajd 13/04
+
+[33mcommit c4051c19ca9e4a76f3ce8a13fe24c81cb11c280d[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Sat Apr 12 00:18:16 2025 +0100
+
+    jihen
+
+[33mcommit 61f3e5b023b5431f1d9ef602ffa6a6a686cabb7a[m
+Merge: 42f1a87b 63ec0ecb
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Sat Apr 12 00:07:53 2025 +0100
+
+    Merge pull request #2 from ranymmjr/gestion_blogs
+    
+    Gestion blogs
+
+[33mcommit 63ec0ecbbd785aa59876f1249a53c8e62134fad5[m
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Sat Apr 12 00:02:52 2025 +0100
+
+    commit 12mai
+
+[33mcommit 57b5517c1316a2c4e4c997c64e8a3c9f70dc8608[m
+Author: alouiamani <alouiamani48@gmail.com>
+Date:   Fri Apr 11 15:29:01 2025 +0200
+
+    gg
+    
+    gg
+
+[33mcommit 3811e256f11b01eba414e93d4388a69c0f41e93c[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Fri Apr 11 11:48:53 2025 +0100
+
+    jihen
+
+[33mcommit a084e4715c91abed10b2dcd26ee4909ae5a10a0c[m
+Merge: 4c610638 f282a20a
+Author: alouiamani <alouiamani48@gmail.com>
+Date:   Fri Apr 11 01:25:11 2025 +0200
+
+    Merge branch 'main' of https://github.com/Wajdbenameur1/gymifyWeb
+
+[33mcommit 4c610638b9bbb80a87c529e2d5062ee6c61bfa03[m
+Author: alouiamani <alouiamani48@gmail.com>
+Date:   Fri Apr 11 01:21:53 2025 +0200
+
+    crud d'abonnement
+    
+    crud d'abonnement
+
+[33mcommit f282a20a4245733f9ada1654795cf9d752d50af8[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Thu Apr 10 22:37:12 2025 +0100
+
+    jihen
+
+[33mcommit 9922db1a081be7993c99d919c7e31b785c10abaa[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Thu Apr 10 19:44:45 2025 +0100
+
+    jihen
+
+[33mcommit a2c2afa8101985c6bc0ac72db3557933d270921b[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Thu Apr 10 12:52:38 2025 +0100
+
+    wajd 10/04
+
+[33mcommit 6af9e254032ccddc71175a5ee5aa5e24c40f3462[m
+Merge: b0f7994b 6a99c04f
+Author: sirine-selmi <selmi.sirine@esprit.tn>
+Date:   Wed Apr 9 20:21:03 2025 +0100
+
+    Merge branch 'main' of https://github.com/Wajdbenameur1/gymifyWeb
+
+[33mcommit b0f7994bebdd5882e7acc0c6f075927c22859d62[m
+Author: sirine-selmi <selmi.sirine@esprit.tn>
+Date:   Wed Apr 9 20:10:06 2025 +0100
+
+    sirine
+
+[33mcommit 2ba891b32d99e822c7fa0e65ef1ef1f05999b2d4[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Wed Apr 9 19:35:48 2025 +0100
+
+    jihen
+
+[33mcommit 6a99c04ff211fbb3581fc95ae5f3356ce2888d86[m
+Merge: 60436a68 e52d8b59
+Author: alouiamani <alouiamani48@gmail.com>
+Date:   Wed Apr 9 19:36:48 2025 +0200
+
+    Merge branch 'main' of https://github.com/Wajdbenameur1/gymifyWeb
+
+[33mcommit 60436a68198b5ca8e2f3572212de3c7a5b3073e9[m
+Author: alouiamani <alouiamani48@gmail.com>
+Date:   Wed Apr 9 19:25:06 2025 +0200
+
+    Crud salle
+    
+    Crud salle
+
+[33mcommit e52d8b597898f61330305435267868a1042e67c9[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Wed Apr 9 18:22:20 2025 +0100
+
+    wajd
+
+[33mcommit 4037ac9fba0f8e99bfbf23fe888714b166347811[m[33m ([m[1;31morigin2/Gestion-de-salle-et-abonnement[m[33m)[m
+Merge: 52581236 7488fa63
+Author: sirine-selmi <selmi.sirine@esprit.tn>
+Date:   Wed Apr 9 15:43:31 2025 +0100
+
+    Mise à jour de l'entité Equipe, services.yaml et composer.json
+
+[33mcommit 7488fa636d302cfe2351ec8db6ac0749c56581af[m[33m ([m[1;31morigin2/Gestion_Events[m[33m)[m
+Author: sirine-selmi <selmi.sirine@esprit.tn>
+Date:   Wed Apr 9 14:38:53 2025 +0100
+
+    sirine
+
+[33mcommit 5258123673015fbc90c680ad6215e6b2f177f196[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Tue Apr 8 23:07:56 2025 +0100
+
+    jihen
+
+[33mcommit 7b48acfef42048a80a14f8febb3e99a8ca1f3fe2[m
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Tue Apr 8 13:24:05 2025 +0100
+
+    new new
+
+[33mcommit 42f1a87b077833b8249de05cb14e7381e4b5b577[m
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Tue Apr 8 12:19:01 2025 +0100
+
+    third
+
+[33mcommit e7dd494dd5a69d6d8d8d2fd6c1906931f539869d[m
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Tue Apr 8 02:25:42 2025 +0100
+
+    second
+
+[33mcommit f31375184757d66fa35237266d2a91372ec5e90c[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Tue Apr 8 10:13:36 2025 +0100
+
+    jihen
+
+[33mcommit f6b830209dc6b3d6a6297743d006c5d55587d426[m
+Merge: 2dd63a47 17ec0594
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Mon Apr 7 23:11:34 2025 +0100
+
+    Merge pull request #1 from ranymmjr/gestion_blogs
+    
+    first commit
+
+[33mcommit 17ec0594ebc8209a2c1e7b8f96325c5c9c1f409e[m
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Mon Apr 7 23:00:16 2025 +0100
+
+    first commit
+
+[33mcommit 2dd63a474a371e2192b6ef28bd94fc8a2c6c5330[m
+Author: Ranym Mejri <124840327+ranymmjr@users.noreply.github.com>
+Date:   Mon Apr 7 22:36:35 2025 +0100
+
+    Initial commit
+
+[33mcommit 855a97b969b62b94672a08c1489f027e195b972a[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 7 22:34:49 2025 +0100
+
+    jihen
+
+[33mcommit d59969d33ead7f4c68c834c47ce0f2de4ae77b46[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 7 21:43:30 2025 +0100
+
+    jihen
+
+[33mcommit 2826170cc5a704ee36446709aaeedb28a57b4099[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 7 21:43:03 2025 +0100
+
+    jihen
+
+[33mcommit 3fbed40a35d0a44de5fb1784b896476241c642aa[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 7 21:09:09 2025 +0100
+
+    jihen
+
+[33mcommit 1c1f69bca1c1169cfc8c95ece6824ff9dae38bf9[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 7 20:37:54 2025 +0100
+
+    jihen
+
+[33mcommit 332fe5bf05b0c4e594d5907f1241119e236e91bf[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 7 16:18:22 2025 +0100
+
+    jihen
+
+[33mcommit 95980a5f38312932c88059561b88da89f6963b8d[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Mon Apr 7 16:09:00 2025 +0100
+
+    jihen
+
+[33mcommit bd772e2d2326e148584adf307240f61f1c657cf9[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Sat Apr 5 14:24:36 2025 +0100
+
+    jihen
+
+[33mcommit 7753b3333af23b533c6791d3da4b36effb05d783[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Sat Apr 5 13:46:42 2025 +0100
+
+    Update Sportif.php
+    
+    jihen
+
+[33mcommit cad4f17f977aa371772ab43535afc14d950a2d73[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Sat Apr 5 13:33:08 2025 +0100
+
+    jihen
+
+[33mcommit 588e8865b00694ebc8f4100b63e14522eaa33871[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Sat Apr 5 13:08:22 2025 +0100
+
+    jihen
+
+[33mcommit a6c3de5858772c35e0adf8a7a7d6cbd4c53ac899[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Sat Apr 5 12:59:57 2025 +0100
+
+    jihen
+
+[33mcommit 8f0e80baaddbdae9d06cf8418f04fa9aa1df7945[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Sat Apr 5 11:41:49 2025 +0100
+
+    jihen
+
+[33mcommit c1d5fdc807fb3f3d4c0c225267367d8e8b0dcc2b[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Thu Apr 3 21:38:12 2025 +0100
+
+    jihen
+
+[33mcommit 600a5324125c3d230ab02621f6010e9d46811c56[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Thu Apr 3 21:37:24 2025 +0100
+
+    jihen
+
+[33mcommit 6cc75d675316c28cf9b552225f4d3668aa6a9c11[m
+Author: GhabiJihen <GhabiJihen@users.noreply.github.com>
+Date:   Thu Apr 3 21:13:51 2025 +0100
+
+    jihen
+
+[33mcommit fe178ecc65cd15bd044c1bc2074785e66e8375f0[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Wed Apr 2 17:15:16 2025 +0100
+
+    wajd mercredi 02
+
+[33mcommit c51fa97e2d99e8e1f769afd16a5cb04b308cf202[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Wed Apr 2 12:24:09 2025 +0100
+
+    wajd mercredi 02
+
+[33mcommit f532602c1ec9286f39b1756f317707ea55c6356c[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Tue Apr 1 23:35:30 2025 +0100
+
+    wajd mardi 01
+
+[33mcommit 2943852dfd63efcee1f7963ad5e75186edcfa78d[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sun Mar 30 18:08:12 2025 +0100
+
+    wajd dimanche 30
+
+[33mcommit 391fbef7f50234636fab8e1ec1ff2b737df2b72d[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sat Mar 29 23:56:23 2025 +0100
+
+    wajd samedi 29
+
+[33mcommit 00bda4f7665b0904ea24ddb55ee669ca5f4e55a0[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sat Mar 29 20:10:24 2025 +0100
+
+    wajd samedi 29
+
+[33mcommit f73aa4b37375b2ee1460ec9d45eb21872043c4b6[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sat Mar 29 12:27:05 2025 +0100
+
+    wajd samedi 29
+
+[33mcommit 21322cc293c4e9acc292e70ee5e4cd5d6826e554[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sat Mar 29 11:44:36 2025 +0100
+
+    wajd samedi 29
+
+[33mcommit fc376cc24f3b8df828c2a8290537bbc60b0f6bb0[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sat Mar 29 00:14:07 2025 +0100
+
+    wajd vendredi 28
+
+[33mcommit 7182c7b5d6ebfbc96868265be2b6acd5a07af6ce[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Fri Mar 28 23:47:19 2025 +0100
+
+    wajd jeudi 28
+
+[33mcommit fb381cce27f9f249e9cba1e993706fd8bcaf064e[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Fri Mar 28 21:31:02 2025 +0100
+
+    Wajd vendredi 28
+
+[33mcommit 25b5b86373da98df99bd7b87c06d0007f4b5cb34[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Fri Mar 28 14:34:55 2025 +0100
+
+    wajd vendredi 28
+
+[33mcommit f1ea1f7ab9582280f891be82dfff39ad27e50992[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Fri Mar 28 13:06:43 2025 +0100
+
+    wajd vendredi 28
+
+[33mcommit 678b2ef50d382cd76c0132028a025345cb67cb26[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Fri Mar 28 00:08:06 2025 +0100
+
+    wajd jeudi 27
+
+[33mcommit 28880a147311aa08a47339d02859fdb70148c673[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Thu Mar 27 19:52:47 2025 +0100
+
+    wajd jeudi 27
+
+[33mcommit cbab62e840287cf9d986dc08ef74b540812f7d98[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Thu Mar 27 12:32:02 2025 +0100
+
+    wajd jeudi 27
+
+[33mcommit 70de6c54bb485e03ce857edb962e72f1743afce6[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Thu Mar 27 00:41:38 2025 +0100
+
+    wajd mercredi
+
+[33mcommit 190ac6910c66f9754e60addcfc8f0e39a6604492[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Wed Mar 26 18:14:40 2025 +0100
+
+    wajd mercredi 26
+
+[33mcommit 74a9e6917334bcb9f2c552844bb1c544b83c5180[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sun Mar 23 11:05:39 2025 +0100
+
+    create
+
+[33mcommit 7a10bfcd534799f29730fbedaf3f35fe799d1f55[m
+Author: wajd <97837888+Wajdbenameur1@users.noreply.github.com>
+Date:   Sun Mar 23 10:57:00 2025 +0100
+
+    Initial commit
