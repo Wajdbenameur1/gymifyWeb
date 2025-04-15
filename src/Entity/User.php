@@ -70,8 +70,7 @@ private Collection $reactions;
 
     }
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
-    private Collection $reactions;
+    
 
 
     
