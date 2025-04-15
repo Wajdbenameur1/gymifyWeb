@@ -15,14 +15,7 @@ class ReponseRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Reponse::class);
     }
-<<<<<<< HEAD
 
-=======
-    public function findByReclamation(int $reclamationId): ?Reponse
-    {
-        return $this->findOneBy(['reclamation' => $reclamationId]);
-    }
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
 //    /**
 //     * @return Reponse[] Returns an array of Reponse objects
 //     */

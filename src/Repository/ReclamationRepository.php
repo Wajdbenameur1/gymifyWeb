@@ -40,18 +40,4 @@ class ReclamationRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
-<<<<<<< HEAD
-=======
-public function findByUserAndStatus(?User $user, ?string $status): array
-    {
-        $qb = $this->createQueryBuilder('r');
-        if ($user) {
-            $qb->andWhere('r.user = :user')->setParameter('user', $user);
-        }
-        if ($status && $status !== 'Tous') {
-            $qb->andWhere('r.statut = :status')->setParameter('status', $status);
-        }
-        return $qb->getQuery()->getResult();
-    }
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
 }

@@ -12,10 +12,6 @@
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
         "google/apiclient": "^2.18",
-<<<<<<< HEAD
-=======
-        "google/apiclient-services": "^0.396.0",
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^2.1",
         "symfony/asset": "6.4.*",
@@ -47,12 +43,7 @@
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
-<<<<<<< HEAD
         "twig/extra-bundle": "^2.12|^3.0",
-=======
-        "twig/extra-bundle": "^3.20",
-        "twig/string-extra": "^3.20",
->>>>>>> 1e2a521f379c042fb627b82253dcd3e5a8f8a1fc
         "twig/twig": "^2.12|^3.0"
     },
     "config": {
