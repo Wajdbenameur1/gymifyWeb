@@ -1,0 +1,187 @@
+/* Styles de base */
+body {
+    background-color: #000;
+    color: white;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-start; /* Alignement au début pour permettre l'affichage de la sidebar */
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+/* Conteneur principal de la page */
+.wrapper {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    padding-top: 20px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar.closed {
+    transform: translateX(-250px); /* Caché lorsque fermé */
+}
+
+/* Contenu principal */
+.main-panel {
+    flex-grow: 1;
+    margin-left: 250px; /* Espacement pour la sidebar */
+    padding: 20px;
+    background-color: #fff;
+    transition: margin-left 0.3s ease;
+}
+
+.main-panel.sidebar-closed {
+    margin-left: 0; /* Lorsque la sidebar est fermée, le contenu occupe toute la largeur */
+}
+
+/* Conteneur des posts */
+.feed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    margin-left: 250px; /* Décalage du feed à droite lorsque la sidebar est ouverte */
+    transition: margin-left 0.3s ease; /* Transition fluide */
+}
+
+/* Lorsque la sidebar est fermée */
+.main-panel.sidebar-closed .feed {
+    margin-left: 0; /* Le feed occupe toute la largeur quand la sidebar est fermée */
+}
+
+/* Post container */
+.post {
+    width: 100%;
+    max-width: 500px;
+    border-bottom: 1px solid #222;
+    margin: 0;
+    background-color: #222;
+    border-radius: 8px;
+    padding: 10px;
+    box-sizing: border-box;
+    text-align: center; /* Centrer le contenu du post */
+}
+
+/* En-tête du post */
+.post-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.post-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+/* Image du post */
+.post-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* Actions du post */
+.post-actions {
+    padding: 10px;
+    display: flex;
+    gap: 15px;
+    font-size: 20px;
+    justify-content: center;
+}
+
+/* Contenu du post */
+.post-content {
+    padding: 10px 0;
+}
+
+/* Date du post */
+.post-date {
+    font-size: 12px;
+    color: #888;
+    padding: 10px 0;
+}
+
+/* Media query pour les petits écrans */
+@media (max-width: 768px) {
+    .feed {
+        margin-left: 0; /* Sur les petits écrans, le feed occupe toute la largeur */
+    }
+
+    .post {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .post-header img {
+        width: 35px;
+        height: 35px;
+    }
+
+    .post-actions {
+        font-size: 18px;
+    }
+
+    .post-content {
+        font-size: 14px;
+    }
+
+    .main-panel {
+        margin-left: 0; /* Sur les petits écrans, la sidebar disparaît */
+    }
+
+    .sidebar {
+        width: 100%;
+        position: static;
+        transform: translateX(0); /* Sidebar complètement visible */
+    }
+}
+
+/* Media query pour les très petits écrans */
+@media (max-width: 480px) {
+    .post {
+        padding: 10px;
+    }
+
+    .post-header img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .post-actions {
+        font-size: 16px;
+    }
+
+    .post-content {
+        font-size: 12px;
+    }
+
+    .post-actions i {
+        font-size: 18px; /* Réduire la taille des icônes sur les petits écrans */
+    }
+}

@@ -1,17 +1,18 @@
 <?php
 
 namespace App\Entity;
-
+use App\Enum\Role;
 use App\Repository\EntraineurRepository;
 use Doctrine\ORM\Mapping as ORM;
-use App\Enum\Role; // Assurez-vous que Role est bien importé
 
-// On dit à Doctrine que Entraineur hérite de User
 #[ORM\Entity(repositoryClass: EntraineurRepository::class)]
 class Entraineur extends User
 {
-    // Définition de la colonne 'specialite' dans la base de données
-  // Spécialité de l'entraîneur, optionnelle
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
 
     // Le constructeur définit le rôle d'Entraîneur
    
@@ -22,17 +23,22 @@ class Entraineur extends User
             }
     
 
-    // Getter pour la spécialité
-    public function getSpecialite(): ?string
+    #[ORM\Column(length: 255)]
+    private ?string $Entraineur = null;
+   public function getId(): ?int
     {
-        return $this->specialite;
+        return $this->id;
     }
 
-    public function setSpecialite(?string $specialite): static
+    public function getEntraineur(): ?string
     {
-        $this->specialite = $specialite;
+        return $this->Entraineur;
+    }
+
+    public function setEntraineur(string $Entraineur): static
+    {
+        $this->Entraineur = $Entraineur;
+
         return $this;
     }
-
-    // Méthode spécifique à l'entraîneur si nécessaire, par exemple pour ajouter des comportements ou des validations.
 }

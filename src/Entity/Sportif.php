@@ -12,5 +12,6 @@ class Sportif extends User
   public function __construct()
   {
       parent::__construct();
-       }
+      $this->setRole(Role::SPORTIF);  // Définir le rôle en utilisant l'Enum
+     }
 }

@@ -13,10 +13,11 @@ class Admin extends User
 
     public function __construct()
     {
+        // Initialise le rôle d'admin
         parent::__construct();
-        $this->setRole(Role::ADMIN); // Sets role to 'admin', which getRoles() will transform to ROLE_ADMIN
+        $this->setRole(Role::ADMIN->value); // Assurez-vous que Role::ADMIN existe et est valide
     }
-    
+
     // Vous pouvez ajouter des méthodes spécifiques à l'Admin si nécessaire.
     // Exemple: getters/setters pour des propriétés spécifiques aux Admins.
 }

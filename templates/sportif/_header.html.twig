@@ -11,8 +11,8 @@
         <ul>
             <li><a href="">Home</a></li>
             <li><a href="">About Us</a></li>
-            <li><a href="">Classes</a></li>
-            <li><a href="">Services</a></li>
+            <li><a href="{{path('activity_sportif')}}">Activity</a></li>
+            <li><a href="{{path('cours_sportif')}}">Classes</a></li>
             <li><a href="">Our Team</a></li>
             <li><a href="#">Pages</a>
                 <ul class="dropdown">
@@ -53,8 +53,8 @@
                     <ul>
                         <li class="{{ app.request.get('_route') == 'homepage' ? 'active' }}"><a href="">Home</a></li>
                         <li class="{{ app.request.get('_route') == 'about_us' ? 'active' }}"><a href="">About Us</a></li>
-                        <li class="{{ app.request.get('_route') == 'classes' ? 'active' }}"><a href="">Classes</a></li>
-                        <li class="{{ app.request.get('_route') == 'services' ? 'active' }}"><a href="">Services</a></li>
+                        <li class="{{ app.request.get('_route') == 'classes' ? 'active' }}"><a href="{{path('cours_sportif')}}">Classes</a></li>
+                        <li class="{{ app.request.get('_route') == 'services' ? 'active' }}"><a href="{{path('activity_sportif')}}">Activity</a></li>
                         <li class="{{ app.request.get('_route') == 'team' ? 'active' }}"><a href="">Our Team</a></li>
                         <li class="{{ app.request.attributes.get('_route') starts with 'pages_' ? 'active' }}">
                             <a href="#">Pages</a>

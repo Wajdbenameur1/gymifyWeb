@@ -1,26 +1,29 @@
 <?php
+
 namespace App\Entity;
+
 use App\Enum\Role;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Entity\Reactions;
+
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "user")]
-#[UniqueEntity("email", message: "L'email {{ value }} est déjà utilisé.")]
 #[ORM\InheritanceType("SINGLE_TABLE")]
 #[ORM\DiscriminatorColumn(name: "role", type: "string")]
-#[ORM\DiscriminatorMap([
-    "sportif" => \App\Entity\Sportif::class,
-    "admin" => \App\Entity\Admin::class,
-    "responsable_salle" => \App\Entity\ResponsableSalle::class,
-    "entraineur" => \App\Entity\Entraineur::class,])]
+#[ORM\DiscriminatorMap([ 
+    "sportif" => Sportif::class, 
+    "admin" => Admin::class, 
+    "responsable_salle" => ResponsableSalle::class, 
+    "entraineur" => Entraineur::class 
+])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -34,25 +37,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 100, unique: true)]
-    #[Assert\NotBlank(message: "L'email est obligatoire.")]
-    #[Assert\Email(message: "Veuillez entrer une adresse email valide.")]
+    #[ORM\Column(length: 100)]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(type: 'string', enumType: Role::class)]
+    private ?Role $role = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $specialite = null;
+
+    #[ORM\Column(length: 255)]
     private ?string $imageUrl = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateNaissance = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
-    private ?string $specialite = null;
-
-    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
-    private Collection $entaineur;
+    // Relation OneToMany avec Post (Les posts d'un utilisateur)
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Post::class)]
+    private Collection $posts;
 
 
     #[ORM\ManyToOne(inversedBy: 'equipes')]
@@ -61,9 +66,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->entaineur = new ArrayCollection();
-   
+        $this->posts = new ArrayCollection();
+        $this->reactions = new ArrayCollection();
+    
 
     }
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+    private Collection $reactions;
+
+
+    
+
+   
 
     public function getId(): ?int
     {
@@ -114,14 +129,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getImageUrl(): ?string
+    
+
+  
+    public function getSpecialite(): ?string
     {
-        return $this->imageUrl;
+        return $this->specialite;
     }
 
-    public function setImageUrl(?string $imageUrl): self
+    public function setSpecialite(string $specialite): static
     {
-        $this->imageUrl = $imageUrl;
+        $this->specialite = $specialite;
         return $this;
     }
 
@@ -136,66 +154,72 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getSpecialite(): ?string
+    // Getter et Setter pour la collection de posts
+    public function getPosts(): Collection
     {
-        return $this->specialite;
+        return $this->posts;
     }
 
-    public function setSpecialite(?string $specialite): static
+    public function addPost(Post $post): static
     {
-        $this->specialite = $specialite;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Cours>
-     */
-    public function getEntaineur(): Collection
-    {
-        return $this->entaineur;
-    }
-
-    public function addEntaineur(Cours $entaineur): static
-    {
-        if (!$this->entaineur->contains($entaineur)) {
-            $this->entaineur[] = $entaineur;
-            $entaineur->setEntaineurId($this);
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->setUser($this);
         }
+
         return $this;
     }
 
-    public function removeEntaineur(Cours $entaineur): static
+    public function removePost(Post $post): static
     {
-        if ($this->entaineur->removeElement($entaineur) && $entaineur->getEntaineur() === $this) {
-            $entaineur->setEntaineur(null);
+        if ($this->posts->removeElement($post)) {
+            if ($post->getUser() === $this) {
+                $post->setUser(null);
+            }
         }
+
         return $this;
     }
 
-    public function getEquipe(): ?Equipe
-    {
-        return $this->equipe;
+   
+
+
+    public function getReactions(): Collection
+{
+    return $this->reactions;
+}
+
+public function addReaction(Reactions $reaction): static
+{
+    if (!$this->reactions->contains($reaction)) {
+        $this->reactions->add($reaction);
+        $reaction->setUser($this);
     }
 
-    public function setEquipe(?Equipe $equipe): static
-    {
-        $this->equipe = $equipe;
-        return $this;
+    return $this;
+}
+
+public function removeReaction(Reactions $reaction): static
+{
+    if ($this->reactions->removeElement($reaction)) {
+        if ($reaction->getUser() === $this) {
+            $reaction->setUser(null);
+        }
     }
 
-    public function getRole(): string
-    {
-        return match (true) {
-            $this instanceof \App\Entity\Admin => 'admin',
-            $this instanceof \App\Entity\Sportif => 'sportif',
-            $this instanceof \App\Entity\ResponsableSalle => 'responsable_salle',
-            $this instanceof \App\Entity\Entraineur => 'entraineur',
-            default => 'utilisateur',
-        };
-    }
-    
+    return $this;
+}
+public function getRole(): Role
+{
+    return match (true) {
+        $this instanceof \App\Entity\Admin => Role::ADMIN,
+        $this instanceof \App\Entity\Sportif => Role::SPORTIF,
+        $this instanceof \App\Entity\ResponsableSalle => Role::RESPONSABLE_SALLE,
+        $this instanceof \App\Entity\Entraineur => Role::ENTRAINEUR,
+        default => Role::USER,
+    };
+}
 
-  
 public function setRole(Role $role): self
 {
     $this->role = $role;
@@ -224,3 +248,6 @@ public function setRole(Role $role): self
         return $this->email;
     }
 }
+
+
+

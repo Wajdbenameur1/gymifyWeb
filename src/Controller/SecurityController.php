@@ -42,7 +42,7 @@ class SecurityController extends AbstractController
             return 'app_home';
         }
     
-        $role = $user->getRoles();
+        $role = $user->getRole();
     
         return match ($role) {
             Role::ADMIN->value => 'app_admin',

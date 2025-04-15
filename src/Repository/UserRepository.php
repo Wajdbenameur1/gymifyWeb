@@ -15,6 +15,7 @@ class UserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, User::class);
     }
+
 //    /**
 //     * @return User[] Returns an array of User objects
 //     */
@@ -39,19 +40,12 @@ class UserRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
 public function findAll(): array
     {
         return $this->findBy([], ['id' => 'ASC']);
     }
-    // src/Repository/UserRepository.php
-public function findByRoleFilter(array $roles): array
-{
-    return $this->createQueryBuilder('u')
-        ->where('u.role IN (:roles)')
-        ->setParameter('roles', $roles)
-        ->getQuery()
-        ->getResult();
-}
+
 
     public function findByAllowedRoles(array $roles): array
     {

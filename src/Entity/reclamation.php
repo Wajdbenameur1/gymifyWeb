@@ -17,19 +17,14 @@ class Reclamation
     #[ORM\Column(length: 255)]
     private ?string $sujet = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(length: 255)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $statut = 'En attente';
+    #[ORM\Column(length: 255)]
+    private ?string $statut = null;
 
-    #[ORM\Column(name: 'dateCreation', type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateCreation = null;
-    
-
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
-    private ?User $user = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date_creation = null;
 
     public function getId(): ?int
     {
@@ -41,9 +36,10 @@ class Reclamation
         return $this->sujet;
     }
 
-    public function setSujet(string $sujet): self
+    public function setSujet(string $sujet): static
     {
         $this->sujet = $sujet;
+
         return $this;
     }
 
@@ -52,9 +48,10 @@ class Reclamation
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription(string $description): static
     {
         $this->description = $description;
+
         return $this;
     }
 
@@ -63,35 +60,22 @@ class Reclamation
         return $this->statut;
     }
 
-    public function setStatut(string $statut): self
+    public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+
         return $this;
     }
-    public function __construct()
-{
-    $this->dateCreation = new \DateTime();
-}
 
     public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->dateCreation;
+        return $this->date_creation;
     }
 
-    public function setDateCreation(\DateTimeInterface $dateCreation): self
+    public function setDateCreation(\DateTimeInterface $date_creation): static
     {
-        $this->dateCreation = $dateCreation;
-        return $this;
-    }
+        $this->date_creation = $date_creation;
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
         return $this;
     }
 }
