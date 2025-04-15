@@ -15,7 +15,8 @@ class ResponsableSalle extends User
     public function __construct()
     {
         parent::__construct();
-        $this->setRole(Role::RESPONSABLE_SALLE);  // Définit le rôle comme responsable de salle
+        // Passez l'objet Role::SPORTIF ici
+       $this->setRole(Role::RESPONSABLE_SALLE);  // Définit le rôle comme responsable de salle
     }
 
     /**
@@ -50,3 +51,4 @@ class ResponsableSalle extends User
         return $this;
     }
 }
+
