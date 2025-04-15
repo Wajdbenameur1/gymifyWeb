@@ -95,4 +95,14 @@ public function salleDetails(Salle $salle, AbonnementRepository $abonnementRepos
             'abonnement' => $abonnement,
         ]);
     }
+    #[Route('/sportif/cours', name: 'cours_sportif')]
+    public function cours(CoursRepository $repo)
+    {
+        $cours = $repo->findAll();
+        foreach ($cours as $c) {
+            dump($c->getEntaineur());
+        }
+        return $this->render('sportif/cours.html.twig', ['cours' => $cours]);
+    }
+    
 }

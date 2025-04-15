@@ -1,7 +1,7 @@
 <?php
 namespace App\Form;
 
-use App\Entity\Activite;
+use App\Entity\Activité;
 use App\Enum\ActivityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -62,16 +62,14 @@ class ActivityFormType extends AbstractType
                 'label' => 'Activity Image *',
                 'mapped' => false,
                 'required' => true,
-                'constraints' => [
-                    new NotBlank(['message' => 'Please select an image'])
-                ]
+                
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Activite::class,
+            'data_class' => Activité::class,
         ]);
     }
 }
