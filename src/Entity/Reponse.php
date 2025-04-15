@@ -14,15 +14,23 @@ class Reponse
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private ?string $message = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(name: 'dateReponse', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateReponse = null;
+
+
+    #[ORM\ManyToOne(targetEntity: Reclamation::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Reclamation $reclamation = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
-        return $this->id_Reponse;
+        return $this->id;
     }
 
     public function getMessage(): ?string
@@ -30,10 +38,9 @@ class Reponse
         return $this->message;
     }
 
-    public function setMessage(string $message): static
+    public function setMessage(string $message): self
     {
         $this->message = $message;
-
         return $this;
     }
 
@@ -42,10 +49,31 @@ class Reponse
         return $this->dateReponse;
     }
 
-    public function setDateReponse(\DateTimeInterface $dateReponse): static
+    public function setDateReponse(\DateTimeInterface $dateReponse): self
     {
         $this->dateReponse = $dateReponse;
+        return $this;
+    }
 
+    public function getReclamation(): ?Reclamation
+    {
+        return $this->reclamation;
+    }
+
+    public function setReclamation(?Reclamation $reclamation): self
+    {
+        $this->reclamation = $reclamation;
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
         return $this;
     }
 }
