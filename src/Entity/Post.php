@@ -7,6 +7,7 @@ use App\Entity\User;  // Ajout de l'entité User
 use App\Entity\Comment;  // Ajout de l'entité Comment
 use App\Entity\Reactions;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
