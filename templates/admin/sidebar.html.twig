@@ -31,23 +31,12 @@
                     <i class="fas fa-dumbbell"></i>
                         <p>Activity</p>
                     </a>
-             </li>
-               <li class="nav-item {{ app.request.get('_route') == 'user_index' ? 'active' }}">
-              <a href="{{ path('user_index') }}">
-                 <i class="fas fa-dumbbell"></i>
-                 <p>Utilisateurs</p>
-               </a>
-             </li>
-              <li class="nav-item {{ app.request.get('_route') == 'admin_salle_index' ? 'active' }}">
-              <a href="{{ path('admin_salle_index') }}">
-                 <i class="fas fa-dumbbell"></i>
-                 <p>Gym</p>
-               </a>
-             </li>
-              <li class="nav-item {{ app.request.get('_route') == 'admin_reclamations_index' ? 'active' }}">
-                    <a href="{{ path('admin_reclamations_index') }}">
-                        <i class="fas fa-envelope"></i>
-                        <p>Réclamations</p>
+                </li>
+                </li>
+                  <li class="nav-item {{ app.request.get('_route') == 'app_users' ? 'active' }}">
+                    <a href="{{ path('app_users') }}">
+                    <i class="fas fa-dumbbell"></i>
+                        <p>Users</p>
                     </a>
                 </li>
                 {# Ajoutez ici les autres éléments du menu #}
