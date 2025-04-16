@@ -24,41 +24,64 @@ final class PostController extends AbstractController
     }
 
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager): Response
-{
-    $post = new Post();
-    $form = $this->createForm(PostType::class, $post);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Vérifie si un utilisateur est connecté
-        $user = $this->getUser();
-
-        // Si l'utilisateur n'est pas connecté, utilise l'utilisateur avec l'ID 1
-        if (!$user) {
-            $user = $entityManager->getRepository(User::class)->find(1);
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $post = new Post();
+        $form = $this->createForm(PostType::class, $post);
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Vérifie si un utilisateur est connecté
+            $user = $this->getUser();
+    
+            // Si l'utilisateur n'est pas connecté, utilise l'utilisateur avec l'ID 1
             if (!$user) {
-                throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
+                $user = $entityManager->getRepository(User::class)->find(1);
+                if (!$user) {
+                    throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
+                }
             }
-        }
+    
+            // Traitement de l'image (si nécessaire)
+// Traitement de l'image (si nécessaire)
+$imageFile = $form->get('imageFile')->getData();
+if ($imageFile) {
+    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+    $safeFilename = $originalFilename; // Tu peux ajouter un slugger si nécessaire
+    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
-        $post->setUser($user);
-        $post->setCreatedAt(new \DateTime());
-
-        $entityManager->persist($post);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Le post a été créé avec succès.');
-        return $this->redirectToRoute('app_post_index');
+    try {
+        // Move the uploaded file to the desired directory and get the absolute path
+        $imageFile->move(
+            $this->getParameter('uploads_directory'),
+            $newFilename
+        );
+        
+        // Save the absolute path in the database (update the image URL)
+        $imageUrl = $this->getParameter('uploads_directory') . '\\' . $newFilename;
+        $post->setImageUrl($imageUrl);
+    } catch (FileException $e) {
+        // Handle the error if necessary
+        $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
     }
-
-    return $this->render('post/new.html.twig', [
-        'form' => $form->createView(),
-    ]);
 }
 
+// Set other properties for the post
+$post->setUser($user);
+$post->setCreatedAt(new \DateTime());
+$entityManager->persist($post);
+$entityManager->flush();
 
+$this->addFlash('success', 'Le post a été créé avec succès.');
+return $this->redirectToRoute('app_post_index');
+}
 
+return $this->render('post/new.html.twig', [
+'form' => $form->createView(),
+]);
+}
+
+    
 
 
 
