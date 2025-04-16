@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
 
 final class SportifController extends AbstractController
@@ -61,6 +61,17 @@ final class SportifController extends AbstractController
 
         return $this->render('sportif/planning.html.twig', [
             'events' => $events,
+        ]);
+    }
+
+    #[Route('/sportif/cours', name: 'cours_sportif')]
+    public function coursSportif(CoursRepository $coursRepository): Response
+    {
+        // Récupérer tous les cours
+        $cours = $coursRepository->findAll();
+
+        return $this->render('sportif/cours.html.twig', [
+            'cours' => $cours,
         ]);
     }
 
@@ -188,13 +199,6 @@ final class SportifController extends AbstractController
         ]);
     }
 
-    /**
-     * Merge a DateTime date with a DateTime time into a full ISO string.
-     *
-     * @param \DateTime $date
-     * @param \DateTime $time
-     * @return string
-     */
     private function mergeDateTime(\DateTime $date, \DateTime $time): string
     {
         $dateStr = $date->format('Y-m-d');
@@ -202,12 +206,6 @@ final class SportifController extends AbstractController
         return $dateStr . 'T' . $timeStr;
     }
 
-    /**
-     * Get color based on the course objective.
-     *
-     * @param ObjectifCours|null $objectif
-     * @return string
-     */
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
         if (!$objectif) {
@@ -218,8 +216,9 @@ final class SportifController extends AbstractController
             ObjectifCours::FORCE => '#ff4d4f', // Red for strength
             ObjectifCours::ENDURANCE => '#1890ff', // Blue for endurance
             ObjectifCours::FLEXIBILITE => '#13c2c2', // Cyan for flexibility
-            ObjectifCours::PERTE_DE_POIDS => '#fadb14', // Yellow for weight loss
-            default => '#808080', // Gray for unknown
+            ObjectifCours::PERTE_DE_POIDS => '#52c41a', // Green for weight loss
+            ObjectifCours::MAIGRIR => '#f5222d', // Red for losing weight
+            default => '#808080', // Default gray
         };
     }
 }

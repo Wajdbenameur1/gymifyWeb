@@ -14,11 +14,6 @@ parameters:
 
 
 
-
-    images_directory: '%kernel.project_dir%/public/uploads/images'
-    users_images_directory: '%kernel.project_dir%/public/uploads/images'
-    events_images_directory: '%kernel.project_dir%/public/uploads/events'
-
 services:
     # default configuration for services in *this* file
     _defaults:
