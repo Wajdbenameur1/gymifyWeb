@@ -4,141 +4,137 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Doctrine\ORM\EntityManagerInterface; // <-- Ajoutez cette ligne
-use Symfony\Component\HttpFoundation\Request; // <-- Cette ligne est cruciale
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Planning;
-use App\Repository\PlanningRepository; 
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
-use Symfony\Component\Routing\Attribute\Route;
-use App\Form\PlanningType;// Assurez-vous d'importer votre form type
+use App\Repository\PlanningRepository;
+use App\Form\PlanningType;
 use Symfony\Component\Security\Core\Security;
-
+use Symfony\Component\Routing\Attribute\Route;
 
 final class PlanningController extends AbstractController
 {
     #[Route('/planning', name: 'app_planning')]
     public function index(EntityManagerInterface $entityManager): Response
-{
-  /** @var \App\Entity\User|null $user */
-  $user = $this->getUser();
-    $plannings = $entityManager->getRepository(Planning::class)->findBy(['entaineur' => $user]);
-    
-    return $this->render('planning/index.html.twig', [
-        'plannings' => $plannings,
-        'page_title' => 'Liste des plannings'
-    ]);
-}
-    #[Route('/planning/new', name: 'app_planning_new')]
-    public function new(Request $request): Response
-{
-    
-    
-    return $this->render('planning/new.html.twig', [
-        'page_title' => 'Add New Planning',
-    ]);
-}
-#[Route('/planning/create', name: 'app_planning_create', methods: ['POST'])]
-    public function create(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        Security $security,
-        ValidatorInterface $validator
-    ): Response {
-        // 1. Vérifier le token CSRF
-        $submittedToken = $request->request->get('token');
-        if (!$this->isCsrfTokenValid('planning_form', $submittedToken)) {
-            $this->addFlash('error', 'Token CSRF invalide.');
-            return $this->redirectToRoute('app_planning');
-        }
-
-        // 2. Récupérer l'utilisateur connecté (entraîneur)
-        /** @var User $user */
-        $user = $security->getUser();
-        $planning = new Planning();
-        $planning->setTitle($request->request->get('title'));
-        $planning->setDescription($request->request->get('description'));
-        $planning->setDateDebut(new \DateTime($request->request->get('dateDebut')));
-        $planning->setDateFin(new \DateTime($request->request->get('dateFin')));
-        $planning->setEntaineur($user);
-        $errors = $validator->validate($planning);
-        if (count($errors) > 0) {
-          foreach ($errors as $error) {
-              $this->addFlash('error', $error->getMessage());
-          }
-          return $this->redirectToRoute('app_planning_new');
-          }
-
-
-        // 4. Enregistrer en base de données
-        $entityManager->persist($planning);
-        $entityManager->flush();
-
-        // 5. Redirection avec message de succès
-        $this->addFlash('success', 'Planning créé avec succès!');
-        return $this->redirectToRoute('app_planning'); // À adapter
+    {
+        /** @var \App\Entity\User|null $user */
+        $user = $this->getUser();
+        $plannings = $entityManager->getRepository(Planning::class)->findBy(['entaineur' => $user]);
+        
+        return $this->render('planning/index.html.twig', [
+            'plannings' => $plannings,
+            'page_title' => 'Liste des plannings'
+        ]);
     }
 
-    #[Route('/planning/edit/{id}', name: 'app_planning_edit', methods: ['GET', 'POST'])]
-    public function edit(int $id, PlanningRepository $repository): Response
+    #[Route('/planning/new', name: 'app_planning_new')]
+    public function new(Request $request, EntityManagerInterface $entityManager, Security $security): Response
     {
-        $planning = $repository->find($id);
-        
-        if (!$planning) {
-            $this->addFlash('error', 'Planning not found');
+        $planning = new Planning();
+        $form = $this->createForm(PlanningType::class, $planning);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var \App\Entity\User $user */
+            $user = $security->getUser();
+            $planning->setEntaineur($user);
+            
+            $entityManager->persist($planning);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Planning créé avec succès!');
             return $this->redirectToRoute('app_planning');
         }
-    
+
+        return $this->render('planning/new.html.twig', [
+            'page_title' => 'Add New Planning',
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/planning/create', name: 'app_planning_create', methods: ['POST'])]
+    public function create(Request $request, EntityManagerInterface $entityManager, Security $security): Response
+    {
+        $planning = new Planning();
+        $form = $this->createForm(PlanningType::class, $planning);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var \App\Entity\User $user */
+            $user = $security->getUser();
+            $planning->setEntaineur($user);
+            
+            $entityManager->persist($planning);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Planning créé avec succès!');
+            return $this->redirectToRoute('app_planning');
+        }
+
+        // Si le formulaire n'est pas valide, afficher les erreurs
+        foreach ($form->getErrors(true) as $error) {
+            $this->addFlash('error', $error->getMessage());
+        }
+
+        return $this->render('planning/new.html.twig', [
+            'page_title' => 'Add New Planning',
+            'form' => $form->createView(),
+        ]);
+    }
+    #[Route('/planning/edit/{id}', name: 'app_planning_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Planning $planning, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(PlanningType::class, $planning);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Planning mis à jour avec succès!');
+            return $this->redirectToRoute('app_planning');
+        }
+
         return $this->render('planning/edit.html.twig', [
             'page_title' => 'Edit Planning',
+            'form' => $form->createView(),
             'planning' => $planning,
         ]);
     }
 
-#[Route('/planning/{id}', name: 'app_planning_delete', methods: ['POST'])]
-public function delete(Request $request, Planning $planning, EntityManagerInterface $entityManager): Response
-{
-    if ($this->isCsrfTokenValid('delete'.$planning->getId(), $request->request->get('_token'))) {
-        $entityManager->remove($planning);
-        $entityManager->flush();
-        $this->addFlash('success', 'Planning supprimé avec succès');
+    #[Route('/planning/{id}', name: 'app_planning_delete', methods: ['POST'])]
+    public function delete(Request $request, Planning $planning, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$planning->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($planning);
+            $entityManager->flush();
+            $this->addFlash('success', 'Planning supprimé avec succès');
+        }
+
+        return $this->redirectToRoute('app_planning');
     }
 
-    return $this->redirectToRoute('app_planning');
-}
-#[Route('/planning/{id}/update', name: 'app_planning_update', methods: ['POST'])]
-public function update(Request $request, Planning $planning, EntityManagerInterface $entityManager,        
-ValidatorInterface $validator
-): Response
-{
-    // Validation du token CSRF
-    if (!$this->isCsrfTokenValid('update_planning_'.$planning->getId(), $request->request->get('_token'))) {
-        $this->addFlash('error', 'Token CSRF invalide');
-        return $this->redirectToRoute('app_planning_edit', ['id' => $planning->getId()]);
+    #[Route('/planning/{id}/update', name: 'app_planning_update', methods: ['POST'])]
+    public function update(Request $request, Planning $planning, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(PlanningType::class, $planning);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Planning mis à jour avec succès');
+            return $this->redirectToRoute('app_planning');
+        }
+
+        // Si le formulaire n'est pas valide, afficher les erreurs
+        foreach ($form->getErrors(true) as $error) {
+            $this->addFlash('error', $error->getMessage());
+        }
+
+        return $this->render('planning/edit.html.twig', [
+            'page_title' => 'Edit Planning',
+            'form' => $form->createView(),
+            'planning' => $planning,
+        ]);
     }
-    $errors = $validator->validate($planning);
-
-    if (count($errors) > 0) {
-      foreach ($errors as $error) {
-          $this->addFlash('error', $error->getMessage());
-      }
-      return $this->redirectToRoute('app_planning_edit', ['id' => $id]);
-      }
-
-    // Mise à jour des données
-    $planning->setTitle($request->request->get('title'));
-    $planning->setDescription($request->request->get('description'));
-    $planning->setDateDebut(new \DateTime($request->request->get('dateDebut')));
-    $planning->setDateFin(new \DateTime($request->request->get('dateFin')));
-
-    $entityManager->flush();
-
-    $this->addFlash('success', 'Planning mis à jour avec succès');
-    return $this->redirectToRoute('app_planning');
-}
-
-
-    
-    
-
 }

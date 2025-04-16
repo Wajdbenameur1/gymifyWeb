@@ -19,7 +19,9 @@
             <div class="swiper calendar-swiper">
                 <div class="swiper-wrapper">
                     {% for jour in joursCalendrier %}
-                        <div class="swiper-slide calendar-day {% if jour|date('Y-m-d') == "now"|date('Y-m-d') %}active{% endif %}" 
+                        <div class="swiper-slide calendar-day 
+                            {% if jour|date('Y-m-d') == "now"|date('Y-m-d') %}active{% endif %}
+                            {% if jour|date('Y-m-d') in datesAvecCours %}has-cours{% endif %}" 
                              data-date="{{ jour|date('Y-m-d') }}">
                             <div class="day-name">{{ jour|date('D')|trans }}</div>
                             <div class="day-number">{{ jour|date('d') }}</div>
@@ -147,9 +149,7 @@
         .calendar-swiper {
             padding: 0 30px;
             position: relative;
-            
         }
-        
         
         .calendar-day {
             width: 70px !important;
@@ -169,6 +169,16 @@
         }
         
         .calendar-day.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .calendar-day.has-cours {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .calendar-day.active.has-cours {
             background: #007bff;
             color: white;
         }
@@ -244,83 +254,84 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
     function filterCourses() {
-    const searchTerm = document.getElementById('globalSearchInput').value.toLowerCase();
-    const selectedDate = document.querySelector('.calendar-day.active')?.getAttribute('data-date') || 'all';
-    
-    document.querySelectorAll('tbody tr').forEach(row => {
-        const rowDate = row.getAttribute('data-date');
-        const rowText = row.textContent.toLowerCase();
+        const searchTerm = document.getElementById('globalSearchInput').value.toLowerCase();
+        const selectedDate = document.querySelector('.calendar-day.active')?.getAttribute('data-date') || 'all';
         
-        const dateMatch = selectedDate === 'all' || rowDate === selectedDate;
-        const searchMatch = rowText.includes(searchTerm);
-        
-        row.style.display = (dateMatch && searchMatch) ? '' : 'none';
-    });
-}
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const rowDate = row.getAttribute('data-date');
+            const rowText = row.textContent.toLowerCase();
+            
+            const dateMatch = selectedDate === 'all' || rowDate === selectedDate;
+            const searchMatch = rowText.includes(searchTerm);
+            
+            row.style.display = (dateMatch && searchMatch) ? '' : 'none';
+        });
+    }
 
-// Écouteurs d'événements
-document.getElementById('globalSearchInput').addEventListener('input', filterCourses);
-document.querySelectorAll('.calendar-day').forEach(day => {
-    day.addEventListener('click', filterCourses);
-});
-        document.addEventListener('DOMContentLoaded', function() {
-            // Activer les tooltips Bootstrap
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-            
-            // Initialiser le Swiper
-            const calendarSwiper = new Swiper('.calendar-swiper', {
-                slidesPerView: 'auto',
-                spaceBetween: 10,
-                centeredSlides: false,
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
+    // Écouteurs d'événements
+    document.getElementById('globalSearchInput').addEventListener('input', filterCourses);
+    document.querySelectorAll('.calendar-day').forEach(day => {
+        day.addEventListener('click', filterCourses);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Activer les tooltips Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+        
+        // Initialiser le Swiper
+        const calendarSwiper = new Swiper('.calendar-swiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 10,
+            centeredSlides: false,
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            breakpoints: {
+                768: {
+                    slidesPerView: 'auto',
+                    spaceBetween: 10,
                 },
-                breakpoints: {
-                    768: {
-                        slidesPerView: 'auto',
-                        spaceBetween: 10,
-                    },
-                    992: {
-                        slidesPerView: 'auto',
-                        spaceBetween: 10,
-                    }
+                992: {
+                    slidesPerView: 'auto',
+                    spaceBetween: 10,
                 }
-            })
-            
-            // Gestion du clic sur les jours
-            document.querySelectorAll('.calendar-day').forEach(day => {
-                day.addEventListener('click', function() {
-                    // Retirer la classe active de tous les jours
-                    document.querySelectorAll('.calendar-day').forEach(d => {
-                        d.classList.remove('active')
-                    })
-                    
-                    // Ajouter la classe active au jour cliqué
-                    this.classList.add('active')
-                    
-                    // Filtrer les cours par date
-                    const selectedDate = this.getAttribute('data-date')
-                    document.querySelectorAll('tbody tr').forEach(row => {
-                        const rowDate = row.getAttribute('data-date')
-                        if (selectedDate === 'all' || rowDate === selectedDate) {
-                            row.style.display = ''
-                        } else {
-                            row.style.display = 'none'
-                        }
-                    })
-                })
-            })
-            
-            // Centrer le jour actuel dans le Swiper
-            const todaySlide = document.querySelector('.calendar-day.active')
-            if (todaySlide) {
-                const slideIndex = Array.from(todaySlide.parentNode.children).indexOf(todaySlide)
-                calendarSwiper.slideTo(slideIndex)
             }
         })
+        
+        // Gestion du clic sur les jours
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            day.addEventListener('click', function() {
+                // Retirer la classe active de tous les jours
+                document.querySelectorAll('.calendar-day').forEach(d => {
+                    d.classList.remove('active')
+                })
+                
+                // Ajouter la classe active au jour cliqué
+                this.classList.add('active')
+                
+                // Filtrer les cours par date
+                const selectedDate = this.getAttribute('data-date')
+                document.querySelectorAll('tbody tr').forEach(row => {
+                    const rowDate = row.getAttribute('data-date')
+                    if (selectedDate === 'all' || rowDate === selectedDate) {
+                        row.style.display = ''
+                    } else {
+                        row.style.display = 'none'
+                    }
+                })
+            })
+        })
+        
+        // Centrer le jour actuel dans le Swiper
+        const todaySlide = document.querySelector('.calendar-day.active')
+        if (todaySlide) {
+            const slideIndex = Array.from(todaySlide.parentNode.children).indexOf(todaySlide)
+            calendarSwiper.slideTo(slideIndex)
+        }
+    })
     </script>
 {% endblock %}

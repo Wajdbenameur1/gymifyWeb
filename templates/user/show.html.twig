@@ -1,11 +1,115 @@
-<h1>Détails de l'utilisateur</h1>
+{% extends 'base.html.twig' %}
 
-<p>Nom : {{ user.nom }}</p>
-<p>Prénom : {{ user.prenom }}</p>
-<p>Email : {{ user.email }}</p>
+{% block title %}Détails de l'utilisateur{% endblock %}
 
-{% if specialite %}
-    <p>Spécialité : {{ specialite }}</p>
-{% else %}
-    <p>Aucune spécialité définie</p>
-{% endif %}
+{% block body %}
+    <div class="container py-5">
+        <h1 class="fw-bold mb-4 text-primary"><i class="fas fa-user me-2"></i>Détails de l'utilisateur</h1>
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-light p-2 rounded shadow-sm">
+                <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('user_index') }}" class="text-decoration-none">Utilisateurs</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Détails</li>
+            </ol>
+        </nav>
+
+        {% if user is not defined or user is null %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                Aucun utilisateur trouvé.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <a href="{{ path('user_index') }}" class="btn btn-outline-secondary btn-lg rounded-pill">
+                <i class="fas fa-arrow-left me-2"></i>Retour
+            </a>
+        {% else %}
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-primary text-white py-3 rounded-top-4">
+                   <h5 class="mb-0">{{ user.prenom }} {{ user.nom }} <small class="text-light">({{ user.role.value|capitalize }})</small></h5>
+  </div>
+                <div class="card-body p-5">
+                    <div class="row">
+                        {% if user.imageUrl %}
+                            <div class="col-md-4 text-center mb-4 mb-md-0">
+                                <img src="{{ asset('Uploads/users/' ~ user.imageUrl) }}"
+                                     alt="{{ user.prenom }} {{ user.nom }}"
+                                     class="img-fluid rounded shadow-sm"
+                                     style="max-width: 200px;">
+                            </div>
+                        {% endif %}
+                        <div class="{{ user.imageUrl ? 'col-md-8' : 'col-md-12' }}">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4 fw-semibold">ID</dt>
+                                <dd class="col-sm-8">{{ user.id }}</dd>
+                                <dt class="col-sm-4 fw-semibold">Prénom</dt>
+                                <dd class="col-sm-8">{{ user.prenom|capitalize }}</dd>
+                                <dt class="col-sm-4 fw-semibold">Nom</dt>
+                                <dd class="col-sm-8">{{ user.nom|capitalize }}</dd>
+                                <dt class="col-sm-4 fw-semibold">Email</dt>
+                                <dd class="col-sm-8">{{ user.email }}</dd>
+                                <dt class="col-sm-4 fw-semibold">Rôle</dt>
+                                <dd class="col-sm-8">
+                                  <span class="{{ 
+    user.role.value == 'admin' ? 'bg-danger' :
+    user.role.value == 'entraineur' ? 'bg-warning' :
+    user.role.value == 'sportif' ? 'bg-primary' :
+    user.role.value == 'responsable_salle' ? 'bg-info' :
+    'bg-secondary' }}">
+    {{ user.role.value|capitalize }}
+</span>
+
+                                </dd>
+                                <dt class="col-sm-4 fw-semibold">Date de naissance</dt>
+                                <dd class="col-sm-8">{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : 'Non spécifiée' }}</dd>
+                                {% if user.specialite %}
+                                    <dt class="col-sm-4 fw-semibold">Spécialité</dt>
+                                    <dd class="col-sm-8">{{ user.specialite }}</dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light p-4">
+                    <div class="d-flex gap-2 justify-content-end">
+                        {% set is_own_profile = app.user and app.user.id == user.id %}
+                        {% if is_granted('ROLE_ADMIN') and not is_own_profile %}
+                            <a href="{{ path('app_user_update', {'id': user.id}) }}"
+                               class="btn btn-primary btn-lg rounded-pill">
+                                <i class="fas fa-edit me-2"></i>Modifier
+                            </a>
+                            <form action="{{ path('user_delete', {'id': user.id}) }}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                <button type="submit" class="btn btn-danger btn-lg rounded-pill">
+                                    <i class="fas fa-trash me-2"></i>Supprimer
+                                </button>
+                            </form>
+                        {% endif %}
+                        <a href="{{ is_own_profile ? path('app_home') : path('user_index') }}"
+                           class="btn btn-outline-secondary btn-lg rounded-pill">
+                            <i class="fas fa-arrow-left me-2"></i>Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #00bcd4);
+        }
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+        }
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+        }
+    </style>
+{% endblock %}

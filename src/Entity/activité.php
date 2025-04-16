@@ -30,7 +30,6 @@ class Activité
     private ?string $description = null;
 
     #[ORM\Column(length: 200)]
-    #[Assert\NotBlank(message: "L'URL ne peut pas être vide")]
     private ?string $url = null;
 
     #[ORM\Column(type: 'string',enumType: ActivityType::class,columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')")]

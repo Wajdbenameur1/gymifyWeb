@@ -13,10 +13,12 @@ class EquipeEvent
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'equipe')]
+    #[ORM\ManyToOne(targetEntity: Equipe::class, inversedBy: 'equipeEvents')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Equipe $equipe = null;
 
-    #[ORM\ManyToOne(inversedBy: 'event')]
+    #[ORM\ManyToOne(targetEntity: Events::class, inversedBy: 'equipeEvents')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Events $event = null;
 
     public function getId(): ?int
@@ -32,7 +34,6 @@ class EquipeEvent
     public function setEquipe(?Equipe $equipe): static
     {
         $this->equipe = $equipe;
-
         return $this;
     }
 
@@ -44,7 +45,6 @@ class EquipeEvent
     public function setEvent(?Events $event): static
     {
         $this->event = $event;
-
         return $this;
     }
 }

@@ -1,5 +1,6 @@
 <?php
 namespace App\Entity;
+use App\Enum\Role;
 
 use App\Repository\AdminRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,7 +15,7 @@ class Admin extends User
     {
         // Initialise le rôle d'admin
         parent::__construct();
-        $this->setRole(\App\Enum\Role::ADMIN); // Assurez-vous que Role::ADMIN existe et est valide
+        $this->setRole(Role::ADMIN->value); // Assurez-vous que Role::ADMIN existe et est valide
     }
 
     // Vous pouvez ajouter des méthodes spécifiques à l'Admin si nécessaire.

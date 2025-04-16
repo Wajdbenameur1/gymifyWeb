@@ -1,0 +1,208 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\PostRepository;
+use App\Entity\User;  // Ajout de l'entité User
+use App\Entity\Comment;  // Ajout de l'entité Comment
+use App\Entity\Reactions;
+use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
+#[ORM\Entity(repositoryClass: PostRepository::class)]
+class Post
+{
+    #[ORM\Id]
+#[ORM\GeneratedValue(strategy: "AUTO")]
+#[ORM\Column(type: "integer")]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+#[Assert\NotBlank(message: 'Le titre est obligatoire.')]
+#[Assert\Length(
+    min: 3,
+    max: 100,
+    minMessage: 'Le titre doit contenir au moins {{ limit }} caractères.',
+    maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères.'
+)]
+#[Assert\Regex(
+    pattern: '/^(?!.*\b(spam|arnaque|insulte)\b).*/i',
+    message: 'Le titre contient un mot interdit.'
+)]
+private ?string $title = null;
+
+#[ORM\Column(length: 1000)]
+#[Assert\NotBlank(message: 'Le contenu est obligatoire.')]
+#[Assert\Length(
+    min: 10,
+    max: 1000,
+    minMessage: 'Le contenu doit contenir au moins {{ limit }} caractères.',
+    maxMessage: 'Le contenu ne peut pas dépasser {{ limit }} caractères.'
+)]
+#[Assert\Regex(
+    pattern: '/^(?!.*\b(spam|arnaque|insulte)\b).*/i',
+    message: 'Le contenu contient un mot interdit.'
+)]
+private ?string $content = null;
+
+#[ORM\Column(length: 255, nullable: true)]
+#[Assert\Url(message: 'Veuillez saisir une URL valide (http(s)://...) pour l’image.')]
+#[Assert\Regex(
+    pattern: '/\.(jpg|jpeg|png|gif)$/i',
+    message: 'L’URL de l’image doit se terminer par .jpg, .jpeg, .png ou .gif'
+)]
+private ?string $image_url = null;
+
+
+
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    // Relation ManyToOne avec User
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'posts')]
+    #[ORM\JoinColumn(name: 'id_User', referencedColumnName: 'id')]
+    private ?User $user = null;  // Cette propriété représente l'utilisateur auquel le post appartient.
+
+    // Relation OneToMany avec Comment
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Comment::class)]
+    private Collection $comments;
+    
+    //reactions
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+private Collection $reactions;
+
+
+  
+
+    
+    public function __construct()
+    {
+        $this->comments = new ArrayCollection();
+        $this->reactions = new ArrayCollection();
+
+       
+        
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): static
+    {
+        $this->title = $title;
+        return $this;
+    }
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(string $content): static
+    {
+        $this->content = $content;
+        return $this;
+    }
+
+    public function getImageUrl(): ?string
+    {
+        return $this->image_url;
+    }
+
+    public function setImageUrl(?string $image_url): static
+    {
+        $this->image_url = $image_url;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    // Getter et Setter pour la relation ManyToOne avec User
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    // Getter et Setter pour la relation OneToMany avec Comment
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setPost($this);  // Associe ce post au commentaire
+        }
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // Désassocie ce post du commentaire
+            if ($comment->getPost() === $this) {
+                $comment->setPost(null);
+            }
+        }
+        return $this;
+    }
+
+
+    public function getReactions(): Collection
+{
+    return $this->reactions;
+}
+
+public function addReaction(Reactions $reaction): static
+{
+    if (!$this->reactions->contains($reaction)) {
+        $this->reactions->add($reaction);
+        $reaction->setPost($this);
+    }
+
+    return $this;
+}
+
+public function removeReaction(Reactions $reaction): static
+{
+    if ($this->reactions->removeElement($reaction)) {
+        if ($reaction->getPost() === $this) {
+            $reaction->setPost(null);
+        }
+    }
+
+    return $this;
+}
+
+   
+
+}

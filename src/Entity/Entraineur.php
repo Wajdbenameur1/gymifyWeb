@@ -10,28 +10,20 @@ use App\Enum\Role; // Assurez-vous que Role est bien importé
 #[ORM\Entity(repositoryClass: EntraineurRepository::class)]
 class Entraineur extends User
 {
+   
     // Définition de la colonne 'specialite' dans la base de données
   // Spécialité de l'entraîneur, optionnelle
 
     // Le constructeur définit le rôle d'Entraîneur
-    public function __construct()
-    {
-        // Appel du constructeur parent pour initialiser les propriétés héritées de User
-        parent::__construct();
-        $this->setRole(\App\Enum\Role::ENTRAINEUR); // Assurez-vous que Role::ENTRAINEUR est valide
-    }
+   
+            public function __construct()
+            {
+                parent::__construct();
+                $this->setRole(Role::ENTRAINEUR); // Sets role to 'admin', which getRoles() will transform to ROLE_ADMIN
+            }
+    
 
-    // Getter pour la spécialité
-    public function getSpecialite(): ?string
-    {
-        return $this->specialite;
-    }
-
-    public function setSpecialite(?string $specialite): static
-    {
-        $this->specialite = $specialite;
-        return $this;
-    }
+    
 
     // Méthode spécifique à l'entraîneur si nécessaire, par exemple pour ajouter des comportements ou des validations.
 }
