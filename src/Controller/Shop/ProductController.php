@@ -18,11 +18,28 @@ use DateTime;
 #[Route('/shop')]
 class ProductController extends AbstractController
 {
-    #[Route('/', name: 'shop_product_index', methods: ['GET'])]
-    public function index(ProduitRepository $produitRepository): Response
+    #[Route('/', name: 'shop_product_index')]
+    public function index(Request $request, ProduitRepository $produitRepository): Response
     {
+        $minPrice = $request->query->get('min_price');
+        $maxPrice = $request->query->get('max_price');
+        $category = $request->query->get('category');
+        
+        // Only apply filters if at least one filter is set and not empty
+        if (($minPrice !== null && $minPrice !== '') || 
+            ($maxPrice !== null && $maxPrice !== '') || 
+            ($category !== null && $category !== '')) {
+            $produits = $produitRepository->findByFilters(
+                $minPrice ? (float) $minPrice : null,
+                $maxPrice ? (float) $maxPrice : null,
+                $category
+            );
+        } else {
+            $produits = $produitRepository->findAll();
+        }
+
         return $this->render('shop/product/index.html.twig', [
-            'produits' => $produitRepository->findAll(),
+            'produits' => $produits
         ]);
     }
 
@@ -55,17 +72,24 @@ class ProductController extends AbstractController
     #[Route('/cart/add/{id}', name: 'shop_cart_add', methods: ['POST'])]
     public function addToCart(Request $request, Produit $product, SessionInterface $session): Response
     {
+        $quantity = max(1, min((int) $request->request->get('quantity', 1), $product->getStockP()));
         $cart = $session->get('cart', []);
         $id = $product->getIdP();
 
         if (!empty($cart[$id])) {
-            $cart[$id]++;
+            $cart[$id] += $quantity;
+            // Make sure we don't exceed the available stock
+            $cart[$id] = min($cart[$id], $product->getStockP());
         } else {
-            $cart[$id] = 1;
+            $cart[$id] = $quantity;
         }
 
         $session->set('cart', $cart);
-        $this->addFlash('success', 'Le produit a été ajouté au panier.');
+        $this->addFlash('success', sprintf('%d %s ajouté%s au panier.', 
+            $quantity, 
+            $product->getNomP(),
+            $quantity > 1 ? 's' : ''
+        ));
         
         return $this->redirectToRoute('shop_cart_index');
     }
@@ -186,5 +210,21 @@ class ProductController extends AbstractController
 
         $this->addFlash('success', 'La commande a été annulée avec succès.');
         return $this->redirectToRoute('shop_orders_index');
+    }
+
+    #[Route('/search', name: 'shop_product_search')]
+    public function search(Request $request, ProduitRepository $produitRepository): Response
+    {
+        $query = $request->query->get('q');
+        $products = [];
+        
+        if ($query) {
+            $products = $produitRepository->searchByName($query);
+        }
+        
+        return $this->render('shop/product/search.html.twig', [
+            'products' => $products,
+            'query' => $query
+        ]);
     }
 } 
