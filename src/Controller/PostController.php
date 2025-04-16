@@ -69,6 +69,7 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
 
 
 
+
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
     public function show(Post $post): Response
     {
