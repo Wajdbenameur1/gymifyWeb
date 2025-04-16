@@ -29,7 +29,7 @@ public function blogs(PostRepository $postRepository): Response
 #[Route('/sportifdashboard/create-post', name: 'app_sportif_create_post')]
     public function createPost(): Response
     {
-        // Redirection vers la route de création de post
+        // Redirection vers la route de création deee post
         return $this->redirectToRoute('app_post_new');
     }
     
