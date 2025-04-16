@@ -1,9 +1,10 @@
+{# templates/post/new.html.twig #}
 {% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
 {% block stylesheets %}
     {{ parent() }}
-    {# Inclusion des styles ParsleyJS #}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.css" integrity="sha512-ey..." crossorigin="anonymous" />
+    {# Inclusion du CSS de Dropzone sans intégrité #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Bordure rouge pour les erreurs Parsley */
         input.parsley-error,
@@ -11,15 +12,13 @@
         textarea.parsley-error {
             border-color: #ff0000 !important;
         }
-
         /* Bordure verte lorsque la validation est correcte */
         input.parsley-success,
         select.parsley-success,
         textarea.parsley-success {
-            border-color: #00cc00 !important; /* vous pouvez ajuster la nuance de vert */
+            border-color: #00cc00 !important;
         }
-
-        /* Style pour la liste d'erreurs si besoin */
+        /* Style pour la liste d'erreurs */
         .parsley-errors-list {
             margin: 2px 0 0;
             padding: 0;
@@ -27,14 +26,30 @@
             color: #ff0000;
             font-size: 0.9em;
         }
+        /* Style Dropzone de base */
+        .dropzone {
+            border: 2px dashed #007bff;
+            padding: 30px;
+            background: #f9f9f9;
+            text-align: center;
+            cursor: pointer;
+        }
+        .dropzone .dz-message {
+            font-weight: bold;
+            color: #555;
+        }
+        /* Nouveau CSS pour agrandir la taille de l'image d'aperçu dans Dropzone */
+        .dropzone .dz-preview .dz-image img {
+            width: 200px;  /* ou la valeur que vous souhaitez */
+            height: auto;  /* pour conserver les proportions */
+        }
     </style>
 {% endblock %}
 
 {% block body %}
 <div class="container mt-5">
     <h1 class="mb-4">Créer un nouveau post</h1>
-
-    {# Ajout de l'attribut data-parsley-validate pour activer la validation ParsleyJS #}
+    {# Activation de la validation Parsley côté client #}
     {{ form_start(form, {'attr': {'data-parsley-validate': ''}}) }}
 
     <div class="mb-3">
@@ -43,13 +58,11 @@
             'attr': {
                 'class': 'form-control',
                 'data-parsley-trigger': 'keyup',
-                'data-parsley-minlength': '3',  
+                'data-parsley-minlength': '3',
                 'data-parsley-minlength-message': 'Le titre doit contenir au moins 3 caractères.'
             }
         }) }}
-        <div class="text-danger">
-            {{ form_errors(form.title) }}
-        </div>
+        <div class="text-danger">{{ form_errors(form.title) }}</div>
     </div>
 
     <div class="mb-3">
@@ -58,35 +71,108 @@
             'attr': {
                 'class': 'form-control',
                 'data-parsley-trigger': 'keyup',
-                'data-parsley-minlength': '10',  
+                'data-parsley-minlength': '10',
                 'data-parsley-minlength-message': 'Le contenu doit contenir au moins 10 caractères.'
             }
         }) }}
-        <div class="text-danger">
-            {{ form_errors(form.content) }}
-        </div>
+       
+       
+       
+       
+       
+       
+        <div class="text-danger">{{ form_errors(form.content) }}</div>
     </div>
 
     <div class="mb-3">
-        {{ form_label(form.imageFile) }}
-        {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.imageFile) }}
+        {{ form_label(form.webImage, "URL de l'image (optionnel)", {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.webImage, {'attr': {'class': 'form-control', 'placeholder': "Entrez une URL"}}) }}
+        <div class="text-danger">{{ form_errors(form.webImage) }}</div>
     </div>
-    
+
+    <div class="mb-3">
+        <p class="text-center">Ou téléchargez une image locale :</p>
+        <label class="form-label">Télécharger une image</label>
+        <div id="dropzone" class="dropzone">
+            <div class="dz-message">Glissez-déposez une image ici ou cliquez</div>
+        </div>
+    </div>
+
+    <div style="display:none">
+        {{ form_row(form.imageFile) }}
+    </div>
 
     <button type="submit" class="btn btn-primary">Publier</button>
-
     {{ form_end(form) }}
 </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" crossorigin="anonymous"></script>
+    <script>
+        Dropzone.autoDiscover = false;
+        const myDropzone = new Dropzone("#dropzone", {
+            url: "#",
+            autoProcessQueue: false,
+            clickable: "#dropzone",
+            maxFiles: 1,
+            acceptedFiles: 'image/jpeg,image/png,image/jpg',
+            addRemoveLinks: true,
+            dictDefaultMessage: "Glissez-déposez une image ici ou cliquez"
+        });
 
-    {# Inclusion du script ParsleyJS #}
-    {# Inclusion du script ParsleyJS #}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" integrity="sha512-ey..." crossorigin="anonymous"></script>
+        // Sélecteurs corrects selon Symfony Form
+        const webImageInput = document.querySelector('input[name="post[webImage]"]');
+        const fileInput     = document.querySelector('input[name="post[imageFile]"]');
+        const formElt       = document.querySelector('form[data-parsley-validate]');
 
+        // Quand l'utilisateur tape une URL
+        webImageInput.addEventListener('input', function () {
+            if (this.value.trim() !== '') {
+                // s'il y a déjà un fichier, on le supprime
+                if (myDropzone.files.length) {
+                    myDropzone.removeAllFiles(true);
+                }
+                myDropzone.disable();     // bloque le dropzone
+            } else {
+                myDropzone.enable();      // réactive le dropzone
+            }
+        });
+
+        // Quand on ajoute un fichier
+        myDropzone.on("addedfile", function(file) {
+            // Si l'URL est déjà remplie, on rejette le fichier
+            if (webImageInput.value.trim() !== '') {
+                this.removeFile(file);
+                alert('Vous avez déjà saisi une URL : choisissez soit un fichier, soit une URL.');
+                return;
+            }
+
+            // Sinon, on verrouille le champ URL (et/ou on l'efface)
+            webImageInput.value = '';
+            webImageInput.readOnly = true;
+
+            // On injecte le fichier dans l'input Symfony
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+        });
+
+        // Quand on retire le fichier
+        myDropzone.on("removedfile", function() {
+            fileInput.value = "";
+            webImageInput.readOnly = false;
+            // Le dropzone reste actif, on ne désactive rien d'autre
+        });
+
+        // En dernier recours : avant soumission, vérif doublon
+        formElt.addEventListener('submit', function(e) {
+            if (webImageInput.value.trim() !== '' && fileInput.files.length) {
+                e.preventDefault();
+                alert('Veuillez choisir soit une URL, soit un fichier, pas les deux.');
+            }
+        });
+    </script>
 {% endblock %}
-
-

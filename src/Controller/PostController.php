@@ -29,53 +29,65 @@ final class PostController extends AbstractController
         $post = new Post();
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
-    
+
+        // Récupération des deux champs non mappés
+        $imageFile = $form->get('imageFile')->getData();
+        $webImage  = $form->get('webImage')->getData();
+
+        // Vérification si les deux sources d'image sont renseignées
+        if ($imageFile && $webImage) {
+            $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
+            return $this->render('post/new.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
-            // Vérifie si un utilisateur est connecté
-            $user = $this->getUser();
-    
-            // Si l'utilisateur n'est pas connecté, utilise l'utilisateur avec l'ID 1
+            // Récupération de l'utilisateur connecté ou défaut
+            $user = $this->getUser() ?: $entityManager->getRepository(User::class)->find(1);
             if (!$user) {
-                $user = $entityManager->getRepository(User::class)->find(1);
-                if (!$user) {
-                    throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
-                }
+                throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
             }
-    
-            // Traitement de l'image (si nécessaire)
-            $imageFile = $form->get('imageFile')->getData();
+
+            // Traitement de l'upload local
             if ($imageFile) {
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $originalFilename; // Tu peux ajouter un slugger si nécessaire
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-    
+                $safeFilename     = $originalFilename; // Vous pouvez utiliser un service slug pour plus de sécurité
+                $newFilename      = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
                 try {
                     $imageFile->move(
                         $this->getParameter('uploads_directory'),
                         $newFilename
                     );
-    
-                    $imageUrl = $this->getParameter('uploads_directory') . '\\' . $newFilename;
-                    $post->setImageUrl($imageUrl);
+                    $post->setImageUrl($this->getParameter('uploads_directory') . DIRECTORY_SEPARATOR . $newFilename);
                 } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image locale.');
+                    return $this->render('post/new.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
                 }
+            } elseif ($webImage) {
+                // Traitement de l'image via une URL
+                $post->setImageUrl($webImage);
             }
-    
+
             $post->setUser($user);
             $post->setCreatedAt(new \DateTime());
-    
+
             $entityManager->persist($post);
             $entityManager->flush();
-    
+
             $this->addFlash('success', 'Le post a été créé avec succès.');
             return $this->redirectToRoute('app_post_index');
         }
-    
+
         return $this->render('post/new.html.twig', [
             'form' => $form->createView(),
         ]);
     }
+
+
     
 
 
