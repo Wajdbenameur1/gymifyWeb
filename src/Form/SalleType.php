@@ -35,10 +35,10 @@ class SalleType extends AbstractType
             ->add('nom', TextType::class, [
                 'label' => 'Nom de la Salle*',
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le nom est obligatoire']),
+                    new Assert\NotBlank(['message' => 'Le nom de la salle est requis.']),
                     new Assert\Length([
                         'max' => 200,
-                        'maxMessage' => 'Le nom ne doit pas dépasser {{ limit }} caractères'
+                        'maxMessage' => 'Le nom ne doit pas dépasser 200 caractères.'
                     ]),
                     new Assert\Callback([$this, 'validateUniqueSalleName'])
                 ],
@@ -50,7 +50,7 @@ class SalleType extends AbstractType
             ->add('adresse', TextType::class, [
                 'label' => 'Adresse*',
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'L\'adresse est obligatoire'])
+                    new Assert\NotBlank(['message' => 'L\'adresse est requise.'])
                 ],
                 'attr' => [
                     'class' => 'form-control',
@@ -60,7 +60,7 @@ class SalleType extends AbstractType
             ->add('num_tel', TelType::class, [
                 'label' => 'Numéro de téléphone*',
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le numéro est obligatoire']),
+                    new Assert\NotBlank(['message' => 'Le numéro de téléphone est requis.']),
                     new Assert\Regex([
                         'pattern' => '/^\+216\s\d{2}\s\d{3}\s\d{3}$/',
                         'message' => 'Le format doit être: +216 XX XXX XXX'
@@ -84,8 +84,8 @@ class SalleType extends AbstractType
             ->add('email', EmailType::class, [
                 'label' => 'Email*',
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'L\'email est obligatoire']),
-                    new Assert\Email(['message' => 'L\'email "{{ value }}" n\'est pas valide'])
+                    new Assert\NotBlank(['message' => 'L\'email est requis.']),
+                    new Assert\Email(['message' => 'L\'email n\'est pas valide.'])
                 ],
                 'attr' => [
                     'class' => 'form-control',
@@ -100,7 +100,7 @@ class SalleType extends AbstractType
                     new Assert\File([
                         'maxSize' => '2M',
                         'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG ou WebP)'
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG ou WebP).'
                     ])
                 ],
                 'attr' => ['class' => 'form-control-file']
@@ -114,15 +114,13 @@ class SalleType extends AbstractType
                     $qb = $this->entityManager->getRepository(ResponsableSalle::class)
                         ->createQueryBuilder('r')
                         ->where('r.role = :role')
-                        ->setParameter('role', Role::RESPONSABLE_SALLE)
-                        ->leftJoin('r.salle', 's'); // Jointure explicite
+                        ->setParameter('role', Role::RESPONSABLE_SALLE->value) // Use enum value
+                        ->leftJoin('r.salle', 's');
 
                     if ($currentSalleId) {
-                        // Inclure le responsable actuel de la salle ou les responsables non associés
                         $qb->andWhere('s.id IS NULL OR s.id = :currentSalleId')
                            ->setParameter('currentSalleId', $currentSalleId);
                     } else {
-                        // Exclure tous les responsables associés à une salle
                         $qb->andWhere('s.id IS NULL');
                     }
 
@@ -131,6 +129,9 @@ class SalleType extends AbstractType
                 'label' => 'Responsable de la salle*',
                 'placeholder' => 'Choisir un responsable',
                 'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank(['message' => 'Le responsable est requis.'])
+                ],
                 'attr' => ['class' => 'form-control']
             ]);
     }
@@ -140,12 +141,10 @@ class SalleType extends AbstractType
         $existingSalle = $this->entityManager->getRepository(Salle::class)
             ->findOneBy(['nom' => $value]);
 
-        // Récupérer l'entité Salle à partir des données du formulaire
         $salle = $context->getRoot()->getData();
 
-        // Vérifier si une salle avec ce nom existe déjà et si elle est différente de la salle actuelle
         if ($existingSalle && (!$salle->getId() || $existingSalle->getId() !== $salle->getId())) {
-            $context->buildViolation('Ce nom de salle est déjà utilisé')
+            $context->buildViolation('Ce nom de salle est déjà utilisé.')
                 ->atPath('nom')
                 ->addViolation();
         }

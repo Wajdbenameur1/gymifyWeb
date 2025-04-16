@@ -6,15 +6,13 @@ use App\Entity\ResponsableSalle;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<ResponsableSalle>
- */
 class ResponsableSalleRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ResponsableSalle::class);
     }
+}
 
     //    /**
     //     * @return ResponsableSalle[] Returns an array of ResponsableSalle objects
@@ -40,4 +38,4 @@ class ResponsableSalleRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-}
+
