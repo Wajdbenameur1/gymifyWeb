@@ -55,6 +55,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
 private Collection $comments;
+#[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Cours::class)]
+private Collection $cours;
+
 
 
 #[ORM\Column(type: 'string', length: 100, nullable: true)]
@@ -74,11 +77,6 @@ private Collection $reactions;
     }
 
     
-
-
-    
-
-   
 
     public function getId(): ?int
     {
