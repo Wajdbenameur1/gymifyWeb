@@ -58,22 +58,21 @@ final class AdminController extends AbstractController
        }
        #[Route('/admin/reclamation', name: 'app_admin_reclamation_index', methods: ['GET', 'POST'])]
        #[IsGranted('ROLE_ADMIN')]
-       public function reclamation(Request $request, ReclamationRepository $reclamationRepository, ReponseRepository $reponseRepository): Response
+       public function reclamation(Request $request, ReclamationRepository $reclamationRepository, ReponseRepository $reponseRepository, EntityManagerInterface $entityManager): Response
        {
            $reclamations = $reclamationRepository->findAll();
            $reponses = $reponseRepository->findAll();
            $reponse = new Reponse();
            $form = $this->createForm(ReponseType::class, $reponse);
            $form->handleRequest($request);
-   
+       
            if ($form->isSubmitted() && $form->isValid()) {
                $selectedReclamations = $request->request->get('selected_reclamations', []);
                if (empty($selectedReclamations)) {
                    $this->addFlash('warning', 'Veuillez sélectionner au moins une réclamation.');
                    return $this->redirectToRoute('app_admin_reclamation_index');
                }
-   
-               $em = $this->getDoctrine()->getManager();
+       
                foreach ($selectedReclamations as $reclamationId) {
                    $reclamation = $reclamationRepository->find($reclamationId);
                    if ($reclamation) {
@@ -83,15 +82,16 @@ final class AdminController extends AbstractController
                                   ->setAdmin($this->getUser())
                                   ->setReclamation($reclamation);
                        $reclamation->setStatut('Traitée');
-                       $em->persist($newReponse);
+                       $entityManager->persist($newReponse);
+                       $entityManager->persist($reclamation); // Ensure status update is persisted
                    }
                }
-               $em->flush();
-   
+               $entityManager->flush();
+       
                $this->addFlash('success', 'Réponses envoyées avec succès !');
                return $this->redirectToRoute('app_admin_reclamation_index');
            }
-   
+       
            return $this->render('admin_reclamation/index.html.twig', [
                'reclamations' => $reclamations,
                'reponses' => $reponses,
@@ -99,7 +99,6 @@ final class AdminController extends AbstractController
                'page_title' => 'Gestion des Réclamations'
            ]);
        }
-   
        #[Route('/admin/reclamation/delete-reponses', name: 'app_admin_reponse_delete', methods: ['POST'])]
        #[IsGranted('ROLE_ADMIN')]
        public function deleteReponses(Request $request, ReponseRepository $reponseRepository): Response

@@ -7,7 +7,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class ReclamationType extends AbstractType
@@ -17,22 +16,23 @@ class ReclamationType extends AbstractType
         $builder
             ->add('sujet', TextType::class, [
                 'label' => 'Sujet',
-                'attr' => ['placeholder' => 'Entrez le sujet de la réclamation'],
+                'attr' => [
+                    'placeholder' => 'Entrez le sujet de la réclamation',
+                    'class' => 'form-control',
+                ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'attr' => ['rows' => 5, 'placeholder' => 'Décrivez votre réclamation'],
-            ])
-            ->add('statut', ChoiceType::class, [
-                'label' => 'Statut',
-                'choices' => [
-                    'En attente' => 'En attente',
-                    'En cours' => 'En cours',
-                    'Résolue' => 'Résolue',
+                'attr' => [
+                    'rows' => 5,
+                    'placeholder' => 'Décrivez votre réclamation',
+                    'class' => 'form-control',
                 ],
-                'data' => 'En attente',
             ])
-            ->add('submit', SubmitType::class, ['label' => 'Envoyer']);
+            ->add('submit', SubmitType::class, [
+                'label' => 'Envoyer',
+                'attr' => ['class' => 'btn btn-primary'],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
