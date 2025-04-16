@@ -2,52 +2,35 @@
 
 namespace App\Entity;
 
-use App\Enum\Niveau;
 use App\Repository\EquipeRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
 class Equipe
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image_url = null;
+    #[ORM\Column(type: 'integer')]
+    private ?int $nombreMembres = 0;
 
+    #[ORM\OneToMany(mappedBy: 'equipe', targetEntity: User::class)]
+    private Collection $membres;
 
-    #[ORM\Column(type: 'string', enumType: Niveau::class)]
-
-    #[ORM\Column(type: 'string',enumType: Niveau::class,/*columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')"*/)]
-
-    private ?Niveau $niveau = null;
-
-    #[ORM\Column]
-    private ?int $nombre_membres = null;
-
-    /**
-     * @var Collection<int, EquipeEvent>
-     */
-    #[ORM\OneToMany(targetEntity: EquipeEvent::class, mappedBy: 'equipe', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'equipe', targetEntity: EquipeEvent::class)]
     private Collection $equipeEvents;
-
-    /**
-     * @var Collection<int, User>
-     */
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'equipe')]
-    private Collection $users;
 
     public function __construct()
     {
+        $this->membres = new ArrayCollection();
         $this->equipeEvents = new ArrayCollection();
-        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -60,42 +43,49 @@ class Equipe
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(string $nom): self
     {
         $this->nom = $nom;
         return $this;
     }
 
-    public function getImageUrl(): ?string
-    {
-        return $this->image_url;
-    }
-
-    public function setImageUrl(?string $image_url): static
-    {
-        $this->image_url = $image_url;
-        return $this;
-    }
-
-    public function getNiveau(): ?Niveau
-    {
-        return $this->niveau;
-    }
-
-    public function setNiveau(Niveau $niveau): static
-    {
-        $this->niveau = $niveau;
-        return $this;
-    }
-
     public function getNombreMembres(): ?int
     {
-        return $this->nombre_membres;
+        return $this->nombreMembres;
     }
 
-    public function setNombreMembres(int $nombre_membres): static
+    public function setNombreMembres(int $nombreMembres): self
     {
-        $this->nombre_membres = $nombre_membres;
+        $this->nombreMembres = $nombreMembres;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getMembres(): Collection
+    {
+        return $this->membres;
+    }
+
+    public function addMembre(User $membre): self
+    {
+        if (!$this->membres->contains($membre)) {
+            $this->membres[] = $membre;
+            $membre->setEquipe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMembre(User $membre): self
+    {
+        if ($this->membres->removeElement($membre)) {
+            if ($membre->getEquipe() === $this) {
+                $membre->setEquipe(null);
+            }
+        }
+
         return $this;
     }
 
@@ -107,49 +97,24 @@ class Equipe
         return $this->equipeEvents;
     }
 
-    public function addEquipeEvent(EquipeEvent $equipeEvent): static
+    public function addEquipeEvent(EquipeEvent $equipeEvent): self
     {
         if (!$this->equipeEvents->contains($equipeEvent)) {
-            $this->equipeEvents->add($equipeEvent);
+            $this->equipeEvents[] = $equipeEvent;
             $equipeEvent->setEquipe($this);
         }
+
         return $this;
     }
 
-    public function removeEquipeEvent(EquipeEvent $equipeEvent): static
+    public function removeEquipeEvent(EquipeEvent $equipeEvent): self
     {
         if ($this->equipeEvents->removeElement($equipeEvent)) {
             if ($equipeEvent->getEquipe() === $this) {
                 $equipeEvent->setEquipe(null);
             }
         }
-        return $this;
-    }
 
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): static
-    {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->setEquipe($this);
-        }
-        return $this;
-    }
-
-    public function removeUser(User $user): static
-    {
-        if ($this->users->removeElement($user)) {
-            if ($user->getEquipe() === $this) {
-                $user->setEquipe(null);
-            }
-        }
         return $this;
     }
 }
