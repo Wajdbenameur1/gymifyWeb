@@ -12,6 +12,7 @@
             <li><a href="">Home</a></li>
             <li><a href="">About Us</a></li>
             <li><a href="{{path('activity_sportif')}}">Activity</a></li>
+             <li><a href="{{path('app_reclamation_index')}}">reclamation</a></li>
             <li><a href="{{path('cours_sportif')}}">Classes</a></li>
             <li><a href="">Our Team</a></li>
             <li><a href="#">Pages</a>
@@ -22,6 +23,7 @@
                     <li><a href="">Our team</a></li>
                     <li><a href="">Gallery</a></li>
                     <li><a href="">Our blog</a></li>
+                     
                 </ul>
             </li>
             <li><a href="">Contact</a></li>
@@ -53,6 +55,7 @@
                     <ul>
                         <li class="{{ app.request.get('_route') == 'homepage' ? 'active' }}"><a href="">Home</a></li>
                         <li class="{{ app.request.get('_route') == 'about_us' ? 'active' }}"><a href="">About Us</a></li>
+                        <li class="{{ app.request.get('_route') == 'classes' ? 'active' }}"><a href="{{path('app_reclamation_index')}}">reclamation</a></li>
                         <li class="{{ app.request.get('_route') == 'classes' ? 'active' }}"><a href="{{path('cours_sportif')}}">Classes</a></li>
                         <li class="{{ app.request.get('_route') == 'services' ? 'active' }}"><a href="{{path('activity_sportif')}}">Activity</a></li>
                         <li class="{{ app.request.get('_route') == 'team' ? 'active' }}"><a href="">Our Team</a></li>
