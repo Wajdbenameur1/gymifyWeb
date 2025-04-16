@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\Salle;
@@ -18,7 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
 
 final class SportifController extends AbstractController
@@ -116,18 +115,15 @@ final class SportifController extends AbstractController
         EquipeEvent $equipeEvent,
         EntityManagerInterface $entityManager
     ): Response {
-        // Get the logged-in user (Sportif)
         /** @var User $sportif */
         $sportif = $this->getUser();
 
-        // Check if the user is logged in and has the ROLE_SPORTIF
         if (!$sportif || !in_array('ROLE_SPORTIF', $sportif->getRoles(), true)) {
             $this->logger->debug('User not logged in or not a sportif');
             $this->addFlash('error', 'Vous devez être connecté en tant que sportif pour participer.');
             return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
-        // Check if the sportif is already in this team for this event
         $existingParticipation = $entityManager->getRepository(User::class)
             ->createQueryBuilder('u')
             ->where('u.id = :sportifId')
@@ -143,7 +139,6 @@ final class SportifController extends AbstractController
             return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
-        // Check if the team is full (max 8 members)
         $equipe = $equipeEvent->getEquipe();
         if ($equipe->getNombreMembres() >= 8) {
             $this->logger->debug('Team is full', ['equipe_id' => $equipe->getId()]);
@@ -151,14 +146,11 @@ final class SportifController extends AbstractController
             return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
-        // Create the form pre-filled with the sportif's data
         $form = $this->createForm(SportifParticipationType::class, $sportif);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Update the sportif's equipe
             $sportif->setEquipe($equipe);
-            // Increment the number of members in the equipe
             $equipe->setNombreMembres($equipe->getNombreMembres() + 1);
 
             $entityManager->persist($sportif);
@@ -168,7 +160,7 @@ final class SportifController extends AbstractController
             $this->logger->info('Sportif joined team event', [
                 'sportif_id' => $sportif->getId(),
                 'equipe_id' => $equipe->getId(),
-                'event_id' => $equipeEvent->getEvent()->getId()
+                'event_id' => $equipeEvent->getEvent()->getId(),
             ]);
             $this->addFlash('success', sprintf('Le sportif %s %s a été ajouté à l\'équipe %s pour cet événement !', $sportif->getPrenom(), $sportif->getNom(), $equipe->getNom()));
             return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
@@ -188,26 +180,11 @@ final class SportifController extends AbstractController
         ]);
     }
 
-    /**
-     * Merge a DateTime date with a DateTime time into a full ISO string.
-     *
-     * @param \DateTime $date
-     * @param \DateTime $time
-     * @return string
-     */
-    private function mergeDateTime(\DateTime $date, \DateTime $time): string
+    private function mergeDateTime(\DateTimeInterface $date, \DateTimeInterface $time): string
     {
-        $dateStr = $date->format('Y-m-d');
-        $timeStr = $time->format('H:i:s');
-        return $dateStr . 'T' . $timeStr;
+        return sprintf('%sT%s', $date->format('Y-m-d'), $time->format('H:i:s'));
     }
 
-    /**
-     * Get color based on the course objective.
-     *
-     * @param ObjectifCours|null $objectif
-     * @return string
-     */
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
         if (!$objectif) {
@@ -215,11 +192,11 @@ final class SportifController extends AbstractController
         }
 
         return match ($objectif) {
-            ObjectifCours::FORCE => '#ff4d4f', // Red for strength
-            ObjectifCours::ENDURANCE => '#1890ff', // Blue for endurance
-            ObjectifCours::FLEXIBILITE => '#13c2c2', // Cyan for flexibility
-            ObjectifCours::PERTE_DE_POIDS => '#fadb14', // Yellow for weight loss
-            default => '#808080', // Gray for unknown
+            ObjectifCours::FORCE => '#ff4d4f',
+            ObjectifCours::ENDURANCE => '#1890ff',
+            ObjectifCours::FLEXIBILITE => '#13c2c2',
+            ObjectifCours::PERTE_DE_POIDS => '#fadb14',
+            default => '#808080',
         };
     }
 }

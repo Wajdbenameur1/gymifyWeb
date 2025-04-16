@@ -10,8 +10,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;  // Ajouter cet import
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Entity\Reactions;
+
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "user")]
@@ -21,11 +22,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     "sportif" => Sportif::class, 
     "admin" => Admin::class, 
     "responsable_salle" => ResponsableSalle::class, 
-    "entraineur"=>Entraineur::class 
+    "entraineur" => Entraineur::class 
 ])]
-/**
- * @UniqueEntity("email", message="L'email {{ value }} est déjà utilisé.")  // Ajoutez la contrainte UniqueEntity ici
- */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -39,9 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 100, unique: true)]  // L'email est unique dans la base de données
-    #[Assert\NotBlank(message: "L'email est obligatoire.")]
-    #[Assert\Email(message: "Veuillez entrer une adresse email valide.")]
+    #[ORM\Column(length: 100)]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
@@ -50,25 +46,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', enumType: Role::class)]
     private ?Role $role = null;
 
-  
+    #[ORM\Column(length: 100)]
+    private ?string $specialite = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $imageUrl = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateNaissance = null;
 
-    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'entaineur')]
-    private Collection $entaineur;
+    // Relation OneToMany avec Post (Les posts d'un utilisateur)
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Post::class)]
+    private Collection $posts;
 
-    #[ORM\ManyToOne(inversedBy: 'equipes')]
-    private ?Equipe $equipe = null;
+   
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+private Collection $reactions;
+
 
     public function __construct()
     {
-        $this->entaineur = new ArrayCollection();
+        $this->posts = new ArrayCollection();
+        $this->reactions = new ArrayCollection();
+
+       
     }
-  
+
     public function eraseCredentials(): void
     {
         // Nettoyer les données sensibles ici si nécessaire (ex: plainPassword)
@@ -76,9 +80,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return $this->email;  // Utiliser l'email comme identifiant
+        return $this->email;
     }
-   
 
     public function getId(): ?int
     {
@@ -93,7 +96,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -105,7 +107,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPrenom(string $prenom): static
     {
         $this->prenom = $prenom;
-
         return $this;
     }
 
@@ -117,7 +118,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -129,72 +129,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
-    #[ORM\Column(type: 'string', length: 100, nullable: true)] // Add nullable if specialite is optional
-    private ?string $specialite;
-    
+
+    public function getRole(): ?string
+    {
+        return $this->role ? $this->role->value : null;
+    }
+
+    public function setRole(Role $role): static
+    {
+        $this->role = $role;
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return [$this->role ? 'ROLE_' . strtoupper($this->role->value) : 'ROLE_USER'];
+    }
+
     public function getSpecialite(): ?string
     {
         return $this->specialite;
     }
-    
-    public function setSpecialite(?string $specialite): static
+
+    public function setSpecialite(string $specialite): static
     {
         $this->specialite = $specialite;
         return $this;
     }
-    public function getRole(): ?Role
-    {
-        // Si $this->role est une instance de Role, renvoyer directement
-        if ($this->role instanceof Role) {
-            return $this->role;
-        }
-    
-        // Sinon, convertir la valeur en Enum
-        return $this->role ? Role::from($this->role) : null;
-    }
-public function setRole($role): self
-{
-    // Si le rôle est une chaîne, on le transforme en un objet Role
-    if (is_string($role)) {
-        $role = Role::from($role); // Utilisez la méthode native `from()` pour créer un objet Role
-    }
 
-    $this->role = $role; // Assurez-vous que $role est bien un objet de type Role
-    return $this;
-}
-
-    public function getRoles(): array
-    {
-        $roles = [];
-    
-        if ($this->role) {
-            $roles[] = 'ROLE_' . strtoupper($this->role->value);  // Convertit l'Enum en chaîne de caractères
-        }
-    
-        return array_unique($roles);  // Retourne les rôles uniques
-    }
-    
-
-   
     public function getDateNaissance(): ?\DateTimeInterface
     {
         return $this->dateNaissance;
-    }
-    
-    
-
-    public function getImageUrl(): ?string
-    {
-        return $this->imageUrl;
-    }
-
-    public function setImageUrl(?string $imageUrl): self
-    {
-        $this->imageUrl = $imageUrl;
-        return $this;
     }
 
     public function setDateNaissance(\DateTimeInterface $dateNaissance): static
@@ -203,47 +170,60 @@ public function setRole($role): self
         return $this;
     }
 
-    /**
-     * @return Collection<int, cours>
-     */
-    public function getEntaineur(): Collection
+    // Getter et Setter pour la collection de posts
+    public function getPosts(): Collection
     {
-        return $this->entaineur;
+        return $this->posts;
     }
 
-    public function addEntaineur(cours $entaineur): static
+    public function addPost(Post $post): static
     {
-        if (!$this->entaineur->contains($entaineur)) {
-            $this->entaineur->add($entaineur);
-            $entaineur->setEntaineurId($this);
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeEntaineur(cours $entaineur): static
+    public function removePost(Post $post): static
     {
-        if ($this->entaineur->removeElement($entaineur)) {
-            // set the owning side to null (unless already changed)
-            if ($entaineur->getEntaineur() === $this) {
-                $entaineur->setEntaineur(null);
-            }    
+        if ($this->posts->removeElement($post)) {
+            if ($post->getUser() === $this) {
+                $post->setUser(null);
+            }
         }
 
         return $this;
     }
 
-    public function getEquipe(): ?equipe
-    {
-        return $this->equipe;
+   
+
+
+    public function getReactions(): Collection
+{
+    return $this->reactions;
+}
+
+public function addReaction(Reactions $reaction): static
+{
+    if (!$this->reactions->contains($reaction)) {
+        $this->reactions->add($reaction);
+        $reaction->setUser($this);
     }
 
-    public function setEquipe(?equipe $equipe): static
-    {
-        $this->equipe = $equipe;
+    return $this;
+}
 
-        return $this;
+public function removeReaction(Reactions $reaction): static
+{
+    if ($this->reactions->removeElement($reaction)) {
+        if ($reaction->getUser() === $this) {
+            $reaction->setUser(null);
+        }
     }
 
-    
+    return $this;
+}
+
 }

@@ -14,7 +14,7 @@ class Admin extends User
     {
         // Initialise le rôle d'admin
         parent::__construct();
-        $this->setRole(Role::ADMIN); // Assurez-vous que Role::ADMIN existe et est valide
+        $this->setRole(Role::ADMIN->value); // Assurez-vous que Role::ADMIN existe et est valide
     }
 
     // Vous pouvez ajouter des méthodes spécifiques à l'Admin si nécessaire.

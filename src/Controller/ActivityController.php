@@ -103,7 +103,7 @@ class ActivityController extends AbstractController
 
     
     #[Route('/activity/delete/{id}', name: 'app_activity_delete', methods: ['POST'])]
-    public function delete(
+public function delete(
     Request $request,
     EntityManagerInterface $entityManager,
     int $id

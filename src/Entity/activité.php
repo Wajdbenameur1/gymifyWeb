@@ -29,12 +29,11 @@ class Activité
     #[ORM\Column(type: 'string',enumType: ActivityType::class,columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')")]
     private ?ActivityType $type = null;
 
-
     /**
      * @var Collection<int, abonnement>
      */
-    #[ORM\OneToMany(mappedBy: 'activite', targetEntity: Abonnement::class)]
-    private Collection $abonnements;
+    #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'activite')]
+    private Collection $activite;
 
     /**
      * @var Collection<int, cours>
@@ -45,7 +44,7 @@ class Activité
     public function __construct()
     {
         $this->activite = new ArrayCollection();
-        $this->abonnements = new ArrayCollection();
+        $this->activité = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -154,30 +153,6 @@ class Activité
             }
         }
 
-        return $this;
-    }
- 
-    public function getAbonnements(): Collection
-    {
-        return $this->abonnements;
-    }
-
-    public function addAbonnement(Abonnement $abonnement): static
-    {
-        if (!$this->abonnements->contains($abonnement)) {
-            $this->abonnements->add($abonnement);
-            $abonnement->setActivite($this);
-        }
-        return $this;
-    }
-
-    public function removeAbonnement(Abonnement $abonnement): static
-    {
-        if ($this->abonnements->removeElement($abonnement)) {
-            if ($abonnement->getActivite() === $this) {
-                $abonnement->setActivite(null);
-            }
-        }
         return $this;
     }
 }
