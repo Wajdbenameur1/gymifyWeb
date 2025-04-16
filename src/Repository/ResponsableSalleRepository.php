@@ -49,15 +49,7 @@ class ResponsableSalleRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
- // Rechercher par rôle (en fonction des entités dérivées)
- public function findByRole($role)
- {
-     return $this->createQueryBuilder('u')
-         ->andWhere('u.role = :role')
-         ->setParameter('role', $role)
-         ->getQuery()
-         ->getResult();
- }
+
     /**
      * Find all ResponsableSalle entities.
      *

@@ -43,45 +43,40 @@ final class PostController extends AbstractController
             }
     
             // Traitement de l'image (si nécessaire)
-// Traiteement de l'image (si nécessaire)
-$imageFile = $form->get('imageFile')->getData();
-if ($imageFile) {
-    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-    $safeFilename = $originalFilename; // Tu peux ajouter un slugger si nécessaire
-    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-    try {
-        // Move the uploaded file to the desired directory and get the absolute path
-        $imageFile->move(
-            $this->getParameter('uploads_directory'),
-            $newFilename
-        );
-        
-        // Save the absolute path in the database (update the image URL)
-        $imageUrl = $this->getParameter('uploads_directory') . '\\' . $newFilename;
-        $post->setImageUrl($imageUrl);
-    } catch (FileException $e) {
-        // Handle the error if necessary
-        $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
-    }
-}
-
-$post->setUser($user);
-$post->setCreatedAt(new \DateTime());
-$entityManager->persist($post);
-$entityManager->flush();
-
-$this->addFlash('success', 'Le post a été créé avec succès.');
-return $this->redirectToRoute('app_post_index');
-}
-
-return $this->render('post/new.html.twig', [
-'form' => $form->createView(),
-]);
-}
-
+            $imageFile = $form->get('imageFile')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $originalFilename; // Tu peux ajouter un slugger si nécessaire
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
     
-
+                try {
+                    $imageFile->move(
+                        $this->getParameter('uploads_directory'),
+                        $newFilename
+                    );
+    
+                    $imageUrl = $this->getParameter('uploads_directory') . '\\' . $newFilename;
+                    $post->setImageUrl($imageUrl);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+                }
+            }
+    
+            $post->setUser($user);
+            $post->setCreatedAt(new \DateTime());
+    
+            $entityManager->persist($post);
+            $entityManager->flush();
+    
+            $this->addFlash('success', 'Le post a été créé avec succès.');
+            return $this->redirectToRoute('app_post_index');
+        }
+    
+        return $this->render('post/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+    
 
 
 
