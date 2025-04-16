@@ -66,7 +66,6 @@ if ($imageFile) {
     }
 }
 
-// Set other properties for the post
 $post->setUser($user);
 $post->setCreatedAt(new \DateTime());
 $entityManager->persist($post);
