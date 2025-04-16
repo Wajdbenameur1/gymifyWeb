@@ -35,19 +35,18 @@ class Post
 )]
 private ?string $title = null;
 
-#[ORM\Column(length: 1000)]
+#[ORM\Column(type: Types::TEXT)] // Changement de TEXT pour supporter le HTML
 #[Assert\NotBlank(message: 'Le contenu est obligatoire.')]
-#[Assert\Length(
-    min: 10,
-    max: 1000,
-    minMessage: 'Le contenu doit contenir au moins {{ limit }} caractères.',
-    maxMessage: 'Le contenu ne peut pas dépasser {{ limit }} caractères.'
-)]
 #[Assert\Regex(
-    pattern: '/^(?!.*\b(spam|arnaque|insulte)\b).*/i',
-    message: 'Le contenu contient un mot interdit.'
+    pattern: '/\b(spam|arnaque|insulte)\b/i',
+    message: 'Contenu inapproprié détecté !',
+    match: false
 )]
 private ?string $content = null;
+
+
+
+
 
 #[ORM\Column(length: 255, nullable: true)]
 #[Assert\Url(message: 'Veuillez saisir une URL valide (http(s)://...) pour l’image.')]
