@@ -17,6 +17,7 @@ final class AdminController extends AbstractController
     #[Route('/admin', name: 'app_admin')]
     public function index(): Response
     {
+       $this->denyAccessUnlessGranted('ROLE_ADMIN');
       $stats = [
         'visitors' => 1294,
         'subscribers' => 1303,
@@ -30,10 +31,10 @@ final class AdminController extends AbstractController
     ]);
     }
     #[Route('/home', name: 'app_home')]
-      public function home()
-      {
-    // Your controller code
-       }
+    public function home(): Response
+    {
+        return new Response('Welcome to the home page');
+    }
        #[Route('/dashboard', name:'app_dashboard')]
       public function dashboard()
       {
@@ -53,10 +54,18 @@ final class AdminController extends AbstractController
        }
 
 
-       #[Route('/profile', name:'app_profile')]
-      public function profile()
-      {
-    
+       #[Route('/profile', name: 'app_profile')]
+       public function profile(): Response
+       {
+           $user = $this->getUser();
+           if (!$user) {
+               throw $this->createAccessDeniedException('Vous devez être connecté pour voir votre profil.');
+           }
+   
+           return $this->render('user/show.html.twig', [
+               'user' => $user,
+               'page_title' => 'Mon Profil'
+           ]);
        }
        #[Route('/login', name:'app_login')]
       public function login()
@@ -78,7 +87,7 @@ final class AdminController extends AbstractController
        {
      
         }
-        #[Route('/admin/users', name:'app_users')]
+        #[Route('/admin/user', name:'user_index')]
        public function user()
        {
         return $this->render('user/index.html.twig', [ ]);

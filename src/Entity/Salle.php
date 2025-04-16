@@ -34,24 +34,28 @@ class Salle
     private ?string $url_photo = null;
 
     /**
-     * @var Collection<int, cours>
+     * @var Collection<int, Cours>
      */
-    #[ORM\OneToMany(targetEntity: cours::class, mappedBy: 'salle')]
-    private Collection $salle;
+    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'salle')]
+    private Collection $cours;
 
+    #[ORM\OneToMany(targetEntity: Activité::class, mappedBy: 'salle')]
+    private Collection $activites;
     /**
      * @var Collection<int, Events>
      */
     #[ORM\OneToMany(targetEntity: Events::class, mappedBy: 'salle')]
-    private Collection $salles;
+    private Collection $events;
 
-    
+    #[ORM\OneToOne(targetEntity: ResponsableSalle::class, inversedBy: 'salle')]
+    #[ORM\JoinColumn(name: 'responsable_id', referencedColumnName: 'id')]
+    private ?ResponsableSalle $responsable = null;
 
     public function __construct()
     {
-        $this->salle = new ArrayCollection();
-        $this->id_salle = new ArrayCollection();
-        $this->salles = new ArrayCollection();
+        $this->cours = new ArrayCollection();
+        $this->events = new ArrayCollection();
+        $this->activites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -64,10 +68,9 @@ class Salle
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(string $nom): self
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -76,10 +79,9 @@ class Salle
         return $this->adresse;
     }
 
-    public function setAdresse(string $adresse): static
+    public function setAdresse(string $adresse): self
     {
         $this->adresse = $adresse;
-
         return $this;
     }
 
@@ -88,10 +90,9 @@ class Salle
         return $this->details;
     }
 
-    public function setDetails(string $details): static
+    public function setDetails(string $details): self
     {
         $this->details = $details;
-
         return $this;
     }
 
@@ -100,10 +101,9 @@ class Salle
         return $this->num_tel;
     }
 
-    public function setNumTel(string $num_tel): static
+    public function setNumTel(string $num_tel): self
     {
         $this->num_tel = $num_tel;
-
         return $this;
     }
 
@@ -112,10 +112,9 @@ class Salle
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(string $email): self
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -124,50 +123,113 @@ class Salle
         return $this->url_photo;
     }
 
-    public function setUrlPhoto(string $url_photo): static
+    public function setUrlPhoto(string $url_photo): self
     {
         $this->url_photo = $url_photo;
+        return $this;
+    }
 
+    public function getResponsable(): ?ResponsableSalle
+    {
+        return $this->responsable;
+    }
+
+    public function setResponsable(?ResponsableSalle $responsable): self
+    {
+        $this->responsable = $responsable;
         return $this;
     }
 
     /**
      * @return Collection<int, Cours>
      */
-    public function getSalle(): Collection
+    public function getCours(): Collection
     {
-        return $this->salle;
+        return $this->cours;
     }
 
-    public function addSalle(Cours $salle): static
+    public function addCour(Cours $cour): self
     {
-        if (!$this->salle->contains($salle)) {
-            $this->salle->add($salle);
-            $salle->setSalleId($this);
+        if (!$this->cours->contains($cour)) {
+            $this->cours->add($cour);
+            $cour->setSalle($this);
         }
-
         return $this;
     }
 
-    public function removeSalle(Cours $salle): static
+    public function removeCour(Cours $cour): self
     {
-        if ($this->salle->removeElement($salle)) {
-            // set the owning side to null (unless already changed)
-            if ($salle->getSalle() === $this) {
-                $salle->setSalle(null);
+        if ($this->cours->removeElement($cour)) {
+            if ($cour->getSalle() === $this) {
+                $cour->setSalle(null);
             }
         }
-
         return $this;
     }
 
     /**
      * @return Collection<int, Events>
      */
-    public function getSalles(): Collection
+    public function getEvents(): Collection
     {
-        return $this->salles;
+        return $this->events;
     }
 
-    
+    public function addEvent(Events $event): self
+    {
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+            $event->setSalle($this);
+        }
+        return $this;
+    }
+
+    public function removeEvent(Events $event): self
+    {
+        if ($this->events->removeElement($event)) {
+            if ($event->getSalle() === $this) {
+                $event->setSalle(null);
+            }
+        }
+        return $this;
+    }
+
+    // Méthode magique pour afficher le nom de la salle lorsqu'elle est convertie en string
+    public function __toString(): string
+    {
+        return $this->nom ?? '';
+    }
+
+    public function getActivites(): Collection
+    {
+        return $this->activites;
+    }
+
+    public function addActivite(Activité $activite): static
+    {
+        if (!$this->activites->contains($activite)) {
+            $this->activites->add($activite);
+            $activite->setSalle($this);
+        }
+        return $this;
+    }
+
+    public function removeActivite(Activité $activite): static
+    {
+        if ($this->activites->removeElement($activite)) {
+            $activite->setSalle(null);
+        }
+        return $this;
+    }
+    // Ajoutez cette méthode pour récupérer les abonnements via les activités
+public function getAbonnements(): array
+{
+    $abonnements = [];
+    foreach ($this->activites as $activite) {
+        foreach ($activite->getAbonnements() as $abonnement) {
+            $abonnements[] = $abonnement;
+        }
+    }
+    return $abonnements;
+}
 }

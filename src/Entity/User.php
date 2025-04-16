@@ -1,23 +1,21 @@
 <?php
-
 namespace App\Entity;
-
 use App\Enum\Role;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Entity\Reactions;
-
-
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "user")]
+#[UniqueEntity("email", message: "L'email {{ value }} est déjà utilisé.")]
 #[ORM\InheritanceType("SINGLE_TABLE")]
-#[ORM\DiscriminatorColumn(name: "type", type: "string")]
+#[ORM\DiscriminatorColumn(name: "role", type: "string")]
 #[ORM\DiscriminatorMap([ 
     "sportif" => Sportif::class, 
     "admin" => Admin::class, 
@@ -37,19 +35,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotBlank(message: "L'email est obligatoire.")]
+    #[Assert\Email(message: "Veuillez entrer une adresse email valide.")]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(type: 'string', enumType: Role::class)]
-    private ?Role $role = null;
-
-    #[ORM\Column(length: 100)]
-    private ?string $specialite = null;
-
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 100, nullable: true)]
     private ?string $imageUrl = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -59,7 +53,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Post::class)]
     private Collection $posts;
 
-   
+   #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
+private Collection $comments;
+
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
 private Collection $reactions;
@@ -67,21 +63,20 @@ private Collection $reactions;
 
     public function __construct()
     {
+        $this->role = Role::SPORTIF; 
+        $this->entaineur = new ArrayCollection();
         $this->posts = new ArrayCollection();
         $this->reactions = new ArrayCollection();
+    
 
-       
     }
 
-    public function eraseCredentials(): void
-    {
-        // Nettoyer les données sensibles ici si nécessaire (ex: plainPassword)
-    }
+    
 
-    public function getUserIdentifier(): string
-    {
-        return $this->email;
-    }
+
+    
+
+   
 
     public function getId(): ?int
     {
@@ -132,22 +127,18 @@ private Collection $reactions;
         return $this;
     }
 
-    public function getRole(): ?string
+        public function getImageUrl(): ?string
     {
-        return $this->role ? $this->role->value : null;
+        return $this->imageUrl;
     }
 
-    public function setRole(Role $role): static
+    public function setImageUrl(?string $imageUrl): self
     {
-        $this->role = $role;
+        $this->imageUrl = $imageUrl;
         return $this;
     }
 
-    public function getRoles(): array
-    {
-        return [$this->role ? 'ROLE_' . strtoupper($this->role->value) : 'ROLE_USER'];
-    }
-
+  
     public function getSpecialite(): ?string
     {
         return $this->specialite;
@@ -170,60 +161,73 @@ private Collection $reactions;
         return $this;
     }
 
-    // Getter et Setter pour la collection de posts
-    public function getPosts(): Collection
+    
+
+    /**
+     * @return Collection<int, Cours>
+     */
+    public function getEntaineur(): Collection
     {
-        return $this->posts;
+        return $this->entaineur;
     }
 
-    public function addPost(Post $post): static
+    public function addEntaineur(Cours $entaineur): static
     {
-        if (!$this->posts->contains($post)) {
-            $this->posts->add($post);
-            $post->setUser($this);
+        if (!$this->entaineur->contains($entaineur)) {
+            $this->entaineur[] = $entaineur;
+            $entaineur->setEntaineurId($this);
         }
-
         return $this;
     }
 
-    public function removePost(Post $post): static
+    public function removeEntaineur(Cours $entaineur): static
     {
-        if ($this->posts->removeElement($post)) {
-            if ($post->getUser() === $this) {
-                $post->setUser(null);
-            }
+        if ($this->entaineur->removeElement($entaineur) && $entaineur->getEntaineur() === $this) {
+            $entaineur->setEntaineur(null);
         }
-
         return $this;
     }
 
-   
+  
 
-
-    public function getReactions(): Collection
+public function getRole(): Role
 {
-    return $this->reactions;
+    return match (true) {
+        $this instanceof \App\Entity\Admin => Role::ADMIN,
+        $this instanceof \App\Entity\Sportif => Role::SPORTIF,
+        $this instanceof \App\Entity\ResponsableSalle => Role::RESPONSABLE_SALLE,
+        $this instanceof \App\Entity\Entraineur => Role::ENTRAINEUR,
+        default => Role::SPORTIF,
+    };
 }
 
-public function addReaction(Reactions $reaction): static
+public function setRole(Role $role): self
 {
-    if (!$this->reactions->contains($reaction)) {
-        $this->reactions->add($reaction);
-        $reaction->setUser($this);
-    }
-
+    $this->role = $role;
     return $this;
 }
+    
 
-public function removeReaction(Reactions $reaction): static
-{
-    if ($this->reactions->removeElement($reaction)) {
-        if ($reaction->getUser() === $this) {
-            $reaction->setUser(null);
-        }
+    public function getRoles(): array
+    {
+        return match (true) {
+            $this instanceof \App\Entity\Admin => ['ROLE_ADMIN'],
+            $this instanceof \App\Entity\Sportif => ['ROLE_SPORTIF'],
+            $this instanceof \App\Entity\ResponsableSalle => ['ROLE_RESPONSABLE_SALLE'],
+            $this instanceof \App\Entity\Entraineur => ['ROLE_ENTRAINEUR'],
+            default => ['ROLE_USER'],
+        };
+    }
+    public function eraseCredentials(): void
+    {
+        // No sensitive data to erase
     }
 
-    return $this;
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
 }
 
-}
+
+

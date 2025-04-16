@@ -68,4 +68,15 @@ private function getColorForObjectif(?ObjectifCours $objectif): string
         };
     }
 
+        
+    #[Route('/sportif/cours', name: 'cours_sportif')]
+    public function cours(CoursRepository $repo)
+    {
+        $cours = $repo->findAll();
+        foreach ($cours as $c) {
+            dump($c->getEntaineur());
+        }
+        return $this->render('sportif/cours.html.twig', ['cours' => $cours]);
+    }
+    
 }
