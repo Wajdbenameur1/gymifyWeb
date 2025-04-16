@@ -36,36 +36,6 @@ security:
             security: false
 
         main:
-
-            lazy: false # Changé à false pour forcer l'authentification
-            provider: app_user_provider
-            custom_authenticator: App\Security\AppCustomAuthenticator
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                username_parameter: email  
-                password_parameter: password
-                enable_csrf: true
-            logout:
-                path: app_logout
-                target: app_login
-            remember_me:
-                secret: '%kernel.secret%'
-                lifetime: 604800 # 1 semaine
-                path: /
-            entry_point: App\Security\AppCustomAuthenticator
-
-    access_control:
-        - { path: ^/dashboard_admin, roles: ROLE_ADMIN }
-        - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
-        - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
-        - { path: ^/responsable, roles: ROLE_RESPONSABLE_SALLE } # Ajouté pour protéger /responsable
-        - { path: ^/home, roles: ROLE_SPORTIF }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
-        # Supprimé : - { path: ^/, roles: IS_AUTHENTICATED_FULLY } 
-        # Remplacé par des règles spécifiques ci-dessus
-
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\AppCustomAuthenticator
@@ -83,6 +53,7 @@ security:
                 lifetime: 604800  # 1 week
                 path: /
             entry_point: App\Security\AppCustomAuthenticator
+
 
 
 
@@ -114,6 +85,7 @@ when@test:
                 memory_cost: 10 # Lowest possible value for argon
 
 
+
     access_control:
         - { path: ^/admin/user, roles: ROLE_ADMIN }
         - { path: ^/admin, roles: ROLE_ADMIN }
@@ -124,7 +96,12 @@ when@test:
         - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
         - { path: ^/reclamation, roles: ROLE_USER }
 
+
         - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY } # Explicit rule
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+
+
+        - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 
