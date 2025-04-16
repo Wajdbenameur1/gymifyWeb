@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Réclamations{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">📩 Gestion des Réclamations</h1>
+
+    {% for flash_message in app.flashes('success') %}
+        <div class="alert alert-success">{{ flash_message }}</div>
+    {% endfor %}
+    {% for flash_message in app.flashes('warning') %}
+        <div class="alert alert-warning">{{ flash_message }}</div>
+    {% endfor %}
+    {% for flash_message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ flash_message }}</div>
+    {% endfor %}
+
+    <form method="post" action="{{ path('app_admin_reclamation_index') }}" id="reclamationForm">
+        <div class="row">
+            <!-- Liste des réclamations -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">📜 Réclamations</div>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-success mb-3" onclick="toggleAllCheckboxes('reclamation')">✔ Tout sélectionner</button>
+                        <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+                            {% for reclamation in reclamations %}
+                            <div class="list-group-item">
+                                <input type="checkbox" name="selected_reclamations[]" value="{{ reclamation.id }}" class="reclamation-checkbox">
+                                <strong>{{ reclamation.user.nom }} {{ reclamation.user.prenom }}</strong> | {{ reclamation.sujet }}<br>
+                                {{ reclamation.description }}<br>
+                                <small>Statut: {{ reclamation.statut }} | Date: {{ reclamation.dateCreation|date('d/m/Y H:i') }}</small>
+                            </div>
+                            {% else %}
+                            <div class="list-group-item">Aucune réclamation trouvée.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire de réponse -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">💬 Réponse à la sélection</div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            {{ form_errors(form) }}
+                            {{ form_row(form.message, {'label': 'Réponse'}) }}
+                            {{ form_row(form.submit, {'label': 'Envoyer la réponse'}) }}
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des réponses -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">📬 Réponses envoyées</div>
+                    <div class="card-body">
+                        <form method="post" action="{{ path('app_admin_reponse_delete') }}">
+                            <button type="button" class="btn btn-success mb-3" onclick="toggleAllCheckboxes('reponse')">✔ Tout sélectionner</button>
+                            <button type="submit" class="btn btn-danger mb-3">🗑 Supprimer sélection</button>
+                            <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+                                {% for reponse in reponses %}
+                                <div class="list-group-item">
+                                    <input type="checkbox" name="selected_reponses[]" value="{{ reponse.id }}" class="reponse-checkbox">
+                                    📨 {{ reponse.message }}<br>
+                                    <small>Envoyée par: {{ reponse.admin.nom }} {{ reponse.admin.prenom }} | Date: {{ reponse.dateReponse|date('d/m/Y H:i') }}</small><br>
+                                    <small>Associée à: {{ reponse.reclamation.sujet }}</small>
+                                </div>
+                                {% else %}
+                                <div class="list-group-item">Aucune réponse trouvée.</div>
+                                {% endfor %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+<script>
+function toggleAllCheckboxes(type) {
+    try {
+        const checkboxes = document.querySelectorAll(`.${type}-checkbox`);
+        if (checkboxes.length === 0) {
+            console.warn(`Aucun checkbox trouvé pour le type: ${type}`);
+            return;
+        }
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+    } catch (error) {
+        console.error('Erreur dans toggleAllCheckboxes:', error);
+    }
+}
+
+document.querySelector('#reclamationForm').addEventListener('submit', function(e) {
+    const checked = document.querySelectorAll('input[name="selected_reclamations[]"]:checked').length;
+    if (checked === 0) {
+        alert('Veuillez sélectionner au moins une réclamation.');
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}
