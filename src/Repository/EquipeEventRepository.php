@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\EquipeEvent;
+use App\Entity\Salle;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +18,23 @@ class EquipeEventRepository extends ServiceEntityRepository
         parent::__construct($registry, EquipeEvent::class);
     }
 
-//    /**
-//     * @return EquipeEvent[] Returns an array of EquipeEvent objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Find EquipeEvents by Salle and optionally by the logged-in Sportif's Equipe.
+     *
+     * @param Salle $salle
+     * @param User|null $sportif
+     * @return EquipeEvent[]
+     */
+    public function findBySalle(Salle $salle): array
+    {
+        return $this->createQueryBuilder('ee')
+            ->join('ee.event', 'e')
+            ->where('e.salle = :salle')
+            ->setParameter('salle', $salle)
+            ->getQuery()
+            ->getResult();
+    
 
-//    public function findOneBySomeField($value): ?EquipeEvent
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $qb->getQuery()->getResult();
+    }
 }

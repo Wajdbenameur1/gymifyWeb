@@ -77,6 +77,37 @@
             height: 100%;
             width: 100%;
         }
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+        .team-list {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .team-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .team-item:last-child {
+            border-bottom: none;
+        }
+        .remove-team-btn {
+            cursor: pointer;
+            color: #dc3545;
+        }
     </style>
 {% endblock %}
 
@@ -119,7 +150,7 @@
                         </div>
                         <div class="d-flex flex-column flex-md-row gap-3">
                             <div class="flex-grow-1">
-                                <input type="file" class="form-control d-none" id="eventImage" name="events[imageFile]" accept="image/*" required>
+                                <input type="file" class="form-control d-none" id="eventImage" name="events[imageFile]" accept="image/*">
                                 <label for="eventImage" class="btn btn-outline-primary w-100 py-3 rounded-3">
                                     <i class="fas fa-cloud-upload-alt me-2"></i> Choose Image
                                 </label>
@@ -192,6 +223,24 @@
                     {{ form_widget(form.longitude, {'attr': {'id': 'events_longitude'}}) }}
                 </div>
 
+                <!-- Add Teams Event Button -->
+                <div class="form-group mb-4">
+                    <button type="button" id="addTeamsEventBtn" class="btn btn-outline-success btn-lg rounded-pill py-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addTeamModal">
+                        <i class="fas fa-users me-2"></i> Add Teams Event
+                    </button>
+                </div>
+
+                <!-- Team List -->
+                <div class="form-group mb-4">
+                    <label class="form-label fw-bold text-muted small">ADDED TEAMS</label>
+                    <div id="teamList" class="team-list">
+                        <p class="text-muted">No teams added yet.</p>
+                    </div>
+                </div>
+
+                <!-- Hidden field for teams -->
+                <input type="hidden" name="teams" id="teamsInput">
+
                 <!-- CSRF Token -->
                 {{ form_row(form._token) }}
 
@@ -208,17 +257,88 @@
             {{ form_end(form, {'render_rest': false}) }}
         </div>
     </div>
+
+    <!-- Modal for Adding a Team -->
+    <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTeamModalLabel">Add New Team to Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(team_form, {'method': 'POST', 'action': path('app_equipe_new'), 'attr': {'enctype': 'multipart/form-data', 'class': 'needs-validation', 'id': 'teamForm', 'novalidate': 'novalidate'}}) }}
+                        <div class="mb-3">
+                            <label for="equipe_nom" class="form-label fw-bold text-muted small">Team Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-heading text-primary"></i></span>
+                                <input type="text" id="equipe_nom" name="equipe[nom]" maxlength="255" class="form-control" placeholder="Enter team name" required="required"/>
+                            </div>
+                            <div class="invalid-feedback">Please enter a team name (max 255 characters).</div>
+                        </div>
+                        <div class="mb-3 image-upload-container">
+                            <label for="teamImageInput" class="form-label fw-bold text-muted small">Team Image</label>
+                            <div class="image-preview-container text-center mb-3 position-relative">
+                                <img id="teamImagePreview" src="" class="image-preview shadow-sm mx-auto d-block" style="display: none;">
+                                <div id="teamPlaceholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light" style="display: block;">
+                                    <i class="fas fa-camera fa-3x text-muted mb-3 d-block"></i>
+                                    <p class="text-muted mb-0">No image selected</p>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div class="flex-grow-1">
+                                    <input type="file" id="teamImageInput" name="equipe[imageFile]" class="form-control d-none" accept="image/*"/>
+                                    <label for="teamImageInput" class="btn btn-outline-primary w-100 py-2"><i class="fas fa-camera me-2"></i>Choose Image</label>
+                                </div>
+                                <button type="button" id="teamRemoveImageBtn" class="btn btn-outline-danger py-2" style="display: none;"><i class="fas fa-trash-alt me-2"></i>Remove</button>
+                            </div>
+                            <div class="invalid-feedback">Please select a valid image (JPG, PNG, WEBP, max 2MB).</div>
+                            <small class="text-muted d-block mt-2">Recommended size: 1200x800px</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="equipe_niveau" class="form-label fw-bold text-muted small">Level</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-list text-primary"></i></span>
+                                <select id="equipe_niveau" name="equipe[niveau]" class="form-control form-select" required="required">
+                                    <option value="" disabled selected>Select a level</option>
+                                    <option value="DEBUTANT">Debutant</option>
+                                    <option value="INTERMEDIAIRE">Intermediaire</option>
+                                    <option value="AVANCE">Avance</option>
+                                    <option value="PROFESSIONNEL">Professionnel</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback">Please select a level.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="equipe_nombre_membres" class="form-label fw-bold text-muted small">Number of Members</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-users text-primary"></i></span>
+                                <input type="number" id="equipe_nombre_membres" name="equipe[nombre_membres]" class="form-control" min="0" max="8" placeholder="Enter number of members" required="required"/>
+                            </div>
+                            <div class="invalid-feedback">Please enter a valid number of members (0-8).</div>
+                        </div>
+                        {{ form_row(team_form._token) }}
+                    {{ form_end(team_form, {'render_rest': false}) }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="saveTeamBtn" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
     {{ encore_entry_script_tags('app') }}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM fully loaded and parsed');
 
-        // DOM elements
+        // DOM elements for Event Form
         const imageInput = document.getElementById('eventImage');
         const imagePreview = document.getElementById('imagePreview');
         const placeholderText = document.getElementById('placeholderText');
@@ -226,11 +346,23 @@
         const form = document.getElementById('eventForm');
         const submitBtn = document.getElementById('submitBtn');
         const cancelBtn = document.getElementById('cancelBtn');
-        const locationInput = document.getElementById('events_lieu'); // Updated ID
+        const locationInput = document.getElementById('events_lieu');
         const searchLocationBtn = document.getElementById('searchLocationBtn');
         const mapContainer = document.getElementById('map');
-        const latitudeInput = document.getElementById('events_latitude'); // Updated ID
-        const longitudeInput = document.getElementById('events_longitude'); // Updated ID
+        const latitudeInput = document.getElementById('events_latitude');
+        const longitudeInput = document.getElementById('events_longitude');
+        const teamList = document.getElementById('teamList');
+        const teamsInput = document.getElementById('teamsInput');
+
+        // DOM elements for Team Form (Modal)
+        const teamForm = document.getElementById('teamForm');
+        const teamImageInput = document.getElementById('teamImageInput');
+        const teamImagePreview = document.getElementById('teamImagePreview');
+        const teamPlaceholderText = document.getElementById('teamPlaceholderText');
+        const teamRemoveImageBtn = document.getElementById('teamRemoveImageBtn');
+        const saveTeamBtn = document.getElementById('saveTeamBtn');
+        const addTeamModalEl = document.getElementById('addTeamModal');
+        const addTeamModal = new bootstrap.Modal(addTeamModalEl);
 
         // Check if critical elements exist
         console.log('Checking DOM elements:', {
@@ -245,247 +377,504 @@
             searchLocationBtn: !!searchLocationBtn,
             mapContainer: !!mapContainer,
             latitudeInput: !!latitudeInput,
-            longitudeInput: !!longitudeInput
+            longitudeInput: !!longitudeInput,
+            teamsInput: !!teamsInput,
+            teamForm: !!teamForm,
+            teamImageInput: !!teamImageInput,
+            teamImagePreview: !!teamImagePreview,
+            teamPlaceholderText: !!teamPlaceholderText,
+            teamRemoveImageBtn: !!teamRemoveImageBtn,
+            saveTeamBtn: !!saveTeamBtn,
+            teamList: !!teamList,
+            addTeamModalEl: !!addTeamModalEl
         });
 
-        if (!locationInput || !latitudeInput || !longitudeInput || !searchLocationBtn || !form || !submitBtn || !mapContainer) {
+        if (!locationInput || !latitudeInput || !longitudeInput || !searchLocationBtn || !form || !submitBtn || !mapContainer || !teamForm || !teamImageInput || !saveTeamBtn || !teamList || !teamsInput || !addTeamModalEl) {
             console.error('One or more critical DOM elements are missing');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Required form elements are missing. Please contact support.',
+            });
             return;
         }
 
-        // Initialize Leaflet Map with default coordinates (Tunis)
+        // Initialize Leaflet Map
         let map;
+        let marker;
         try {
-            map = L.map('map').setView([36.8065, 10.1815], 13);
+            map = L.map(mapContainer, {
+                center: [36.8065, 10.1815], // Default: Tunis
+                zoom: 13,
+                zoomControl: true,
+                scrollWheelZoom: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add default marker
+            marker = L.marker([36.8065, 10.1815]).addTo(map)
+                .bindPopup('Default Location: Tunis')
+                .openPopup();
+
             console.log('Map initialized successfully');
         } catch (error) {
             console.error('Error initializing map:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Map Error',
+                text: 'Failed to initialize the map. Please try again later.',
+            });
             return;
         }
 
-        // Add tile layer
-        try {
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            console.log('Tile layer added successfully');
-        } catch (error) {
-            console.error('Error adding tile layer:', error);
-            return;
+        // Ensure map is properly sized after initialization
+        setTimeout(() => {
+            map.invalidateSize();
+            console.log('Map size invalidated');
+        }, 100);
+
+        // Handle image selection for Event Form
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (!file.type.match('image.*')) {
+                        showError(imageInput, 'Please select a valid image file (JPG, PNG, WEBP)');
+                        return;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        showError(imageInput, 'Image size must be less than 2MB');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        placeholderText.style.display = 'none';
+                        removeImageBtn.style.display = 'block';
+                        clearError(imageInput);
+                    };
+                    reader.onerror = function() {
+                        showError(imageInput, 'Error reading the image file.');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         }
 
-        // Add default marker
-        let marker = L.marker([36.8065, 10.1815]).addTo(map)
-            .bindPopup('Default Location: Tunis')
-            .openPopup();
-        console.log('Default marker added');
+        // Handle the "Remove" button for Event Form
+        if (removeImageBtn) {
+            removeImageBtn.addEventListener('click', function() {
+                imageInput.value = '';
+                imagePreview.src = '';
+                imagePreview.style.display = 'none';
+                placeholderText.style.display = 'block';
+                removeImageBtn.style.display = 'none';
+                clearError(imageInput);
+            });
+        }
 
-        // Handle image selection
-        imageInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                if (!file.type.match('image.*')) {
-                    showError(imageInput, 'Please select a valid image file (JPG, PNG, WEBP)');
+        // Handle image selection for Team Form
+        if (teamImageInput) {
+            teamImageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (!file.type.match('image.*')) {
+                        showError(teamImageInput, 'Please select a valid image file (JPG, PNG, WEBP)');
+                        return;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        showError(teamImageInput, 'Image size must be less than 2MB');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        teamImagePreview.src = e.target.result;
+                        teamImagePreview.style.display = 'block';
+                        teamPlaceholderText.style.display = 'none';
+                        teamRemoveImageBtn.style.display = 'block';
+                        clearError(teamImageInput);
+                    };
+                    reader.onerror = function() {
+                        showError(teamImageInput, 'Error reading the image file.');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Handle the "Remove" button for Team Form
+        if (teamRemoveImageBtn) {
+            teamRemoveImageBtn.addEventListener('click', function() {
+                teamImageInput.value = '';
+                teamImagePreview.src = '';
+                teamImagePreview.style.display = 'none';
+                teamPlaceholderText.style.display = 'block';
+                teamRemoveImageBtn.style.display = 'none';
+                clearError(teamImageInput);
+            });
+        }
+
+        // Search location functionality
+        if (searchLocationBtn) {
+            searchLocationBtn.addEventListener('click', function() {
+                const address = locationInput.value.trim();
+                if (!address) {
+                    showError(locationInput, 'Please enter a location');
                     return;
                 }
 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    placeholderText.style.display = 'none';
-                    removeImageBtn.style.display = 'block';
-                    clearError(imageInput);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+                console.log('Searching for location:', address);
 
-        // Handle the "Remove" button
-        removeImageBtn.addEventListener('click', function() {
-            imageInput.value = '';
-            imagePreview.src = '';
-            imagePreview.style.display = 'none';
-            placeholderText.style.display = 'block';
-            removeImageBtn.style.display = 'none';
-            showError(imageInput, 'Please select an image');
-        });
-
-        // Search location functionality
-        searchLocationBtn.addEventListener('click', function() {
-            const address = locationInput.value.trim();
-            if (!address) {
-                showError(locationInput, 'Please enter a location');
-                return;
-            }
-
-            console.log('Searching for location:', address);
-
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`, {
-                headers: {
-                    'User-Agent': 'GymifyApp/1.0 (contact@example.com)'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Nominatim search response:', data);
-                if (data && data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lon = parseFloat(data[0].lon);
-                    
-                    // Update map view
-                    map.setView([lat, lon], 15);
-                    
-                    // Update or create marker
-                    if (marker) {
-                        marker.setLatLng([lat, lon]);
-                    } else {
-                        marker = L.marker([lat, lon]).addTo(map);
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&addressdetails=1`, {
+                    headers: {
+                        'User-Agent': 'GymifyApp/1.0 (contact@example.com)', // Required by Nominatim
+                        'Accept': 'application/json'
                     }
-                    
-                    // Update popup
-                    marker.bindPopup(`<b>${address}</b><br>Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`)
-                        .openPopup();
-                    
-                    // Update hidden inputs
-                    latitudeInput.value = lat;
-                    longitudeInput.value = lon;
-                    clearError(locationInput);
-                } else {
-                    showError(locationInput, 'Location not found. Please try a different address.');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching location:', error);
-                showError(locationInput, 'Error fetching location. Please try again.');
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Nominatim search response:', data);
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lon = parseFloat(data[0].lon);
+
+                        if (isNaN(lat) || isNaN(lon)) {
+                            throw new Error('Invalid coordinates received');
+                        }
+
+                        map.setView([lat, lon], 15);
+                        if (marker) {
+                            marker.setLatLng([lat, lon]);
+                        } else {
+                            marker = L.marker([lat, lon]).addTo(map);
+                        }
+
+                        const popupContent = `<b>${data[0].display_name}</b>`;
+                        marker.bindPopup(popupContent).openPopup();
+
+                        latitudeInput.value = lat.toFixed(6);
+                        longitudeInput.value = lon.toFixed(6);
+                        locationInput.value = data[0].display_name;
+                        clearError(locationInput);
+
+                        // Invalidate map size to ensure proper rendering
+                        map.invalidateSize();
+                    } else {
+                        showError(locationInput, 'Location not found. Please try a more specific address.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching location:', error);
+                    showError(locationInput, 'Unable to fetch location. Please check your connection and try again.');
+                });
             });
-        });
+        }
 
         // Allow clicking on the map to set location
         map.on('click', function(e) {
             const { lat, lng } = e.latlng;
-            console.log('Map clicked at:', lat, lng);
+            console.log('Map clicked at:', { lat, lng });
 
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`, {
                 headers: {
-                    'User-Agent': 'GymifyApp/1.0 (contact@example.com)'
+                    'User-Agent': 'GymifyApp/1.0 (contact@example.com)', // Required by Nominatim
+                    'Accept': 'application/json'
                 }
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+                    throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
                 }
                 return response.json();
             })
             .then(data => {
                 console.log('Nominatim reverse geocoding response:', data);
                 const address = data.display_name || 'Selected Location';
-                
-                // Update marker
+
                 if (marker) {
                     marker.setLatLng([lat, lng]);
                 } else {
                     marker = L.marker([lat, lng]).addTo(map);
                 }
-                
-                marker.bindPopup(`<b>${address}</b><br>Lat: ${lat.toFixed(6)}, Lon: ${lng.toFixed(6)}`)
-                    .openPopup();
-                
-                // Update inputs
+
+                const popupContent = `<b>${address}</b>`;
+                marker.bindPopup(popupContent).openPopup();
+
                 locationInput.value = address;
-                latitudeInput.value = lat;
-                longitudeInput.value = lng;
+                latitudeInput.value = lat.toFixed(6);
+                longitudeInput.value = lng.toFixed(6);
                 clearError(locationInput);
+
+                // Invalidate map size to ensure proper rendering
+                map.invalidateSize();
             })
             .catch(error => {
                 console.error('Error in reverse geocoding:', error);
-                showError(locationInput, 'Error fetching location. Please try again.');
+                showError(locationInput, 'Unable to fetch location details. Please try again.');
             });
         });
 
-        // Form validation
-        form.addEventListener('submit', function(e) {
+        // Manage added teams
+        let addedTeams = [];
+
+        function updateTeamList() {
+            teamList.innerHTML = '';
+            if (addedTeams.length === 0) {
+                teamList.innerHTML = '<p class="text-muted">No teams added yet.</p>';
+            } else {
+                addedTeams.forEach(team => {
+                    const teamItem = document.createElement('div');
+                    teamItem.className = 'team-item';
+                    teamItem.innerHTML = `
+                        <span>${team.nom}</span>
+                        <i class="fas fa-times remove-team-btn" data-id="${team.id}"></i>
+                    `;
+                    teamList.appendChild(teamItem);
+                });
+
+                document.querySelectorAll('.remove-team-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const teamId = this.getAttribute('data-id');
+                        addedTeams = addedTeams.filter(team => team.id != teamId);
+                        updateTeamList();
+                        updateTeamsInput();
+                    });
+                });
+            }
+        }
+
+        function updateTeamsInput() {
+            teamsInput.value = JSON.stringify(addedTeams.map(team => team.id));
+        }
+
+        // Validate Team Form before submission
+        function validateTeamForm() {
             let isValid = true;
-            
             const fieldsToValidate = [
-                { input: document.getElementById('events_nom'), required: true },
-                { input: imageInput, required: true },
-                { input: document.getElementById('events_date'), required: true },
-                { input: document.getElementById('events_heure_debut'), required: true },
-                { input: document.getElementById('events_heure_fin'), required: true },
-                { input: document.getElementById('events_type'), required: true },
-                { input: document.getElementById('events_reward'), required: true },
-                { input: document.getElementById('events_description'), required: true },
-                { input: document.getElementById('events_lieu'), required: true }
+                { input: document.getElementById('equipe_nom'), required: true, message: 'Please enter a team name (max 255 characters)' },
+                { input: document.getElementById('equipe_niveau'), required: true, message: 'Please select a level' },
+                { input: document.getElementById('equipe_nombre_membres'), required: true, message: 'Please enter a valid number of members (0-8)' },
             ];
-            
+
             fieldsToValidate.forEach(field => {
-                if (field.required && !validateField(field.input)) {
+                if (field.required && !validateField(field.input, field.message)) {
                     isValid = false;
                 }
             });
 
-            // Validate that coordinates are set
-            if (!latitudeInput.value || !longitudeInput.value) {
-                showError(locationInput, 'Please search for a location or click on the map to set the coordinates');
+            const nombreMembres = document.getElementById('equipe_nombre_membres').value;
+            if (nombreMembres < 0 || nombreMembres > 8) {
+                showError(document.getElementById('equipe_nombre_membres'), 'Number of members must be between 0 and 8');
                 isValid = false;
             }
 
-            if (!isValid) {
-                e.preventDefault();
-                
-                const firstInvalid = form.querySelector('.is-invalid');
-                if (firstInvalid) {
-                    firstInvalid.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
-                    });
+            return isValid;
+        }
+
+        // Handle Team Form Submission
+        if (saveTeamBtn) {
+            saveTeamBtn.addEventListener('click', function() {
+                if (!validateTeamForm()) {
+                    const firstInvalid = teamForm.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
                 }
-            } else {
+
+                const formData = new FormData(teamForm);
+                // Log FormData for debugging
+                for (let pair of formData.entries()) {
+                    console.log('FormData entry:', pair[0], pair[1]);
+                }
+
+                saveTeamBtn.disabled = true;
+                saveTeamBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+                fetch(teamForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Team creation response:', data); // Log the response for debugging
+                    saveTeamBtn.disabled = false;
+                    saveTeamBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save';
+
+                    if (data.success && data.teamId && data.nom) {
+                        // Use only the fields we need, but the controller sends more (niveau, nombre_membres, imageFile)
+                        addedTeams.push({ id: data.teamId, nom: data.nom });
+                        updateTeamList();
+                        updateTeamsInput();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Team Added',
+                            text: 'The team has been added successfully!',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            addTeamModal.hide();
+                            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                            document.body.classList.remove('modal-open');
+                            document.body.style.overflow = 'auto';
+                            document.body.style.paddingRight = '';
+
+                            teamForm.reset();
+                            teamImagePreview.src = '';
+                            teamImagePreview.style.display = 'none';
+                            teamPlaceholderText.style.display = 'block';
+                            teamRemoveImageBtn.style.display = 'none';
+                            teamForm.querySelectorAll('.is-invalid').forEach(input => clearError(input));
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Une erreur s\'est produite lors de l\'ajout de l\'équipe.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving team:', error);
+                    saveTeamBtn.disabled = false;
+                    saveTeamBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'Une erreur s\'est produite lors de l\'ajout de l\'équipe.',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            });
+        }
+
+        // Handle Event Form Submission
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                formData.set('teams', teamsInput.value);
+
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-            }
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json()) // Parse JSON response directly
+                .then(data => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Save';
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Event Added Successfully',
+                            text: 'The event and team associations have been created successfully!',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Redirect to the List of Events page
+                            window.location.href = '{{ path('app_events_index') }}';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to create the event.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving event:', error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Save';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred while creating the event. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            });
+        }
+
+        // Ensure modal backdrop is removed when modal is hidden
+        addTeamModalEl.addEventListener('hidden.bs.modal', function () {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '';
         });
 
         // Handle the "Cancel" button
-        cancelBtn.addEventListener('click', function() {
-            form.reset();
-            imagePreview.style.display = 'none';
-            placeholderText.style.display = 'block';
-            removeImageBtn.style.display = 'none';
-            form.querySelectorAll('.is-invalid').forEach(input => clearError(input));
-            window.location.href = '/events/';
-        });
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                form.reset();
+                imagePreview.style.display = 'none';
+                placeholderText.style.display = 'block';
+                removeImageBtn.style.display = 'none';
+                addedTeams = [];
+                updateTeamList();
+                updateTeamsInput();
+                form.querySelectorAll('.is-invalid').forEach(input => clearError(input));
+                window.location.href = '{{ path('app_events_index') }}';
+            });
+        }
 
         // Function to display errors
         function showError(input, message) {
             if (!input) return;
 
             let formGroup;
-            if (input === imageInput) {
+            if (input === imageInput || input === teamImageInput) {
                 formGroup = input.closest('.image-upload-container');
             } else {
-                formGroup = input.closest('.form-group') || input.closest('.mb-4');
+                formGroup = input.closest('.form-group') || input.closest('.mb-3') || input.closest('.mb-4');
             }
-            
+
             let errorElement = formGroup.querySelector('.invalid-feedback');
             if (!errorElement) {
                 errorElement = document.createElement('div');
                 errorElement.className = 'invalid-feedback d-block';
                 formGroup.appendChild(errorElement);
             }
-            
+
             errorElement.textContent = message;
             input.classList.add('is-invalid');
-            
+
             if (input === imageInput) {
                 placeholderText.classList.add('border-danger');
                 placeholderText.innerHTML = '<i class="fas fa-exclamation-circle fa-3x text-danger mb-3 d-block"></i><p class="text-danger">' + message + '</p>';
+            } else if (input === teamImageInput) {
+                teamPlaceholderText.classList.add('border-danger');
+                teamPlaceholderText.innerHTML = '<i class="fas fa-exclamation-circle fa-3x text-danger mb-3 d-block"></i><p class="text-danger">' + message + '</p>';
             }
         }
 
@@ -498,41 +887,58 @@
                 formGroup = input.closest('.image-upload-container');
                 placeholderText.innerHTML = '<i class="fas fa-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
                 placeholderText.classList.remove('border-danger');
+            } else if (input === teamImageInput) {
+                formGroup = input.closest('.image-upload-container');
+                teamPlaceholderText.innerHTML = '<i class="fas fa-camera fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
+                teamPlaceholderText.classList.remove('border-danger');
             } else {
-                formGroup = input.closest('.form-group') || input.closest('.mb-4');
+                formGroup = input.closest('.form-group') || input.closest('.mb-3') || input.closest('.mb-4');
             }
-            
+
             const errorElement = formGroup.querySelector('.invalid-feedback');
             if (errorElement) {
                 errorElement.remove();
             }
-            
+
             input.classList.remove('is-invalid');
         }
 
         // Real-time validation
-        function validateField(input) {
+        function validateField(input, customMessage) {
             if (!input) return false;
 
-            if (input === imageInput) {
-                if (!imageInput.files.length) {
-                    showError(imageInput, 'Please select an image');
+            const message = customMessage || `Please enter ${input.placeholder || 'a value'}`;
+
+            if (input === imageInput || input === teamImageInput) {
+                // Image inputs are optional
+                if (input.files.length) {
+                    const file = input.files[0];
+                    if (!file.type.match('image.*')) {
+                        showError(input, 'Please select a valid image file (JPG, PNG, WEBP)');
+                        return false;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        showError(input, 'Image size must be less than 2MB');
+                        return false;
+                    }
+                }
+            } else if (input.hasAttribute('required')) {
+                if (input.tagName === 'SELECT' && (!input.value || input.value === '')) {
+                    showError(input, message);
                     return false;
                 }
-            } else if (input.hasAttribute('required') && !input.value.trim()) {
-                showError(input, `Please enter ${input.placeholder || 'a value'}`);
-                return false;
+                if (input.type === 'number' && (input.value === '' || parseInt(input.value) < 0)) {
+                    showError(input, message);
+                    return false;
+                }
+                if (!input.value.trim()) {
+                    showError(input, message);
+                    return false;
+                }
             }
             clearError(input);
             return true;
         }
-
-        // Real-time validation on blur
-        document.querySelectorAll('input[required], textarea[required], select[required]').forEach(input => {
-            input.addEventListener('blur', function() {
-                validateField(this);
-            });
-        });
     });
     </script>
 {% endblock %}

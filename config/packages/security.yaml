@@ -54,13 +54,4 @@ security:
             # switch_user: true
       
 
-    # Contrôle d'accès pour certaines routes
-    access_control:
-    - { path: ^/admin, roles: ROLE_ADMIN }
-    - { path: ^/dashboard_entraineur, roles: ROLE_ENTRAINEUR }
-    - { path: ^/dashboard_responsable_salle, roles: ROLE_RESPONSABLE_SALLE }
-    - { path: ^/home, roles: ROLE_SPORTIF }
-    - { path: ^/login, roles: PUBLIC_ACCESS }
-    - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
-    - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
-
+   

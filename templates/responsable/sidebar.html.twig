@@ -26,12 +26,12 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-<li class="nav-item">
-    <a href="{{ path('app_responsable_mygym') }}" class="nav-link">
-        <i class="fas fa-dumbbell"></i>
-        <p>My Gym</p>
-    </a>
-</li>
+                <li class="nav-item">
+                    <a href="{{ path('app_responsable_mygym') }}" class="nav-link">
+                        <i class="fas fa-dumbbell"></i>
+                        <p>My Gym</p>
+                    </a>
+                </li>
                 <li class="nav-item {{ app.request.get('_route') == 'app_events_index' ? 'active' : '' }}">
                     <a href="{{ path('app_events_index') }}">
                         <i class="fas fa-calendar-alt"></i>
@@ -44,12 +44,18 @@
                         <p>Teams</p>
                     </a>
                 </li>
-             <li class="nav-item">
-    <a href="{{ path('responsable_abonnement_index') }}" class="nav-link">
-        <i class="fas fa-ticket-alt"></i>
-        <span>subscriptions</span>
-    </a>
-</li>
+                <li class="nav-item {{ app.request.get('_route') == 'app_equipe_event' ? 'active' : '' }}">
+                    <a href="{{ path('app_equipe_event') }}">
+                        <i class="fas fa-link"></i>
+                        <p>Teams Events</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('responsable_abonnement_index') }}" class="nav-link">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Subscriptions</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
