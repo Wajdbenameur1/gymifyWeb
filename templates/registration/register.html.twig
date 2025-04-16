@@ -3,128 +3,287 @@
 {% block title %}Inscription Sportif{% endblock %}
 
 {% block body %}
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow-lg border-0 rounded-4">
-                    <div class="card-header text-center bg-gradient-primary text-white py-4 rounded-top-4">
-                        <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>Créer un compte Sportif</h3>
-                    </div>
-                    <div class="card-body p-5">
-                        {% for label, messages in app.flashes %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        {% endfor %}
-
-                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
-                        
-                        <div class="form-group mb-4 position-relative">
-                            {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
-                                {{ form_widget(form.nom) }}
-                            </div>
-                            <div class="invalid-feedback mt-1"></div>
-                            {{ form_errors(form.nom) }}
-                        </div>
-
-                        <div class="form-group mb-4 position-relative">
-                            {{ form_label(form.prenom, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
-                                {{ form_widget(form.prenom) }}
-                            </div>
-                            <div class="invalid-feedback mt-1"></div>
-                            {{ form_errors(form.prenom) }}
-                        </div>
-
-                        <div class="form-group mb-4 position-relative">
-                            {{ form_label(form.email, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-envelope"></i></span>
-                                {{ form_widget(form.email) }}
-                            </div>
-                            <div class="invalid-feedback mt-1"></div>
-                            {{ form_errors(form.email) }}
-                        </div>
-
-                        <div class="form-group mb-4 position-relative">
-                            {{ form_label(form.password.first, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
-                                {{ form_widget(form.password.first) }}
-                            </div>
-                            <div class="invalid-feedback mt-1"></div>
-                            {{ form_errors(form.password.first) }}
-                        </div>
-
-                        <div class="form-group mb-4 position-relative">
-                            {{ form_label(form.password.second, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
-                                {{ form_widget(form.password.second) }}
-                            </div>
-                            <div class="invalid-feedback mt-1"></div>
-                            {{ form_errors(form.password.second) }}
-                        </div>
-
-                        <div class="form-group mb-4 position-relative">
-                            {{ form_label(form.dateNaissance, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-calendar-alt"></i></span>
-                                {{ form_widget(form.dateNaissance) }}
-                            </div>
-                            <div class="invalid-feedback mt-1"></div>
-                            {{ form_errors(form.dateNaissance) }}
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill">
-                                <i class="fas fa-user-plus me-2"></i>S'inscrire
-                            </button>
-                            <a href="{{ path('app_login') }}" class="btn btn-outline-secondary btn-lg rounded-pill">
-                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
-                            </a>
-                        </div>
-
-                        {{ form_end(form) }}
-                    </div>
-                </div>
-            </div>
+    <div class="form-container">
+        <div class="logo-container">
+            <img src="{{ asset('img/logocopy.png') }}" alt="Logo Fitness Club">
         </div>
+
+        <div class="welcome-text">
+            <p>Inscrivez-vous pour rejoindre notre club et commencer votre parcours fitness.</p>
+        </div>
+
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show">
+                        <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom', 'data-validate': 'true'}}) }}
+                </div>
+                <div class="invalid-feedback mt-1"></div>
+                {{ form_errors(form.nom) }}
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom', 'data-validate': 'true'}}) }}
+                </div>
+                <div class="invalid-feedback mt-1"></div>
+                {{ form_errors(form.prenom) }}
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Adresse email', 'data-validate': 'true'}}) }}
+                </div>
+                <div class="invalid-feedback mt-1"></div>
+                {{ form_errors(form.email) }}
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    {{ form_widget(form.password.first, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe', 'data-validate': 'true'}}) }}
+                </div>
+                <div class="invalid-feedback mt-1"></div>
+                {{ form_errors(form.password.first) }}
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    {{ form_widget(form.password.second, {'attr': {'class': 'form-control', 'placeholder': 'Confirmer mot de passe', 'data-validate': 'true'}}) }}
+                </div>
+                <div class="invalid-feedback mt-1"></div>
+                {{ form_errors(form.password.second) }}
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                    {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control', 'placeholder': 'Date de naissance', 'data-validate': 'true'}}) }}
+                </div>
+                <div class="invalid-feedback mt-1"></div>
+                {{ form_errors(form.dateNaissance) }}
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>S'inscrire
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>Déjà membre ?</span>
+            </div>
+
+            <div class="d-grid">
+                <a href="{{ path('app_login') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                </a>
+            </div>
+
+            <div class="footer-text">
+                En continuant, vous acceptez nos <a href="#">Conditions d'utilisation</a> et notre <a href="#">Politique de confidentialité</a>.
+            </div>
+
+        {{ form_end(form) }}
     </div>
 
     <style>
-        .bg-gradient-primary {
-            background: linear-gradient(45deg, #007bff, #00bcd4);
+        :root {
+            --primary-color: #ff7f00;
+            --primary-hover: #e76f00;
+            --secondary-color: #6c757d;
+            --light-gray: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 10px;
         }
+        
+        body {
+            background-image: url('{{ asset('img/sallegymback.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            backdrop-filter: blur(6px);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-container img {
+            max-width: 180px;
+            margin-bottom: 1.8rem;
+            transition: transform 0.4s;
+        }
+
+        .logo-container img:hover {
+            transform: scale(1.03);
+        }
+
+        .welcome-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .form-control {
+            border-radius: var(--border-radius);
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            height: 48px;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(255, 127, 0, 0.15);
+        }
+
         .form-control.is-invalid {
             border-color: #dc3545;
             background-image: none;
         }
+
         .invalid-feedback {
             color: #dc3545;
             font-size: 0.875rem;
             display: block;
+            text-align: left;
         }
-        .input-group .form-control.is-invalid {
-            z-index: 0;
+
+        .input-group-text {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            color: #777;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
         }
-        .card {
-            transition: transform 0.2s;
+
+        .btn {
+            border-radius: var(--border-radius);
+            padding: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .card:hover {
-            transform: translateY(-5px);
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
         }
-        .btn-lg {
-            padding: 0.75rem 1.5rem;
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 111, 0, 0.25);
         }
-        .form-group .invalid-feedback:empty {
-            display: none;
+
+        .btn-outline-secondary {
+            border: 1px solid #ddd;
+            color: var(--text-color);
+            background-color: white;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            border-color: #ccc;
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            padding: 12px 15px;
+            font-size: 0.9rem;
+        }
+
+        .divider {
+            position: relative;
+            margin: 1.8rem 0;
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #eee;
+            z-index: 1;
+        }
+
+        .divider span {
+            position: relative;
+            z-index: 2;
+            background-color: white;
+            padding: 0 12px;
+        }
+
+        .footer-text {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .footer-text a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 576px) {
+            .form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            .logo-container img {
+                max-width: 150px;
+            }
+            .welcome-text {
+                font-size: 1rem;
+            }
         }
     </style>
 
@@ -135,7 +294,7 @@
 
             // Validation function
             const validateField = async (input) => {
-                const errorElement = input.closest('.form-group').querySelector('.invalid-feedback');
+                const errorElement = input.closest('.mb-3').querySelector('.invalid-feedback');
                 const name = input.id.replace('sportif_', '').replace('_first', '').replace('_second', '');
                 errorElement.textContent = '';
 
@@ -193,7 +352,7 @@
                     } else if (input.id.includes('first') && password2 && password1 !== password2) {
                         const secondInput = document.querySelector('#sportif_password_second');
                         secondInput.classList.add('is-invalid');
-                        secondInput.closest('.form-group').querySelector('.invalid-feedback').textContent = 
+                        secondInput.closest('.mb-3').querySelector('.invalid-feedback').textContent = 
                             'Les mots de passe ne correspondent pas.';
                         input.classList.remove('is-invalid');
                     } else {
@@ -201,7 +360,7 @@
                         if (input.id.includes('first') && password2) {
                             document.querySelector('#sportif_password_second').classList.remove('is-invalid');
                             document.querySelector('#sportif_password_second')
-                                .closest('.form-group').querySelector('.invalid-feedback').textContent = '';
+                                .closest('.mb-3').querySelector('.invalid-feedback').textContent = '';
                         }
                     }
                 } else if (name === 'dateNaissance') {
