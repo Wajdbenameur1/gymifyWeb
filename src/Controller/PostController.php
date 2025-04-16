@@ -43,7 +43,7 @@ final class PostController extends AbstractController
             }
     
             // Traitement de l'image (si nécessaire)
-// Traitement de l'image (si nécessaire)
+// Traiteement de l'image (si nécessaire)
 $imageFile = $form->get('imageFile')->getData();
 if ($imageFile) {
     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
