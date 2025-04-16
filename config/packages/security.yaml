@@ -57,6 +57,7 @@ security:
 
 
 
+
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -86,6 +87,7 @@ when@test:
 
 
 
+
     access_control:
         - { path: ^/admin/user, roles: ROLE_ADMIN }
         - { path: ^/admin, roles: ROLE_ADMIN }
@@ -97,7 +99,12 @@ when@test:
         - { path: ^/reclamation, roles: ROLE_USER }
 
 
+
         - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY } # Explicit rule
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+
+
+        - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 
