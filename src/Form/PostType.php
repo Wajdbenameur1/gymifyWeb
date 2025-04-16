@@ -7,7 +7,10 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+
 
 class PostType extends AbstractType
 {
@@ -38,14 +41,22 @@ class PostType extends AbstractType
                     'data-parsley-trigger'               => 'keyup'
                 ],
             ])
-            ->add('image_url', UrlType::class, [
-                'label'    => 'Image (URL)',
+            ->add('imageFile', FileType::class, [
+                'label' => 'Image (fichier)',
+                'mapped' => false,
                 'required' => false,
-                'attr'     => [
-                    'data-parsley-type'           => 'url',
-                    'data-parsley-pattern'        => '/\.(jpg|jpeg|png|gif)$/i',
-                    'data-parsley-trigger'        => 'keyup'
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/jpg',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader un fichier image valide (jpg ou png)',
+                    ])
                 ],
+                'attr' => ['class' => 'form-control']
             ]);
     }
 

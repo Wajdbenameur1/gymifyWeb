@@ -1,14 +1,18 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\Role;
 use App\Form\UserType;
+use App\Service\EmailService;
 use App\Repository\UserRepository;
+use App\Service\EmailUniquenessValidator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -69,11 +73,9 @@ class UserController extends AbstractController
                 ]);
             }
 
-            // Password hashing and saving the user
             $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
             $user->setPassword($hashedPassword);
 
-            // Check if the user is an ENTRAINEUR and has no speciality
             if ($user->getRole() === Role::ENTRAINEUR && empty($user->getSpecialite())) {
                 $this->addFlash('danger', 'La spécialité est requise pour les entraîneurs.');
                 return $this->render('user/user_create.html.twig', [
@@ -81,7 +83,6 @@ class UserController extends AbstractController
                 ]);
             }
 
-            // Handling the image file upload
             $imageFile = $form->get('imageUrl')->getData();
             if ($imageFile) {
                 try {
@@ -104,14 +105,12 @@ class UserController extends AbstractController
                 }
             }
 
-            // Persist the user and send registration email
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
             $emailService->sendRegistrationEmail($user);
 
             $this->addFlash('success', 'Utilisateur créé avec succès.');
-
             return $this->redirectToRoute('user_index');
         }
 
@@ -121,29 +120,25 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/user/{id}/edit', name: 'user_edit')]
-    public function edit(Request $request, User $user): Response
+    #[Route('/admin/user/{id}/edit', name: 'app_user_update')]
+    public function update(Request $request, User $user): Response
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            // Check if the email is already taken
             $existingUser = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
             if ($existingUser && $existingUser->getId() !== $user->getId()) {
                 $this->addFlash('error', 'L\'email est déjà utilisé.');
                 return $this->render('user/edit.html.twig', ['form' => $form->createView()]);
             }
 
-            // Hash the password if changed
             $plainPassword = $form->get('password')->getData();
             if ($plainPassword) {
                 $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashedPassword);
             }
 
-            // Handle image update
             $imageFile = $form->get('imageUrl')->getData();
             if ($imageFile) {
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -155,9 +150,9 @@ class UserController extends AbstractController
                 $user->setImageUrl('/uploads/users/'.$newFilename);
             }
 
-            // Persist the updated user
             $this->entityManager->flush();
 
+            $this->addFlash('success', 'L\'utilisateur a été mis à jour avec succès.');
             return $this->redirectToRoute('user_index');
         }
 
@@ -169,15 +164,29 @@ class UserController extends AbstractController
     #[Route('/admin/user/{id}/delete', name: 'user_delete')]
     public function delete(User $user): Response
     {
+        if ($user->getImageUrl()) {
+            $imagePath = $this->getParameter('kernel.project_dir').'/public'.$user->getImageUrl();
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 
+        $this->addFlash('success', 'Utilisateur supprimé avec succès.');
         return $this->redirectToRoute('user_index');
     }
 
-    #[Route('/admin/user/{id}', name: 'user_show')]
-    public function show(User $user): Response
+    #[Route('/admin/user/{id}', name: 'user_show', requirements: ['id' => '\d+'])]
+    public function showById(int $id): Response
     {
+        $user = $this->userRepository->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable.");
+        }
+
         return $this->render('user/show.html.twig', [
             'user' => $user,
         ]);

@@ -34,6 +34,7 @@ public function index(Request $request, CoursRepository $coursRepository,
     $dateDebut = $planning->getDateDebut();
     $dateFin = $planning->getDateFin();
     
+    
     // Vérifier que les dates sont valides
     if ($dateDebut && $dateFin) {
         $currentDate = clone $dateDebut;
@@ -45,13 +46,19 @@ public function index(Request $request, CoursRepository $coursRepository,
 
     // Récupérer les cours associés à ce planning
     $cours = $coursRepository->findBy(['planning' => $planning]);
+    $datesAvecCours = array_map(function($cour) {
+      return $cour->getDateDebut()->format('Y-m-d');
+  }, $cours);
+  
 
     return $this->render('cours/index.html.twig', [
         'page_title' => 'Liste des cours',
         'cours' => $cours,
         'planning' => $planning,
         'joursCalendrier' => $joursCalendrier,
-        'idPlanning' => $idPlanning
+        'idPlanning' => $idPlanning,
+        'datesAvecCours' => $datesAvecCours,
+
     ]);
 }
 
@@ -113,6 +120,13 @@ public function index(Request $request, CoursRepository $coursRepository,
     $cours->setSalle($salleRepo->find($request->request->get('salle')));
     //$cours->setEntraineur($user);
     $cours->setPlanning($planning);
+    $errors = $validator->validate($cours);
+         if (count($errors) > 0) {
+        foreach ($errors as $error) {
+            $this->addFlash('error', $error->getMessage());
+        }
+        return $this->redirectToRoute('app_cours_new');
+        }
 
     // 5. Enregistrer
     $entityManager->persist($cours);
@@ -192,6 +206,13 @@ public function update(
     $cours->setDateDebut($dateDebut);
     $cours->setHeurDebut($heurDebut);
     $cours->setHeurFin($heurFin);
+    $errors = $validator->validate($cours);
+    if (count($errors) > 0) {
+   foreach ($errors as $error) {
+       $this->addFlash('error', $error->getMessage());
+   }
+   return $this->redirectToRoute('app_cours_edit', ['id' => $cours->getId()]);
+   }
     
     // Gestion des relations
     $activiteId = $request->request->get('activite');

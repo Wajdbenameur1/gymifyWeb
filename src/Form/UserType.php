@@ -1,79 +1,167 @@
 <?php
- // src/Form/UserType.php
-
 namespace App\Form;
 
-use App\Entity\User;
 use App\Enum\Role;
+
+use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class UserType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email', TextType::class, [
-                'label' => 'Email',
-                'constraints' => [
-                    new Assert\NotBlank(['message' => 'L\'email est obligatoire.']),
-                    new Assert\Email(['message' => 'Veuillez entrer une adresse email valide.']),
-                ],
-            ])
-            ->add('password', PasswordType::class, [
-                'label' => 'Mot de passe',
-                'mapped' => false,
-                'required' => true,
-                'attr' => ['autocomplete' => 'new-password'],
-                'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le mot de passe est obligatoire.']),
-                    new Assert\Length(['min' => 8, 'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères.']),
-                ],
-            ])
             ->add('nom', TextType::class, [
-                'label' => 'Nom',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(['max' => 50])],
+                'constraints' => [
+                    new NotBlank(['message' => 'Le nom est requis.']),
+                    new Length(['max' => 50, 'maxMessage' => 'Le nom ne peut dépasser 50 caractères.'])
+                ],
+                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
             ])
             ->add('prenom', TextType::class, [
-                'label' => 'Prénom',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(['max' => 50])],
-            ])
-            ->add('role', ChoiceType::class, [
-                'choices' => [
-                    'Admin' => Role::ADMIN,
-                    'Responsable Salle' => Role::RESPONSABLE_SALLE,
-                    'Entraîneur' => Role::ENTRAINEUR,
-                    'Sportif' => Role::SPORTIF,
+                'constraints' => [
+                    new NotBlank(['message' => 'Le prénom est requis.']),
+                    new Length(['max' => 50, 'maxMessage' => 'Le prénom ne peut dépasser 50 caractères.'])
                 ],
-                'label' => 'Rôle',
-                'constraints' => [new Assert\NotBlank()],
+                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+            ])
+            ->add('email', EmailType::class, [
+                'constraints' => [
+                    new NotBlank(['message' => 'L\'email est requis.']),
+                    new Email(['message' => 'Veuillez entrer un email valide.'])
+                ],
+                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+            ])
+            ->add('password', PasswordType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Length([
+                        'min' => 8,
+                        'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères.',
+                        'max' => 4096
+                    ])
+                ],
+                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
             ])
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
                 'required' => true,
-            ]);
-
-        if ($options['is_entraineur']) {
-            $builder->add('specialite', TextType::class, [
-                'label' => 'Spécialité',
+                'constraints' => [
+                    new NotBlank(['message' => 'La date de naissance est requise.']),
+                    new Callback([$this, 'validateAge'])
+                ],
+                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+            ])
+            ->add('role', ChoiceType::class, [
+                'choices' => [
+                    'Sportif' => Role::SPORTIF,
+                    'Admin' => Role::ADMIN,
+                    'Responsable Salle' => Role::RESPONSABLE_SALLE,
+                    'Entraineur' => Role::ENTRAINEUR,
+                ],
+                'required' => true,
+                'choice_value' => function ($choice) {
+                    return $choice instanceof Role ? $choice->value : null; // Assure-toi que la valeur correspond bien à Role
+                },
+                'choice_label' => function ($choice, $key, $value) {
+                    return $choice->label(); // Assure-toi que la méthode label() existe et fonctionne comme prévu
+                },
+            ])
+            
+            ->add('specialite', TextType::class, [
                 'required' => false,
-                'constraints' => [new Assert\Length(['max' => 100])],
+                'constraints' => [
+                    new Length(['max' => 100, 'maxMessage' => 'La spécialité ne peut dépasser 100 caractères.']),
+                    new Callback(function ($value, ExecutionContextInterface $context) {
+                        $form = $context->getObject()->getParent();
+                        $role = $form->get('role')->getData();
+                        if ($role === Role::ENTRAINEUR && empty($value)) {
+                            $context->buildViolation('La spécialité est requise pour les entraîneurs.')
+                                ->addViolation();
+                        }
+                    })
+                ]
+            ])
+            
+            ->add('imageUrl', FileType::class, [
+                'label' => 'Image de profil',
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                            'image/gif',
+                            'image/svg+xml'
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, WebP, GIF ou SVG).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser {{ limit }} ({{ suffix }}).',
+                        'uploadIniSizeErrorMessage' => 'L\'image ne doit pas dépasser {{ limit }} ({{ suffix }}).',
+                        'uploadFormSizeErrorMessage' => 'L\'image ne doit pas dépasser {{ limit }} ({{ suffix }}).',
+                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload de l\'image.'
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) {
+                        if ($value) {
+                            $extension = strtolower($value->guessExtension());
+                            $allowedExtensions = ['jpeg', 'jpg', 'png', 'webp', 'gif', 'svg'];
+                            
+                            if (!in_array($extension, $allowedExtensions)) {
+                                $context->buildViolation('Le type de fichier n\'est pas autorisé. Types autorisés: '.implode(', ', $allowedExtensions))
+                                    ->addViolation();
+                            }
+                        }
+                    })
+                ],
+                'attr' => [
+                    'accept' => 'image/jpeg,image/png,image/webp,image/gif,image/svg+xml',
+                    'class' => 'form-control d-none',
+                    'data-validate' => 'true',
+                    'data-preview-target' => '#image-preview',
+                    'data-remove-target' => '#remove-image'
+                ],
+                'help' => 'Formats acceptés: JPEG, PNG, WebP, GIF, SVG (max 2MB)',
+                'help_attr' => ['class' => 'text-muted small']
             ]);
-        }
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => User::class,
-            'is_entraineur' => false,
+            'attr' => ['id' => 'user-form', 'class' => 'needs-validation', 'novalidate' => 'novalidate']
         ]);
+    }
+
+    public function validateAge($value, ExecutionContextInterface $context): void
+    {
+        if (!$value instanceof \DateTimeInterface) {
+            return;
+        }
+
+        $today = new \DateTime();
+        $age = $today->diff($value)->y;
+
+        if ($age < 12) {
+            $context->buildViolation('Vous devez avoir au moins 12 ans.')
+                ->atPath('dateNaissance')
+                ->addViolation();
+        }
     }
 }
