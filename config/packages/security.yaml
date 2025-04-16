@@ -61,6 +61,6 @@ security:
         - { path: ^/home, roles: ROLE_SPORTIF }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register/sportif, roles: PUBLIC_ACCESS }
-        -  { path: ^/reclamation, roles: ROLE_USER }
+        - { path: ^/reclamation, roles: ROLE_USER }
         - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY } # Explicit rule
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
