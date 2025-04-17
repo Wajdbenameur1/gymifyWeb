@@ -23,6 +23,7 @@ class AdminReclamationController extends AbstractController
         $this->logger = $logger;
     }
 
+
     #[Route('/', name: 'app_admin_reclamation_index', methods: ['GET', 'POST'])]
     public function index(
         Request $request,
@@ -103,6 +104,7 @@ class AdminReclamationController extends AbstractController
             'reclamations' => $reclamations,
             'reponses' => $reponses,
             'form' => $form->createView(),
+            'page_title' => 'Gestion des Réclamations',
         ]);
     }
 

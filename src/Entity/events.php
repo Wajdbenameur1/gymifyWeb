@@ -37,7 +37,7 @@ class Events
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 
-    #[ORM\Column(type: 'string',enumType: Reward::class,/*columnDefinition: "ENUM('PERSONAL_TRAINING', 'GROUP_ACTIVITY', 'FITNESS_CONSULTATION')"*/)]
+    #[ORM\Column(type: 'string',enumType: Reward::class)]
     private ?Reward $reward = null;
 
     #[ORM\Column]
@@ -45,8 +45,6 @@ class Events
 
     #[ORM\Column]
     private ?float $longitude = null;
-
-    
 
     /**
      * @var Collection<int, EquipeEvent>
@@ -57,14 +55,8 @@ class Events
     #[ORM\ManyToOne(inversedBy: 'salles')]
     private ?Salle $salle = null;
 
-    
-
-    
-
     public function __construct()
     {
-        $this->id_event = new ArrayCollection();
-        $this->id_equipe = new ArrayCollection();
         $this->event = new ArrayCollection();
     }
 
@@ -81,7 +73,6 @@ class Events
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -93,7 +84,6 @@ class Events
     public function setDate(\DateTimeInterface $date): static
     {
         $this->date = $date;
-
         return $this;
     }
 
@@ -105,7 +95,6 @@ class Events
     public function setHeureDebut(\DateTimeInterface $heure_debut): static
     {
         $this->heure_debut = $heure_debut;
-
         return $this;
     }
 
@@ -117,7 +106,6 @@ class Events
     public function setHeureFin(\DateTimeInterface $heure_fin): static
     {
         $this->heure_fin = $heure_fin;
-
         return $this;
     }
 
@@ -129,7 +117,6 @@ class Events
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -141,7 +128,6 @@ class Events
     public function setImageUrl(string $image_url): static
     {
         $this->image_url = $image_url;
-
         return $this;
     }
 
@@ -153,7 +139,6 @@ class Events
     public function setType(string $type): static
     {
         $this->type = $type;
-
         return $this;
     }
 
@@ -165,7 +150,6 @@ class Events
     public function setReward(Reward $reward): static
     {
         $this->reward = $reward;
-
         return $this;
     }
 
@@ -177,7 +161,6 @@ class Events
     public function setLatitude(float $latitude): static
     {
         $this->latitude = $latitude;
-
         return $this;
     }
 
@@ -189,11 +172,8 @@ class Events
     public function setLongitude(float $longitude): static
     {
         $this->longitude = $longitude;
-
         return $this;
     }
-
-    
 
     /**
      * @return Collection<int, EquipeEvent>
@@ -209,19 +189,16 @@ class Events
             $this->event->add($event);
             $event->setEvent($this);
         }
-
         return $this;
     }
 
     public function removeEvent(EquipeEvent $event): static
     {
         if ($this->event->removeElement($event)) {
-            // set the owning side to null (unless already changed)
             if ($event->getEvent() === $this) {
                 $event->setEvent(null);
             }
         }
-
         return $this;
     }
 
@@ -233,9 +210,6 @@ class Events
     public function setSalle(?Salle $salle): static
     {
         $this->salle = $salle;
-
         return $this;
     }
-
-    
-  }
+}

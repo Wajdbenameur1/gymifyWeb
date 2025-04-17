@@ -65,7 +65,7 @@ class UserController extends AbstractController
 public function addUser(Request $request): Response
 {
     // Utilisé uniquement pour le formulaire vide au départ
-    $user = new Sportif(); // valeur par défaut (car le formulaire a `data` => Role::SPORTIF)
+    $user = new Sportif(); // valeur par défaut (car le formulaire a data => Role::SPORTIF)
     $form = $this->createForm(UserType::class, $user);
     $form->handleRequest($request);
 

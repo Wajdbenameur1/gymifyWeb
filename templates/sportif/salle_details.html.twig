@@ -1,0 +1,568 @@
+{% extends 'sportif/base.html.twig' %}
+
+{% block title %}{{ salle.nom }} | Gym{% endblock %}
+
+{% block body %}
+    <!-- Salle Details Section -->
+    <section class="salle-details-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="salle-image">
+                        {% if salle.urlPhoto %}
+                            <img src="{{ asset('Uploads/images/' ~ salle.urlPhoto) }}" alt="{{ salle.nom }}">
+                            <div class="image-overlay"></div>
+                        {% else %}
+                            <img src="{{ asset('img/placeholder-gym.jpg') }}" alt="Default Gym Image">
+                            <div class="image-overlay"></div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="salle-content">
+                        <h2>{{ salle.nom }}</h2>
+                        <p>{{ salle.details }}</p>
+                        <ul class="salle-meta">
+                            <li><i class="fa fa-map-marker"></i> {{ salle.adresse }}</li>
+                            <li><i class="fa fa-user"></i> {% if salle.responsable %}{{ salle.responsable.prenom|default('') }} {{ salle.responsable.nom|default('N/A') }}{% else %}No responsible{% endif %}</li>
+                            <li><i class="fa fa-phone"></i> {{ salle.numTel }}</li>
+                            <li><i class="fa fa-envelope"></i> {{ salle.email }}</li>
+                        </ul>
+                        <div class="salle-actions">
+                            <a href="#abonnements" class="primary-btn">Voir les abonnements</a>
+                            <a href="#evenements" class="primary-btn">Voir les événements</a>
+                            <a href="{{ path('home') }}" class="secondary-btn">Retour</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Abonnements - Version modernisée -->
+    <section id="abonnements" class="abonnements-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nos Abonnements</h2>
+                <p>Choisissez l'abonnement qui correspond à vos besoins</p>
+            </div>
+
+            {% set uniqueActivites = [] %}
+            {% for abonnement in abonnements|default([]) %}
+                {% if abonnement.activite is not null and abonnement.activite.id not in uniqueActivites|map(a => a.id) %}
+                    {% set uniqueActivites = uniqueActivites|merge([abonnement.activite]) %}
+                {% endif %}
+            {% endfor %}
+
+            {% if uniqueActivites|length > 0 %}
+                <div class="activites-grid">
+                    {% for activite in uniqueActivites %}
+                        {% set abonnementsForActivite = abonnements|filter(a => a.activite.id == activite.id) %}
+                        
+                        {% if abonnementsForActivite|length > 0 %}
+                            <div class="activite-card">
+                                <div class="activite-name">
+                                    <h3>{{ activite.nom }}</h3>
+                                </div>
+                                <div class="abonnements-container">
+                                    {% for abonnement in abonnementsForActivite %}
+                                        <div class="abonnement-card compact">
+                                            <div class="abonnement-header">
+                                                <h4>{{ abonnement.type.value|capitalize }}</h4>
+                                                <div class="price">{{ abonnement.tarif }} DT</div>
+                                            </div>
+                                            <div class="abonnement-body">
+                                                <ul class="abonnement-features">
+                                                    <li><i class="fas fa-clock"></i> 
+                                                        {% if abonnement.type.value == 'mois' %}30 jours
+                                                        {% elseif abonnement.type.value == 'trimestre' %}90 jours
+                                                        {% elseif abonnement.type.value == 'année' %}365 jours
+                                                        {% else %}Personnalisé{% endif %}
+                                                    </li>
+                                                    <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
+                                                </ul>
+                                                <a href="#" class="subscribe-btn">S'abonner</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-abonnements">
+                    <i class="fa fa-info-circle"></i>
+                    <p>Aucun abonnement disponible actuellement.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Section Événements -->
+    <section id="evenements" class="evenements-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nos Événements</h2>
+                <p>Participez à nos événements pour une expérience unique</p>
+            </div>
+            <div class="row">
+                {% for equipe_event in equipe_events %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="evenement-card">
+                        <div class="evenement-image">
+                            {% if equipe_event.event.imageUrl %}
+                                <img src="{{ asset('Uploads/evenements/' ~ equipe_event.event.imageUrl) }}" alt="{{ equipe_event.event.nom }}">
+                            {% else %}
+                                <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
+                            {% endif %}
+                            <div class="evenement-date">
+                                <span>{{ equipe_event.event.date|date('d') }}</span>
+                                <p>{{ equipe_event.event.date|date('M') }}</p>
+                            </div>
+                        </div>
+                        <div class="evenement-body">
+                            <h3>{{ equipe_event.event.nom }}</h3>
+                            <p><i class="fa fa-clock-o"></i> {{ equipe_event.event.heureDebut|date('H:i') }} - {{ equipe_event.event.heureFin|date('H:i') }}</p>
+                            <p>{{ equipe_event.event.description|slice(0, 100) }}...</p>
+                            <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn">Détails</a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fa fa-info-circle fa-2x mb-3"></i>
+                        <p>Aucun événement prévu pour cette salle actuellement.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        * {
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --secondary: #004E89;
+            --dark: #1A1A1A;
+            --light: #F7F7F7;
+            --accent: #FFD166;
+            --gray: #E8E8E8;
+            --dark-gray: #6C757D;
+        }
+
+        /* Salle Details Section */
+        .salle-details-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--dark), #2A2A2A);
+            color: white;
+        }
+
+        .salle-image {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease;
+        }
+
+        .salle-image:hover {
+            transform: scale(1.02);
+        }
+
+        .salle-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 78, 137, 0.3));
+        }
+
+        .salle-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .salle-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 70px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .salle-content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 2rem;
+        }
+
+        .salle-meta {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .salle-meta li {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .salle-meta i {
+            color: var(--primary);
+            width: 24px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .salle-actions {
+            margin-top: 2.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .primary-btn, .secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .primary-btn {
+            background: linear-gradient(45deg, var(--primary), #FF8C42);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--primary);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        /* Section Abonnements - Design modernisé */
+        .abonnements-section {
+            padding: 4rem 0;
+            background: var(--light);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+            margin-top: 1rem;
+        }
+
+        .activites-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .activite-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .activite-name {
+            padding: 1.2rem 1.5rem;
+            background: var(--secondary);
+            color: white;
+        }
+
+        .activite-name h3 {
+            font-size: 1.4rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .abonnements-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .abonnement-card.compact {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray);
+        }
+
+        .abonnement-card.compact:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .abonnement-card.compact .abonnement-header {
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .abonnement-card.compact .abonnement-header h4 {
+            font-size: 1rem;
+            margin: 0;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .abonnement-card.compact .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 0.3rem;
+        }
+
+        .abonnement-card.compact .abonnement-body {
+            padding: 1rem;
+        }
+
+        .abonnement-card.compact .abonnement-features {
+            margin-bottom: 1rem;
+        }
+
+        .abonnement-card.compact .abonnement-features li {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .abonnement-card.compact .abonnement-features i {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            width: 18px;
+        }
+
+        .abonnement-card.compact .subscribe-btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        .no-abonnements {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-gray);
+        }
+
+        .no-abonnements i {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Section Événements */
+        .evenements-section {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .evenement-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .evenement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .evenement-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .evenement-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .evenement-card:hover .evenement-image img {
+            transform: scale(1.05);
+        }
+
+        .evenement-date {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.6rem;
+            border-radius: 8px;
+            text-align: center;
+            width: 50px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .evenement-date span {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .evenement-date p {
+            font-size: 0.7rem;
+            margin: 0;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .evenement-body {
+            padding: 1.2rem;
+        }
+
+        .evenement-body h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .evenement-body p {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-bottom: 1.2rem;
+        }
+
+        .event-btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            background: linear-gradient(45deg, var(--secondary), #0066B3);
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .event-btn:hover {
+            background: linear-gradient(45deg, #0066B3, var(--secondary));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .salle-content h2 {
+                font-size: 2.2rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .salle-details-section {
+                padding: 3rem 0;
+            }
+            
+            .salle-image {
+                margin-bottom: 2rem;
+            }
+            
+            .salle-content h2 {
+                font-size: 1.8rem;
+            }
+            
+            .abonnements-container {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .salle-content h2 {
+                font-size: 1.6rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+            
+            .salle-actions {
+                flex-direction: column;
+            }
+            
+            .primary-btn, .secondary-btn {
+                width: 100%;
+            }
+            
+            .abonnements-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}

@@ -2,7 +2,6 @@
 namespace App\Form;
 
 use App\Enum\Role;
-
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -30,21 +29,21 @@ class UserType extends AbstractType
                     new NotBlank(['message' => 'Le nom est requis.']),
                     new Length(['max' => 50, 'maxMessage' => 'Le nom ne peut dépasser 50 caractères.'])
                 ],
-                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+                'attr' => ['class' => 'form-control floating-input', 'placeholder' => 'Nom', 'data-validate' => 'true']
             ])
             ->add('prenom', TextType::class, [
                 'constraints' => [
                     new NotBlank(['message' => 'Le prénom est requis.']),
                     new Length(['max' => 50, 'maxMessage' => 'Le prénom ne peut dépasser 50 caractères.'])
                 ],
-                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+                'attr' => ['class' => 'form-control floating-input', 'placeholder' => 'Prénom', 'data-validate' => 'true']
             ])
             ->add('email', EmailType::class, [
                 'constraints' => [
                     new NotBlank(['message' => 'L\'email est requis.']),
                     new Email(['message' => 'Veuillez entrer un email valide.'])
                 ],
-                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+                'attr' => ['class' => 'form-control floating-input', 'placeholder' => 'Email', 'data-validate' => 'true']
             ])
             ->add('password', PasswordType::class, [
                 'required' => false,
@@ -55,7 +54,7 @@ class UserType extends AbstractType
                         'max' => 4096
                     ])
                 ],
-                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+                'attr' => ['class' => 'form-control floating-input password-input', 'placeholder' => 'Mot de passe', 'data-validate' => 'true']
             ])
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
@@ -64,7 +63,7 @@ class UserType extends AbstractType
                     new NotBlank(['message' => 'La date de naissance est requise.']),
                     new Callback([$this, 'validateAge'])
                 ],
-                'attr' => ['class' => 'form-control', 'data-validate' => 'true']
+                'attr' => ['class' => 'form-control floating-input datepicker', 'placeholder' => 'Date de naissance', 'data-validate' => 'true']
             ])
             ->add('role', ChoiceType::class, [
                 'choices' => [
@@ -74,14 +73,10 @@ class UserType extends AbstractType
                     'Entraineur' => Role::ENTRAINEUR,
                 ],
                 'required' => true,
-                'choice_value' => function ($choice) {
-                    return $choice instanceof Role ? $choice->value : null; // Assure-toi que la valeur correspond bien à Role
-                },
-                'choice_label' => function ($choice, $key, $value) {
-                    return $choice->label(); // Assure-toi que la méthode label() existe et fonctionne comme prévu
-                },
+                'choice_value' => fn($choice) => $choice instanceof Role ? $choice->value : $choice,
+                'choice_label' => fn($choice) => $choice instanceof Role ? $choice->label() : $choice,
+                'attr' => ['class' => 'form-select floating-input role-select', 'data-validate' => 'true']
             ])
-            
             ->add('specialite', TextType::class, [
                 'required' => false,
                 'constraints' => [
@@ -94,50 +89,26 @@ class UserType extends AbstractType
                                 ->addViolation();
                         }
                     })
-                ]
+                ],
+                'attr' => ['class' => 'form-control floating-input', 'placeholder' => 'Spécialité']
             ])
-            
             ->add('imageUrl', FileType::class, [
-                'label' => 'Image de profil',
+                'label' => 'Photo de profil',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
                     new File([
                         'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                            'image/webp',
-                            'image/gif',
-                            'image/svg+xml'
-                        ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, WebP, GIF ou SVG).',
-                        'maxSizeMessage' => 'L\'image ne doit pas dépasser {{ limit }} ({{ suffix }}).',
-                        'uploadIniSizeErrorMessage' => 'L\'image ne doit pas dépasser {{ limit }} ({{ suffix }}).',
-                        'uploadFormSizeErrorMessage' => 'L\'image ne doit pas dépasser {{ limit }} ({{ suffix }}).',
-                        'uploadErrorMessage' => 'Une erreur est survenue lors de l\'upload de l\'image.'
-                    ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) {
-                        if ($value) {
-                            $extension = strtolower($value->guessExtension());
-                            $allowedExtensions = ['jpeg', 'jpg', 'png', 'webp', 'gif', 'svg'];
-                            
-                            if (!in_array($extension, $allowedExtensions)) {
-                                $context->buildViolation('Le type de fichier n\'est pas autorisé. Types autorisés: '.implode(', ', $allowedExtensions))
-                                    ->addViolation();
-                            }
-                        }
-                    })
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, WebP, GIF).',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 2Mo.'
+                    ])
                 ],
                 'attr' => [
-                    'accept' => 'image/jpeg,image/png,image/webp,image/gif,image/svg+xml',
-                    'class' => 'form-control d-none',
-                    'data-validate' => 'true',
-                    'data-preview-target' => '#image-preview',
-                    'data-remove-target' => '#remove-image'
-                ],
-                'help' => 'Formats acceptés: JPEG, PNG, WebP, GIF, SVG (max 2MB)',
-                'help_attr' => ['class' => 'text-muted small']
+                    'class' => 'd-none',
+                    'accept' => 'image/jpeg,image/png,image/webp,image/gif',
+                    'data-validate' => 'true'
+                ]
             ]);
     }
 

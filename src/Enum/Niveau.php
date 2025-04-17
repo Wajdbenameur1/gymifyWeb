@@ -12,10 +12,10 @@ enum Niveau: string
     public function label(): string
     {
         return match($this) {
-            self::DEBUTANT => 'Beginner',
-            self::INTERMEDIAIRE => 'Intermediate',
-            self::AVANCE => 'Advanced',
-            self::PROFESSIONNEL => 'Professional',
+            self::DEBUTANT => 'Debutant',
+            self::INTERMEDIAIRE => 'Intermediare',
+            self::AVANCE => 'Advance',
+            self::PROFESSIONNEL => 'Professionnel',
         };
     }
 }

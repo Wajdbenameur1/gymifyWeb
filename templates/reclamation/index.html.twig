@@ -2,210 +2,313 @@
 
 {% block title %}Mes Réclamations{% endblock %}
 
-{% block body %}
-<div class="container-fluid px-4 py-5 bg-dark text-light">
-    <!-- Header -->
-    <h1 class="display-4 fw-bold mb-4 text-orange">
-        <i class="fas fa-exclamation-circle me-2"></i>Mes Réclamations
-    </h1>
+{% block stylesheets %}
+    <style>
+        :root {
+            --primary-orange: #F28C38;
+            --dark-black: #000000;
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --border-gray: #dee2e6;
+            --gradient-orange: linear-gradient(45deg, #F28C38, #e07b30);
+        }
 
-    <!-- Flash Messages -->
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show bg-dark border-orange text-light" role="alert">
-                <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-triangle' }} me-2"></i>{{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endfor %}
+        body {
+            background-color: var(--dark-black);
+            color: var(--white);
+            font-family: 'Roboto', 'Arial', sans-serif;
+        }
 
-    <!-- Filter Form -->
-    <div class="card bg-dark border-orange shadow-lg mb-5 rounded-3">
-        <div class="card-header bg-orange text-dark fw-bold py-3">
-            <i class="fas fa-filter me-2"></i>Filtrer les réclamations
-        </div>
-        <div class="card-body p-4">
-            <form method="get">
-                <div class="input-group">
-                    <select name="filter" class="form-select bg-dark text-light border-orange" onchange="this.form.submit()">
-                        <option value="Tous" {% if filter == 'Tous' %}selected{% endif %}>Tous</option>
-                        <option value="En attente" {% if filter == 'En attente' %}selected{% endif %}>⏳ En attente</option>
-                        <option value="Traitée" {% if filter == 'Traitée' %}selected{% endif %}>✅ Traité</option>
-                    </select>
-                    <button type="submit" class="btn btn-orange"><i class="fas fa-search"></i></button>
-                </div>
-            </form>
-        </div>
-    </div>
+        .container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
 
-    <!-- Reclamations List -->
-    <div class="card bg-dark border-orange shadow-lg mb-5 rounded-3">
-        <div class="card-header bg-orange text-dark fw-bold py-3">
-            <i class="fas fa-list me-2"></i>Liste des réclamations
-        </div>
-        <div class="card-body p-4">
-            <ul class="list-group list-group-flush">
-                {% for reclamation in reclamations %}
-                    <li class="list-group-item bg-dark text-light border-orange mb-3 rounded">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="mb-1 text-orange">
-                                    <strong>{{ reclamation.sujet }}</strong>
-                                    <span class="badge {% if reclamation.statut == 'Traitée' %}bg-success{% else %}bg-warning{% endif %} ms-2">
-                                        {{ reclamation.statut }}
-                                    </span>
-                                </h5>
-                                <p class="mb-2">{{ reclamation.description }}</p>
-                                {% if reclamation.reponse %}
-                                    <div class="alert alert-info bg-dark border-orange text-light mt-2">
-                                        <i class="fas fa-comment me-2"></i>Réponse: {{ reclamation.reponse.message }}
-                                    </div>
-                                {% else %}
-                                    <div class="alert alert-warning bg-dark border-orange text-light mt-2">
-                                        <i class="fas fa-hourglass-half me-2"></i>En attente de réponse
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <form action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer cette réclamation ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
-                                <button type="submit" class="btn btn-sm btn-danger">
-                                    <i class="fas fa-trash me-1"></i>Supprimer
-                                </button>
-                            </form>
-                        </div>
-                    </li>
-                {% else %}
-                    <li class="list-group-item bg-dark text-light border-orange text-center py-4">
-                        <i class="fas fa-info-circle me-2"></i>Aucune réclamation trouvée.
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
+        h1 {
+            color: var(--primary-orange);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-size: 2.2rem;
+        }
 
-    <!-- Add Reclamation Form -->
-    <div class="card bg-dark border-orange shadow-lg rounded-3">
-        <div class="card-header bg-orange text-dark fw-bold py-3">
-            <i class="fas fa-plus-circle me-2"></i>Ajouter une réclamation
-        </div>
-        <div class="card-body p-4">
-            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-                <div class="mb-3">
-                    {{ form_label(form.sujet, null, {'label_attr': {'class': 'form-label text-orange'}}) }}
-                    {{ form_widget(form.sujet, {'attr': {'class': 'form-control bg-dark text-light border-orange'}}) }}
-                    {{ form_errors(form.sujet, {'attr': {'class': 'text-danger'}}) }}
-                </div>
-                <div class="mb-3">
-                    {{ form_label(form.description, null, {'label_attr': {'class': 'form-label text-orange'}}) }}
-                    {{ form_widget(form.description, {'attr': {'class': 'form-control bg-dark text-light border-orange', 'rows': '5'}}) }}
-                    {{ form_errors(form.description, {'attr': {'class': 'text-danger'}}) }}
-                </div>
-                <div class="mb-3">
-                    {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label text-orange'}}) }}
-                    {{ form_widget(form.statut, {'attr': {'class': 'form-select bg-dark text-light border-orange'}}) }}
-                    {{ form_errors(form.statut, {'attr': {'class': 'text-danger'}}) }}
-                </div>
-                <button type="submit" class="btn btn-orange btn-lg rounded-pill">
-                    <i class="fas fa-paper-plane me-2"></i>Envoyer
-                </button>
-            {{ form_end(form) }}
-        </div>
-    </div>
-</div>
+        h2 {
+            color: var(--dark-black);
+            font-size: 1.6rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-<style>
-    :root {
-        --dark: #1C2526;
-        --orange: #F4A261;
-    }
+        .input-group .form-select {
+            border-color: var(--primary-orange);
+            color: var(--dark-black);
+            font-weight: 500;
+            background-color: var(--white);
+            border-radius: 8px;
+        }
 
-    .bg-dark {
-        background-color: var(--dark) !important;
-    }
+        .input-group .form-select:focus {
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 8px rgba(242, 140, 56, 0.4);
+        }
 
-    .text-orange {
-        color: var(--orange) !important;
-    }
+        .list-group-item {
+            border: 1px solid var(--border-gray);
+            border-radius: 10px;
+            margin-bottom: 1.2rem;
+            padding: 1.8rem;
+            background-color: var(--white);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
 
-    .border-orange {
-        border-color: var(--orange) !important;
-    }
+        .list-group-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
 
-    .btn-orange {
-        background-color: var(--orange);
-        border-color: var(--orange);
-        color: var(--dark);
-        transition: all 0.3s ease;
-    }
+        .list-group-item strong {
+            color: var(--primary-orange);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
 
-    .btn-orange:hover {
-        background-color: #e68a3e;
-        border-color: #e68a3e;
-        color: #fff;
-    }
+        .list-group-item p {
+            color: var(--dark-black);
+            font-size: 1rem;
+        }
 
-    .form-control, .form-select {
-        background-color: var(--dark);
-        color: #fff;
-        border: 1px solid var(--orange);
-        transition: all 0.3s ease;
-    }
+        .alert-info {
+            background: var(--gradient-orange);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.95rem;
+            margin-top: 0.8rem;
+        }
 
-    .form-control:focus, .form-select:focus {
-        background-color: #2a3435;
-        border-color: #e68a3e;
-        box-shadow: 0 0 0 0.25rem rgba(244, 162, 97, 0.25);
-        color: #fff;
-    }
+        .alert-warning {
+            background-color: #fff3cd;
+            color: var(--dark-black);
+            border: 1px solid #ffecb5;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.95rem;
+            margin-top: 0.8rem;
+        }
 
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+        .btn-danger {
+            background-color: var(--dark-black);
+            border-color: var(--dark-black);
+            font-weight: 500;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(244, 162, 97, 0.2) !important;
-    }
+        .btn-danger:hover {
+            background-color: #333;
+            border-color: #333;
+            transform: scale(1.05);
+        }
 
-    .alert {
-        border-left: 4px solid var(--orange);
-    }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            font-size: 1rem;
+            padding: 0.75rem;
+        }
 
-    .badge.bg-success {
-        background-color: #28a745 !important;
-    }
+        .form-control:focus {
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 8px rgba(242, 140, 56, 0.4);
+        }
 
-    .badge.bg-warning {
-        background-color: #ffc107 !important;
-    }
+        .btn-primary {
+            background: var(--gradient-orange);
+            border: none;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
 
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(242, 140, 56, 0.4);
+        }
 
-    .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
-    }
-</style>
+        .form-label {
+            color: var(--dark-black);
+            font-weight: 500;
+        }
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.forEach(tooltipTriggerEl => {
-            new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.85rem;
+        }
 
-        // Client-side form validation
-        const form = document.querySelector('.needs-validation');
-        form.addEventListener('submit', (event) => {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
+        /* Header-specific styles */
+        .header-section .nav-menu ul li a {
+            color: var(--white);
+            font-weight: 500;
+            padding: 10px 15px;
+            transition: color 0.3s;
+        }
+
+        .header-section .nav-menu ul li.active a,
+        .header-section .nav-menu ul li a:hover {
+            color: var(--primary-orange);
+        }
+
+        .header-section .dropdown {
+            background-color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-section .dropdown li a {
+            color: var(--white);
+            padding: 8px 15px;
+        }
+
+        .header-section .dropdown li a:hover {
+            background-color: var(--primary-orange);
+            color: var(--white);
+        }
+
+        .offcanvas-menu-wrapper {
+            background-color: #1a1a1a;
+        }
+
+        .offcanvas-menu-wrapper .canvas-menu ul li a {
+            color: var(--white);
+            font-weight: 500;
+            padding: 10px 15px;
+        }
+
+        .offcanvas-menu-wrapper .canvas-menu ul li a:hover {
+            color: var(--primary-orange);
+        }
+
+        .offcanvas-menu-wrapper .dropdown {
+            background-color: #2c2c2c;
+        }
+
+        .offcanvas-menu-wrapper .dropdown li a {
+            color: var(--white);
+        }
+
+        .offcanvas-menu-wrapper .dropdown li a:hover {
+            background-color: var(--primary-orange);
+            color: var(--white);
+        }
+
+        .canvas-social a,
+        .to-social a {
+            color: var(--white);
+            margin: 0 8px;
+            transition: color 0.3s;
+        }
+
+        .canvas-social a:hover,
+        .to-social a:hover {
+            color: var(--primary-orange);
+        }
+
+        .canvas-open i,
+        .canvas-close i,
+        .search-switch i {
+            color: var(--white);
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .canvas-open i:hover,
+        .canvas-close i:hover,
+        .search-switch i:hover {
+            color: var(--primary-orange);
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 1.2rem;
+                margin: 1rem;
             }
-            form.classList.add('was-validated');
-        }, false);
-    });
-</script>
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .list-group-item {
+                padding: 1.2rem;
+            }
+
+            .btn-primary, .btn-danger {
+                padding: 0.6rem 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>📌 Mes Réclamations</h1>
+
+    <!-- Filtre -->
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <select name="filter" class="form-select" onchange="this.form.submit()">
+                <option value="Tous" {% if filter == 'Tous' %}selected{% endif %}>Tous</option>
+                <option value="En attente" {% if filter == 'En attente' %}selected{% endif %}>⏳ En attente</option>
+                <option value="Traitée" {% if filter == 'Traitée' %}selected{% endif %}>✅ Traité</option>
+            </select>
+        </div>
+    </form>
+
+    <!-- Liste des réclamations -->
+    <ul class="list-group mb-4">
+        {% for reclamation in reclamations %}
+        <li class="list-group-item">
+            <strong>{{ reclamation.sujet }}</strong> | {{ reclamation.statut }}<br>
+            <p class="mb-2">{{ reclamation.description }}</p>
+            {% if reclamation.reponses|length > 0 %}
+                {% for reponse in reclamation.reponses %}
+                    <div class="alert alert-info mt-2">
+                        🗨 Réponse ({{ reponse.dateReponse|date('d/m/Y H:i') }}): {{ reponse.message }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-warning mt-2">⏳ En attente de réponse</div>
+            {% endif %}
+            <form action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cette réclamation ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                <button type="submit" class="btn btn-danger btn-sm">🗑 Supprimer</button>
+            </form>
+        </li>
+        {% else %}
+        <li class="list-group-item">Aucune réclamation trouvée.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Formulaire d'ajout -->
+    <h2>Ajouter une réclamation</h2>
+    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        <div class="mb-3">
+            {{ form_label(form.sujet, 'Sujet', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.sujet, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+            {{ form_errors(form.sujet, {'attr': {'class': 'invalid-feedback'}}) }}
+        </div>
+        <div class="mb-3">
+            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+            {{ form_errors(form.description, {'attr': {'class': 'invalid-feedback'}}) }}
+        </div>
+        {{ form_widget(form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
+    {{ form_end(form) }}
+</div>
 {% endblock %}

@@ -228,6 +228,3 @@ public function setRole(Role $role): self
         return $this->email;
     }
 }
-
-
-
