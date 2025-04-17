@@ -36,48 +36,63 @@ final class CommentController extends AbstractController
 
 
 
-    #[Route('/post/{id}/comments', name: 'app_post_comments', methods: ['GET'])]
-public function comments(Post $post, CommentRepository $commentRepository): Response
-{
-    $comments = $commentRepository->findBy(['post' => $post], ['createdAt' => 'ASC']);
     
-    return $this->render('comment/_comments.html.twig', [
-        'post' => $post,
-        'comments' => $comments,
-    ]);
+
+    #[Route('/new/{postId}', name: 'app_comment_new', methods: ['POST'])]
+public function new(
+    Request $request,
+    EntityManagerInterface $em,
+    PostRepository $postRepo,
+    int $postId
+): Response {
+    $post = $postRepo->find($postId);
+    if (!$post) {
+        throw $this->createNotFoundException('Le post n\'existe pas.');
+    }
+
+    $content = trim($request->request->get('content'));
+    if ($content !== '') {
+        $comment = new Comment();
+        $comment->setPost($post)
+                ->setUser($this->getUser())
+                ->setContent($content)
+                ->setCreatedAt(new \DateTime());
+
+        $em->persist($comment);
+        $em->flush();
+
+        // Si c'est une requête AJAX, renvoyer du JSON
+        if ($request->isXmlHttpRequest()) {
+            return $this->json([
+                'id'        => $comment->getId(),
+                'content'   => $comment->getContent(),
+                'user'      => [
+                    'nom'      => $comment->getUser()->getNom(),
+                    'avatar'   => $comment->getUser()->getImageUrl()
+                                   ? $this->getParameter('uploads_base_url').'/'.$comment->getUser()->getImageUrl()
+                                   : $this->getParameter('app.base_path').'/img/screen/user.png',
+                ],
+                'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
+            ]);
+        }
+    }
+
+    // Sinon (pas AJAX) : redirection classique
+    return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
 }
 
 
-    #[Route('/new/{postId}', name: 'app_comment_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, PostRepository $postRepository, int $postId): Response
-    {
-        $post = $postRepository->find($postId);
 
-        if (!$post) {
-            throw $this->createNotFoundException('Le post n\'existe pas.');
-        }
 
-        $comment = new Comment();
-        $comment->setPost($post);
 
-        $form = $this->createForm(CommentType::class, $comment);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $comment->setUser($this->getUser()); // Associer l'utilisateur connecté au commentaire
-            $comment->setCreatedAt(new \DateTime());
 
-            $entityManager->persist($comment);
-            $entityManager->flush();
 
-            return $this->redirectToRoute('app_post_show', ['id' => $post->getId()], Response::HTTP_SEE_OTHER);
-        }
 
-        return $this->render('comment/new.html.twig', [
-            'comment' => $comment,
-            'form' => $form->createView(),
-        ]);
-    }
+
+
+
+
 
     #[Route('/{id}', name: 'app_comment_show', methods: ['GET'])]
     public function show(Comment $comment): Response

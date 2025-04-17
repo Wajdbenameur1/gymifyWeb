@@ -92,32 +92,75 @@
 
 
 
-              <!-- Modal Bootstrap pour les commentaires -->
+             <!-- Modal Bootstrap pour les commentaires version Instagram -->
 <div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="commentsModalLabel{{ post.id }}">Commentaires</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <!-- Liste des commentaires -->
-              {% for comment in post.comments %}
-                  <div class="comment">
-                      <p><strong>{{ comment.user.nom }}:</strong> {{ comment.content }}</p>
-                      <p class="text-muted">{{ comment.createdAt|date('d M Y') }}</p>
-                  </div>
-              {% else %}
-                  <p>Aucun commentaire pour ce post.</p>
-              {% endfor %}
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-              <a href="{{ path('app_comment_new', { postId: post.id }) }}" class="btn btn-primary">Ajouter un commentaire</a>
-          </div>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="commentsModalLabel{{ post.id }}">Commentaires</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
+      <div class="modal-body d-flex flex-column" style="max-height: 500px; overflow-y: auto;">
+        <!-- Liste des commentaires -->
+        {% for comment in post.comments %}
+          <div class="d-flex align-items-start mb-3">
+            <img 
+              src="{{ comment.user.imageUrl 
+                       ? asset(comment.user.imageUrl) 
+                       : asset('img/screen/user.png') }}" 
+              alt="Avatar de {{ comment.user.nom }}" 
+              class="rounded-circle me-3" 
+              style="width: 40px; height: 40px; object-fit: cover;"
+            >
+            <div>
+              <strong>{{ comment.user.nom }}</strong>
+              <p class="mb-1">{{ comment.content }}</p>
+              <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-center">Aucun commentaire pour ce post.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Formulaire d'ajout de commentaire -->
+      <div class="modal-footer border-0 d-flex align-items-center">
+        <img 
+          src="{{ app.user.imageUrl 
+                   ? asset(app.user.imageUrl) 
+                   : asset('img/screen/user.png') }}" 
+          alt="Votre avatar" 
+          class="rounded-circle me-2" 
+          style="width: 40px; height: 40px; object-fit: cover;"
+        >
+
+
+
+        <form 
+  action="{{ path('app_comment_new', { postId: post.id }) }}" 
+  method="POST" 
+  class="comment-form d-flex w-100 align-items-center"
+  data-post-id="{{ post.id }}"
+>
+  <input 
+    type="text" 
+    <input name="content">
+    placeholder="Ajouter un commentaire..." 
+    class="form-control me-2" 
+    required
+  >
+  <button type="submit" class="btn btn-primary">
+    Publier
+  </button>
+</form>
+
+
+      </div>
+    </div>
   </div>
 </div>
+
 
               
 
