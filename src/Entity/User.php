@@ -16,11 +16,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity("email", message: "L'email {{ value }} est déjà utilisé.")]
 #[ORM\InheritanceType("SINGLE_TABLE")]
 #[ORM\DiscriminatorColumn(name: "role", type: "string")]
-#[ORM\DiscriminatorMap([ 
-    "sportif" => Sportif::class, 
-    "admin" => Admin::class, 
-    "responsable_salle" => ResponsableSalle::class, 
-    "entraineur" => Entraineur::class 
+#[ORM\DiscriminatorMap([
+    "sportif" => Sportif::class,
+    "admin" => Admin::class,
+    "responsable_salle" => ResponsableSalle::class,
+    "entraineur" => Entraineur::class
 ])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -55,6 +55,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
 private Collection $comments;
+#[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Cours::class)]
+private Collection $cours;
+
 
 
 #[ORM\Column(type: 'string', length: 100, nullable: true)]
@@ -74,11 +77,6 @@ private Collection $reactions;
     }
 
     
-
-
-    
-
-   
 
     public function getId(): ?int
     {
@@ -140,13 +138,12 @@ private Collection $reactions;
         return $this;
     }
 
-  
     public function getSpecialite(): ?string
     {
         return $this->specialite;
     }
 
-    public function setSpecialite(string $specialite): static
+    public function setSpecialite(?string $specialite): static
     {
         $this->specialite = $specialite;
         return $this;

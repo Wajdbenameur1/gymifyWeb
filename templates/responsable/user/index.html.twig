@@ -1,0 +1,161 @@
+{% extends 'responsable/homepage_responsable.html.twig' %}
+
+{% block title %}Liste des utilisateurs{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4 py-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="fw-bold mb-2 text-primary"><i class="fas fa-users me-2"></i>Liste des utilisateurs</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-light p-2 rounded shadow-sm">
+                        <li class="breadcrumb-item"><a href="{{ path('app_responsable_dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Utilisateurs</li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="{{ path('responsable_user_create') }}" class="btn btn-primary btn-lg rounded-pill">
+                <i class="fas fa-plus me-2"></i>Ajouter un utilisateur
+            </a>
+        </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-gradient-primary text-white py-3 rounded-top-4">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Utilisateurs (Sportifs & Entraîneurs)</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Spécialité</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        {% if user.imageUrl %}
+                                            <img src="{{ asset('Uploads/users/' ~ user.imageUrl) }}"
+                                                 alt="{{ user.nom|capitalize }} {{ user.prenom|capitalize }}"
+                                                 class="rounded-circle shadow-sm"
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-user text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.nom|capitalize }}</td>
+                                    <td>{{ user.prenom|capitalize }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="badge
+                                            {% if user.role.value == 'entraineur' %}bg-warning
+                                            {% elseif user.role.value == 'sportif' %}bg-primary
+                                            {% elseif user.role.value == 'admin' %}bg-danger
+                                            {% elseif user.role.value == 'responsable_salle' %}bg-info
+                                            {% endif %}">
+                                            {{ user.role.value|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if user.role.value == 'entraineur' and user.specialite %}
+                                            {{ user.specialite|capitalize }}
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if user.role.value not in ['admin', 'responsable_salle'] %}
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="{{ path('responsable_user_show', {'id': user.id}) }}"
+                                                   class="btn btn-sm btn-outline-info rounded-pill"
+                                                   data-bs-toggle="tooltip"
+                                                   title="Voir">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ path('responsable_user_edit', {'id': user.id}) }}"
+                                                   class="btn btn-sm btn-outline-primary rounded-pill"
+                                                   data-bs-toggle="tooltip"
+                                                   title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ path('responsable_user_delete', {'id': user.id}) }}"
+                                                      method="POST"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger rounded-pill"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">Aucune action</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>Aucun utilisateur (sportif ou entraîneur) trouvé
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #00bcd4);
+        }
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+        }
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+{% endblock %}

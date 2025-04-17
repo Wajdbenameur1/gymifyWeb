@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Enum\Role;
@@ -66,15 +67,13 @@ class UserType extends AbstractType
                 'attr' => ['class' => 'form-control floating-input datepicker', 'placeholder' => 'Date de naissance', 'data-validate' => 'true']
             ])
             ->add('role', ChoiceType::class, [
-                'choices' => [
+                'choices' => $options['role_choices'] ?? [
                     'Sportif' => Role::SPORTIF,
-                    'Admin' => Role::ADMIN,
-                    'Responsable Salle' => Role::RESPONSABLE_SALLE,
-                    'Entraineur' => Role::ENTRAINEUR,
+                    'Entraîneur' => Role::ENTRAINEUR,
                 ],
                 'required' => true,
                 'choice_value' => fn($choice) => $choice instanceof Role ? $choice->value : $choice,
-                'choice_label' => fn($choice) => $choice instanceof Role ? $choice->label() : $choice,
+                'choice_label' => fn($choice) => $choice instanceof Role ? ucfirst($choice->value) : $choice,
                 'attr' => ['class' => 'form-select floating-input role-select', 'data-validate' => 'true']
             ])
             ->add('specialite', TextType::class, [
@@ -116,7 +115,9 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
-            'attr' => ['id' => 'user-form', 'class' => 'needs-validation', 'novalidate' => 'novalidate']
+            'attr' => ['id' => 'user-form', 'class' => 'needs-validation', 'novalidate' => 'novalidate'],
+            'role_choices' => null,
+            'validation_groups' => ['Default'],
         ]);
     }
 

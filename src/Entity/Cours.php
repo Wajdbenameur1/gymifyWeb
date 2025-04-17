@@ -48,8 +48,8 @@ class Cours
 
     #[ORM\ManyToOne(inversedBy: 'planning')]
     private ?Planning $planning = null;
-
-    #[ORM\ManyToOne(inversedBy: 'entaineur')]
+    
+    #[ORM\ManyToOne(inversedBy: 'cours')]
     private ?User $entaineur = null;
 
     #[ORM\ManyToOne(inversedBy: 'salle')]

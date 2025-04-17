@@ -211,16 +211,25 @@ final class SportifController extends AbstractController
      */
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
-        if (!$objectif) {
-            return '#808080'; // Default gray color
+        if (null === $objectif) {
+            return '#CCCCCC';
         }
 
         return match ($objectif) {
-            ObjectifCours::FORCE => '#ff4d4f', // Red for strength
-            ObjectifCours::ENDURANCE => '#1890ff', // Blue for endurance
-            ObjectifCours::FLEXIBILITE => '#13c2c2', // Cyan for flexibility
-            ObjectifCours::PERTE_DE_POIDS => '#fadb14', // Yellow for weight loss
-            default => '#808080', // Gray for unknown
+            ObjectifCours::PERTE_POIDS => '#FF5733',
+            ObjectifCours::PRISE_DE_MASSE => '#33FF57',
+            ObjectifCours::ENDURANCE => '#3357FF',
+            ObjectifCours::RELAXATION => '#F033FF',
+            default => '#CCCCCC',
         };
+    }
+    #[Route('/sportif/cours', name: 'cours_sportif')]
+    public function cours(CoursRepository $repo)
+    {
+        $cours = $repo->findAll();
+        foreach ($cours as $c) {
+            dump($c->getEntaineur());
+        }
+        return $this->render('sportif/cours.html.twig', ['cours' => $cours]);
     }
 }
