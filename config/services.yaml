@@ -6,6 +6,8 @@
 parameters:
     activities_image_directory: '%kernel.project_dir%/public/uploads/activities'
     uploads_directory: '%kernel.project_dir%/public/uploads'
+    # chemin public utilisable dans asset() pour afficher l’image
+    uploads_public_path: '/uploads'
 
 
     images_directory: '%kernel.project_dir%/public/uploads/images'

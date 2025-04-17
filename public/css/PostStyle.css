@@ -1,0 +1,136 @@
+/* Amélioration du design des champs de formulaire */
+body, .form-control, .dropzone, .cke_contents iframe, .cke_chrome, .cke_top, .cke_bottom, h2 {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 1rem;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+.form-control, .dropzone {
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 1.1em;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.8);
+    border-color: #007bff;
+}
+
+.dropzone {
+    border: 2px dashed #74C0FC !important;
+    padding: 30px;
+    background: #f9f9f9;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    height: 323px;
+}
+
+.dropzone:hover {
+    background-color: #e7f3ff;
+    border-color: #74C0FC;
+}
+
+.dropzone .dz-message {
+    font-weight: bold;
+    color: #74C0FC !important;
+}
+
+.dropzone .dz-preview .dz-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Message d'erreur plus visible */
+.text-danger {
+    color: #dc3545;
+    font-size: 0.9em;
+}
+
+.parsley-error {
+    border-color: #dc3545 !important;
+}
+
+.parsley-success {
+    border-color: #28a745 !important;
+}
+
+.parsley-errors-list {
+    margin-top: 5px;
+    padding: 0;
+    list-style: none;
+    color: #dc3545;
+    font-size: 0.9em;
+}
+
+/* Appliquer un border-radius à l'éditeur CKEditor */
+.cke {
+    height: 320px !important;
+}
+
+.cke_chrome {
+    border-radius: 10px !important;
+    overflow: hidden;
+    border: 3px solid #ebedf2 !important;
+    box-shadow: none !important;
+}
+
+.cke_top {
+    background: rgba(128, 192, 255, 0.663) !important; /* Bleu avec 85% d'opacité */
+    border-bottom: 1px solid #ebedf2  !important;
+    color: black !important; /* Texte éventuel en noir */
+}
+
+.cke_top a,
+.cke_top .cke_button_icon,
+.cke_top .cke_toolgroup {
+    color: inherit !important;
+    fill: inherit !important;
+    filter: none !important;
+}
+
+.cke_contents {
+    background-color: #f5f7fd !important; /* Blanc doux Bootstrap */
+    padding: 10px !important;
+    border-radius: 0 0 9px 9px !important;
+    height: 222px !important;
+}
+
+.cke_contents iframe {
+    background-color: #f5f7fd !important;
+    font-family: "Segoe UI", sans-serif !important;
+    color: #212529 !important; /* Texte Bootstrap */
+    border-radius: 0 0 9px 9px !important;
+}
+
+.cke_bottom {
+    background-color: #f5f7fd !important;
+    color: white !important;
+    border-top: 1px solid #f5f7fd !important;
+    border-radius: 0 0 9px 9px !important;
+    padding: 5px 10px !important;
+}
+
+.post-title-animated {
+    font-size: 2rem;
+    font-weight: 700;
+    color: rgba(36, 36, 36, 0.912);
+    transition: transform 0.3s ease;
+}
+
+.post-title-animated:hover {
+    transform: scale(1.05);
+    color: #2d84e1;
+}
+
+.speech-btn {
+    height: 51px;
+    font-size: 1.05rem;
+    border-radius: 10px;
+    margin-top: 27px;
+}

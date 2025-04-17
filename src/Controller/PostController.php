@@ -127,6 +127,7 @@ final class PostController extends AbstractController
 
 
 
+   
   #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET','POST'])]
 public function edit(Request $request, Post $post, EntityManagerInterface $em): Response
 {
@@ -180,7 +181,6 @@ public function edit(Request $request, Post $post, EntityManagerInterface $em): 
         'form' => $form->createView(),
     ]);
 }
-
 
 
 
