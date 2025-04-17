@@ -5,65 +5,7 @@
 {% block stylesheet %}
 <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-  /* Assurez-vous que la ligne contient bien des colonnes et qu'elles s'affichent correctement */
-  .row {
-    display: flex;
-    flex-wrap: wrap; /* Permet à l'élément de passer à la ligne suivante */
-    justify-content: space-between; /* Espace égal entre les cartes */
-  }
 
-  /* 2 cartes par ligne avec espacement entre elles */
-  .col-md-6 {
-    width: 48%; /* Deux cartes par ligne avec un petit espace entre elles */
-    margin-bottom: 20px; /* Ajout d'un petit espace sous chaque carte */
-  }
-
-  /* Limitation de la taille des cartes */
-  .card-post {
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Ajuster les images pour qu'elles aient une hauteur fixe */
-  .card-img-top {
-    height: 200px; /* Hauteur fixe */
-    object-fit: cover; /* Permet à l'image de bien couvrir la zone sans déformation */
-  }
-
-  .card-body {
-    padding: 15px;
-  }
-
-  /* Limiter la hauteur du contenu texte */
-  .card-text {
-    max-height: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Espacement de la colonne */
-  .col-12, .col-md-6 {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
-
-
-
-
-
- 
-
-  .breadcrumb-item a:hover {
-    text-decoration: underline;
-  }
-
-
-  
-  
-</style>
 {% endblock %}
 
 {% block body %}
@@ -135,16 +77,48 @@
             </p>
 
             <div class="mt-auto">
-              <a 
-                href="{{ path('app_post_show', { id: post.id }) }}" 
-                 class="btn btn-primary"
-              >Show</a>
+              <a href="{{ path('app_post_show', { id: post.id }) }}" class="btn btn-primary">
+                  Show
+              </a>
+          
+              <button 
+                  type="button" 
+                  class="btn btn-primary" 
+                  data-bs-toggle="modal" 
+                  data-bs-target="#commentsModal{{ post.id }}">
+                  {{ post.comments|length }} Commentaires
+              </button>
 
 
-              <a 
-                href="" 
-                 class="btn btn-primary"
-              >0 Comments</a>
+
+
+              <!-- Modal Bootstrap pour les commentaires -->
+<div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="commentsModalLabel{{ post.id }}">Commentaires</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <!-- Liste des commentaires -->
+              {% for comment in post.comments %}
+                  <div class="comment">
+                      <p><strong>{{ comment.user.nom }}:</strong> {{ comment.content }}</p>
+                      <p class="text-muted">{{ comment.createdAt|date('d M Y') }}</p>
+                  </div>
+              {% else %}
+                  <p>Aucun commentaire pour ce post.</p>
+              {% endfor %}
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+              <a href="{{ path('app_comment_new', { postId: post.id }) }}" class="btn btn-primary">Ajouter un commentaire</a>
+          </div>
+      </div>
+  </div>
+</div>
+
               
 
 
@@ -216,6 +190,14 @@ Delete
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
+
 
 
 
