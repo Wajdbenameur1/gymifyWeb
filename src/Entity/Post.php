@@ -202,6 +202,32 @@ public function removeReaction(Reactions $reaction): static
     return $this;
 }
 
-   
+  
+
+
+
+public function getWebPath(): ?string
+{
+    if ($this->image_url === null) {
+        return null;
+    }
+
+    // Normalise le chemin (Windows -> compatible avec URL)
+    $path = str_replace('\\', '/', $this->image_url);
+
+    // Enlève la partie absolue jusqu'à "public"
+    $publicPos = strpos($path, '/public');
+
+    if ($publicPos !== false) {
+        return substr($path, $publicPos + 7); // 7 = longueur de "/public"
+    }
+
+    // Si le chemin ne contient pas "public", on retourne tel quel
+    return $path;
+}
+
+
+
+
 
 }
