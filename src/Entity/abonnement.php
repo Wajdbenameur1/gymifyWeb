@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Enum\TypeAbonnement;
 use App\Repository\AbonnementRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AbonnementRepository::class)]
 class Abonnement
@@ -18,6 +19,19 @@ class Abonnement
     private ?TypeAbonnement $type = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le tarif est requis.')]
+    #[Assert\GreaterThan(
+        value: 0,
+        message: 'Le tarif doit être supérieur à 0.'
+    )]
+    #[Assert\LessThanOrEqual(
+        value: 10000,
+        message: 'Le tarif ne peut pas dépasser 10 000.'
+    )]
+    #[Assert\Type(
+        type: 'float',
+        message: 'Le tarif doit être un nombre décimal.'
+    )]
     private ?float $tarif = null;
 
     #[ORM\ManyToOne(targetEntity: Activité::class, inversedBy: 'abonnements')]
