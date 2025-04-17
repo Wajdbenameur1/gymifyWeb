@@ -3,35 +3,51 @@
 {% block title %}{{ salle.nom }} | Gym{% endblock %}
 
 {% block body %}
-    <!-- Salle Details Section -->
-    <section class="salle-details-section">
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb-text">
+                        <h2>{{ salle.nom }}</h2>
+                        <div class="bt-option">
+                            <a href="{{ path('app_home') }}">Home</a>
+                            <span>Gym</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+
+    <!-- Gym Details Section -->
+    <section class="gym-details-section spad">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <div class="salle-image">
+                    <div class="gym-image">
                         {% if salle.urlPhoto %}
                             <img src="{{ asset('Uploads/images/' ~ salle.urlPhoto) }}" alt="{{ salle.nom }}">
-                            <div class="image-overlay"></div>
                         {% else %}
                             <img src="{{ asset('img/placeholder-gym.jpg') }}" alt="Default Gym Image">
-                            <div class="image-overlay"></div>
                         {% endif %}
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="salle-content">
+                    <div class="gym-content">
                         <h2>{{ salle.nom }}</h2>
                         <p>{{ salle.details }}</p>
-                        <ul class="salle-meta">
+                        <ul class="gym-meta">
                             <li><i class="fa fa-map-marker"></i> {{ salle.adresse }}</li>
-                            <li><i class="fa fa-user"></i> {% if salle.responsable %}{{ salle.responsable.prenom|default('') }} {{ salle.responsable.nom|default('N/A') }}{% else %}No responsible{% endif %}</li>
+                            <li><i class="fa fa-user"></i> {% if salle.responsable %}{{ salle.responsable.prenom|default('') }} {{ salle.responsable.nom|default('N/A') }}{% else %}No manager{% endif %}</li>
                             <li><i class="fa fa-phone"></i> {{ salle.numTel }}</li>
                             <li><i class="fa fa-envelope"></i> {{ salle.email }}</li>
                         </ul>
-                        <div class="salle-actions">
-                            <a href="#abonnements" class="primary-btn">Voir les abonnements</a>
-                            <a href="#evenements" class="primary-btn">Voir les événements</a>
-                            <a href="{{ path('home') }}" class="secondary-btn">Retour</a>
+                        <div class="gym-actions">
+                            <a href="#subscriptions" class="primary-btn" data-tooltip="View available subscriptions">View Subscriptions</a>
+                            <a href="#events" class="primary-btn" data-tooltip="View upcoming events">View Events</a>
+                            <a href="{{ path('home') }}" class="primary-btn" data-tooltip="Return to homepage">Back</a>
                         </div>
                     </div>
                 </div>
@@ -39,12 +55,16 @@
         </div>
     </section>
 
-    <!-- Section Abonnements - Version modernisée -->
-    <section id="abonnements" class="abonnements-section">
+    <!-- Subscriptions Section -->
+    <section id="subscriptions" class="subscriptions-section spad">
         <div class="container">
-            <div class="section-title">
-                <h2>Nos Abonnements</h2>
-                <p>Choisissez l'abonnement qui correspond à vos besoins</p>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title">
+                        <span>Discover Our</span>
+                        <h2>AVAILABLE SUBSCRIPTIONS</h2>
+                    </div>
+                </div>
             </div>
 
             {% set uniqueActivites = [] %}
@@ -54,514 +74,754 @@
                 {% endif %}
             {% endfor %}
 
+            {% set activityIcons = {
+                'Yoga': 'fa-spa',
+                'Boxing': 'fa-hand-fist',
+                'Zumba': 'fa-person-running',
+                'Weightlifting': 'fa-dumbbell',
+                'Cardio': 'fa-heart-pulse',
+                'Musculation': 'fa-dumbbell'
+            } %}
+
             {% if uniqueActivites|length > 0 %}
-                <div class="activites-grid">
+                <div class="row">
                     {% for activite in uniqueActivites %}
                         {% set abonnementsForActivite = abonnements|filter(a => a.activite.id == activite.id) %}
-                        
                         {% if abonnementsForActivite|length > 0 %}
-                            <div class="activite-card">
-                                <div class="activite-name">
-                                    <h3>{{ activite.nom }}</h3>
-                                </div>
-                                <div class="abonnements-container">
-                                    {% for abonnement in abonnementsForActivite %}
-                                        <div class="abonnement-card compact">
-                                            <div class="abonnement-header">
-                                                <h4>{{ abonnement.type.value|capitalize }}</h4>
-                                                <div class="price">{{ abonnement.tarif }} DT</div>
+                            <div class="col-lg-4 col-md-6">
+                                <div class="activity-card" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                                    <div class="activity-name">
+                                        <i class="fas {{ activityIcons[activite.nom] ?? 'fa-dumbbell' }}"></i>
+                                        <h3>{{ activite.nom }}</h3>
+                                    </div>
+                                    <div class="subscriptions-container">
+                                        {% for abonnement in abonnementsForActivite %}
+                                            <div class="subscription-card">
+                                                <div class="subscription-header">
+                                                    <h4>{{ abonnement.type.value|capitalize }}</h4>
+                                                    <div class="price">{{ abonnement.tarif }} DT</div>
+                                                </div>
+                                                <div class="subscription-body">
+                                                    <ul class="subscription-features">
+                                                        <li><i class="fas fa-clock"></i> 
+                                                            {% if abonnement.type.value == 'mois' %}30 days
+                                                            {% elseif abonnement.type.value == 'trimestre' %}90 days
+                                                            {% elseif abonnement.type.value == 'année' %}365 days
+                                                            {% else %}Custom{% endif %}
+                                                        </li>
+                                                        <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
+                                                    </ul>
+                                                    <a href="#" class="subscription-btn" data-tooltip="Subscribe to this plan">Subscribe</a>
+                                                </div>
                                             </div>
-                                            <div class="abonnement-body">
-                                                <ul class="abonnement-features">
-                                                    <li><i class="fas fa-clock"></i> 
-                                                        {% if abonnement.type.value == 'mois' %}30 jours
-                                                        {% elseif abonnement.type.value == 'trimestre' %}90 jours
-                                                        {% elseif abonnement.type.value == 'année' %}365 jours
-                                                        {% else %}Personnalisé{% endif %}
-                                                    </li>
-                                                    <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
-                                                </ul>
-                                                <a href="#" class="subscribe-btn">S'abonner</a>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                         {% endif %}
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="no-abonnements">
-                    <i class="fa fa-info-circle"></i>
-                    <p>Aucun abonnement disponible actuellement.</p>
+                <div class="col-lg-12 text-center">
+                    <p>No subscriptions available at the moment.</p>
                 </div>
             {% endif %}
         </div>
     </section>
 
-    <!-- Section Événements -->
-    <section id="evenements" class="evenements-section">
+    <!-- Events Section -->
+    <section id="events" class="events-section spad">
         <div class="container">
-            <div class="section-title">
-                <h2>Nos Événements</h2>
-                <p>Participez à nos événements pour une expérience unique</p>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title">
+                        <span>Discover Our</span>
+                        <h2>AVAILABLE EVENTS</h2>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 {% for equipe_event in equipe_events %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="evenement-card">
-                        <div class="evenement-image">
-                            {% if equipe_event.event.imageUrl %}
-                                <img src="{{ asset('Uploads/evenements/' ~ equipe_event.event.imageUrl) }}" alt="{{ equipe_event.event.nom }}">
-                            {% else %}
-                                <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
-                            {% endif %}
-                            <div class="evenement-date">
-                                <span>{{ equipe_event.event.date|date('d') }}</span>
-                                <p>{{ equipe_event.event.date|date('M') }}</p>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="event-card" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                            <div class="event-pic">
+                                {% if equipe_event.event.imageUrl %}
+                                    <img src="{{ asset('Uploads/evenements/' ~ equipe_event.event.imageUrl) }}" alt="{{ equipe_event.event.nom }}">
+                                {% else %}
+                                    <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
+                                {% endif %}
+                            </div>
+                            <div class="event-text">
+                                <span>{{ equipe_event.event.type ? equipe_event.event.type.value|capitalize : 'Not defined' }}</span>
+                                <h5>{{ equipe_event.event.nom }}</h5>
+                                <p>{{ equipe_event.event.description|length > 100 ? equipe_event.event.description|slice(0, 100) ~ '...' : equipe_event.event.description }}</p>
+                                <ul class="event-details">
+                                    <li><i class="fa fa-calendar"></i> {{ equipe_event.event.date|date('d/m/Y') }}</li>
+                                    <li><i class="fa fa-clock-o"></i> {{ equipe_event.event.heureDebut|date('H:i') }} - {{ equipe_event.event.heureFin|date('H:i') }}</li>
+                                    <li><i class="fa fa-map-marker"></i> {{ equipe_event.event.lieu|default('Not specified') }}</li>
+                                </ul>
+                                <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn" data-tooltip="View event details">Details</a>
                             </div>
                         </div>
-                        <div class="evenement-body">
-                            <h3>{{ equipe_event.event.nom }}</h3>
-                            <p><i class="fa fa-clock-o"></i> {{ equipe_event.event.heureDebut|date('H:i') }} - {{ equipe_event.event.heureFin|date('H:i') }}</p>
-                            <p>{{ equipe_event.event.description|slice(0, 100) }}...</p>
-                            <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn">Détails</a>
-                        </div>
                     </div>
-                </div>
                 {% else %}
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="fa fa-info-circle fa-2x mb-3"></i>
-                        <p>Aucun événement prévu pour cette salle actuellement.</p>
+                    <div class="col-lg-12 text-center">
+                        <p>No events available at the moment.</p>
                     </div>
-                </div>
                 {% endfor %}
             </div>
         </div>
     </section>
+{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
     <style>
-        /* Global Styles */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        /* General Reset */
         * {
-            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --primary: #FF6B35;
-            --secondary: #004E89;
-            --dark: #1A1A1A;
-            --light: #F7F7F7;
-            --accent: #FFD166;
-            --gray: #E8E8E8;
-            --dark-gray: #6C757D;
-        }
-
-        /* Salle Details Section */
-        .salle-details-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, var(--dark), #2A2A2A);
-            color: white;
-        }
-
-        .salle-image {
-            border-radius: 12px;
+        /* Breadcrumb Section Styling */
+        .breadcrumb-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+            padding: 120px 0;
+            position: relative;
             overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-            transition: transform 0.4s ease;
+            transform: skewY(-2deg);
         }
-
-        .salle-image:hover {
-            transform: scale(1.02);
+        .breadcrumb-section > .container {
+            transform: skewY(2deg);
         }
-
-        .salle-image img {
+        .breadcrumb-text h2 {
+            color: #ffffff;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .bt-option a {
+            color: #f36100;
+            font-size: 16px;
+            text-decoration: none;
+            font-family: 'Muli', sans-serif;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .bt-option a:hover {
+            color: #ff8c00;
+        }
+        .bt-option a::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ff8c00;
+            transition: width 0.3s ease;
+        }
+        .bt-option a:hover::after {
             width: 100%;
-            height: auto;
-            display: block;
+        }
+        .bt-option span {
+            color: #f36100;
+            font-size: 16px;
+            font-family: 'Muli', sans-serif;
         }
 
-        .image-overlay {
+        /* Gym Details Section */
+        .gym-details-section {
+            padding: 100px 0;
+            background: #fafafa;
+            position: relative;
+            overflow: hidden;
+        }
+        .gym-details-section::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 78, 137, 0.3));
+            background: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+            opacity: 0.05;
+            z-index: 0;
         }
-
-        .salle-content h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
+        .gym-image {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.5s ease;
+            z-index: 1;
             position: relative;
-            display: inline-block;
         }
-
-        .salle-content h2::after {
+        .gym-image:hover {
+            transform: scale(1.03);
+        }
+        .gym-image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .gym-content {
+            z-index: 1;
+            position: relative;
+        }
+        .gym-content h2 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .gym-content h2::after {
             content: '';
             position: absolute;
             bottom: -10px;
             left: 0;
-            width: 70px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 2px;
+            width: 100px;
+            height: 5px;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            border-radius: 3px;
         }
-
-        .salle-content p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 2rem;
+        .gym-content p {
+            font-size: 15px;
+            color: #333333;
+            line-height: 1.9;
+            margin-bottom: 25px;
+            font-family: 'Muli', sans-serif;
         }
-
-        .salle-meta {
-            padding-left: 0;
+        .gym-meta {
             list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
         }
-
-        .salle-meta li {
-            font-size: 1rem;
-            margin-bottom: 1rem;
+        .gym-meta li {
+            font-size: 15px;
+            color: #333333;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Muli', sans-serif;
         }
-
-        .salle-meta i {
-            color: var(--primary);
-            width: 24px;
-            text-align: center;
-            font-size: 1.2rem;
+        .gym-meta li i {
+            color: #f36100;
+            margin-right: 15px;
+            font-size: 20px;
+            transition: color 0.3s ease;
         }
-
-        .salle-actions {
-            margin-top: 2.5rem;
+        .gym-meta li:hover i {
+            color: #ff8c00;
+        }
+        .gym-actions {
             display: flex;
+            gap: 20px;
             flex-wrap: wrap;
-            gap: 1rem;
         }
-
-        .primary-btn, .secondary-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.8rem 1.8rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
         .primary-btn {
-            background: linear-gradient(45deg, var(--primary), #FF8C42);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            box-shadow: 0 6px 20px rgba(243, 97, 0, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-
         .primary-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(243, 97, 0, 0.5);
+        }
+        .primary-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .primary-btn:hover::before {
+            left: 100%;
+        }
+        .primary-btn[data-tooltip] {
+            position: relative;
+        }
+        .primary-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .primary-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .secondary-btn {
-            background: transparent;
-            color: white;
-            border: 2px solid var(--primary);
+        /* Subscriptions and Events Sections */
+        .subscriptions-section, .events-section {
+            padding: 100px 0;
+            background: #fafafa;
+            position: relative;
         }
-
-        .secondary-btn:hover {
-            background: rgba(255, 107, 53, 0.1);
+        .subscriptions-section::before, .events-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+            opacity: 0.05;
+            z-index: 0;
         }
-
-        /* Section Abonnements - Design modernisé */
-        .abonnements-section {
-            padding: 4rem 0;
-            background: var(--light);
-        }
-
         .section-title {
             text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-title h2 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--dark);
+            margin-bottom: 70px;
             position: relative;
-            display: inline-block;
+            z-index: 1;
         }
-
+        .section-title span {
+            font-family: 'Oswald', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: #f36100;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .section-title h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
         .section-title h2::after {
             content: '';
             position: absolute;
             bottom: -10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 2px;
+            width: 120px;
+            height: 5px;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            border-radius: 3px;
         }
 
-        .section-title p {
-            font-size: 1.1rem;
-            color: var(--dark-gray);
-            margin-top: 1rem;
-        }
-
-        .activites-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .activite-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        .activite-name {
-            padding: 1.2rem 1.5rem;
-            background: var(--secondary);
-            color: white;
-        }
-
-        .activite-name h3 {
-            font-size: 1.4rem;
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .abonnements-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            padding: 1.5rem;
-        }
-
-        .abonnement-card.compact {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid var(--gray);
-        }
-
-        .abonnement-card.compact:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-        }
-
-        .abonnement-card.compact .abonnement-header {
-            padding: 1rem;
-            background: white;
-            border-bottom: 1px solid var(--gray);
-        }
-
-        .abonnement-card.compact .abonnement-header h4 {
-            font-size: 1rem;
-            margin: 0;
-            color: var(--dark);
-            font-weight: 600;
-        }
-
-        .abonnement-card.compact .price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-top: 0.3rem;
-        }
-
-        .abonnement-card.compact .abonnement-body {
-            padding: 1rem;
-        }
-
-        .abonnement-card.compact .abonnement-features {
-            margin-bottom: 1rem;
-        }
-
-        .abonnement-card.compact .abonnement-features li {
-            font-size: 0.85rem;
-            color: var(--dark-gray);
-            margin-bottom: 0.5rem;
-        }
-
-        .abonnement-card.compact .abonnement-features i {
-            color: var(--secondary);
-            font-size: 0.9rem;
-            width: 18px;
-        }
-
-        .abonnement-card.compact .subscribe-btn {
-            padding: 0.6rem 1rem;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            width: 100%;
-        }
-
-        .no-abonnements {
-            text-align: center;
-            padding: 2rem;
-            color: var(--dark-gray);
-        }
-
-        .no-abonnements i {
-            font-size: 2rem;
-            color: var(--secondary);
-            margin-bottom: 1rem;
-        }
-
-        /* Section Événements */
-        .evenements-section {
-            padding: 4rem 0;
-            background: white;
-        }
-
-        .evenement-card {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .evenement-card:hover {
-            transform: translateY(-5px);
+        /* Activity Grid */
+        .activity-card {
+            background: #ffffff;
+            border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+        .activity-card:hover {
+            transform: translateY(-5px) rotate(0.5deg);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .activity-name {
+            padding: 20px;
+            background: linear-gradient(90deg,rgb(96, 94, 94),rgb(133, 130, 130));
+            color: #e0e0e0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .activity-name i {
+            font-size: 20px;
+            color: #e0e0e0;
+            margin-right: 10px;
+            transition: color 0.3s ease;
+        }
+        .activity-name:hover i {
+            color: #ff8c00;
+        }
+        .activity-name h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .subscriptions-container {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .subscription-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            background: #f8f9fa;
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 1;
+        }
+        .subscription-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .subscription-header {
+            padding: 15px;
+            background: #ffffff;
+            border-bottom: 2px solid #e0e0e0;
+            text-align: center;
+        }
+        .subscription-header h4 {
+            font-size: 20px;
+            margin: 0;
+            color: #1a1a1a;
+            font-weight: 700;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+        .subscription-header .price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f36100;
+            margin-top: 10px;
+            font-family: 'Oswald', sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .subscription-body {
+            padding: 15px;
+        }
+        .subscription-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .subscription-features li {
+            font-size: 15px;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            font-family: 'Muli', sans-serif;
+        }
+        .subscription-features li i {
+            color: #f36100;
+            margin-right: 12px;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+        .subscription-features li:hover i {
+            color: #ff8c00;
+        }
+        .subscription-btn {
+            display: block;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .subscription-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(243, 97, 0, 0.4);
+        }
+        .subscription-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .subscription-btn:hover::before {
+            left: 100%;
+        }
+        .subscription-btn[data-tooltip] {
+            position: relative;
+        }
+        .subscription-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .subscription-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .evenement-image {
-            height: 200px;
+        /* Events */
+        .event-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+        .event-card:hover {
+            transform: translateY(-5px) rotate(-0.5deg);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        .event-pic {
             overflow: hidden;
             position: relative;
         }
-
-        .evenement-image img {
+        .event-pic img {
             width: 100%;
-            height: 100%;
+            height: 240px;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            transition: transform 0.6s ease;
         }
-
-        .evenement-card:hover .evenement-image img {
-            transform: scale(1.05);
+        .event-card:hover .event-pic img {
+            transform: scale(1.1);
         }
-
-        .evenement-date {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            color: white;
-            padding: 0.6rem;
-            border-radius: 8px;
+        .event-text {
+            padding: 25px;
             text-align: center;
-            width: 50px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
-
-        .evenement-date span {
-            font-size: 1.2rem;
+        .event-text span {
+            color: #f36100;
+            font-size: 15px;
+            text-transform: uppercase;
             font-weight: 700;
             display: block;
+            margin-bottom: 15px;
+            font-family: 'Oswald', sans-serif;
         }
-
-        .evenement-date p {
-            font-size: 0.7rem;
-            margin: 0;
+        .event-text h5 {
+            font-size: 24px;
+            color: #1a1a1a;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-family: 'Oswald', sans-serif;
             text-transform: uppercase;
-            font-weight: 600;
         }
-
-        .evenement-body {
-            padding: 1.2rem;
+        .event-text p {
+            color: #333333;
+            font-size: 15px;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            font-family: 'Muli', sans-serif;
         }
-
-        .evenement-body h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
+        .event-details {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 25px;
         }
-
-        .evenement-body p {
-            font-size: 0.9rem;
-            color: var(--dark-gray);
-            margin-bottom: 1.2rem;
+        .event-details li {
+            font-size: 15px;
+            color: #333333;
+            margin-bottom: 12px;
+            font-family: 'Muli', sans-serif;
         }
-
+        .event-details li i {
+            color: #f36100;
+            margin-right: 12px;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+        .event-details li:hover i {
+            color: #ff8c00;
+        }
         .event-btn {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            background: linear-gradient(45deg, var(--secondary), #0066B3);
-            color: white;
+            display: inline-block;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            padding: 12px 22px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.4s ease;
             text-decoration: none;
-            transition: all 0.3s ease;
+            font-family: 'Oswald', sans-serif;
+            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-
         .event-btn:hover {
-            background: linear-gradient(45deg, #0066B3, var(--secondary));
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(243, 97, 0, 0.4);
+        }
+        .event-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .event-btn:hover::before {
+            left: 100%;
+        }
+        .event-btn[data-tooltip] {
+            position: relative;
+        }
+        .event-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .event-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
         }
 
         /* Responsive Design */
         @media (max-width: 992px) {
-            .salle-content h2 {
-                font-size: 2.2rem;
+            .gym-content h2 {
+                font-size: 40px;
             }
-            
             .section-title h2 {
-                font-size: 1.8rem;
+                font-size: 40px;
             }
-        }
-
-        @media (max-width: 768px) {
-            .salle-details-section {
-                padding: 3rem 0;
+            .event-pic img {
+                height: 220px;
             }
-            
-            .salle-image {
-                margin-bottom: 2rem;
-            }
-            
-            .salle-content h2 {
-                font-size: 1.8rem;
-            }
-            
-            .abonnements-container {
+            .subscriptions-container {
                 grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             }
+            .activity-card, .event-card {
+                animation: none;
+            }
         }
-
-        @media (max-width: 576px) {
-            .salle-content h2 {
-                font-size: 1.6rem;
+        @media (max-width: 768px) {
+            .gym-details-section, .subscriptions-section, .events-section {
+                padding: 80px 0;
             }
-            
+            .gym-image {
+                margin-bottom: 40px;
+            }
+            .gym-content h2 {
+                font-size: 36px;
+            }
             .section-title h2 {
-                font-size: 1.5rem;
+                font-size: 36px;
             }
-            
-            .salle-actions {
-                flex-direction: column;
+            .event-pic img {
+                height: 200px;
             }
-            
-            .primary-btn, .secondary-btn {
-                width: 100%;
-            }
-            
-            .abonnements-container {
+            .subscriptions-container {
                 grid-template-columns: 1fr;
+            }
+            .gym-actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .primary-btn {
+                padding: 12px 20px;
+            }
+        }
+        @media (max-width: 576px) {
+            .breadcrumb-text h2 {
+                font-size: 40px;
+            }
+            .gym-content h2 {
+                font-size: 32px;
+            }
+            .section-title h2 {
+                font-size: 32px;
+            }
+            .primary-btn, .subscription-btn, .event-btn {
+                width: 100%;
+                text-align: center;
+                padding: 12px 15px;
+            }
+            .event-pic img {
+                height: 180px;
+            }
+            .activity-name h3, .subscription-header h4, .event-text h5 {
+                font-size: 20px;
+            }
+            .subscription-header .price {
+                font-size: 20px;
+            }
+            .activity-name i {
+                font-size: 18px;
             }
         }
     </style>

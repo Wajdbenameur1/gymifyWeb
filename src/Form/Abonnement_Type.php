@@ -31,13 +31,26 @@ class AbonnementType extends AbstractType
             ->add('tarif', NumberType::class, [
                 'label' => 'Tarif (DT)*',
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le tarif est requis.']),
+                    new Assert\NotBlank(['message' => 'Veuillez entrer un tarif. Ce champ ne peut pas être vide.']),
                     new Assert\GreaterThan([
                         'value' => 0,
                         'message' => 'Le tarif doit être supérieur à 0.'
+                    ]),
+                    new Assert\LessThanOrEqual([
+                        'value' => 10000,
+                        'message' => 'Le tarif ne peut pas dépasser 10 000.'
+                    ]),
+                    new Assert\Type([
+                        'type' => 'numeric',
+                        'message' => 'Le tarif doit être un nombre.'
                     ])
                 ],
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Entrez le tarif']
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Entrez le tarif',
+                    'step' => '0.01',
+                    'min' => '0.01'
+                ]
             ])
             ->add('activite', EntityType::class, [
                 'class' => Activité::class,

@@ -157,6 +157,16 @@
             border: 2px solid #fff;
             border-radius: 50%;
             position: absolute;
+            background-color: #dc3545;
+            color: white;
+            font-size: 14px;
+            line-height: 1;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-image-btn:hover {
+            background-color: #c82333;
         }
         
         .upload-btn {
@@ -247,6 +257,9 @@
                 font-size: 0.7rem;
                 padding: 0 3px;
             }
+            .remove-image-btn {
+                right: calc(50% - 50px);
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
@@ -298,20 +311,16 @@
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
                         <div class="form-floating floating-label-group">
-                            {{ form_widget(form.nom, {'attr': {'class': 'form-control floating-input' ~ (form.nom.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Name'}}) }}
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Name'}}) }}
                             {{ form_label(form.nom, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.nom) ?: 'Name is required (max 200 characters).' }}
-                            </div>
+                            <div class="invalid-feedback animated-feedback"></div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating floating-label-group">
-                            {{ form_widget(form.num_tel, {'attr': {'class': 'form-control floating-input' ~ (form.num_tel.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Phone Number'}}) }}
+                            {{ form_widget(form.num_tel, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Phone Number'}}) }}
                             {{ form_label(form.num_tel, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.num_tel) ?: 'Please enter a valid phone number (e.g., +216 55 325 658).' }}
-                            </div>
+                            <div class="invalid-feedback animated-feedback"></div>
                         </div>
                     </div>
                 </div>
@@ -319,39 +328,24 @@
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
                         <div class="form-floating floating-label-group">
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control floating-input' ~ (form.email.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Email'}}) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Email'}}) }}
                             {{ form_label(form.email, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.email) ?: 'Please enter a valid email address (e.g., username@domain.com, max 100 characters).' }}
-                            </div>
+                            <div class="invalid-feedback animated-feedback"></div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating floating-label-group">
-                            {{ form_widget(form.responsable, {'attr': {'class': 'form-select floating-input' ~ (form.responsable.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Manager'}}) }}
+                            {{ form_widget(form.responsable, {'attr': {'class': 'form-select floating-input', 'placeholder': 'Manager'}}) }}
                             {{ form_label(form.responsable, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.responsable) ?: 'Manager is required.' }}
-                            </div>
+                            <div class="invalid-feedback animated-feedback"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-floating mb-4 floating-label-group">
-                    {{ form_widget(form.details, {'attr': {'class': 'form-control floating-input' ~ (form.details.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Details'}}) }}
+                    {{ form_widget(form.details, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Details'}}) }}
                     {{ form_label(form.details, null, {'label_attr': {'class': 'floating-label'}}) }}
-                    <div class="invalid-feedback animated-feedback">
-                        {{ form_errors(form.details) ?: 'Details are required (max 500 characters).' }}
-                    </div>
-                </div>
-
-                <div class="form-floating mb-4 floating-label-group">
-                    {{ form_widget(form.adresse, {'attr': {'id': 'salle_adresse', 'autocomplete': 'off', 'class': 'form-control floating-input' ~ (form.adresse.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Address'}}) }}
-                    {{ form_label(form.adresse, null, {'label_attr': {'class': 'floating-label'}}) }}
-                    <div class="invalid-feedback animated-feedback">
-                        {{ form_errors(form.adresse) ?: 'Address is required (max 200 characters).' }}
-                    </div>
-                    <div id="address-results"></div>
+                    <div class="invalid-feedback animated-feedback"></div>
                 </div>
 
                 <div class="mb-4">
@@ -373,10 +367,15 @@
                         <div class="form-text text-muted mt-2">
                             Accepted formats: JPG, PNG, WebP (max 2MB)
                         </div>
-                        <div class="invalid-feedback animated-feedback" id="image-error">
-                            {{ form_errors(form.image) }}
-                        </div>
+                        <div class="invalid-feedback animated-feedback" id="image-error"></div>
                     </div>
+                </div>
+
+                <div class="form-floating mb-4 floating-label-group">
+                    {{ form_widget(form.adresse, {'attr': {'id': 'salle_adresse', 'autocomplete': 'off', 'class': 'form-control floating-input', 'placeholder': 'Address'}}) }}
+                    {{ form_label(form.adresse, null, {'label_attr': {'class': 'floating-label'}}) }}
+                    <div class="invalid-feedback animated-feedback"></div>
+                    <div id="address-results"></div>
                 </div>
 
                 <div class="mb-4">
@@ -479,6 +478,7 @@
                                     addressInput.value = item.display_name;
                                     addressResults.style.display = 'none';
                                     placeMarker(parseFloat(item.lat), parseFloat(item.lon), item.display_name);
+                                    validateField(addressInput);
                                 });
                                 addressResults.appendChild(div);
                             });
@@ -502,90 +502,92 @@
                 }
             });
 
-            // Validation function
-            const fields = [
-                {
-                    id: 'salle_nom',
-                    validate: value => value.trim() !== '' && value.length <= 200,
-                    errorMsg: 'Name is required (max 200 characters).'
-                },
-                {
-                    id: 'salle_num_tel',
-                    validate: value => /^\+216\s\d{2}\s\d{3}\s\d{3}$/.test(value),
-                    errorMsg: 'Please enter a valid phone number (e.g., +216 55 325 658).'
-                },
-                {
-                    id: 'salle_email',
-                    validate: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 100,
-                    errorMsg: 'Please enter a valid email address (e.g., username@domain.com, max 100 characters).'
-                },
-                {
-                    id: 'salle_responsable',
-                    validate: value => value !== '',
-                    errorMsg: 'Manager is required.'
-                },
-                {
-                    id: 'salle_details',
-                    validate: value => value.trim() !== '' && value.length <= 500,
-                    errorMsg: 'Details are required (max 500 characters).'
-                },
-                {
-                    id: 'salle_adresse',
-                    validate: value => value.trim() !== '' && value.length <= 200,
-                    errorMsg: 'Address is required (max 200 characters).'
-                }
-            ];
-
+            // AJAX validation function
             function validateField(input) {
-                const field = fields.find(f => f.id === input.id);
-                if (!field) return;
-                const feedback = input.parentElement.querySelector('.invalid-feedback');
-                const isValid = field.validate(input.value);
-                input.classList.toggle('is-invalid', !isValid);
-                input.classList.toggle('is-valid', isValid);
-                feedback.textContent = isValid ? '' : field.errorMsg;
+                // Skip validation for CSRF token input
+                if (input.name.includes('_token')) return;
+
+                const fieldName = input.name.split('[')[1].split(']')[0];
+                const formData = new FormData();
+                if (input.type === 'file') {
+                    const file = input.files[0] || null;
+                    formData.append(`salle[${fieldName}]`, file);
+                } else {
+                    formData.append(`salle[${fieldName}]`, input.value);
+                }
+                formData.append('_token', form.querySelector('[name="salle[_token]"]').value);
+
+                fetch('{{ path('admin_salle_validate_new') }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const feedback = input.parentElement.querySelector('.invalid-feedback') || 
+                                    input.closest('.image-upload-wrapper')?.querySelector('.invalid-feedback');
+                    input.classList.remove('is-valid', 'is-invalid');
+                    if (feedback) feedback.innerHTML = '';
+
+                    if (data.errors && data.errors[fieldName]) {
+                        input.classList.add('is-invalid');
+                        if (feedback) {
+                            feedback.innerHTML = data.errors[fieldName].join('<br>');
+                            feedback.style.display = 'block';
+                        }
+                    } else {
+                        // Apply is-valid only if the field is not empty (or for select, a value is selected)
+                        if ((input.type !== 'file' && input.value.trim() !== '') || 
+                            (input.type === 'file' && input.files.length > 0) || 
+                            (input.tagName === 'SELECT' && input.value !== '')) {
+                            input.classList.add('is-valid');
+                        }
+                        if (feedback) feedback.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Validation error:', error);
+                    const feedback = input.parentElement.querySelector('.invalid-feedback') || 
+                                    input.closest('.image-upload-wrapper')?.querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.innerHTML = 'Erreur de validation serveur. Veuillez réessayer.';
+                        feedback.style.display = 'block';
+                        input.classList.add('is-invalid');
+                    }
+                });
             }
 
-            fields.forEach(field => {
-                const input = document.getElementById(field.id);
-                input.addEventListener('input', () => validateField(input));
+            // Debounce function to limit AJAX calls
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Attach validation to inputs
+            const inputs = form.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            inputs.forEach(input => {
+                const debouncedValidate = debounce(validateField, 300);
+                input.addEventListener('input', () => debouncedValidate(input));
                 input.addEventListener('blur', () => validateField(input));
                 input.addEventListener('change', () => validateField(input));
-            });
-
-            form.addEventListener('submit', function(event) {
-                let hasErrors = false;
-                fields.forEach(field => {
-                    const input = document.getElementById(field.id);
+                // Initial validation for pre-filled fields (e.g., adresse)
+                if (input.value.trim() !== '' || input.tagName === 'SELECT') {
                     validateField(input);
-                    if (input.classList.contains('is-invalid')) hasErrors = true;
-                });
-
-                const imageInput = document.querySelector('[name="salle[image]"]');
-                const imageError = document.querySelector('#image-error');
-                if (imageInput.files[0]) {
-                    const file = imageInput.files[0];
-                    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
-                    if (!validImageTypes.includes(file.type)) {
-                        imageError.textContent = 'Please select a valid image file (JPEG, PNG, WebP).';
-                        imageError.style.display = 'block';
-                        hasErrors = true;
-                    } else if (file.size > 2 * 1024 * 1024) {
-                        imageError.textContent = 'Image must not exceed 2MB.';
-                        imageError.style.display = 'block';
-                        hasErrors = true;
-                    } else {
-                        imageError.style.display = 'none';
-                    }
                 }
-
-                if (hasErrors) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    const firstError = form.querySelector('.is-invalid');
-                    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                form.classList.add('was-validated');
             });
 
             // Image upload functionality
@@ -602,16 +604,24 @@
                 if (file) {
                     const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
                     if (!validImageTypes.includes(file.type)) {
-                        imageError.textContent = 'Please select a valid image file (JPEG, PNG, WebP).';
+                        imageError.textContent = 'Veuillez uploader une image valide (JPEG, PNG, WebP).';
                         imageError.style.display = 'block';
+                        imageInput.classList.add('is-invalid');
                         return;
                     }
                     if (file.size > 2 * 1024 * 1024) {
-                        imageError.textContent = 'Image must not exceed 2MB.';
+                        imageError.textContent = 'L\'image ne doit pas dépasser 2 Mo.';
                         imageError.style.display = 'block';
+                        imageInput.classList.add('is-invalid');
                         return;
                     }
                     updateImagePreview(file);
+                    validateField(imageInput);
+                    imageError.style.display = 'none';
+                } else {
+                    // If no file is selected, clear validation state
+                    imageInput.classList.remove('is-valid', 'is-invalid');
+                    imageError.style.display = 'none';
                 }
             });
 
@@ -632,6 +642,33 @@
                 imagePreview.style.display = 'none';
                 removeImageBtn.style.display = 'none';
                 imageError.style.display = 'none';
+                imageInput.classList.remove('is-valid', 'is-invalid');
+            });
+
+            // Form submission handling
+            form.addEventListener('submit', function(event) {
+                let hasErrors = false;
+                inputs.forEach(input => {
+                    validateField(input);
+                    if (input.classList.contains('is-invalid')) {
+                        hasErrors = true;
+                    }
+                });
+
+                if (hasErrors) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const firstError = form.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                form.classList.add('was-validated');
+            });
+
+            // Re-validate all fields on page load to handle server-side errors
+            inputs.forEach(input => {
+                validateField(input);
             });
         });
     </script>
