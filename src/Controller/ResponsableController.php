@@ -48,19 +48,20 @@ final class ResponsableController extends AbstractController
         ]);
     }
 
-    #[Route('/profile', name: 'app_profile')]
+    #[Route('/responsable/profile', name: 'app_responsable_profile')]
     public function profile(): Response
-    {
-        $user = $this->getUser();
-        if (!$user) {
-            throw $this->createAccessDeniedException('Vous devez être connecté pour voir votre profil.');
-        }
-
-        return $this->render('/responsableuser/show.html.twig', [
-            'user' => $user,
-            'page_title' => 'Mon Profil'
-        ]);
-    }
+  
+       {
+           $user = $this->getUser();
+           if (!$user) {
+               throw $this->createAccessDeniedException('Vous devez être connecté pour voir votre profil.');
+           }
+   
+           return $this->render('/responsable/user/show.html.twig', [
+               'user' => $user,
+               'page_title' => 'Mon Profil'
+           ]);
+       }
 
     #[Route('/responsable/login', name: 'app_responsable_login')]
     public function login(): Response
