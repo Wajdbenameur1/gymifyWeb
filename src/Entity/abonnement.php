@@ -29,8 +29,8 @@ class Abonnement
         message: 'Le tarif ne peut pas dépasser 10 000.'
     )]
     #[Assert\Type(
-        type: 'float',
-        message: 'Le tarif doit être un nombre décimal.'
+        type: 'numeric',
+        message: 'Veuillez entrer un nombre valide pour le tarif.'
     )]
     private ?float $tarif = null;
 
