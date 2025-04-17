@@ -31,6 +31,7 @@
             border-color: #007bff;
         }
 
+
         .dropzone {
             border: 2px dashed #74C0FC !important;
             padding: 30px;
@@ -39,7 +40,7 @@
             cursor: pointer;
             border-radius: 10px;
             transition: background 0.3s ease, border-color 0.3s ease;
-            min-height: 200px;
+            height: 323px;
         }
 
         .dropzone:hover {
@@ -64,17 +65,9 @@
             font-size: 0.9em;
         }
 
-        .btn-primary {
-            padding: 10px 30px;
-            font-size: 1.1em;
-            border-radius: 30px;
-            transition: background-color 0.3s ease;
-        }
+       
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
+        
 
         /* Styles supplémentaires pour les champs de formulaire */
         .parsley-error {
@@ -94,6 +87,9 @@
         }
 
         /* Appliquer un border-radius à l'éditeur CKEditor */
+        .cke {
+            height: 320px !important;
+        }
         .cke_chrome {
             border-radius: 10px !important;
             overflow: hidden;
@@ -118,20 +114,22 @@
         .cke_contents {
             background-color: #f5f7fd !important; /* Blanc doux Bootstrap */
             padding: 10px !important;
-            border-radius: 0 0 10px 10px !important;
+            border-radius: 0 0 9px 9px !important;
+            height: 222px !important; /* Ajusté pour garder l’espace pour la toolbar en haut et le bas */
+
         }
         
         .cke_contents iframe {
             background-color: #f5f7fd !important;
             font-family: "Segoe UI", sans-serif !important;
             color: #212529 !important; /* Texte Bootstrap */
-            border-radius: 0 0 10px 10px !important;
+            border-radius: 0 0 9px 9px !important;
         }
         .cke_bottom {
             background-color: #f5f7fd !important; /* Rouge Bootstrap */
             color: white !important; /* Texte en blanc pour le contraste */
             border-top: 1px solid #f5f7fd !important; /* Légère bordure sombre */
-            border-radius: 0 0 10px 10px !important;
+            border-radius: 0 0 9px 9px !important;
             padding: 5px 10px !important;
         }
 
@@ -147,6 +145,14 @@
             transform: scale(1.05);
             color: #2d84e1;
         }
+        /* Adapter la taille du bouton à l’éditeur et ajouter un espacement */
+.speech-btn {
+    height: 51px; /* même hauteur que les champs */
+    font-size: 1.05rem;
+    border-radius: 10px;
+    margin-top: 27px;
+}
+
         
 
         
@@ -156,14 +162,17 @@
 {% block body %}
 <div class="container-fluid mt-5 px-4">
     <h2 class=" mb-4 post-title-animated">
-        Create new post
+        CREATE NEW POST
     </h2>
     
     {{ form_start(form, {'attr': {'data-parsley-validate': '', 'enctype': 'multipart/form-data'}}) }}
 
     <!-- Titre du post -->
     <div class="mb-4">
-        {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_label(form.title, 'Title <span class="text-danger">*</span>', {
+            'label_attr': {'class': 'form-label'},
+            'label_html': true
+        }) }}
         {{ form_widget(form.title, {
             'attr': {
                 'class': 'form-control',
@@ -176,33 +185,43 @@
     </div>
 
     <!-- Ligne principale: Dropzone & URL à gauche, Éditeur à droite -->
-    <div class="row">
+    <div class="row align-items-start">
         <!-- Colonne gauche: Dropzone + URL -->
         <div class="col-lg-6">
+            <!-- Dropzone -->
             <div class="mb-4">
 
 
 
-                <label class="form-label d-block text-center">Télécharger une image</label>
+                <label class="form-label d-block">Image</label>
                 <div id="dropzone" class="dropzone">
                     
   
 
                     <i class="fas fa-cloud-upload-alt fa-3x dropzone-icon" style="color: #74C0FC;"></i>  </div>
             </div>
+             <!-- Champ URL -->
             <div class="mb-4">
-                {{ form_label(form.webImage, "URL de l'image (optionnel)", {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.webImage, {'attr': {'class': 'form-control', 'placeholder': "Entrez une URL"}}) }}
+                <!--<label class="form-label d-block text-center">Télécharger une image</label>-->
+                {{ form_label(form.webImage, "Url", {'label_attr': {'class': 'form-label'}}) }}
+                
+                {{ form_widget(form.webImage, {'attr': {'class': 'form-control', 'placeholder': "Choose url or drop file"}}) }}
+                
                 <div class="text-danger">{{ form_errors(form.webImage) }}</div>
             </div>
+            <!-- Champ image caché -->
             <div style="display:none">{{ form_row(form.imageFile) }}</div>
         </div>
 
         <!-- Colonne droite: Éditeur de contenu -->
         <div class="col-lg-6">
+            <!-- Content -->
             <div class="mb-4">
-                {{ form_label(form.content, 'Contenu', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.content, {
+                {{ form_label(form.content, 'Content <span class="text-danger">*</span>', {
+                    'label_attr': {'class': 'form-label'},
+                    'label_html': true
+                }) }}
+                                {{ form_widget(form.content, {
                     'attr': {
                         'class': 'form-control',
                         'id': 'post_content',
@@ -211,15 +230,27 @@
                         'data-parsley-forbiddenwords': ''
                     }
                 }) }}
+                
                 <div class="text-danger">{{ form_errors(form.content) }}</div>
+             
             </div>
+            <!-- Ligne contenant "you can try" et le bouton en parallèle avec URL -->
+            
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <!--<p class="mb-0" style="font-weight: 500;">you can try our ai speech to text</p>-->
+                
+                <button type="button" id="speechToTextBtn" class="btn btn-warning speech-btn">
+                    <i class="fas fa-microphone"></i> Try our ai speech to text
+                </button>
+            </div>
+            
         </div>
     </div>
-
-    <!-- Bouton Publier -->
-    <div class="text-center mt-4">
-        <button type="submit" class="btn btn-primary">Publier</button>
+     <!-- Bouton submit -->
+    <div class="hstack gap-2 justify-content-center mb-3">
+        <button class="btn btn-primary">Publish</button>
     </div>
+    
 
     {{ form_end(form) }}
 </div>
