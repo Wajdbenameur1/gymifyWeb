@@ -6,14 +6,40 @@
     {{ parent() }}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
-        :root {
-            --primary: #7c3aed; /* Violet vibrant */
-            --secondary: #f472b6; /* Rose vif */
-            --accent: #22d3ee; /* Cyan éclatant */
-            --dark: #1e1b4b; /* Bleu profond */
-            --light: #ffffff; /* Blanc pur */
-            --shadow: rgba(124, 58, 237, 0.3);
-            --glow: rgba(124, 58, 237, 0.5);
+              :root {
+          --primary: #667eea;    /* Blue */
+--primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Blue to purple */
+--secondary: #6c757d;  /* Gray */
+--accent: #a8b4ff;     /* Light blue */
+--dark: #2d3748;       /* Dark gray */
+--light: #f8f9fa;      /* Light gray */
+--shadow: rgba(102, 126, 234, 0.3); /* Blue shadow */
+--glow: rgba(102, 126, 234, 0.5);
+        }
+
+        .invalid-feedback {
+            color: #f87171;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .is-invalid {
+            border-color: #f87171 !important;
+            box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2) !important;
+        }
+
+        /* Styles for error messages */
+        .invalid-feedback {
+            color: #f87171;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .is-invalid {
+            border-color: #f87171 !important;
+            box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2) !important;
         }
 
         /* Override the search bar background */
@@ -53,7 +79,7 @@
             border: none;
             cursor: pointer;
             background: var(--accent);
- =           color: white;
+            color: white;
         }
 
         .btn-back:hover {
@@ -327,25 +353,29 @@
                 <h1 class="form-title">Add Gym Room</h1>
                 <p class="form-subtitle">Fill in the form to create a new gym room</p>
             </div>
-            <div style="width: 60px;"></div> <!-- Spacer pour équilibrer -->
+            <div style="width: 60px;"></div>
         </div>
 
         <div class="form-container">
-            {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+            {{ form_start(form, {'attr': {'class': 'form-horizontal', 'novalidate': 'novalidate'}}) }}
             
             <div class="form-row">
                 <div class="form-col">
                     <div class="form-group">
                         {{ form_label(form.nom, "Name") }}
-                        {{ form_widget(form.nom) }}
-                        {{ form_errors(form.nom) }}
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control' ~ (form.nom.vars.errors|length ? ' is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.nom) }}
+                        </div>
                     </div>
                 </div>
                 <div class="form-col">
                     <div class="form-group">
                         {{ form_label(form.num_tel, "Phone Number") }}
-                        {{ form_widget(form.num_tel) }}
-                        {{ form_errors(form.num_tel) }}
+                        {{ form_widget(form.num_tel, {'attr': {'class': 'form-control' ~ (form.num_tel.vars.errors|length ? ' is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.num_tel) }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -354,31 +384,39 @@
                 <div class="form-col">
                     <div class="form-group">
                         {{ form_label(form.email, "Email") }}
-                        {{ form_widget(form.email) }}
-                        {{ form_errors(form.email) }}
+                        {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length ? ' is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.email) }}
+                        </div>
                     </div>
                 </div>
                 <div class="form-col">
                     <div class="form-group">
                         {{ form_label(form.responsable, "Manager") }}
-                        {{ form_widget(form.responsable) }}
-                        {{ form_errors(form.responsable) }}
+                        {{ form_widget(form.responsable, {'attr': {'class': 'form-control' ~ (form.responsable.vars.errors|length ? ' is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.responsable) }}
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div class="form-group">
                 {{ form_label(form.details, "Details") }}
-                {{ form_widget(form.details) }}
-                {{ form_errors(form.details) }}
+                {{ form_widget(form.details, {'attr': {'class': 'form-control' ~ (form.details.vars.errors|length ? ' is-invalid' : '')}}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.details) }}
+                </div>
             </div>
             
             <div class="form-row">
                 <div class="form-col">
                     <div class="form-group">
                         {{ form_label(form.image, "Image") }}
-                        {{ form_widget(form.image) }}
-                        {{ form_errors(form.image) }}
+                        {{ form_widget(form.image, {'attr': {'class': (form.image.vars.errors|length ? 'is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.image) }}
+                        </div>
                         <img id="imagePreview" class="form-image-preview" alt="Image Preview">
                     </div>
                 </div>
@@ -386,14 +424,20 @@
             
             <div class="form-group">
                 {{ form_label(form.adresse, "Address") }}
-                {{ form_widget(form.adresse, {'attr': {'id': 'salle_adresse', 'autocomplete': 'off'}}) }}
-                {{ form_errors(form.adresse) }}
+                {{ form_widget(form.adresse, {'attr': {
+                    'id': 'salle_adresse', 
+                    'autocomplete': 'off',
+                    'class': 'form-control' ~ (form.adresse.vars.errors|length ? ' is-invalid' : '')
+                }}) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.adresse) }}
+                </div>
                 <div id="address-results"></div>
                 
                 <div class="mt-3">
                     <p class="map-title">Room Location</p>
                     <p class="map-instructions">Search for an address or click on the map to set the location</p>
-                    <p class="location-notice">Adjust the marker if the initial location isn’t correct.</p>
+                    <p class="location-notice">Adjust the marker if the initial location isn't correct.</p>
                     <div id="map-container">
                         <div id="map"></div>
                     </div>

@@ -39,42 +39,63 @@
         </div>
     </section>
 
-    <!-- Section Abonnements -->
+    <!-- Section Abonnements - Version modernisée -->
     <section id="abonnements" class="abonnements-section">
         <div class="container">
             <div class="section-title">
                 <h2>Nos Abonnements</h2>
-                <p>Découvrez nos offres dynamiques pour booster votre forme</p>
+                <p>Choisissez l'abonnement qui correspond à vos besoins</p>
             </div>
-            <div class="row">
-                {% for abonnement in abonnements %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="abonnement-card">
-                        <div class="abonnement-header">
-                            <h3>{{ abonnement.type.value|capitalize }}</h3>
-                            <div class="price">{{ abonnement.tarif }} DT</div>
-                        </div>
-                        <div class="abonnement-body">
-                            <p><i class="fa fa-dumbbell"></i> {{ abonnement.activite.nom }}</p>
-                            <p><i class="fa fa-calendar"></i> Durée: 
-                                {% if abonnement.type.value == 'mois' %}30 jours
-                                {% elseif abonnement.type.value == 'trimestre' %}90 jours
-                                {% elseif abonnement.type.value == 'année' %}365 jours
-                                {% else %}Unknown{% endif %}
-                            </p>
-                            <a href="#" class="subscribe-btn" title="Souscription bientôt disponible">S'abonner</a>
-                        </div>
-                    </div>
+
+            {% set uniqueActivites = [] %}
+            {% for abonnement in abonnements|default([]) %}
+                {% if abonnement.activite is not null and abonnement.activite.id not in uniqueActivites|map(a => a.id) %}
+                    {% set uniqueActivites = uniqueActivites|merge([abonnement.activite]) %}
+                {% endif %}
+            {% endfor %}
+
+            {% if uniqueActivites|length > 0 %}
+                <div class="activites-grid">
+                    {% for activite in uniqueActivites %}
+                        {% set abonnementsForActivite = abonnements|filter(a => a.activite.id == activite.id) %}
+                        
+                        {% if abonnementsForActivite|length > 0 %}
+                            <div class="activite-card">
+                                <div class="activite-name">
+                                    <h3>{{ activite.nom }}</h3>
+                                </div>
+                                <div class="abonnements-container">
+                                    {% for abonnement in abonnementsForActivite %}
+                                        <div class="abonnement-card compact">
+                                            <div class="abonnement-header">
+                                                <h4>{{ abonnement.type.value|capitalize }}</h4>
+                                                <div class="price">{{ abonnement.tarif }} DT</div>
+                                            </div>
+                                            <div class="abonnement-body">
+                                                <ul class="abonnement-features">
+                                                    <li><i class="fas fa-clock"></i> 
+                                                        {% if abonnement.type.value == 'mois' %}30 jours
+                                                        {% elseif abonnement.type.value == 'trimestre' %}90 jours
+                                                        {% elseif abonnement.type.value == 'année' %}365 jours
+                                                        {% else %}Personnalisé{% endif %}
+                                                    </li>
+                                                    <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
+                                                </ul>
+                                                <a href="#" class="subscribe-btn">S'abonner</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="fa fa-info-circle fa-2x mb-3"></i>
-                        <p>Aucun abonnement disponible pour cette salle actuellement.</p>
-                    </div>
+            {% else %}
+                <div class="no-abonnements">
+                    <i class="fa fa-info-circle"></i>
+                    <p>Aucun abonnement disponible actuellement.</p>
                 </div>
-                {% endfor %}
-            </div>
+            {% endif %}
         </div>
     </section>
 
@@ -120,298 +141,428 @@
         </div>
     </section>
 
-   <style>
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        * {
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
 
-    /* Global Styles */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-    * {
-        font-family: 'Poppins', sans-serif;
-        box-sizing: border-box;
-    }
+        :root {
+            --primary: #FF6B35;
+            --secondary: #004E89;
+            --dark: #1A1A1A;
+            --light: #F7F7F7;
+            --accent: #FFD166;
+            --gray: #E8E8E8;
+            --dark-gray: #6C757D;
+        }
 
-    /* Couleurs thématiques */
-    :root {
-        --primary: #FF6B35;  /* Orange vif */
-        --secondary: #004E89; /* Bleu sportif */
-        --dark: #1A1A1A;
-        --light: #F7F7F7;
-        --accent: #FFD166;   /* Jaune accent */
-    }
+        /* Salle Details Section */
+        .salle-details-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--dark), #2A2A2A);
+            color: white;
+        }
 
-    /* Salle Details Section - Version Dynamique */
-    .salle-details-section {
-        padding: 100px 0;
-        background: linear-gradient(135deg, var(--dark), #2A2A2A);
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
+        .salle-image {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease;
+        }
 
-    .salle-image {
-        position: relative;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-        transform: perspective(1000px) rotateY(-5deg);
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+        .salle-image:hover {
+            transform: scale(1.02);
+        }
 
-    .salle-image:hover {
-        transform: perspective(1000px) rotateY(0deg) scale(1.02);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    }
+        .salle-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
 
-    .salle-image img {
-        width: 100%;
-        height: auto;
-        transition: transform 0.8s ease;
-    }
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 78, 137, 0.3));
+        }
 
-    .image-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 78, 137, 0.3));
-        z-index: 1;
-    }
+        .salle-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
 
-    .salle-content h2 {
-        font-size: 3rem;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 1.5rem;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        position: relative;
-        display: inline-block;
-    }
+        .salle-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 70px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
 
-    .salle-content h2::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 0;
-        width: 70px;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary), var(--accent));
-        border-radius: 2px;
-    }
+        .salle-content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 2rem;
+        }
 
-    .salle-content p {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: rgba(255, 255, 255, 0.85);
-        margin-bottom: 2rem;
-    }
+        .salle-meta {
+            padding-left: 0;
+            list-style: none;
+        }
 
-    .salle-meta {
-        padding-left: 0;
-        list-style: none;
-    }
+        .salle-meta li {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
 
-    .salle-meta li {
-        font-size: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: rgba(255, 255, 255, 0.8);
-    }
+        .salle-meta i {
+            color: var(--primary);
+            width: 24px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
 
-    .salle-meta i {
-        color: var(--primary);
-        width: 24px;
-        text-align: center;
-        font-size: 1.2rem;
-    }
+        .salle-actions {
+            margin-top: 2.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
 
-    /* Boutons - Version Dynamique */
-    .salle-actions {
-        margin-top: 2.5rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
+        .primary-btn, .secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
 
-    .primary-btn, .secondary-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.9rem 2rem;
-        border-radius: 50px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        min-width: 180px;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        z-index: 1;
-    }
+        .primary-btn {
+            background: linear-gradient(45deg, var(--primary), #FF8C42);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
 
-    .primary-btn {
-        background: linear-gradient(45deg, var(--primary), #FF8C42);
-        color: white;
-        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
-    }
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
 
-    .primary-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(45deg, #FF8C42, var(--primary));
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        z-index: -1;
-    }
+        .secondary-btn {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--primary);
+        }
 
-    .primary-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
-    }
+        .secondary-btn:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
 
-    .primary-btn:hover::before {
-        opacity: 1;
-    }
+        /* Section Abonnements - Design modernisé */
+        .abonnements-section {
+            padding: 4rem 0;
+            background: var(--light);
+        }
 
-    .secondary-btn {
-        background: transparent;
-        color: white;
-        border: 2px solid var(--primary);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
 
-    .secondary-btn:hover {
-        background: rgba(255, 107, 53, 0.1);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
+        .section-title h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            position: relative;
+            display: inline-block;
+        }
 
-    /* Section Abonnements - Design Moderne */
-    .abonnements-section {
-        padding: 5rem 0;
-        background: var(--light);
-    }
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
 
-    .section-title {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
+        .section-title p {
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+            margin-top: 1rem;
+        }
 
-    .section-title h2 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--dark);
-        text-transform: uppercase;
-        position: relative;
-        display: inline-block;
-    }
+        .activites-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
 
-    .section-title h2::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary), var(--secondary));
-        border-radius: 2px;
-    }
+        .activite-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
 
-    .section-title p {
-        font-size: 1.1rem;
-        color: #666;
-        margin-top: 1rem;
-    }
+        .activite-name {
+            padding: 1.2rem 1.5rem;
+            background: var(--secondary);
+            color: white;
+        }
 
-    .abonnement-card {
-        background: white;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        margin-bottom: 2rem;
-        border: none;
-        position: relative;
-        z-index: 1;
-    }
+        .activite-name h3 {
+            font-size: 1.4rem;
+            margin: 0;
+            font-weight: 600;
+        }
 
-    .abonnement-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    }
+        .abonnements-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
 
-    .abonnement-header {
-        background: linear-gradient(135deg, var(--secondary), #0066B3);
-        color: white;
-        padding: 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
+        .abonnement-card.compact {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray);
+        }
 
-    .abonnement-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 100%;
-        height: 200%;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
-        transform: rotate(30deg);
-        z-index: -1;
-    }
+        .abonnement-card.compact:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
 
-    .abonnement-header h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+        .abonnement-card.compact .abonnement-header {
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid var(--gray);
+        }
 
-    .price {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-top: 0.5rem;
-        display: block;
-    }
+        .abonnement-card.compact .abonnement-header h4 {
+            font-size: 1rem;
+            margin: 0;
+            color: var(--dark);
+            font-weight: 600;
+        }
 
-    .abonnement-body {
-        padding: 2rem;
-        text-align: center;
-    }
+        .abonnement-card.compact .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 0.3rem;
+        }
 
-    .abonnement-body p {
-        font-size: 1rem;
-        color: #555;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
+        .abonnement-card.compact .abonnement-body {
+            padding: 1rem;
+        }
 
-    .abonnement-body i {
-        color: var(--secondary);
-        font-size: 1.2rem;
-    }
+        .abonnement-card.compact .abonnement-features {
+            margin-bottom: 1rem;
+        }
 
-    .subscribe-btn {
-        display: inline-block;
-        padding: 0.8rem 2rem;
-        background: linear-gradient(45deg, var(--primary), #FF8C42);
-        color: white;
-        border-radius: 
-</style>
+        .abonnement-card.compact .abonnement-features li {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .abonnement-card.compact .abonnement-features i {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            width: 18px;
+        }
+
+        .abonnement-card.compact .subscribe-btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        .no-abonnements {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-gray);
+        }
+
+        .no-abonnements i {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Section Événements */
+        .evenements-section {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .evenement-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .evenement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .evenement-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .evenement-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .evenement-card:hover .evenement-image img {
+            transform: scale(1.05);
+        }
+
+        .evenement-date {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.6rem;
+            border-radius: 8px;
+            text-align: center;
+            width: 50px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .evenement-date span {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .evenement-date p {
+            font-size: 0.7rem;
+            margin: 0;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .evenement-body {
+            padding: 1.2rem;
+        }
+
+        .evenement-body h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .evenement-body p {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-bottom: 1.2rem;
+        }
+
+        .event-btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            background: linear-gradient(45deg, var(--secondary), #0066B3);
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .event-btn:hover {
+            background: linear-gradient(45deg, #0066B3, var(--secondary));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .salle-content h2 {
+                font-size: 2.2rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .salle-details-section {
+                padding: 3rem 0;
+            }
+            
+            .salle-image {
+                margin-bottom: 2rem;
+            }
+            
+            .salle-content h2 {
+                font-size: 1.8rem;
+            }
+            
+            .abonnements-container {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .salle-content h2 {
+                font-size: 1.6rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+            
+            .salle-actions {
+                flex-direction: column;
+            }
+            
+            .primary-btn, .secondary-btn {
+                width: 100%;
+            }
+            
+            .abonnements-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 {% endblock %}

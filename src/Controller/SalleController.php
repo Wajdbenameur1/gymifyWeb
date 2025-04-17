@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Salle;
 use App\Form\SalleType;
 use App\Repository\SalleRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +16,10 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 #[Route('/admin/salle')]
 final class SalleController extends AbstractController
 {
+    public function __construct(
+        private EntityManagerInterface $entityManager
+    ) {}
+
     #[Route('/', name: 'admin_salle_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function index(SalleRepository $salleRepository): Response
@@ -27,7 +32,7 @@ final class SalleController extends AbstractController
 
     #[Route('/new', name: 'admin_salle_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function new(Request $request, SalleRepository $salleRepository): Response
+    public function new(Request $request): Response
     {
         $salle = new Salle();
         $form = $this->createForm(SalleType::class, $salle);
@@ -50,7 +55,9 @@ final class SalleController extends AbstractController
                 }
             }
 
-            $salleRepository->save($salle, true);
+            $this->entityManager->persist($salle);
+            $this->entityManager->flush();
+            
             $this->addFlash('success', 'Gym room created successfully!');
             return $this->redirectToRoute('admin_salle_index');
         }
@@ -73,7 +80,7 @@ final class SalleController extends AbstractController
 
     #[Route('/{id}/edit', name: 'admin_salle_edit', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(Request $request, Salle $salle, SalleRepository $salleRepository): Response
+    public function edit(Request $request, Salle $salle): Response
     {
         $form = $this->createForm(SalleType::class, $salle, [
             'current_salle_id' => $salle->getId(),
@@ -104,7 +111,7 @@ final class SalleController extends AbstractController
                 }
             }
 
-            $salleRepository->save($salle, true);
+            $this->entityManager->flush();
             $this->addFlash('success', 'Gym room updated successfully!');
             return $this->redirectToRoute('admin_salle_index');
         }
@@ -118,7 +125,7 @@ final class SalleController extends AbstractController
 
     #[Route('/{id}', name: 'admin_salle_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function delete(Request $request, Salle $salle, SalleRepository $salleRepository): Response
+    public function delete(Request $request, Salle $salle): Response
     {
         if ($this->isCsrfTokenValid('delete' . $salle->getId(), $request->request->get('_token'))) {
             // Delete image if it exists
@@ -129,7 +136,8 @@ final class SalleController extends AbstractController
                 }
             }
 
-            $salleRepository->remove($salle, true);
+            $this->entityManager->remove($salle);
+            $this->entityManager->flush();
             $this->addFlash('success', 'Gym room deleted successfully!');
         } else {
             $this->addFlash('error', 'Invalid CSRF token.');

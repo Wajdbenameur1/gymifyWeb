@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Salle;
+use App\Enum\ActivityType;
 use App\Entity\Abonnement;
 use App\Entity\EquipeEvent;
 use App\Entity\User;
@@ -75,8 +76,8 @@ final class SportifController extends AbstractController
 
         return $this->render('sportif/salle_details.html.twig', [
             'salle' => $salle,
-            'abonnements' => $abonnements,
-            'equipe_events' => $equipeEvents,
+            'abonnements' => $abonnementRepository->findBy(['salle' => $salle]), // ou votre requête personnalisée
+            'equipe_events' => $equipeEvents
         ]);
     }
 
