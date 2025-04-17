@@ -10,18 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\PostRepository;                // <- Assurez‑vous d’importer LE BON namespace
 
-namespace App\Controller;
 
-use App\Entity\Comment;
-use App\Form\CommentType;
-use App\Repository\CommentRepository;
-use App\Repository\PostRepository; // Importation du repository Post
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/comment')]
 final class CommentController extends AbstractController
@@ -50,8 +41,9 @@ public function new(
         throw $this->createNotFoundException('Le post n\'existe pas.');
     }
 
-    $content = trim($request->request->get('content'));
-    if ($content !== '') {
+ // 2. Récupérer le contenu envoyé (scalar simple)
+ $content = trim($request->request->get('content', ''));
+        if ($content !== '') {
         $comment = new Comment();
         $comment->setPost($post)
                 ->setUser($this->getUser())
