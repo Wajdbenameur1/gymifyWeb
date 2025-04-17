@@ -3,64 +3,118 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\Role;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Enum\Role;
+use Psr\Log\LoggerInterface;
+
 /**
  * @extends ServiceEntityRepository<User>
  */
 class UserRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $logger;
+
+    public function __construct(ManagerRegistry $registry, LoggerInterface $logger)
     {
         parent::__construct($registry, User::class);
+        $this->logger = $logger;
     }
 
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?User
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
-
-public function findAll(): array
+    /**
+     * Find all users, sorted by ID in ascending order.
+     *
+     * @return User[]
+     */
+    public function findAll(): array
     {
         return $this->findBy([], ['id' => 'ASC']);
     }
 
-
-    public function findByAllowedRoles(array $roles): array
+    /**
+     * Find users by their roles.
+     *
+     * @param Role[] $roles
+     * @return User[]
+     */
+    public function findByRoles(array $roles): array
     {
-        $qb = $this->createQueryBuilder('u');
-        $qb->where($qb->expr()->in('u.role', ':roles'))
-           ->setParameter('roles', array_map(fn($r) => $r->value, $roles));
+        if (empty($roles)) {
+            $this->logger->warning('No roles provided for findByRoles');
+            return [];
+        }
 
-        return $qb->getQuery()->getResult();
-    }
-    public function findByRole(array $roles): array
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.role IN (:roles)')
-            ->setParameter('roles', $roles)
-            ->getQuery()
-            ->getResult();
+        $roleValues = array_map(fn(Role $role) => $role->value, $roles);
+
+        $this->logger->info('Executing findByRoles', [
+            'roles' => $roleValues,
+        ]);
+
+        // Map Role enum values to corresponding entity classes
+        $classMap = [
+            'sportif' => \App\Entity\Sportif::class,
+            'entraineur' => \App\Entity\Entraineur::class,
+            'admin' => \App\Entity\Admin::class,
+            'responsable_salle' => \App\Entity\ResponsableSalle::class,
+        ];
+
+        // Log the class map for debugging
+        $this->logger->debug('Class map', [
+            'classMap' => $classMap,
+        ]);
+
+        // Filter classes based on provided roles
+        $targetClasses = array_filter(
+            $classMap,
+            fn($key) => in_array($key, $roleValues),
+            ARRAY_FILTER_USE_KEY
+        );
+
+        if (empty($targetClasses)) {
+            $this->logger->warning('No valid entity classes mapped for provided roles', [
+                'roles' => $roleValues,
+            ]);
+            return [];
+        }
+
+        // Log the target classes
+        $this->logger->debug('Target classes', [
+            'targetClasses' => $targetClasses,
+        ]);
+
+        $queryBuilder = $this->createQueryBuilder('u')
+            ->where('u INSTANCE OF :classes')
+            ->setParameter('classes', array_values($targetClasses))
+            ->orderBy('u.id', 'ASC');
+
+        $query = $queryBuilder->getQuery();
+
+        // Log the DQL and SQL for debugging
+        $this->logger->debug('DQL Query', [
+            'dql' => $query->getDQL(),
+            'sql' => $query->getSQL(),
+            'parameters' => array_map(fn($param) => is_array($param) ? implode(', ', $param) : $param, $query->getParameters()->getValues()),
+        ]);
+
+        try {
+            $results = $query->getResult();
+            $this->logger->info('Users found', [
+                'count' => count($results),
+                'roles' => $roleValues,
+                'users' => array_map(fn(User $u) => [
+                    'id' => $u->getId(),
+                    'email' => $u->getEmail(),
+                    'role' => $u->getRole()->value,
+                    'class' => get_class($u),
+                ], $results),
+            ]);
+            return $results;
+        } catch (\Exception $e) {
+            $this->logger->error('Error in findByRoles', [
+                'message' => $e->getMessage(),
+                'roles' => $roleValues,
+            ]);
+            throw $e;
+        }
     }
 }

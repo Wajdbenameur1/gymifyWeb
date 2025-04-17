@@ -1,0 +1,452 @@
+{% extends 'responsable/homepage_responsable.html.twig' %}
+
+{% block title %}Ajouter un utilisateur{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4 py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-bold text-gradient">
+                <i class="fas fa-user-plus me-2"></i>Ajouter un utilisateur
+            </h1>
+            <a href="{{ path('responsable_user_index') }}" class="btn btn-outline-secondary rounded-pill hover-scale">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-white p-3 rounded-3 shadow-sm">
+                <li class="breadcrumb-item"><a href="{{ path('app_responsable_dashboard') }}" class="text-decoration-none"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('responsable_user_index') }}" class="text-decoration-none"><i class="fas fa-users me-1"></i> Utilisateurs</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-plus me-1"></i> Ajouter</li>
+            </ol>
+        </nav>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm floating-alert" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-triangle' }} me-2"></i>
+                        <span>{{ message }}</span>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card border-0 shadow-sm overflow-hidden rounded-4">
+            <div class="card-header bg-gradient-primary text-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>Formulaire de création
+                </h5>
+                <div class="badge bg-white text-primary rounded-pill">
+                    <i class="fas fa-info-circle me-1"></i> Champs obligatoires (*)
+                </div>
+            </div>
+            <div class="card-body p-4 p-md-5 bg-light">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': '', 'id': 'user-form'}}) }}
+                
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Nom'}}) }}
+                            {{ form_label(form.nom, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.nom) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Prénom'}}) }}
+                            {{ form_label(form.prenom, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.prenom) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Email'}}) }}
+                            {{ form_label(form.email, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.email) }}
+                            </div>
+                            <div class="valid-feedback animated-feedback">
+                                <i class="fas fa-check-circle me-1"></i> Email valide
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control floating-input datepicker', 'placeholder': 'Date de naissance'}}) }}
+                            {{ form_label(form.dateNaissance, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.dateNaissance) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.password, {'attr': {'class': 'form-control floating-input password-input', 'placeholder': 'Mot de passe'}}) }}
+                            {{ form_label(form.password, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.password) }}
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="form-text text-muted d-block mt-1">
+                                    <span class="password-strength-text">Faible</span>
+                                    <span class="float-end"><i class="fas fa-eye-slash toggle-password" style="cursor: pointer;"></i></span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.role, {'attr': {'class': 'form-select floating-input role-select', 'placeholder': 'Rôle'}}) }}
+                            {{ form_label(form.role, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.role) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-floating mb-4 floating-label-group" id="specialite_container" style="display: none;">
+                    {{ form_widget(form.specialite, {'attr': {'class': 'form-control floating-input', 'placeholder': 'Spécialité'}}) }}
+                    {{ form_label(form.specialite, null, {'label_attr': {'class': 'floating-label'}}) }}
+                    <div class="invalid-feedback animated-feedback">
+                        {{ form_errors(form.specialite) }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold d-flex align-items-center">
+                        <i class="fas fa-camera me-2"></i> Photo de profil
+                        <span class="badge bg-secondary-subtle text-secondary ms-2">Optionnel</span>
+                    </label>
+                    <div class="image-upload-wrapper">
+                        <button type="button" class="btn btn-outline-primary rounded-pill mb-3 upload-btn">
+                            <i class="fas fa-upload me-2"></i>Charger une image
+                        </button>
+                        {{ form_widget(form.imageUrl, {'attr': {'class': 'd-none', 'accept': 'image/jpeg,image/png,image/webp,image/gif'}}) }}
+                        <div class="text-center position-relative">
+                            <img id="image-preview" class="rounded-circle shadow object-fit-cover preview-image" alt="Aperçu de l'image">
+                            <button id="remove-image" class="btn btn-danger btn-sm rounded-circle position-absolute remove-image-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="form-text text-muted mt-2">
+                            Formats acceptés: JPG, PNG, WebP, GIF (max 2Mo)
+                        </div>
+                        <div class="invalid-feedback animated-feedback" id="image-error"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 py-2 shadow-sm hover-scale">
+                        <i class="fas fa-save me-2"></i>Enregistrer
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-color: #6c757d;
+            --light-bg: #f8f9fa;
+        }
+        .container-fluid {
+            max-width: 1400px;
+        }
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-gradient-primary {
+            background: var(--primary-gradient);
+        }
+        .card {
+            border-radius: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .floating-label-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .floating-input {
+            position: relative;
+            z-index: 2;
+            background: #fff;
+            padding-top: 1.25rem;
+            padding-bottom: 0.75rem;
+        }
+        .floating-input:focus ~ .floating-label,
+        .floating-input:not(:placeholder-shown) ~ .floating-label {
+            top: -8px;
+            left: 12px;
+            font-size: 0.75rem;
+            background: #fff;
+            padding: 0 4px;
+            color: var(--primary-color);
+            font-weight: 500;
+            z-index: 1;
+        }
+        .floating-label {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            transition: all 0.2s ease;
+            color: var(--secondary-color);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            height: 50px;
+            padding: 1.25rem 1rem 0.75rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.2);
+        }
+        .invalid-feedback {
+            font-size: 0.875rem;
+            color: #dc3545;
+            margin-top: 0.25rem;
+            position: relative;
+        }
+        .valid-feedback {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            position: relative;
+        }
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .btn-outline-primary:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        .preview-image {
+            width: 120px;
+            height: 120px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .remove-image-btn {
+            width: 28px;
+            height: 28px;
+            top: 0;
+            right: calc(50% - 60px);
+            border: 2px solid #fff;
+        }
+        .upload-btn {
+            transition: all 0.2s ease;
+        }
+        .upload-btn:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            min-width: 300px;
+            animation: slideIn 0.5s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .password-strength .progress {
+            height: 6px;
+            border-radius: 3px;
+        }
+        .password-strength .progress-bar {
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        .datepicker {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") no-repeat right 1rem center/16px 16px;
+        }
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 1.5rem;
+            }
+            .btn-lg {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+            .preview-image {
+                width: 100px;
+                height: 100px;
+            }
+            .floating-alert {
+                min-width: 90%;
+                right: 5%;
+            }
+            .form-control, .form-select {
+                height: 46px;
+                padding: 1rem 0.75rem 0.5rem;
+            }
+            .floating-input:focus ~ .floating-label,
+            .floating-input:not(:placeholder-shown) ~ .floating-label {
+                top: -7px;
+                font-size: 0.7rem;
+                padding: 0 3px;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Gestion de la spécialité selon le rôle
+            const roleSelect = document.querySelector('#user_role');
+            const specialiteContainer = document.querySelector('#specialite_container');
+            
+            const toggleSpecialite = () => {
+                const isEntraineur = roleSelect.value === 'entraineur';
+                specialiteContainer.style.display = isEntraineur ? 'block' : 'none';
+                document.querySelector('#user_specialite').required = isEntraineur;
+            };
+            roleSelect.addEventListener('change', toggleSpecialite);
+            toggleSpecialite();
+
+            const imageInput = document.querySelector('#user_imageUrl');
+            const imagePreview = document.querySelector('#image-preview');
+            const removeImageBtn = document.querySelector('#remove-image');
+            const uploadBtn = document.querySelector('.upload-btn');
+            const imageError = document.querySelector('#image-error');
+
+            uploadBtn.addEventListener('click', () => imageInput.click());
+
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (!file.type.match('image.*')) {
+                        showImageError('Veuillez sélectionner un fichier image valide');
+                        return;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        showImageError('L\'image ne doit pas dépasser 2Mo');
+                        return;
+                    }
+                    updateImagePreview(file);
+                }
+            });
+
+            function showImageError(message) {
+                imageError.textContent = message;
+                imageError.style.display = 'block';
+            }
+
+            function updateImagePreview(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    removeImageBtn.style.display = 'flex';
+                    imageError.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            removeImageBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                imageInput.value = '';
+                imagePreview.style.display = 'none';
+                removeImageBtn.style.display = 'none';
+                imageError.style.display = 'none';
+            });
+
+            const passwordInput = document.querySelector('.password-input');
+            if (passwordInput) {
+                const progressBar = document.querySelector('.password-strength .progress-bar');
+                const strengthText = document.querySelector('.password-strength-text');
+                
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    let strength = 0;
+                    if (password.length >= 8) strength += 1;
+                    if (password.length >= 12) strength += 1;
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    if (/[0-9]/.test(password)) strength += 1;
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+                    
+                    const width = strength * 20;
+                    progressBar.style.width = `${width}%`;
+                    
+                    let color, text;
+                    if (strength <= 1) {
+                        color = '#dc3545';
+                        text = 'Faible';
+                    } else if (strength <= 3) {
+                        color = '#fd7e14';
+                        text = 'Moyen';
+                    } else {
+                        color = '#28a745';
+                        text = 'Fort';
+                    }
+                    progressBar.style.backgroundColor = color;
+                    strengthText.textContent = text;
+                });
+            }
+
+            const togglePassword = document.querySelector('.toggle-password');
+            if (togglePassword) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.type === 'password' ? 'text' : 'password';
+                    passwordInput.type = type;
+                    this.classList.toggle('fa-eye-slash');
+                    this.classList.toggle('fa-eye');
+                });
+            }
+
+            const form = document.querySelector('#user-form');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+    </script>
+{% endblock %}

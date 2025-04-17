@@ -51,7 +51,7 @@ final class ResponsableController extends AbstractController
     #[Route('/responsable/profile', name: 'app_responsable_profile')]
     public function profile(): Response
     {
-        return $this->render('responsable/profile.html.twig', [
+        return $this->render('responsable/user/show.html.twig', [
             'page_title' => 'Profil Responsable'
         ]);
     }
