@@ -4,50 +4,166 @@
     {{ parent() }}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+    <!-- Font Awesome 6 -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-R6HkF9T/5xk6slM7e4rWJZlGJrxO46hKBGG+1ZC43nlGQskM3Qj8Zc+V9OeGmFUyPNKO6kVoZ8iI2EN9MdXYUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        input.parsley-error,
-        select.parsley-error,
-        textarea.parsley-error {
-            border-color: #ff0000 !important;
+        /* Amélioration du design des champs de formulaire */
+        
+        body, .form-control, .dropzone, .cke_contents iframe, .cke_chrome, .cke_top, .cke_bottom, h2 {
+            font-family: 'Poppins', sans-serif !important;
+            font-size: 1rem;
         }
-        input.parsley-success,
-        select.parsley-success,
-        textarea.parsley-success {
-            border-color: #00cc00 !important;
+        
+        .form-label {
+            font-weight: bold;
         }
-        .parsley-errors-list {
-            margin: 2px 0 0;
-            padding: 0;
-            list-style: none;
-            color: #ff0000;
-            font-size: 0.9em;
+
+        .form-control, .dropzone {
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1em;
         }
+
+        .form-control:focus {
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.8);
+            border-color: #007bff;
+        }
+
         .dropzone {
-            border: 2px dashed #007bff;
+            border: 2px dashed #74C0FC !important;
             padding: 30px;
             background: #f9f9f9;
             text-align: center;
             cursor: pointer;
+            border-radius: 10px;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            min-height: 200px;
         }
+
+        .dropzone:hover {
+            background-color: #e7f3ff;
+            border-color: #74C0FC;
+        }
+
         .dropzone .dz-message {
             font-weight: bold;
-            color: #555;
+            color: #74C0FC !important;
         }
+
         .dropzone .dz-preview .dz-image img {
-            width: 200px;
+            width: 100%;
             height: auto;
+            border-radius: 10px;
         }
+
+        /* Message d'erreur plus visible */
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            padding: 10px 30px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        /* Styles supplémentaires pour les champs de formulaire */
+        .parsley-error {
+            border-color: #dc3545 !important;
+        }
+
+        .parsley-success {
+            border-color: #28a745 !important;
+        }
+
+        .parsley-errors-list {
+            margin-top: 5px;
+            padding: 0;
+            list-style: none;
+            color: #dc3545;
+            font-size: 0.9em;
+        }
+
+        /* Appliquer un border-radius à l'éditeur CKEditor */
+        .cke_chrome {
+            border-radius: 10px !important;
+            overflow: hidden;
+            border: 3px solid #ebedf2 !important;
+            box-shadow: none !important;
+        }
+        
+        .cke_top {
+            background: rgba(128, 192, 255, 0.663) !important; /* Bleu avec 85% d'opacité */
+            border-bottom: 1px solid #ebedf2  !important;
+            color: black !important; /* Texte éventuel en noir */
+        }
+        
+        /* Supprime le style blanc sur les icônes */
+        .cke_top a,
+        .cke_top .cke_button_icon,
+        .cke_top .cke_toolgroup {
+            color: inherit !important;
+            fill: inherit !important;
+            filter: none !important;
+        }
+        .cke_contents {
+            background-color: #f5f7fd !important; /* Blanc doux Bootstrap */
+            padding: 10px !important;
+            border-radius: 0 0 10px 10px !important;
+        }
+        
+        .cke_contents iframe {
+            background-color: #f5f7fd !important;
+            font-family: "Segoe UI", sans-serif !important;
+            color: #212529 !important; /* Texte Bootstrap */
+            border-radius: 0 0 10px 10px !important;
+        }
+        .cke_bottom {
+            background-color: #f5f7fd !important; /* Rouge Bootstrap */
+            color: white !important; /* Texte en blanc pour le contraste */
+            border-top: 1px solid #f5f7fd !important; /* Légère bordure sombre */
+            border-radius: 0 0 10px 10px !important;
+            padding: 5px 10px !important;
+        }
+
+
+        .post-title-animated {
+            font-size: 2rem;
+            font-weight: 700;
+            color: rgba(36, 36, 36, 0.912);
+            transition: transform 0.3s ease;
+        }
+        
+        .post-title-animated:hover {
+            transform: scale(1.05);
+            color: #2d84e1;
+        }
+        
+
+        
     </style>
 {% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="mb-4">Créer un nouveau post</h1>
-
+<div class="container-fluid mt-5 px-4">
+    <h2 class=" mb-4 post-title-animated">
+        Create new post
+    </h2>
+    
     {{ form_start(form, {'attr': {'data-parsley-validate': '', 'enctype': 'multipart/form-data'}}) }}
 
-    <div class="mb-3">
-        {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}}) }}
+    <!-- Titre du post -->
+    <div class="mb-4">
+        {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.title, {
             'attr': {
                 'class': 'form-control',
@@ -59,39 +175,52 @@
         <div class="text-danger">{{ form_errors(form.title) }}</div>
     </div>
 
-    <div class="mb-3">
-        {{ form_label(form.content, 'Contenu', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.content, {
-            'attr': {
-                'class': 'form-control',
-                'id': 'post_content',
-                'data-parsley-trigger': 'keyup',
-                'data-parsley-cleancontent': '',
-                'data-parsley-forbiddenwords': ''
-            }
-        }) }}
-        <div class="text-danger">{{ form_errors(form.content) }}</div>
-    </div>
+    <!-- Ligne principale: Dropzone & URL à gauche, Éditeur à droite -->
+    <div class="row">
+        <!-- Colonne gauche: Dropzone + URL -->
+        <div class="col-lg-6">
+            <div class="mb-4">
 
-    <div class="mb-3">
-        {{ form_label(form.webImage, "URL de l'image (optionnel)", {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.webImage, {'attr': {'class': 'form-control', 'placeholder': "Entrez une URL"}}) }}
-        <div class="text-danger">{{ form_errors(form.webImage) }}</div>
-    </div>
 
-    <div class="mb-3">
-        <p class="text-center">Ou téléchargez une image locale :</p>
-        <label class="form-label">Télécharger une image</label>
-        <div id="dropzone" class="dropzone">
-            <div class="dz-message">Glissez-déposez une image ici ou cliquez</div>
+
+                <label class="form-label d-block text-center">Télécharger une image</label>
+                <div id="dropzone" class="dropzone">
+                    
+  
+
+                    <i class="fas fa-cloud-upload-alt fa-3x dropzone-icon" style="color: #74C0FC;"></i>  </div>
+            </div>
+            <div class="mb-4">
+                {{ form_label(form.webImage, "URL de l'image (optionnel)", {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.webImage, {'attr': {'class': 'form-control', 'placeholder': "Entrez une URL"}}) }}
+                <div class="text-danger">{{ form_errors(form.webImage) }}</div>
+            </div>
+            <div style="display:none">{{ form_row(form.imageFile) }}</div>
+        </div>
+
+        <!-- Colonne droite: Éditeur de contenu -->
+        <div class="col-lg-6">
+            <div class="mb-4">
+                {{ form_label(form.content, 'Contenu', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.content, {
+                    'attr': {
+                        'class': 'form-control',
+                        'id': 'post_content',
+                        'data-parsley-trigger': 'keyup',
+                        'data-parsley-cleancontent': '',
+                        'data-parsley-forbiddenwords': ''
+                    }
+                }) }}
+                <div class="text-danger">{{ form_errors(form.content) }}</div>
+            </div>
         </div>
     </div>
 
-    <div style="display:none">
-        {{ form_row(form.imageFile) }}
+    <!-- Bouton Publier -->
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary">Publier</button>
     </div>
 
-    <button type="submit" class="btn btn-primary">Publier</button>
     {{ form_end(form) }}
 </div>
 {% endblock %}
@@ -115,6 +244,7 @@
         const webImageInput = document.querySelector('input[name="post[webImage]"]');
         const fileInput = document.querySelector('input[name="post[imageFile]"]');
         const formElt = document.querySelector('form[data-parsley-validate]');
+        const uploadIcon = document.querySelector('.dropzone-icon');
 
         // CKEditor init
         const editor = CKEDITOR.replace('post_content', {
@@ -124,7 +254,7 @@
             on: {
                 change: function() {
                     this.updateElement();
-                    $('#post_content').trigger('input');
+                    document.getElementById('post_content').dispatchEvent(new Event('input'));
                 }
             }
         });
@@ -150,12 +280,10 @@
             messages: { fr: 'Le contenu contient des mots interdits.' }
         });
 
-        // Si l'utilisateur tape une URL, on désactive Dropzone
+        // Gestion du champ URL vs Dropzone
         webImageInput.addEventListener('input', function () {
             if (this.value.trim() !== '') {
-                if (myDropzone.files.length) {
-                    myDropzone.removeAllFiles(true);
-                }
+                if (myDropzone.files.length) myDropzone.removeAllFiles(true);
                 myDropzone.disable();
             } else {
                 myDropzone.enable();
@@ -175,31 +303,44 @@
             const dt = new DataTransfer();
             dt.items.add(file);
             fileInput.files = dt.files;
+            if (uploadIcon) uploadIcon.style.display = 'none';
         });
 
         // Lorsqu’un fichier est retiré
         myDropzone.on("removedfile", function() {
             fileInput.value = "";
             webImageInput.readOnly = false;
+            if (uploadIcon) uploadIcon.style.display = 'block';
         });
 
         // Vérification avant envoi
         formElt.addEventListener('submit', function(e) {
             editor.updateElement();
-
             const html = editor.getData();
             const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
             if (text.length < 10) {
                 e.preventDefault();
-                $('#post_content').parsley().reset().validate();
+                document.getElementById('post_content').parsley().reset().validate();
                 return;
             }
-
             if (webImageInput.value.trim() !== '' && fileInput.files.length) {
                 e.preventDefault();
                 alert('Veuillez choisir soit une URL, soit un fichier, pas les deux.');
             }
         });
     </script>
+    <script>const ckeFrame = document.querySelector('.cke_chrome');
+
+        if (ckeFrame) {
+            ckeFrame.addEventListener('focusin', () => {
+                ckeFrame.style.boxShadow = '0 0 5px rgba(0, 123, 255, 0.8)';
+                ckeFrame.style.borderColor = '#007bff';
+            });
+        
+            ckeFrame.addEventListener('focusout', () => {
+                ckeFrame.style.boxShadow = 'none';
+                ckeFrame.style.borderColor = '#ced4da';
+            });
+        }</script>
 {% endblock %}

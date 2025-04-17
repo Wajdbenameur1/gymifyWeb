@@ -49,13 +49,14 @@
     {% endblock %}
 </head>
 <body>
-    <div class="wrapper">
+  <div class="wrapper d-flex">  {# bootstrap flex-container #}
         {% include 'sportifdashboard/sidebar.html.twig' %}
         
-        <div class="main-panel">
+        <div class="main-panel flex-grow-1">
+           {# on peut garder container-fluid ou container selon l’effet désiré #}
             
             
-            <div class="container">
+           <div class="container-fluid">
                 <div class="page-inner">
                     {% block body %}{% endblock %}
                 </div>

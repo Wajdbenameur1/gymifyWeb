@@ -29,64 +29,51 @@ final class PostController extends AbstractController
         $post = new Post();
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
-
-        // Récupération des deux champs non mappés
+    
         $imageFile = $form->get('imageFile')->getData();
         $webImage  = $form->get('webImage')->getData();
-
-        // Vérification si les deux sources d'image sont renseignées
+    
         if ($imageFile && $webImage) {
             $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
             return $this->render('post/new.html.twig', [
                 'form' => $form->createView(),
             ]);
         }
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
-            // Récupération de l'utilisateur connecté ou défaut
             $user = $this->getUser() ?: $entityManager->getRepository(User::class)->find(1);
-            if (!$user) {
-                throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
-            }
-
-            // Traitement de l'upload local
+            $post->setUser($user)->setCreatedAt(new \DateTime());
+    
             if ($imageFile) {
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename     = $originalFilename; // Vous pouvez utiliser un service slug pour plus de sécurité
-                $newFilename      = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-
+                $safeFilename = preg_replace('/[^a-z0-9_]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $originalFilename)));
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+    
                 try {
-                    $imageFile->move(
-                        $this->getParameter('uploads_directory'),
-                        $newFilename
-                    );
-                    $post->setImageUrl($this->getParameter('uploads_directory') . DIRECTORY_SEPARATOR . $newFilename);
+                    // Déplacement du fichier vers le dossier absolute défini
+$targetDir    = $this->getParameter('uploads_directory');
+$imageFile->move($targetDir, $newFilename);
+
+// Construction du chemin absolu à stocker
+$absolutePath = $targetDir . DIRECTORY_SEPARATOR . $newFilename;
+$post->setImageUrl($absolutePath);  // Chemin web
                 } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image locale.');
-                    return $this->render('post/new.html.twig', [
-                        'form' => $form->createView(),
-                    ]);
+                    $this->addFlash('error', 'Erreur lors de l\'upload');
+                    return $this->render('post/new.html.twig', ['form' => $form]);
                 }
             } elseif ($webImage) {
-                // Traitement de l'image via une URL
                 $post->setImageUrl($webImage);
             }
-
-            $post->setUser($user);
-            $post->setCreatedAt(new \DateTime());
-
+    
             $entityManager->persist($post);
             $entityManager->flush();
-
-            $this->addFlash('success', 'Le post a été créé avec succès.');
+    
+            $this->addFlash('success', 'Post créé !');
             return $this->redirectToRoute('app_post_index');
         }
-
-        return $this->render('post/new.html.twig', [
-            'form' => $form->createView(),
-        ]);
+    
+        return $this->render('post/new.html.twig', ['form' => $form]);
     }
-
 
     
 
