@@ -134,28 +134,23 @@
           class="rounded-circle me-2" 
           style="width: 40px; height: 40px; object-fit: cover;"
         >
-
-
-
         <form 
-  action="{{ path('app_comment_new', { postId: post.id }) }}" 
-  method="POST" 
-  class="comment-form d-flex w-100 align-items-center"
-  data-post-id="{{ post.id }}"
->
-  <input 
-    type="text" 
-    <input name="content">
-    placeholder="Ajouter un commentaire..." 
-    class="form-control me-2" 
-    required
-  >
-  <button type="submit" class="btn btn-primary">
-    Publier
-  </button>
-</form>
-
-
+        action="{{ path('app_comment_new', { postId: post.id }) }}" 
+        method="POST" 
+        class="modal-footer d-flex"
+      >
+        <input 
+          type="text" 
+          name="comment[content]" 
+          placeholder="Ajouter un commentaire..." 
+          class="form-control me-2" 
+          required
+        >
+        <button type="submit" class="btn btn-primary">
+          Publier
+        </button>
+      </form>
+      
       </div>
     </div>
   </div>
