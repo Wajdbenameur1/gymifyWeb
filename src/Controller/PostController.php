@@ -110,83 +110,70 @@ final class PostController extends AbstractController
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    
-  #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET','POST'])]
-public function edit(Request $request, Post $post, EntityManagerInterface $em): Response
-{
-    $form = $this->createForm(PostType::class, $post, [
-        'attr' => ['data-parsley-validate'=>'', 'enctype'=>'multipart/form-data']
-    ]);
+    #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
+    {
+        // 1) Création du form et pré-remplissage du champ URL si nécessaire
+        $form = $this->createForm(PostType::class, $post);
+        $form->get('webImage')->setData(
+            filter_var($post->getImageUrl(), FILTER_VALIDATE_URL)
+                ? $post->getImageUrl()
+                : ''
+        );
 
-    // Pré-remplir le champ URL si l’ancienne image est une URL
-    if (!$request->isMethod('POST') && filter_var($post->getImageUrl(), FILTER_VALIDATE_URL)) {
-        $form->get('webImage')->setData($post->getImageUrl());
-    }
+        $form->handleRequest($request);
 
-    $form->handleRequest($request);
+        // 2) Récupération des uploads
+        $imageFile = $form->get('imageFile')->getData();
+        $webImage  = $form->get('webImage')->getData();
 
-    // Récupération des fichiers/url
-    $imageFile = $form->get('imageFile')->getData();
-    $webImage   = $form->get('webImage')->getData();
+        // 3) Soumission du form
+        if ($form->isSubmitted() && $form->isValid()) {
+            // 3.a) Check exclusivité fichier vs URL
+            if ($imageFile && $webImage) {
+                $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
+            } else {
+                // 3.b) Traitement du fichier
+                if ($imageFile) {
+                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = preg_replace('/[^a-z0-9_]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $originalFilename)));
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
-    // Validation mutuelle
-    if ($form->isSubmitted()) {
-        if ($imageFile && $webImage) {
-            $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
-        } elseif ($form->isValid()) {
-            // Si nouvel upload de fichier
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = preg_replace('/[^a-z0-9_]+/','-', strtolower(iconv('UTF-8','ASCII//TRANSLIT',$originalFilename)));
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-                try {
-                    $targetDir = $this->getParameter('uploads_directory');
-                    $imageFile->move($targetDir, $newFilename);
-                    $post->setImageUrl($targetDir . DIRECTORY_SEPARATOR . $newFilename);
-                } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l’upload de l’image.');
-                    return $this->render('post/edit.html.twig', [
-                        'post' => $post,
-                        'form' => $form->createView(),
-                    ]);
+                    try {
+                        $targetDir = $this->getParameter('uploads_directory');
+                        $imageFile->move($targetDir, $newFilename);
+                        $post->setImageUrl(
+                            // ici le chemin complet exposé au web, ex. '/uploads/nom-de-fichier.jpg'
+                            '/uploads/'.$newFilename
+                        );
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Erreur lors de l’upload de l’image.');
+                        return $this->render('post/edit.html.twig', [
+                            'form' => $form->createView(),
+                            'post' => $post,
+                        ]);
+                    }
                 }
-            } elseif ($webImage) {
-                $post->setImageUrl($webImage);
+                // 3.c) Traitement de l’URL
+                if ($webImage && !$imageFile) {
+                    $post->setImageUrl($webImage);
+                }
+
+                // 3.d) Sauvegarde
+                $entityManager->flush();
+                $this->addFlash('success', 'Post modifié avec succès !');
+                return $this->redirectToRoute('app_post_index');
             }
-            $em->flush();
-            $this->addFlash('success', 'Post mis à jour !');
-            return $this->redirectToRoute('app_post_index');
         }
+
+        // 4) Affichage du template
+        return $this->render('post/edit.html.twig', [
+            'form' => $form->createView(),
+            'post' => $post,
+            'existingImage' => $post->getImageUrl(),
+        ]);
     }
-
-    return $this->render('post/edit.html.twig', [
-        'post' => $post,
-        'form' => $form->createView(),
-    ]);
-}
-
-
-
-
-
-
 
 
 

@@ -5,27 +5,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
     <link rel="stylesheet" href="{{ asset('/css/PostStyle.css') }}" />
-
-    <!-- Font Awesome 6 -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-R6HkF9T/5xk6slM7e4rWJZlGJrxO46hKBGG+1ZC43nlGQskM3Qj8Zc+V9OeGmFUyPNKO6kVoZ8iI2EN9MdXYUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          integrity="sha512-R6HkF9T/5xk6slM7e4rWJZlGJrxO46hKBGG+1ZC43nlGQskM3Qj8Zc+V9OeGmFUyPNKO6kVoZ8iI2EN9MdXYUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endblock %}
 
 {% block body %}
 <div class="container-fluid mt-5 px-4">
-    <h2 class="mb-4 post-title-animated">
-        EDIT POST
-    </h2>
+    <h2 class="mb-4 post-title-animated">EDIT POST</h2>
 
     {{ form_start(form, {
-        'action': path('app_post_edit', {'id': post.id}),
         'attr': {'data-parsley-validate': '', 'enctype': 'multipart/form-data'}
     }) }}
 
-    <!-- Title -->
+    {# ========== TITLE ========== #}
     <div class="mb-4">
         {{ form_label(form.title, 'Title <span class="text-danger">*</span>', {
-            'label_attr': {'class': 'form-label'}, 'label_html': true
+            'label_attr': {'class': 'form-label'},
+            'label_html': true
         }) }}
         {{ form_widget(form.title, {
             'attr': {
@@ -38,29 +35,37 @@
         <div class="text-danger">{{ form_errors(form.title) }}</div>
     </div>
 
-    <!-- Main Row: Dropzone & URL | Editor -->
+    {# ========== ROW DROPZONE + CONTENT ========== #}
     <div class="row align-items-start">
-        <!-- Left Column: Dropzone & URL -->
+        {# -- Colonne gauche -- #}
         <div class="col-lg-6">
             <div class="mb-4">
                 <label class="form-label d-block">Image</label>
-                <div id="dropzone" class="dropzone">
-                    <!--i <class="fas fa-cloud-upload-alt fa-3x dropzone-icon" style="color: #74C0FC;"></i>-->
+                <div id="dropzone"
+                     class="dropzone"
+                     data-existing="{{ existingImage ? asset(existingImage) : '' }}">
+                     <i class="fas fa-cloud-upload-alt fa-3x dropzone-icon" style="color: #74C0FC;"></i>
                 </div>
             </div>
             <div class="mb-4">
-                {{ form_label(form.webImage, 'Url', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.webImage, {'attr': {'class': 'form-control', 'placeholder': 'Choose url or drop file'}}) }}
+                {{ form_label(form.webImage, "Url", {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.webImage, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': "Choose url or drop file"
+                    }
+                }) }}
                 <div class="text-danger">{{ form_errors(form.webImage) }}</div>
             </div>
             <div style="display:none">{{ form_row(form.imageFile) }}</div>
         </div>
 
-        <!-- Right Column: Editor -->
+        {# -- Colonne droite -- #}
         <div class="col-lg-6">
             <div class="mb-4">
                 {{ form_label(form.content, 'Content <span class="text-danger">*</span>', {
-                    'label_attr': {'class': 'form-label'}, 'label_html': true
+                    'label_attr': {'class': 'form-label'},
+                    'label_html': true
                 }) }}
                 {{ form_widget(form.content, {
                     'attr': {
@@ -81,9 +86,8 @@
         </div>
     </div>
 
-    <!-- Submit Button -->
     <div class="hstack gap-2 justify-content-center mb-3">
-        <button class="btn btn-success">Update</button>
+        <button class="btn btn-primary">Update</button>
     </div>
 
     {{ form_end(form) }}
@@ -96,6 +100,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" crossorigin="anonymous"></script>
     <script>
         Dropzone.autoDiscover = false;
+
+        const webImageInput = document.querySelector('input[name="post[webImage]"]');
+        const fileInput = document.querySelector('input[name="post[imageFile]"]');
+        const formElt = document.querySelector('form[data-parsley-validate]');
+        const uploadIcon = document.querySelector('.dropzone-icon');
+
         const myDropzone = new Dropzone("#dropzone", {
             url: "#",
             autoProcessQueue: false,
@@ -103,12 +113,77 @@
             maxFiles: 1,
             acceptedFiles: 'image/*',
             addRemoveLinks: true,
+            
+            
+            
+            
+            
+            
+            init: function() {
+                const dz = this;
+                const existing = dz.element.dataset.existing;
+            
+                if (existing) {
+                    // Si c'est une URL distante, on la met dans le champ et on désactive le dropzone
+                    if (/^https?:\/\//.test(existing)) {
+                        webImageInput.value = existing;
+                        uploadIcon.style.display = 'none';
+                        dz.disable();
+                    }
+                    // Sinon, pour un fichier déjà uploadé côté serveur
+                    else {
+                        webImageInput.value = '';
+                        webImageInput.readOnly = true;
+                        uploadIcon.style.display = 'none';
+            
+                        const filename = existing.split('/').pop();
+                        // MockFile minimal
+                        const mockFile = { name: filename, size: 12345, accepted: true };
+            
+                        // Ajout à l’UI
+                        dz.emit("addedfile", mockFile);
+                        dz.emit("complete", mockFile);
+            
+                        // Création de la vignette à partir de l’URL publique
+                        dz.createThumbnailFromUrl(
+                            mockFile,
+                            existing,
+                            dz.options.thumbnailWidth,
+                            dz.options.thumbnailHeight,
+                            false,
+                            (thumbnailUrl) => dz.emit("thumbnail", mockFile, thumbnailUrl)
+                        );
+            
+                        dz.files.push(mockFile);
+                    }
+                }
+            
+                // === handlers classiques ===
+                dz.on("addedfile", file => {
+                    if (webImageInput.value.trim()) {
+                        dz.removeFile(file);
+                        return alert('Vous avez déjà saisi une URL. Choisissez soit un fichier, soit une URL.');
+                    }
+                    webImageInput.value = '';
+                    webImageInput.readOnly = true;
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                    uploadIcon.style.display = 'none';
+                });
+            
+                dz.on("removedfile", () => {
+                    fileInput.value = "";
+                    webImageInput.readOnly = false;
+                    uploadIcon.style.display = 'block';
+                });
+            }
+            
+
+
+
         });
 
-        const webImageInput = document.querySelector('input[name="post[webImage]"]');
-        const fileInput = document.querySelector('input[name="post[imageFile]"]');
-        const formElt = document.querySelector('form[data-parsley-validate]');
-        const uploadIcon = document.querySelector('.dropzone-icon');
 
 
 
@@ -119,102 +194,57 @@
 
 
 
+        webImageInput.addEventListener('input', function () {
+            if (this.value.trim() !== '') {
+                if (myDropzone.files.length) myDropzone.removeAllFiles(true);
+                myDropzone.disable();
+            } else {
+                myDropzone.enable();
+            }
+        });
 
+        // CKEditor
+        const editor = CKEDITOR.replace('post_content', {
+            allowedContent: true,
+            removePlugins: 'elementspath',
+            height: 300,
+            on: {
+                change: () => {
+                    editor.updateElement();
+                    document.getElementById('post_content').dispatchEvent(new Event('input'));
+                }
+            }
+        });
 
-
-
-
-
-
-
-
-  // Pré-charge l'image existante si locale ou URL passée du contrôleur
-  const existingImage = {{ localImageUrl is defined ? '"' ~ localImageUrl ~ '"' : 'null' }};
-  const existingName  = {{ oldFilename is defined ? '"' ~ oldFilename ~ '"' : '""' }};
-  if(existingImage){
-      const mockFile = { name: existingName, size: 0, accepted: true };
-      myDropzone.emit('addedfile', mockFile);
-      myDropzone.emit('thumbnail', mockFile, existingImage);
-      myDropzone.emit('complete', mockFile);
-      myDropzone.files.push(mockFile);
-      webImageInput.readOnly = true;
-      uploadIcon.style.display = 'none';
-  }
-
-  // CKEditor init
-  const editor = CKEDITOR.replace('post_content',{ allowedContent:true, removePlugins:'elementspath', height:300,
-      on:{ change(){ this.updateElement(); document.getElementById('post_content').dispatchEvent(new Event('input')); }}
-  });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Parsley validators
+        // Parsley validators
         window.Parsley.addValidator('cleancontent', {
-            validateString(value) {
-                const text = editor.getData().replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            validateString: () => {
+                const text = editor.getData().replace(/<[^>]*>/g, ' ').trim();
                 return text.length >= 10;
             },
             messages: { fr: 'Le contenu doit contenir au moins 10 caractères (sans HTML).' }
         });
-
         window.Parsley.addValidator('forbiddenwords', {
-            validateString(value) {
-                const text = editor.getData().replace(/<[^>]*>/g, ' ').toLowerCase();
-                return !['spam','arnaque','insulte'].some(w => text.includes(w));
+            validateString: () => {
+                const text = editor.getData().toLowerCase();
+                const bad = ['spam','arnaque','insulte'];
+                return !bad.some(w => text.includes(w));
             },
             messages: { fr: 'Le contenu contient des mots interdits.' }
         });
 
-// URL vs Dropzone
-        webImageInput.addEventListener('input', function() {
-            if (this.value.trim()) { myDropzone.removeAllFiles(true); myDropzone.disable(); }
-            else myDropzone.enable();
-        });
-
-        myDropzone.on('addedfile', file => {
-            if (webImageInput.value.trim()) { myDropzone.removeFile(file); alert('Vous avez déjà saisi une URL. Choisissez soit un fichier, soit une URL.'); return; }
-            webImageInput.value = ''; webImageInput.readOnly = true;
-            const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files;
-            uploadIcon && (uploadIcon.style.display = 'none');
-        });
-
-        myDropzone.on('removedfile', () => {
-            fileInput.value = ''; webImageInput.readOnly = false;
-            uploadIcon && (uploadIcon.style.display = 'block');
-        });
- // Soumission
         formElt.addEventListener('submit', e => {
             editor.updateElement();
-            const text = editor.getData().replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
-            if (text.length < 10) { e.preventDefault(); document.getElementById('post_content').parsley().reset().validate(); return; }
-            if (webImageInput.value.trim() && fileInput.files.length) { e.preventDefault(); alert('Veuillez choisir soit une URL, soit un fichier, pas les deux.'); }
-        });
- // Focus CKEditor
-        document.querySelector('.cke_chrome')?.addEventListener('focusin', e => {
-            e.currentTarget.style.boxShadow = '0 0 5px rgba(0, 123, 255, 0.8)';
-            e.currentTarget.style.borderColor = '#007bff';
-        });
-        document.querySelector('.cke_chrome')?.addEventListener('focusout', e => {
-            e.currentTarget.style.boxShadow = 'none';
-            e.currentTarget.style.borderColor = '#ced4da';
+            const text = editor.getData().replace(/<[^>]*>/g, ' ').trim();
+            if (text.length < 10) {
+                e.preventDefault();
+                document.getElementById('post_content').parsley().reset().validate();
+                return;
+            }
+            if (webImageInput.value.trim() !== '' && fileInput.files.length) {
+                e.preventDefault();
+                alert('Veuillez choisir soit une URL, soit un fichier, pas les deux.');
+            }
         });
     </script>
 {% endblock %}
