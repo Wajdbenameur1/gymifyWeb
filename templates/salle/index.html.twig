@@ -6,19 +6,20 @@
     {{ parent() }}
     <style>
         :root {
-            --primary: #8b5cf6; /* Violet électrique */
-            --secondary: #ec4899; /* Rose néon */
-            --accent: #10b981; /* Vert émeraude */
-            --dark: #0f172a; /* Noir profond */
-            --light: #f8fafc; /* Blanc cassé doux */
+            --primary-color: #667eea; /* Primary blue */
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradient blue to purple */
+            --secondary-color: #6c757d; /* Gray */
+            --light-bg: #f8f9fa; /* Light background */
+            --danger-color: #dc3545; /* Red for delete */
+            --dark: #0f172a; /* Dark text */
             --shadow: rgba(0, 0, 0, 0.1);
-            --glow: rgba(139, 92, 246, 0.3);
+            --glow: rgba(102, 126, 234, 0.3); /* Adjusted for primary color */
         }
 
         /* Conteneur principal avec fond doux */
         .container-fluid {
             padding: 0 2rem;
-            background: var(--light); /* Fond blanc cassé */
+            background: var(--light-bg);
             min-height: 100vh;
             position: relative;
         }
@@ -39,10 +40,12 @@
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             font-size: 2rem;
-            color: var(--dark);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-transform: uppercase;
             letter-spacing: 2px;
-            text-shadow: 0 0 5px var(--glow);
             animation: fadeIn 1s ease;
         }
 
@@ -55,12 +58,12 @@
             font-family: 'Nunito', sans-serif;
             font-weight: 400;
             font-size: 1rem;
-            color: #64748b;
+            color: var(--secondary-color);
             margin-top: 0.5rem;
         }
 
         .btn-admin-add {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            background: var(--primary-gradient);
             color: white;
             border-radius: 30px;
             padding: 0.6rem 1.5rem;
@@ -79,7 +82,6 @@
         .btn-admin-add:hover {
             transform: scale(1.1) rotate(2deg);
             box-shadow: 0 10px 25px var(--glow);
-            background: linear-gradient(45deg, var(--secondary), var(--primary));
         }
 
         /* Cartes */
@@ -96,7 +98,7 @@
 
         .salle-card:hover {
             transform: translateY(-10px) scale(1.02);
-            border-color: var(--primary);
+            border-color: var(--primary-color);
             box-shadow: 0 15px 35px var(--shadow);
         }
 
@@ -129,7 +131,7 @@
         .salle-info {
             font-family: 'Nunito', sans-serif;
             font-size: 0.9rem;
-            color: #64748b;
+            color: var(--secondary-color);
             margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
@@ -137,19 +139,19 @@
 
         .salle-info i {
             margin-right: 0.6rem;
-            color: var(--primary);
+            color: var(--primary-color);
             font-size: 1.1rem;
             transition: color 0.3s ease;
         }
 
         .salle-card:hover .salle-info i {
-            color: var(--secondary);
+            color: var(--secondary-color);
         }
 
         .salle-desc {
             font-family: 'Nunito', sans-serif;
             font-size: 0.95rem;
-            color: #6b7280;
+            color: var(--secondary-color);
             line-height: 1.5;
             margin-bottom: 1rem;
             max-height: 3rem;
@@ -196,30 +198,30 @@
         }
 
         .btn-view {
-            background: var(--primary);
+            background: var(--primary-color);
             color: white;
         }
 
         .btn-view:hover {
-            background: var(--secondary);
+            background: #5a4bd8; /* Slightly darker primary */
         }
 
         .btn-edit {
-            background: var(--accent);
+            background: #28a745; /* Keep green for edit */
             color: white;
         }
 
         .btn-edit:hover {
-            background: #059669;
+            background: #218838;
         }
 
         .btn-delete {
-            background: #f43f5e;
+            background: var(--danger-color);
             color: white;
         }
 
         .btn-delete:hover {
-            background: #e11d48;
+            background: #c82333;
         }
 
         /* État vide */
@@ -228,7 +230,7 @@
             padding: 4rem 2rem;
             background: white;
             border-radius: 20px;
-            border: 2px dashed rgba(139, 92, 246, 0.2);
+            border: 2px dashed rgba(102, 126, 234, 0.2); /* Adjusted for primary color */
             box-shadow: 0 8px 20px var(--shadow);
             animation: float 4s ease-in-out infinite;
         }
@@ -255,7 +257,7 @@
         .empty-state p {
             font-family: 'Nunito', sans-serif;
             font-size: 1.1rem;
-            color: #6b7280;
+            color: var(--secondary-color);
             max-width: 450px;
             margin: 0 auto 2rem;
         }
@@ -271,11 +273,11 @@
         }
 
         .alert-success {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(102, 126, 234, 0.1); /* Adjusted for primary color */
         }
 
         .alert-danger {
-            background: rgba(244, 63, 94, 0.1);
+            background: rgba(220, 53, 69, 0.1); /* Matches danger color */
         }
 
         /* Responsive */
@@ -338,7 +340,7 @@
                 {% for salle in salles %}
                     <div class="col-xl-4 col-lg-6 col-md-6">
                         <div class="salle-card">
-                            <img src="{{ salle.urlPhoto ? asset('uploads/images/' ~ salle.urlPhoto) : asset('images/default-gym.jpg') }}" 
+                            <img src="{{ salle.urlPhoto ? asset('Uploads/images/' ~ salle.urlPhoto) : asset('images/default-gym.jpg') }}" 
                                  class="salle-image" 
                                  alt="{{ salle.nom }}">
                             <div class="card-content">

@@ -38,28 +38,38 @@ final class SalleController extends AbstractController
         $form = $this->createForm(SalleType::class, $salle);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Handle file upload
-            $imageFile = $form->get('image')->getData();
-            if ($imageFile) {
-                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-                try {
-                    $imageFile->move(
-                        $this->getParameter('images_directory'),
-                        $newFilename
-                    );
-                    $salle->setUrlPhoto($newFilename);
-                } catch (FileException $e) {
-                    $this->addFlash('error', 'Failed to upload image: ' . $e->getMessage());
-                    return $this->redirectToRoute('admin_salle_new');
+        if ($form->isSubmitted()) {
+            if (!$form->isValid()) {
+                $this->addFlash('error', 'Please correct the errors in the form.');
+                foreach ($form->get('image')->getErrors(true) as $error) {
+                    $this->addFlash('error', 'Image error: ' . $error->getMessage());
                 }
-            }
+            } else {
+                // Handle file upload
+                $imageFile = $form->get('image')->getData();
+                if ($imageFile) {
+                    $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                    try {
+                        $imageFile->move(
+                            $this->getParameter('images_directory'),
+                            $newFilename
+                        );
+                        $salle->setUrlPhoto($newFilename);
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Failed to upload image: ' . $e->getMessage());
+                        return $this->render('salle/new.html.twig', [
+                            'form' => $form->createView(),
+                            'page_title' => 'Add New Gym Room',
+                        ]);
+                    }
+                }
 
-            $this->entityManager->persist($salle);
-            $this->entityManager->flush();
-            
-            $this->addFlash('success', 'Gym room created successfully!');
-            return $this->redirectToRoute('admin_salle_index');
+                $this->entityManager->persist($salle);
+                $this->entityManager->flush();
+                
+                $this->addFlash('success', 'Gym room created successfully!');
+                return $this->redirectToRoute('admin_salle_index');
+            }
         }
 
         return $this->render('salle/new.html.twig', [
@@ -87,33 +97,44 @@ final class SalleController extends AbstractController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Handle file upload
-            $imageFile = $form->get('image')->getData();
-            if ($imageFile) {
-                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-                try {
-                    $imageFile->move(
-                        $this->getParameter('images_directory'),
-                        $newFilename
-                    );
-                    // Delete old image if it exists
-                    if ($salle->getUrlPhoto()) {
-                        $oldImagePath = $this->getParameter('images_directory') . '/' . $salle->getUrlPhoto();
-                        if (file_exists($oldImagePath)) {
-                            unlink($oldImagePath);
-                        }
-                    }
-                    $salle->setUrlPhoto($newFilename);
-                } catch (FileException $e) {
-                    $this->addFlash('error', 'Failed to upload image: ' . $e->getMessage());
-                    return $this->redirectToRoute('admin_salle_edit', ['id' => $salle->getId()]);
+        if ($form->isSubmitted()) {
+            if (!$form->isValid()) {
+                $this->addFlash('error', 'Please correct the errors in the form.');
+                foreach ($form->get('image')->getErrors(true) as $error) {
+                    $this->addFlash('error', 'Image error: ' . $error->getMessage());
                 }
-            }
+            } else {
+                // Handle file upload
+                $imageFile = $form->get('image')->getData();
+                if ($imageFile) {
+                    $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                    try {
+                        $imageFile->move(
+                            $this->getParameter('images_directory'),
+                            $newFilename
+                        );
+                        // Delete old image if it exists
+                        if ($salle->getUrlPhoto()) {
+                            $oldImagePath = $this->getParameter('images_directory') . '/' . $salle->getUrlPhoto();
+                            if (file_exists($oldImagePath)) {
+                                unlink($oldImagePath);
+                            }
+                        }
+                        $salle->setUrlPhoto($newFilename);
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Failed to upload image: ' . $e->getMessage());
+                        return $this->render('salle/edit.html.twig', [
+                            'salle' => $salle,
+                            'form' => $form->createView(),
+                            'page_title' => 'Edit Gym Room: ' . $salle->getNom(),
+                        ]);
+                    }
+                }
 
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Gym room updated successfully!');
-            return $this->redirectToRoute('admin_salle_index');
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Gym room updated successfully!');
+                return $this->redirectToRoute('admin_salle_index');
+            }
         }
 
         return $this->render('salle/edit.html.twig', [

@@ -29,7 +29,7 @@
                 <li class="nav-item {{ app.request.get('_route') starts with 'admin_salle' ? 'active' }}">
                     <a href="{{ path('admin_salle_index') }}">
                         <i class="fas fa-building"></i>
-                        <p>Salles</p>
+                        <p>Gyms</p>
                     </a>
                 </li>
                 <li class="nav-item {{ app.request.get('_route') == 'app_activity' ? 'active' }}">
@@ -41,7 +41,7 @@
                 <li class="nav-item {{ app.request.get('_route') == 'user_index' ? 'active' }}">
                     <a href="{{ path('user_index') }}">
                         <i class="fas fa-users"></i>
-                        <p>Utilisateurs</p>
+                        <p>Users</p>
                     </a>
                 </li>
                 <li class="nav-item {{ app.request.get('_route') == 'app_admin_reclamation_index' ? 'active' }}">

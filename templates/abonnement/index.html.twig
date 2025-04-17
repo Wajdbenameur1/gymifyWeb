@@ -1,10 +1,12 @@
 {% extends 'responsable/homepage_responsable.html.twig' %}
 
-{% block title %}Gestion des abonnements{% endblock %}
+{% block title %}
+Subscription management{% endblock %}
 
 {% block body %}
 <div class="container animate__animated animate__fadeIn">
-    <h1 class="text-gradient mb-4">Gestion des abonnements</h1>
+    <h1 class="text-gradient mb-4">
+Subscription management</h1>
 
     <!-- Filtres -->
     <div class="card filter-card mb-4">
@@ -13,7 +15,7 @@
                 <div class="col-md-4">
                     <label for="type" class="form-label">Type d'abonnement</label>
 <select name="type" id="type" class="form-select">
-    <option value="">Tous les types</option>
+    <option value="">All Types</option>
     <option value="mois" {{ current_type_filter == 'mois' ? 'selected' : '' }}>Mensuel</option>
     <option value="trimestre" {{ current_type_filter == 'trimestre' ? 'selected' : '' }}>Trimestriel</option>
     <option value="année" {{ current_type_filter == 'année' ? 'selected' : '' }}>Annuel</option>
@@ -22,7 +24,7 @@
                 <div class="col-md-4">
                     <label for="activity" class="form-label">Activité</label>
                     <select name="activity" id="activity" class="form-select">
-                        <option value="">Toutes les activités</option>
+                        <option value="">All activities</option>
                         {% for activity in activities %}
                             <option value="{{ activity.id }}" {{ current_activity_filter == activity.id ? 'selected' : '' }}>
                                 {{ activity.nom }}
@@ -46,7 +48,8 @@
     <div class="card card-round shadow-lg border-0 overflow-hidden">
         <div class="card-header bg-transparent">
             <div class="card-head-row justify-content-between align-items-center">
-                <div class="card-title text-gradient h4">Liste des abonnements</div>
+                <div class="card-title text-gradient h4">
+Subscription List</div>
                 <div class="card-tools">
                     <a href="{{ path('responsable_abonnement_new') }}" class="btn btn-primary btn-gradient px-4 py-2 rounded-pill shadow">
                         <i class="fas fa-plus me-2"></i> Ajouter

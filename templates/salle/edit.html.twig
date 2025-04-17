@@ -1,327 +1,251 @@
 {% extends 'admin/homepageadmin.html.twig' %}
 
-{% block title %}Edit Gym Room - {{ salle.nom }}{% endblock %}
+{% block title %}Add New Gym Room{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         :root {
-          --primary: #667eea;    /* Blue */
---primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Blue to purple */
---secondary: #6c757d;  /* Gray */
---accent: #a8b4ff;     /* Light blue */
---dark: #2d3748;       /* Dark gray */
---light: #f8f9fa;      /* Light gray */
---shadow: rgba(102, 126, 234, 0.3); /* Blue shadow */
---glow: rgba(102, 126, 234, 0.5);
+            --primary-color: #667eea;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-color: #6c757d;
+            --light-bg: #f8f9fa;
+            --danger-color: #dc3545;
         }
-.invalid-feedback {
-    color: #f87171; /* Rouge clair */
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-    font-family: 'Nunito', sans-serif;
-}
-
-.is-invalid {
-    border-color: #f87171 !important;
-    box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2) !important;
-}
-        /* Override the search bar background */
-        .search-bar-container {
-            background: var(--light) !important;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 1rem;
-        }
-
+        
         .container-fluid {
-            padding: 2rem;
-            background: var(--light);
-            min-height: 100vh;
+            max-width: 1400px;
+            padding: 1.5rem 1rem;
+        }
+        
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .bg-gradient-primary {
+            background: var(--primary-gradient);
+        }
+        
+        .card {
+            border-radius: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .floating-label-group {
             position: relative;
+            margin-bottom: 1.5rem;
         }
-
-        .form-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            background: var(--light);
-        }
-
-        .btn-back {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            transition: all 0.4s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-back:hover {
-            background: #06b6d4;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px var(--glow);
-        }
-
-        .form-title-wrapper {
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        .form-title {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 2.2rem;
-            color: var(--dark);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--glow);
-            animation: neonText 2s infinite alternate;
-        }
-
-        @keyframes neonText {
-            0% { text-shadow: 0 0 5px var(--glow), 0 0 10px var(--primary); }
-            100% { text-shadow: 0 0 15px var(--glow), 0 0 20px var(--primary); }
-        }
-
-        .form-subtitle {
-            font-family: 'Nunito', sans-serif;
-            font-weight: 400;
-            font-size: 1.1rem;
-            color: #64748b;
-            margin-top: 0.5rem;
-        }
-
-        .form-container {
-            background: linear-gradient(135deg, var(--dark) 0%, #3730a3 50%, var(--primary) 100%);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px var(--shadow);
-            padding: 2.5rem;
-            margin: 2rem 0;
+        
+        .floating-input {
             position: relative;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
+            z-index: 2;
+            background: #fff;
+            padding-top: 1.25rem;
+            padding-bottom: 0.75rem;
         }
-
-        .form-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(124, 58, 237, 0.2), transparent 70%);
-            animation: pulseGlow 8s infinite ease-in-out;
-            z-index: 0;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-        }
-
-        .form-group {
-            margin-bottom: 1.75rem;
-            position: relative;
+        
+        .floating-input:focus ~ .floating-label,
+        .floating-input:not(:placeholder-shown) ~ .floating-label {
+            top: -8px;
+            left: 12px;
+            font-size: 0.75rem;
+            background: #fff;
+            padding: 0 4px;
+            color: var(--primary-color);
+            font-weight: 500;
             z-index: 1;
         }
-
-        .form-label {
-            font-family: 'Nunito', sans-serif;
-            font-weight: 600;
-            font-size: 1rem;
-            color: white;
-            margin-bottom: 0.5rem;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-control {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 0.9rem 1.2rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: all 0.3s ease;
-            width: 100%;
-            font-family: 'Nunito', sans-serif;
-            font-size: 1rem;
-        }
-
-        .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 10px var(--glow);
-            background: rgba(255, 255, 255, 0.15);
-            outline: none;
-        }
-
-        textarea.form-control {
-            min-height: 140px;
-            resize: vertical;
-        }
-
-        .form-image-preview {
-            max-width: 250px;
-            border-radius: 12px;
-            margin-top: 1rem;
-            display: block;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 1.75rem;
-        }
-
-        .form-col {
-            flex: 1;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding: 1rem;
-            background: var(--light);
-            border-radius: 0 0 20px 20px;
-            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-submit, .btn-cancel {
-            padding: 0.9rem 2rem;
-            border-radius: 12px;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-            font-size: 1rem;
-            text-transform: uppercase;
-            transition: all 0.4s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            border: none;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .btn-submit {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
-            box-shadow: 0 5px 15px var(--shadow);
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(45deg, var(--secondary), var(--accent));
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px var(--glow);
-        }
-
-        .btn-cancel {
-            background: rgba(0, 0, 0, 0.1);
-            color: var(--dark);
-            box-shadow: 0 5px 15px var(--shadow);
-        }
-
-        .btn-cancel:hover {
-            background: rgba(0, 0, 0, 0.2);
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px var(--shadow);
-        }
-
-        #address-results {
+        
+        .floating-label {
             position: absolute;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.9);
-            width: calc(100% - 2.4rem);
-            border-radius: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 10px 20px var(--shadow);
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            transition: all 0.2s ease;
+            color: var(--secondary-color);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            height: 50px;
+            padding: 1.25rem 1rem 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.2);
+        }
+        
+        .form-control.is-valid {
+            border-color: #28a745;
+            background-image: none;
+        }
+        
+        .form-control.is-valid:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        
+        .form-select.is-valid {
+            border-color: #28a745;
+        }
+        
+        .form-select.is-valid:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        
+        .invalid-feedback {
+            font-size: 0.875rem;
+            color: var(--danger-color);
+            margin-top: 0.25rem;
+            position: relative;
             display: none;
-            margin-top: 0.5rem;
         }
-
-        .address-item {
-            padding: 0.75rem 1.2rem;
-            cursor: pointer;
-            font-family: 'Nunito', sans-serif;
-            color: var(--dark);
-            transition: all 0.3s ease;
+        
+        .is-invalid ~ .invalid-feedback {
+            display: block;
         }
-
-        .address-item:hover {
-            background: var(--accent);
-            color: white;
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        .preview-image {
+            width: 120px;
+            height: 120px;
+            display: none;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+        }
+        
+        .remove-image-btn {
+            width: 28px;
+            height: 28px;
+            display: none;
+            top: 0;
+            right: calc(50% - 60px);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .upload-btn {
+            transition: all 0.2s ease;
+            border-radius: 0.5rem;
+        }
+        
+        .upload-btn:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            min-width: 300px;
+            animation: slideIn 0.5s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
         #map-container {
             margin-top: 1.5rem;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px var(--shadow);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-
+        
         #map {
             height: 400px;
             width: 100%;
         }
-
-        .map-title {
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: white;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-        }
-
-        .map-instructions {
-            font-family: 'Nunito', sans-serif;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .location-notice {
-            font-family: 'Nunito', sans-serif;
-            color: #f472b6;
-            font-size: 0.95rem;
+        
+        #address-results {
+            position: absolute;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            width: calc(100% - 2rem);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: none;
             margin-top: 0.5rem;
         }
-
-        @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-                gap: 0;
+        
+        .address-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            color: #2d3748;
+            transition: all 0.3s ease;
+        }
+        
+        .address-item:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 1.5rem;
             }
-
-            .form-col {
-                margin-bottom: 1.75rem;
+            .btn-lg {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
             }
-
-            .form-title {
-                font-size: 1.8rem;
+            .preview-image {
+                width: 100px;
+                height: 100px;
             }
-
-            .button-group {
-                flex-direction: column;
-                gap: 0.75rem;
+            .floating-alert {
+                min-width: 90%;
+                right: 5%;
+            }
+            .form-control, .form-select {
+                height: 46px;
+                padding: 1rem 0.75rem 0.5rem;
+            }
+            .floating-input:focus ~ .floating-label,
+            .floating-input:not(:placeholder-shown) ~ .floating-label {
+                top: -7px;
+                font-size: 0.7rem;
+                padding: 0 3px;
             }
         }
     </style>
@@ -329,125 +253,148 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container-fluid">
-        <div class="form-header">
-            <a href="{{ path('admin_salle_index') }}" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Back
+    <div class="container-fluid px-4 py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-bold text-gradient">
+                <i class="fas fa-plus me-2"></i>Add New Gym Room
+            </h1>
+            <a href="{{ path('admin_salle_index') }}" class="btn btn-outline-secondary rounded-pill hover-scale">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
             </a>
-            <div class="form-title-wrapper">
-                <h1 class="form-title">Edit Gym Room: {{ salle.nom }}</h1>
-                <p class="form-subtitle">Update the gym room details below</p>
-            </div>
-            <div style="width: 60px;"></div>
         </div>
 
-        <div class="form-container">
-            {{ form_start(form, {'attr': {'class': 'form-horizontal', 'novalidate': 'novalidate'}}) }}
-            
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        {{ form_label(form.nom, "Name") }}
-                        {{ form_widget(form.nom, {'attr': {'class': 'form-control' ~ (form.nom.vars.errors|length ? ' is-invalid' : '')}}) }}
-                        <div class="invalid-feedback">
-                            {{ form_errors(form.nom) }}
-                        </div>
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-white p-3 rounded-3 shadow-sm">
+                <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('admin_salle_index') }}" class="text-decoration-none"><i class="fas fa-dumbbell me-1"></i> Gym Rooms</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-plus me-1"></i> Add</li>
+            </ol>
+        </nav>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm floating-alert" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-triangle' }} me-2"></i>
+                        <span>{{ message }}</span>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        {{ form_label(form.num_tel, "Phone Number") }}
-                        {{ form_widget(form.num_tel, {'attr': {'class': 'form-control' ~ (form.num_tel.vars.errors|length ? ' is-invalid' : '')}}) }}
-                        <div class="invalid-feedback">
-                            {{ form_errors(form.num_tel) }}
-                        </div>
-                    </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card border-0 shadow-sm overflow-hidden rounded-4">
+            <div class="card-header bg-gradient-primary text-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-dumbbell me-2"></i>New Gym Room Form
+                </h5>
+                <div class="badge bg-white text-primary rounded-pill">
+                    <i class="fas fa-info-circle me-1"></i> Required Fields (*)
                 </div>
             </div>
+            <div class="card-body p-4 p-md-5 bg-light">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': '', 'id': 'gym-form'}}) }}
                 
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        {{ form_label(form.email, "Email") }}
-                        {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length ? ' is-invalid' : '')}}) }}
-                        <div class="invalid-feedback">
-                            {{ form_errors(form.email) }}
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control floating-input' ~ (form.nom.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Name'}}) }}
+                            {{ form_label(form.nom, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.nom) ?: 'Name is required (max 200 characters).' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.num_tel, {'attr': {'class': 'form-control floating-input' ~ (form.num_tel.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Phone Number'}}) }}
+                            {{ form_label(form.num_tel, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.num_tel) ?: 'Please enter a valid phone number (+216 XX XXX XXX).' }}
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        {{ form_label(form.responsable, "Manager") }}
-                        {{ form_widget(form.responsable, {'attr': {'class': 'form-control' ~ (form.responsable.vars.errors|length ? ' is-invalid' : '')}}) }}
-                        <div class="invalid-feedback">
-                            {{ form_errors(form.responsable) }}
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control floating-input' ~ (form.email.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Email'}}) }}
+                            {{ form_label(form.email, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.email) ?: 'Please enter a valid email address (max 100 characters).' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating floating-label-group">
+                            {{ form_widget(form.responsable, {'attr': {'class': 'form-select floating-input' ~ (form.responsable.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Manager'}}) }}
+                            {{ form_label(form.responsable, null, {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback animated-feedback">
+                                {{ form_errors(form.responsable) ?: 'Manager is required.' }}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-           <div class="form-group">
-    {{ form_label(form.details, "Details") }}
-    {{ form_widget(form.details, {
-        'attr': {
-            'class': 'form-control' ~ (form.details.vars.errors|length ? ' is-invalid' : ''),
-            'required': 'required'
-        }
-    }) }}
-    <div class="invalid-feedback">
-        {{ form_errors(form.details) }}
-    </div>
-</div>
-            
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        {{ form_label(form.image, "Image") }}
-                        {{ form_widget(form.image, {'attr': {'class': (form.image.vars.errors|length ? 'is-invalid' : '')}}) }}
-                        <div class="invalid-feedback">
+
+                <div class="form-floating mb-4 floating-label-group">
+                    {{ form_widget(form.details, {'attr': {'class': 'form-control floating-input' ~ (form.details.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Details'}}) }}
+                    {{ form_label(form.details, null, {'label_attr': {'class': 'floating-label'}}) }}
+                    <div class="invalid-feedback animated-feedback">
+                        {{ form_errors(form.details) ?: 'Details are required (max 500 characters).' }}
+                    </div>
+                </div>
+
+                <div class="form-floating mb-4 floating-label-group">
+                    {{ form_widget(form.adresse, {'attr': {'id': 'salle_adresse', 'autocomplete': 'off', 'class': 'form-control floating-input' ~ (form.adresse.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Address'}}) }}
+                    {{ form_label(form.adresse, null, {'label_attr': {'class': 'floating-label'}}) }}
+                    <div class="invalid-feedback animated-feedback">
+                        {{ form_errors(form.adresse) ?: 'Address is required (max 200 characters).' }}
+                    </div>
+                    <div id="address-results"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold d-flex align-items-center">
+                        <i class="fas fa-camera me-2"></i> Room Image
+                        <span class="badge bg-secondary-subtle text-secondary ms-2">Optional</span>
+                    </label>
+                    <div class="image-upload-wrapper">
+                        <button type="button" class="btn btn-outline-primary rounded-pill mb-3 upload-btn">
+                            <i class="fas fa-upload me-2"></i>Upload Image
+                        </button>
+                        {{ form_widget(form.image, {'attr': {'class': 'd-none', 'accept': 'image/jpeg,image/png,image/webp'}}) }}
+                        <div class="text-center position-relative">
+                            <img id="image-preview" class="rounded-circle shadow object-fit-cover preview-image" alt="Image Preview">
+                            <button id="remove-image" class="btn btn-danger btn-sm rounded-circle position-absolute remove-image-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="form-text text-muted mt-2">
+                            Accepted formats: JPG, PNG, WebP (max 2MB)
+                        </div>
+                        <div class="invalid-feedback animated-feedback" id="image-error">
                             {{ form_errors(form.image) }}
                         </div>
-                        {% if salle.urlPhoto %}
-                            <img src="{{ asset('uploads/images/' ~ salle.urlPhoto) }}" class="form-image-preview" alt="Current Image">
-                        {% else %}
-                            <img class="form-image-preview" alt="Image Preview" style="display: none;">
-                        {% endif %}
                     </div>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                {{ form_label(form.adresse, "Address") }}
-                {{ form_widget(form.adresse, {'attr': {
-                    'id': 'salle_adresse', 
-                    'autocomplete': 'off',
-                    'class': 'form-control' ~ (form.adresse.vars.errors|length ? ' is-invalid' : '')
-                }}) }}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.adresse) }}
-                </div>
-                <div id="address-results"></div>
-                
-                <div class="mt-3">
-                    <p class="map-title">Room Location</p>
-                    <p class="map-instructions">Search for an address or click on the map to adjust the location</p>
-                    <p class="location-notice">Adjust the marker if the initial location isn't correct.</p>
+
+                <div class="mb-4">
+                    <p class="fw-semibold">Room Location</p>
+                    <p class="form-text text-muted">Search for an address or click on the map to set the location</p>
                     <div id="map-container">
                         <div id="map"></div>
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-end mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 py-2 shadow-sm hover-scale">
+                        <i class="fas fa-save me-2"></i>Save Room
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
             </div>
-            
-            <div class="button-group">
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-                <button type="reset" class="btn-cancel">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-            
-            {{ form_end(form) }}
         </div>
     </div>
 {% endblock %}
@@ -457,16 +404,18 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Map and address search functionality
             const addressInput = document.getElementById('salle_adresse');
             const addressResults = document.getElementById('address-results');
-
+            const form = document.querySelector('#gym-form');
+            
             const map = L.map('map').setView([34, 9], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
-
+            
             let marker = null;
-
+            
             function placeMarker(lat, lng, address) {
                 if (marker) map.removeLayer(marker);
                 marker = L.marker([lat, lng]).addTo(map)
@@ -474,26 +423,28 @@
                     .openPopup();
                 map.setView([lat, lng], 16);
                 addressInput.value = address;
+                validateField(addressInput);
             }
 
-            const currentAddress = "{{ salle.adresse|escape('js') }}";
-            if (currentAddress) {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentAddress)}&countrycodes=tn&limit=1`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.length > 0) {
-                            const lat = parseFloat(data[0].lat);
-                            const lon = parseFloat(data[0].lon);
-                            placeMarker(lat, lon, currentAddress);
-                        } else {
-                            console.warn('No coordinates found for this address');
-                            map.setView([34, 9], 6);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Geocoding error:', error);
-                        map.setView([34, 9], 6);
-                    });
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const address = data.display_name || "Address not available";
+                                placeMarker(lat, lng, address);
+                            })
+                            .catch(error => {
+                                console.error('Reverse geocoding error:', error);
+                                placeMarker(lat, lng, "Address not available");
+                            });
+                    },
+                    error => console.error("Geolocation error:", error.message),
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
             }
 
             map.on('click', function(e) {
@@ -551,32 +502,136 @@
                 }
             });
 
-            function previewImage(input) {
-                const preview = document.querySelector('.form-image-preview');
-                const file = input.files[0];
+            // Validation function
+            const fields = [
+                {
+                    id: 'salle_nom',
+                    validate: value => value.trim() !== '' && value.length <= 200,
+                    errorMsg: 'Name is required (max 200 characters).'
+                },
+                {
+                    id: 'salle_num_tel',
+                    validate: value => /^\+216\s\d{2}\s\d{3}\s\d{3}$/.test(value),
+                    errorMsg: 'Please enter a valid phone number (+216 XX XXX XXX).'
+                },
+                {
+                    id: 'salle_email',
+                    validate: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 100,
+                    errorMsg: 'Please enter a valid email address (max 100 characters).'
+                },
+                {
+                    id: 'salle_responsable',
+                    validate: value => value !== '',
+                    errorMsg: 'Manager is required.'
+                },
+                {
+                    id: 'salle_details',
+                    validate: value => value.trim() !== '' && value.length <= 500,
+                    errorMsg: 'Details are required (max 500 characters).'
+                },
+                {
+                    id: 'salle_adresse',
+                    validate: value => value.trim() !== '' && value.length <= 200,
+                    errorMsg: 'Address is required (max 200 characters).'
+                }
+            ];
+
+            function validateField(input) {
+                const field = fields.find(f => f.id === input.id);
+                if (!field) return;
+                const feedback = input.parentElement.querySelector('.invalid-feedback');
+                const isValid = field.validate(input.value);
+                input.classList.toggle('is-invalid', !isValid);
+                input.classList.toggle('is-valid', isValid);
+                feedback.textContent = isValid ? '' : field.errorMsg;
+            }
+
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                input.addEventListener('input', () => validateField(input));
+                input.addEventListener('blur', () => validateField(input));
+                input.addEventListener('change', () => validateField(input));
+            });
+
+            form.addEventListener('submit', function(event) {
+                let hasErrors = false;
+                fields.forEach(field => {
+                    const input = document.getElementById(field.id);
+                    validateField(input);
+                    if (input.classList.contains('is-invalid')) hasErrors = true;
+                });
+
+                const imageInput = document.querySelector('[name="salle[image]"]');
+                const imageError = document.querySelector('#image-error');
+                if (imageInput.files[0]) {
+                    const file = imageInput.files[0];
+                    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    if (!validImageTypes.includes(file.type)) {
+                        imageError.textContent = 'Please select a valid image file (JPEG, PNG, WebP).';
+                        imageError.style.display = 'block';
+                        hasErrors = true;
+                    } else if (file.size > 2 * 1024 * 1024) {
+                        imageError.textContent = 'Image must not exceed 2MB.';
+                        imageError.style.display = 'block';
+                        hasErrors = true;
+                    } else {
+                        imageError.style.display = 'none';
+                    }
+                }
+
+                if (hasErrors) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const firstError = form.querySelector('.is-invalid');
+                    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                form.classList.add('was-validated');
+            });
+
+            // Image upload functionality
+            const imageInput = document.querySelector('[name="salle[image]"]');
+            const imagePreview = document.querySelector('#image-preview');
+            const removeImageBtn = document.querySelector('#remove-image');
+            const uploadBtn = document.querySelector('.upload-btn');
+            const imageError = document.querySelector('#image-error');
+
+            uploadBtn.addEventListener('click', () => imageInput.click());
+
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
                 if (file) {
-                    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-                    if (!validTypes.includes(file.type)) {
-                        alert('Please select a valid image (JPEG, PNG, or WebP)');
-                        input.value = '';
+                    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    if (!validImageTypes.includes(file.type)) {
+                        imageError.textContent = 'Please select a valid image file (JPEG, PNG, WebP).';
+                        imageError.style.display = 'block';
                         return;
                     }
                     if (file.size > 2 * 1024 * 1024) {
-                        alert('Image must not exceed 2MB');
-                        input.value = '';
+                        imageError.textContent = 'Image must not exceed 2MB.';
+                        imageError.style.display = 'block';
                         return;
                     }
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
+                    updateImagePreview(file);
                 }
+            });
+
+            function updateImagePreview(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    removeImageBtn.style.display = 'flex';
+                    imageError.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
             }
 
-            document.querySelector('[name="salle[image]"]').addEventListener('change', function() {
-                previewImage(this);
+            removeImageBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                imageInput.value = '';
+                imagePreview.style.display = 'none';
+                removeImageBtn.style.display = 'none';
+                imageError.style.display = 'none';
             });
         });
     </script>
