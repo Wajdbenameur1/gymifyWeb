@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 #[Route('/post')]
 final class PostController extends AbstractController
@@ -114,6 +115,14 @@ final class PostController extends AbstractController
     #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
+
+        // ✅ Vérifier que l'utilisateur est bien le créateur du post
+    $user = $this->getUser();
+    if ($user !== $post->getUser()) {
+        throw new AccessDeniedHttpException('Vous n\'êtes pas autorisé à modifier ce post.');
+    }
+
+    
         // 1) Création du form et pré-remplissage du champ URL si nécessaire
         $form = $this->createForm(PostType::class, $post);
         $form->get('webImage')->setData(

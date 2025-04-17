@@ -49,12 +49,40 @@
     padding-left: 5px;
     padding-right: 5px;
   }
+
+
+
+
+
+ 
+
+  .breadcrumb-item a:hover {
+    text-decoration: underline;
+  }
+
+
+  
+  
 </style>
 {% endblock %}
 
 {% block body %}
+
+
+<nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">Blogs</li>
+    <li class="breadcrumb-item active" aria-current="page"><a href="#">Home</a></li>
+  </ol>
+</nav>
+
+
 <h1 class="mb-4">Posts</h1>
 
+<a href="{{ path('app_post_new') }}" class="btn btn-success btn-rounded">
+  Create new post
+</a>
+<br> <br>
 <div class="container">
   <div class="row">
     {% for post in posts %}
@@ -109,8 +137,15 @@
             <div class="mt-auto">
               <a 
                 href="{{ path('app_post_show', { id: post.id }) }}" 
-                class="btn btn-primary btn-rounded btn-sm"
-              >Voir</a>
+                 class="btn btn-primary"
+              >Show</a>
+
+
+              <a 
+                href="" 
+                 class="btn btn-primary"
+              >0 Comments</a>
+              
 
 
 
@@ -118,8 +153,72 @@
               {% if post.user == app.user %}
   <a 
     href="{{ path('app_post_edit', { id: post.id }) }}" 
-    class="btn btn-secondary btn-rounded btn-sm"
-  >Modifier</a>
+    class="btn btn-secondary"
+  >Edit</a>
+
+ <!-- Bouton pour déclencher le modal -->
+<button 
+class="btn btn-danger ms-2" 
+data-bs-toggle="modal" 
+data-bs-target="#deleteModal{{ post.id }}"
+>
+Delete
+</button>
+
+<!-- Modal Bootstrap -->
+<div 
+  class="modal fade" 
+  id="deleteModal{{ post.id }}" 
+  tabindex="-1" 
+  aria-labelledby="deleteModalLabel{{ post.id }}" 
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      
+      <div class="modal-header justify-content-center border-0">
+        <h5 class="modal-title w-100" id="deleteModalLabel{{ post.id }}">
+          <i class="fas fa-trash-alt fa-3x text-danger"></i>
+        </h5>
+      </div>
+
+      <div class="modal-body">
+        <p class="mb-2">
+          Es-tu sûr(e) de vouloir supprimer ce post :
+        </p>
+        <p><strong>{{ post.title }}</strong> ?</p>
+      </div>
+
+      <div class="modal-footer justify-content-center">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          data-bs-dismiss="modal"
+        >
+          Annuler
+        </button>
+        <form 
+          method="post" 
+          action="{{ path('app_post_delete', { id: post.id }) }}"
+          class="d-inline"
+        >
+          <input 
+            type="hidden" 
+            name="_token" 
+            value="{{ csrf_token('delete' ~ post.id) }}"
+          >
+          <button type="submit" class="btn btn-danger">
+            Supprimer
+          </button>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
 {% endif %}
 
 
@@ -137,8 +236,6 @@
   </div>
 </div>
 
-<a href="{{ path('app_post_new') }}" class="btn btn-success btn-rounded">
-  Créer un nouveau post
-</a>
+
 
 {% endblock %}
