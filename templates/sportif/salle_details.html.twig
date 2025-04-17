@@ -46,7 +46,7 @@
                         </ul>
                         <div class="gym-actions">
                             <a href="#subscriptions" class="primary-btn" data-tooltip="View available subscriptions">View Subscriptions</a>
-                            <a href="#events" class="primary-btn" data-tooltip="Explore upcoming events">View Events</a>
+                            <a href="#events" class="primary-btn" data-tooltip="View upcoming events">View Events</a>
                             <a href="{{ path('home') }}" class="primary-btn" data-tooltip="Return to homepage">Back</a>
                         </div>
                     </div>
@@ -61,7 +61,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title">
-                        <span>Explore Our</span>
+                        <span>Discover Our</span>
                         <h2>AVAILABLE SUBSCRIPTIONS</h2>
                     </div>
                 </div>
@@ -74,6 +74,15 @@
                 {% endif %}
             {% endfor %}
 
+            {% set activityIcons = {
+                'Yoga': 'fa-spa',
+                'Boxing': 'fa-hand-fist',
+                'Zumba': 'fa-person-running',
+                'Weightlifting': 'fa-dumbbell',
+                'Cardio': 'fa-heart-pulse',
+                'Musculation': 'fa-dumbbell'
+            } %}
+
             {% if uniqueActivites|length > 0 %}
                 <div class="row">
                     {% for activite in uniqueActivites %}
@@ -82,6 +91,7 @@
                             <div class="col-lg-4 col-md-6">
                                 <div class="activity-card" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
                                     <div class="activity-name">
+                                        <i class="fas {{ activityIcons[activite.nom] ?? 'fa-dumbbell' }}"></i>
                                         <h3>{{ activite.nom }}</h3>
                                     </div>
                                     <div class="subscriptions-container">
@@ -125,7 +135,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title">
-                        <span>Explore Our</span>
+                        <span>Discover Our</span>
                         <h2>AVAILABLE EVENTS</h2>
                     </div>
                 </div>
@@ -157,12 +167,11 @@
                 {% else %}
                     <div class="col-lg-12 text-center">
                         <p>No events available at the moment.</p>
-                </div>
+                    </div>
                 {% endfor %}
             </div>
         </div>
     </section>
-
 {% endblock %}
 
 {% block stylesheets %}
@@ -453,9 +462,21 @@
         }
         .activity-name {
             padding: 20px;
-            background: linear-gradient(90deg,rgb(160, 154, 154), #252525);
-            color: #e0e0e0; /* Lighter color for activity name */
+            background: linear-gradient(90deg,rgb(96, 94, 94),rgb(133, 130, 130));
+            color: #e0e0e0;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .activity-name i {
+            font-size: 20px;
+            color: #e0e0e0;
+            margin-right: 10px;
+            transition: color 0.3s ease;
+        }
+        .activity-name:hover i {
+            color: #ff8c00;
         }
         .activity-name h3 {
             font-size: 24px;
@@ -463,7 +484,7 @@
             margin: 0;
             font-family: 'Oswald', sans-serif;
             text-transform: uppercase;
-            text-shadow: 0 1px 2px rgba(171, 155, 155, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         .subscriptions-container {
             padding: 25px;
@@ -798,6 +819,9 @@
             }
             .subscription-header .price {
                 font-size: 20px;
+            }
+            .activity-name i {
+                font-size: 18px;
             }
         }
     </style>
