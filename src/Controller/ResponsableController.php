@@ -103,7 +103,7 @@ final class ResponsableController extends AbstractController
         $salle = $user->getSalle();
         if (!$salle) {
             $this->addFlash('warning', 'Aucune salle associée à votre compte');
-            return $this->redirectToRoute('app_salle_create');
+            return $this->redirectToRoute('app_responsable_mygym');
         }
     
         // 4. Chargement des relations avec une méthode existante du repository

@@ -54,9 +54,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $posts;
 
    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
-private Collection $comments;
-#[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Cours::class)]
-private Collection $cours;
+    private Collection $comments;
+    #[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Cours::class)]
+    private Collection $cours;
+    #[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Planning::class)]
+    private Collection $plannings;
 
 
 

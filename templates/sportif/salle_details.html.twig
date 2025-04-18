@@ -3,6 +3,7 @@
 {% block title %}{{ salle.nom }} | Gym{% endblock %}
 
 {% block body %}
+
     <!-- Salle Details Section -->
     <section class="salle-details-section">
         <div class="container">
@@ -10,7 +11,7 @@
                 <div class="col-lg-6">
                     <div class="salle-image">
                         {% if salle.urlPhoto %}
-                            <img src="{{ asset('Uploads/images/' ~ salle.urlPhoto) }}" alt="{{ salle.nom }}">
+                            <img src="{{ asset('Uploads/images/' ~ salle.urlPhoto | replace({'/Uploads/images/': ''})) }}" alt="{{ salle.nom }}">
                             <div class="image-overlay"></div>
                         {% else %}
                             <img src="{{ asset('img/placeholder-gym.jpg') }}" alt="Default Gym Image">
@@ -21,17 +22,17 @@
                 <div class="col-lg-6">
                     <div class="salle-content">
                         <h2>{{ salle.nom }}</h2>
-                        <p>{{ salle.details }}</p>
+                        <p>{{ salle.details|default('No description available') }}</p>
                         <ul class="salle-meta">
-                            <li><i class="fa fa-map-marker"></i> {{ salle.adresse }}</li>
-                            <li><i class="fa fa-user"></i> {% if salle.responsable %}{{ salle.responsable.prenom|default('') }} {{ salle.responsable.nom|default('N/A') }}{% else %}No responsible{% endif %}</li>
-                            <li><i class="fa fa-phone"></i> {{ salle.numTel }}</li>
-                            <li><i class="fa fa-envelope"></i> {{ salle.email }}</li>
+                            <li><i class="fa fa-map-marker icon"></i> {{ salle.adresse }}</li>
+                            <li><i class="fa fa-user icon"></i> {% if salle.responsable %}{{ salle.responsable.prenom|default('') }} {{ salle.responsable.nom|default('N/A') }}{% else %}No manager assigned{% endif %}</li>
+                            <li><i class="fa fa-phone icon"></i> {{ salle.numTel }}</li>
+                            <li><i class="fa fa-envelope icon"></i> {{ salle.email }}</li>
                         </ul>
                         <div class="salle-actions">
-                            <a href="#abonnements" class="primary-btn">Voir les abonnements</a>
-                            <a href="#evenements" class="primary-btn">Voir les événements</a>
-                            <a href="{{ path('home') }}" class="secondary-btn">Retour</a>
+                            <a href="#abonnements" class="primary-btn" aria-label="View subscriptions">See Subscriptions</a>
+                            <a href="#evenements" class="primary-btn" aria-label="View events">See Events</a>
+                            <a href="{{ path('home') }}" class="secondary-btn" aria-label="Go back to home"><i class="fas fa-arrow-left me-1"></i> Back</a>
                         </div>
                     </div>
                 </div>
@@ -39,63 +40,42 @@
         </div>
     </section>
 
-    <!-- Section Abonnements - Version modernisée -->
+    <!-- Section Abonnements -->
     <section id="abonnements" class="abonnements-section">
         <div class="container">
             <div class="section-title">
-                <h2>Nos Abonnements</h2>
-                <p>Choisissez l'abonnement qui correspond à vos besoins</p>
+                <h2>Our Subscriptions</h2>
+                <p>Discover our dynamic offers to boost your fitness</p>
             </div>
-
-            {% set uniqueActivites = [] %}
-            {% for abonnement in abonnements|default([]) %}
-                {% if abonnement.activite is not null and abonnement.activite.id not in uniqueActivites|map(a => a.id) %}
-                    {% set uniqueActivites = uniqueActivites|merge([abonnement.activite]) %}
-                {% endif %}
-            {% endfor %}
-
-            {% if uniqueActivites|length > 0 %}
-                <div class="activites-grid">
-                    {% for activite in uniqueActivites %}
-                        {% set abonnementsForActivite = abonnements|filter(a => a.activite.id == activite.id) %}
-                        
-                        {% if abonnementsForActivite|length > 0 %}
-                            <div class="activite-card">
-                                <div class="activite-name">
-                                    <h3>{{ activite.nom }}</h3>
-                                </div>
-                                <div class="abonnements-container">
-                                    {% for abonnement in abonnementsForActivite %}
-                                        <div class="abonnement-card compact">
-                                            <div class="abonnement-header">
-                                                <h4>{{ abonnement.type.value|capitalize }}</h4>
-                                                <div class="price">{{ abonnement.tarif }} DT</div>
-                                            </div>
-                                            <div class="abonnement-body">
-                                                <ul class="abonnement-features">
-                                                    <li><i class="fas fa-clock"></i> 
-                                                        {% if abonnement.type.value == 'mois' %}30 jours
-                                                        {% elseif abonnement.type.value == 'trimestre' %}90 jours
-                                                        {% elseif abonnement.type.value == 'année' %}365 jours
-                                                        {% else %}Personnalisé{% endif %}
-                                                    </li>
-                                                    <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
-                                                </ul>
-                                                <a href="#" class="subscribe-btn">S'abonner</a>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
+            <div class="row">
+                {% for abonnement in abonnements %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="abonnement-card">
+                            <div class="abonnement-header">
+                                <h3>{{ abonnement.type.value|capitalize }}</h3>
+                                <div class="price">{{ abonnement.tarif }} DT</div>
                             </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-abonnements">
-                    <i class="fa fa-info-circle"></i>
-                    <p>Aucun abonnement disponible actuellement.</p>
-                </div>
-            {% endif %}
+                            <div class="abonnement-body">
+                                <p><i class="fa fa-dumbbell icon"></i> {{ abonnement.activite.nom }}</p>
+                                <p><i class="fa fa-calendar icon"></i> Duration: 
+                                    {% if abonnement.type.value == 'mois' %}30 days
+                                    {% elseif abonnement.type.value == 'trimestre' %}90 days
+                                    {% elseif abonnement.type.value == 'année' %}365 days
+                                    {% else %}Unknown{% endif %}
+                                </p>
+                                <a href="#" class="subscribe-btn" title="Subscription coming soon" aria-label="Subscribe to {{ abonnement.type.value|capitalize }}">Subscribe</a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fa fa-info-circle fa-2x mb-3"></i>
+                            <p>No subscriptions available for this gym currently.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </section>
 
@@ -103,203 +83,302 @@
     <section id="evenements" class="evenements-section">
         <div class="container">
             <div class="section-title">
-                <h2>Nos Événements</h2>
-                <p>Participez à nos événements pour une expérience unique</p>
+                <h2>Our Events</h2>
+                <p>Join our events for a unique experience</p>
             </div>
-            <div class="row">
+
+            <!-- Display Flash Messages -->
+            {% set errorMessages = app.flashes('error') %}
+            {% if errorMessages is not empty %}
+                <div class="alert alert-danger">
+                    {% for message in errorMessages %}
+                        {% if message|trim is not empty %}
+                            {{ message }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% set successMessages = app.flashes('success') %}
+            {% if successMessages is not empty %}
+                <div class="alert alert-success">
+                    {% for message in successMessages %}
+                        {% if message|trim is not empty %}
+                            {{ message }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="row" id="events-container">
                 {% for equipe_event in equipe_events %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="evenement-card">
-                        <div class="evenement-image">
-                            {% if equipe_event.event.imageUrl %}
-                                <img src="{{ asset('Uploads/evenements/' ~ equipe_event.event.imageUrl) }}" alt="{{ equipe_event.event.nom }}">
-                            {% else %}
-                                <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
-                            {% endif %}
-                            <div class="evenement-date">
-                                <span>{{ equipe_event.event.date|date('d') }}</span>
-                                <p>{{ equipe_event.event.date|date('M') }}</p>
+                    {% set event = equipe_event.event %}
+                    {% set equipe = equipe_event.equipe %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="event-card">
+                            <div class="event-image-wrapper">
+                                {% if event.imageUrl %}
+                                    <img src="{{ asset(event.imageUrl) }}" alt="{{ event.nom }}">
+                                {% else %}
+                                    <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
+                                {% endif %}
+                                <div class="event-overlay">
+                                    <div class="event-type-badge">{{ event.type.value|capitalize }}</div>
+                                </div>
+                                <div class="event-date">
+                                    <span>{{ event.date|date('d') }}</span>
+                                    <p>{{ event.date|date('M') }}</p>
+                                </div>
+                            </div>
+                            <div class="event-content">
+                                <h3>{{ event.nom }}</h3>
+                                <ul class="details-list">
+                                    <li>
+                                        <i class="fa fa-users icon"></i>
+                                        <strong>Team:</strong> {{ equipe.nom }}
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-info-circle icon"></i>
+                                        <strong>Description:</strong> {{ event.description|default('No description')|slice(0, 60) }}...
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-clock-o icon"></i>
+                                        <strong>Time:</strong> {{ event.getHeureDebut|date('H:i') }} - {{ event.getHeureFin|date('H:i') }}
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-award icon"></i>
+                                        <strong>Reward:</strong> {{ event.reward.label|capitalize|default('None') }}
+                                    </li>
+                                    <li class="location-item">
+                                        <i class="fa fa-map-marker icon"></i>
+                                        <strong>Location:</strong> <span class="location-text">{{ event.lieu|default('Not specified') }}</span>
+                                    </li>
+                                </ul>
+                                <div class="event-actions">
+                                    <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn" aria-label="View details for {{ event.nom }}">
+                                        <i class="fa fa-info-circle me-2"></i>Details
+                                    </a>
+                                    <a href="{{ path('app_equipe_event_join', {'id': equipe_event.id}) }}" class="join-btn" aria-label="Join {{ event.nom }}">
+                                        <i class="fa fa-sign-in-alt me-2"></i>Join
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div class="evenement-body">
-                            <h3>{{ equipe_event.event.nom }}</h3>
-                            <p><i class="fa fa-clock-o"></i> {{ equipe_event.event.heureDebut|date('H:i') }} - {{ equipe_event.event.heureFin|date('H:i') }}</p>
-                            <p>{{ equipe_event.event.description|slice(0, 100) }}...</p>
-                            <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn">Détails</a>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fa fa-info-circle fa-2x mb-3"></i>
+                            <p>No team events scheduled for this gym currently.</p>
                         </div>
                     </div>
-                </div>
-                {% else %}
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="fa fa-info-circle fa-2x mb-3"></i>
-                        <p>Aucun événement prévu pour cette salle actuellement.</p>
-                    </div>
-                </div>
                 {% endfor %}
             </div>
         </div>
     </section>
 
+    <!-- Styles -->
     <style>
         /* Global Styles */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         * {
             font-family: 'Poppins', sans-serif;
             box-sizing: border-box;
         }
 
-        :root {
-            --primary: #FF6B35;
-            --secondary: #004E89;
-            --dark: #1A1A1A;
-            --light: #F7F7F7;
-            --accent: #FFD166;
-            --gray: #E8E8E8;
-            --dark-gray: #6C757D;
-        }
-
         /* Salle Details Section */
         .salle-details-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, var(--dark), #2A2A2A);
-            color: white;
-        }
-
-        .salle-image {
-            border-radius: 12px;
+            padding: 100px 0;
+            background: linear-gradient(135deg, #1e1e1e, #2c3e50);
+            color: #fff;
+            position: relative;
             overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-            transition: transform 0.4s ease;
         }
-
-        .salle-image:hover {
-            transform: scale(1.02);
+        .salle-image {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-
         .salle-image img {
             width: 100%;
             height: auto;
-            display: block;
+            transition: transform 0.5s ease;
         }
-
+        .salle-image:hover img {
+            transform: scale(1.05);
+        }
         .image-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 78, 137, 0.3));
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+            z-index: 1;
         }
-
         .salle-content h2 {
-            font-size: 2.5rem;
+            font-size: 48px;
             font-weight: 700;
-            margin-bottom: 1.5rem;
-            position: relative;
-            display: inline-block;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
         }
-
-        .salle-content h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 70px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 2px;
-        }
-
         .salle-content p {
-            font-size: 1.1rem;
+            font-size: 16px;
+            color: #d1d1d1;
             line-height: 1.8;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 2rem;
+            margin-bottom: 30px;
         }
-
         .salle-meta {
-            padding-left: 0;
             list-style: none;
+            padding: 0;
+            margin: 0;
         }
-
         .salle-meta li {
-            font-size: 1rem;
-            margin-bottom: 1rem;
+            font-size: 16px;
+            color: #d1d1d1;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 12px;
-            color: rgba(255, 255, 255, 0.8);
         }
-
-        .salle-meta i {
-            color: var(--primary);
-            width: 24px;
-            text-align: center;
-            font-size: 1.2rem;
+        .salle-meta .icon {
+            color: #00d4ff;
+            font-size: 18px;
         }
-
         .salle-actions {
-            margin-top: 2.5rem;
+            margin-top: 30px;
             display: flex;
+            gap: 15px;
             flex-wrap: wrap;
-            gap: 1rem;
         }
 
-        .primary-btn, .secondary-btn {
+        /* Buttons (Global) */
+        .primary-btn, .secondary-btn, .subscribe-btn, .event-btn, .join-btn {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 0.8rem 1.8rem;
+            padding: 12px 20px;
             border-radius: 50px;
-            font-size: 0.9rem;
+            font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
             text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            letter-spacing: 1px;
         }
-
         .primary-btn {
-            background: linear-gradient(45deg, var(--primary), #FF8C42);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            background: linear-gradient(90deg, #00d4ff, #007bff);
+            color: #fff;
+            margin-right: 15px;
         }
-
         .primary-btn:hover {
+            background: linear-gradient(90deg, #007bff, #00d4ff);
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
         }
-
         .secondary-btn {
-            background: transparent;
-            color: white;
-            border: 2px solid var(--primary);
+            background: linear-gradient(90deg, #fff, #e0e0e0);
+            color: #1e1e1e;
         }
-
         .secondary-btn:hover {
-            background: rgba(255, 107, 53, 0.1);
+            background: linear-gradient(90deg, #e0e0e0, #fff);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
+        .subscribe-btn {
+            background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+            color: #fff;
+            width: 100%;
+            text-align: center;
+        }
+        .subscribe-btn:hover {
+            background: linear-gradient(90deg, #ff8e53, #ff6b6b);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+        .event-btn {
+            background: linear-gradient(90deg, #1e90ff, #00d4ff);
+            color: #fff;
+            flex: 1;
+            text-align: center;
+            border: 2px solid #1e90ff;
+            box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+        }
+        .event-btn:hover {
+            background: linear-gradient(90deg, #00d4ff, #1e90ff);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(30, 144, 255, 0.5);
+            border-color: #00d4ff;
+        }
+        .event-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+        .event-btn:hover::before {
+            width: 50%;
+            left: 25%;
+        }
+        .join-btn {
+            background: linear-gradient(90deg, #ff7f00, #ffbb33);
+            color: #fff;
+            flex: 1;
+            text-align: center;
+            border: 2px solid #ff7f00;
+            box-shadow: 0 4px 15px rgba(255, 127, 0, 0.3);
+        }
+        .join-btn:hover {
+            background: linear-gradient(90deg, #ffbb33, #ff7f00);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(255, 127, 0, 0.5);
+            border-color: #ffbb33;
+        }
+        .join-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+        .join-btn:hover::before {
+            width: 50%;
+            left: 25%;
+        }
+        .secondary-btn i {
+            font-size: 12px;
+            margin-right: 8px;
         }
 
-        /* Section Abonnements - Design modernisé */
-        .abonnements-section {
-            padding: 4rem 0;
-            background: var(--light);
+        /* Abonnements Section */
+        .abonnements-section, .evenements-section {
+            padding: 80px 0;
+            background: #fff;
         }
-
         .section-title {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 60px;
         }
-
         .section-title h2 {
-            font-size: 2.2rem;
+            font-size: 42px;
             font-weight: 700;
-            color: var(--dark);
+            color: #1e1e1e;
+            text-transform: uppercase;
             position: relative;
             display: inline-block;
         }
-
         .section-title h2::after {
             content: '';
             position: absolute;
@@ -308,261 +387,371 @@
             transform: translateX(-50%);
             width: 80px;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background: linear-gradient(90deg, #00d4ff, #007bff);
             border-radius: 2px;
         }
-
         .section-title p {
-            font-size: 1.1rem;
-            color: var(--dark-gray);
-            margin-top: 1rem;
+            font-size: 18px;
+            color: #666;
+            margin-top: 15px;
+        }
+        .abonnement-card {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .abonnement-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+        .abonnement-header {
+            background: linear-gradient(135deg, #00d4ff, #007bff);
+            color: #fff;
+            padding: 25px;
+            text-align: center;
+        }
+        .abonnement-header h3 {
+            font-size: 26px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .price {
+            font-size: 34px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        .abonnement-body {
+            padding: 25px;
+            text-align: center;
+        }
+        .abonnement-body p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .abonnement-body .icon {
+            color: #007bff;
+            font-size: 18px;
         }
 
-        .activites-grid {
+        /* Enhanced Evenements Section */
+        .event-card {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 520px;
             display: flex;
             flex-direction: column;
-            gap: 2rem;
         }
-
-        .activite-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
         }
-
-        .activite-name {
-            padding: 1.2rem 1.5rem;
-            background: var(--secondary);
-            color: white;
-        }
-
-        .activite-name h3 {
-            font-size: 1.4rem;
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .abonnements-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            padding: 1.5rem;
-        }
-
-        .abonnement-card.compact {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid var(--gray);
-        }
-
-        .abonnement-card.compact:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-        }
-
-        .abonnement-card.compact .abonnement-header {
-            padding: 1rem;
-            background: white;
-            border-bottom: 1px solid var(--gray);
-        }
-
-        .abonnement-card.compact .abonnement-header h4 {
-            font-size: 1rem;
-            margin: 0;
-            color: var(--dark);
-            font-weight: 600;
-        }
-
-        .abonnement-card.compact .price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-top: 0.3rem;
-        }
-
-        .abonnement-card.compact .abonnement-body {
-            padding: 1rem;
-        }
-
-        .abonnement-card.compact .abonnement-features {
-            margin-bottom: 1rem;
-        }
-
-        .abonnement-card.compact .abonnement-features li {
-            font-size: 0.85rem;
-            color: var(--dark-gray);
-            margin-bottom: 0.5rem;
-        }
-
-        .abonnement-card.compact .abonnement-features i {
-            color: var(--secondary);
-            font-size: 0.9rem;
-            width: 18px;
-        }
-
-        .abonnement-card.compact .subscribe-btn {
-            padding: 0.6rem 1rem;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            width: 100%;
-        }
-
-        .no-abonnements {
-            text-align: center;
-            padding: 2rem;
-            color: var(--dark-gray);
-        }
-
-        .no-abonnements i {
-            font-size: 2rem;
-            color: var(--secondary);
-            margin-bottom: 1rem;
-        }
-
-        /* Section Événements */
-        .evenements-section {
-            padding: 4rem 0;
-            background: white;
-        }
-
-        .evenement-card {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .evenement-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .evenement-image {
+        .event-image-wrapper {
+            position: relative;
             height: 200px;
             overflow: hidden;
-            position: relative;
         }
-
-        .evenement-image img {
+        .event-image-wrapper img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
         }
-
-        .evenement-card:hover .evenement-image img {
-            transform: scale(1.05);
+        .event-card:hover .event-image-wrapper img {
+            transform: scale(1.08);
         }
-
-        .evenement-date {
+        .event-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+        }
+        .event-type-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(90deg, #00d4ff, #007bff);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .event-date {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            color: white;
-            padding: 0.6rem;
-            border-radius: 8px;
+            background: linear-gradient(90deg, #ff6200, #ff8c00);
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
             text-align: center;
-            width: 50px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            width: 60px;
         }
-
-        .evenement-date span {
-            font-size: 1.2rem;
+        .event-date span {
+            font-size: 24px;
             font-weight: 700;
             display: block;
         }
-
-        .evenement-date p {
-            font-size: 0.7rem;
+        .event-date p {
+            font-size: 12px;
             margin: 0;
             text-transform: uppercase;
+        }
+        .event-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-content h3 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e1e1e;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00d4ff;
+            padding-bottom: 10px;
+        }
+        .details-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .details-list li {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+        .details-list li:hover {
+            color: #1e1e1e;
+        }
+        .details-list li strong {
+            color: #1e1e1e;
             font-weight: 600;
         }
-
-        .evenement-body {
-            padding: 1.2rem;
+        .details-list .icon {
+            color: #007bff;
+            font-size: 16px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .details-list li:hover .icon {
+            transform: scale(1.2);
+            color: #00d4ff;
+        }
+        .location-item {
+            align-items: flex-start !important;
+            flex-wrap: wrap;
+        }
+        .location-item .icon {
+            font-size: 18px;
+        }
+        .location-item:hover .icon {
+            color: #0056b3;
+        }
+        .location-text {
+            color: #444;
+            background: rgba(0, 123, 255, 0.05);
+            padding: 5px 8px;
+            border-radius: 5px;
+            max-width: 80%;
+            display: inline-block;
+        }
+        .location-text:empty:before, .location-text:contains('Not specified') {
+            content: 'Not specified';
+            font-style: italic;
+            color: #888;
+        }
+        .event-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
         }
 
-        .evenement-body h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
+        /* Flash Message Styles */
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
         }
-
-        .evenement-body p {
-            font-size: 0.9rem;
-            color: var(--dark-gray);
-            margin-bottom: 1.2rem;
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
         }
-
-        .event-btn {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            background: linear-gradient(45deg, var(--secondary), #0066B3);
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
         }
-
-        .event-btn:hover {
-            background: linear-gradient(45deg, #0066B3, var(--secondary));
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
         }
 
         /* Responsive Design */
-        @media (max-width: 992px) {
-            .salle-content h2 {
-                font-size: 2.2rem;
-            }
-            
-            .section-title h2 {
-                font-size: 1.8rem;
-            }
-        }
-
         @media (max-width: 768px) {
             .salle-details-section {
-                padding: 3rem 0;
+                padding: 60px 0;
             }
-            
-            .salle-image {
-                margin-bottom: 2rem;
-            }
-            
             .salle-content h2 {
-                font-size: 1.8rem;
+                font-size: 36px;
             }
-            
-            .abonnements-container {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            .section-title h2 {
+                font-size: 32px;
+            }
+            .abonnement-header h3 {
+                font-size: 22px;
+            }
+            .price {
+                font-size: 28px;
+            }
+            .event-card {
+                min-height: 480px;
+            }
+            .event-content h3 {
+                font-size: 18px;
+            }
+            .details-list li {
+                font-size: 13px;
+            }
+            .details-list .icon {
+                font-size: 14px;
+            }
+            .event-image-wrapper {
+                height: 180px;
             }
         }
-
         @media (max-width: 576px) {
             .salle-content h2 {
-                font-size: 1.6rem;
+                font-size: 28px;
             }
-            
             .section-title h2 {
-                font-size: 1.5rem;
+                font-size: 26px;
             }
-            
+            .primary-btn, .secondary-btn, .subscribe-btn, .event-btn, .join-btn {
+                width: 100%;
+                margin: 5px 0;
+                justify-content: center;
+            }
             .salle-actions {
                 flex-direction: column;
+                align-items: center;
             }
-            
-            .primary-btn, .secondary-btn {
-                width: 100%;
+            .event-actions {
+                flex-direction: column;
             }
-            
-            .abonnements-container {
-                grid-template-columns: 1fr;
+            .event-card {
+                min-height: 500px;
+            }
+            .event-image-wrapper {
+                height: 160px;
             }
         }
     </style>
+
+    <!-- JavaScript -->
+    <script>
+        // Function to fetch and refresh events
+        function refreshEvents() {
+            fetch('{{ path('sportif_salle_events', {'id': salle.id}) }}')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched events data:', data); // Log the JSON response for debugging
+                    const eventsContainer = document.getElementById('events-container');
+                    eventsContainer.innerHTML = ''; // Clear existing content
+
+                    if (data.equipe_events.length === 0) {
+                        eventsContainer.innerHTML = `
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="fa fa-info-circle fa-2x mb-3"></i>
+                                    <p>No team events scheduled for this gym currently.</p>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    data.equipe_events.forEach(eventData => {
+                        const eventHtml = `
+                            <div class="col-lg-4 col-md-6">
+                                <div class="event-card">
+                                    <div class="event-image-wrapper">
+                                        <img src="${eventData.imageUrl || '/img/event-default.jpg'}" alt="${eventData.nom}">
+                                        <div class="event-overlay">
+                                            <div class="event-type-badge">${eventData.type}</div>
+                                        </div>
+                                        <div class="event-date">
+                                            <span>${eventData.dateDay}</span>
+                                            <p>${eventData.dateMonth}</p>
+                                        </div>
+                                    </div>
+                                    <div class="event-content">
+                                        <h3>${eventData.nom}</h3>
+                                        <ul class="details-list">
+                                            <li>
+                                                <i class="fa fa-users icon"></i>
+                                                <strong>Team:</strong> ${eventData.equipeNom}
+                                            </li>
+                                            <li>
+                                                <i class="fa fa-info-circle icon"></i>
+                                                <strong>Description:</strong> ${eventData.description.slice(0, 60)}...
+                                            </li>
+                                            <li>
+                                                <i class="fa fa-clock-o icon"></i>
+                                                <strong>Time:</strong> ${eventData.heureDebut} - ${eventData.heureFin}
+                                            </li>
+                                            <li>
+                                                <i class="fa fa-award icon"></i>
+                                                <strong>Reward:</strong> ${eventData.reward || 'None'}
+                                            </li>
+                                            <li class="location-item">
+                                                <i class="fa fa-map-marker icon"></i>
+                                                <strong>Location:</strong> <span class="location-text">${eventData.lieu || 'Not specified'}</span>
+                                            </li>
+                                        </ul>
+                                        <div class="event-actions">
+                                            <a href="${eventData.detailsUrl}" class="event-btn" aria-label="View details for ${eventData.nom}">
+                                                <i class="fa fa-info-circle me-2"></i>Details
+                                            </a>
+                                            <a href="${eventData.joinUrl}" class="join-btn" aria-label="Join ${eventData.nom}">
+                                                <i class="fa fa-sign-in-alt me-2"></i>Join
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        eventsContainer.innerHTML += eventHtml;
+                    });
+                })
+                .catch(error => console.error('Error refreshing events:', error));
+        }
+
+        // Refresh events every 30 seconds
+        setInterval(refreshEvents, 30000);
+
+        // Initial refresh on page load
+        document.addEventListener('DOMContentLoaded', refreshEvents);
+    </script>
+
 {% endblock %}

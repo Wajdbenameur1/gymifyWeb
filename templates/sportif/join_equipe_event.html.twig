@@ -14,49 +14,38 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                     <div class="join-form">
-                        {% set hasError = false %}
                         {% for message in app.flashes('error') %}
                             {% if message|trim is not empty %}
-                                {% set hasError = true %}
+                                <div class="alert alert-danger">
+                                    {{ message }}
+                                </div>
                             {% endif %}
                         {% endfor %}
-                        {% if hasError %}
-                            <div class="alert alert-danger">
-                                {% for message in app.flashes('error') %}
-                                    {% if message|trim is not empty %}
-                                        {{ message }}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
 
                         {{ form_start(form, {'attr': {'id': 'join-form'}}) }}
                             <div class="form-group">
-                                {{ form_label(form.nom, 'Last Name') }}
+                                {{ form_label(form.nom) }}
                                 {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'value': app.user.nom|default('')}}) }}
-                                <div class="custom-error" id="last-name-error"></div>
                                 {% if form_errors(form.nom) %}
                                     <div class="form-errors">{{ form_errors(form.nom) }}</div>
                                 {% endif %}
                             </div>
                             <div class="form-group">
-                                {{ form_label(form.prenom, 'First Name') }}
+                                {{ form_label(form.prenom) }}
                                 {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'value': app.user.prenom|default('')}}) }}
-                                <div class="custom-error" id="first-name-error"></div>
                                 {% if form_errors(form.prenom) %}
                                     <div class="form-errors">{{ form_errors(form.prenom) }}</div>
                                 {% endif %}
                             </div>
                             <div class="form-group">
-                                {{ form_label(form.email, 'Email') }}
+                                {{ form_label(form.email) }}
                                 {{ form_widget(form.email, {'attr': {'class': 'form-control', 'value': app.user.email|default('')}}) }}
-                                <div class="custom-error" id="email-error"></div>
                                 {% if form_errors(form.email) %}
                                     <div class="form-errors">{{ form_errors(form.email) }}</div>
                                 {% endif %}
                             </div>
                             <div class="form-actions">
-                                {{ form_widget(form.submit, {'attr': {'class': 'primary-btn', 'aria-label': 'Confirm participation in the team and event'}, 'label': 'Confirm'}) }}
+                                {{ form_widget(form.submit, {'attr': {'class': 'primary-btn', 'aria-label': 'Confirm participation in the team and event'}}) }}
                                 <a href="{{ path('sportif_salle_details', {'id': equipe_event.event.salle.id}) }}" class="secondary-btn" aria-label="Cancel and return to salle details">Cancel</a>
                             </div>
                         {{ form_end(form) }}
@@ -151,15 +140,7 @@
             background: #f5f5f5;
             cursor: not-allowed;
         }
-        .form-control.is-valid {
-            border-color: #28a745;
-            background: rgba(40, 167, 69, 0.05);
-        }
-        .form-control.is-invalid {
-            border-color: #ff6b6b;
-            background: rgba(255, 107, 107, 0.05);
-        }
-        .form-errors, .custom-error {
+        .form-errors {
             color: #ff6b6b;
             font-size: 14px;
             margin-top: 5px;
@@ -233,9 +214,6 @@
             width: 50%;
             left: 25%;
         }
-        .primary-btn i, .secondary-btn i {
-            margin-right: 8px;
-        }
         .alert {
             margin-bottom: 20px;
             border-radius: 8px;
@@ -275,70 +253,4 @@
             }
         }
     </style>
-
-    <!-- JavaScript for Client-Side Validation -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('join-form');
-            const inputs = form.querySelectorAll('.form-control');
-            const lastNameInput = form.querySelector('input[name="join_equipe_event[nom]"]');
-            const firstNameInput = form.querySelector('input[name="join_equipe_event[prenom]"]');
-            const emailInput = form.querySelector('input[name="join_equipe_event[email]"]');
-            const lastNameError = document.getElementById('last-name-error');
-            const firstNameError = document.getElementById('first-name-error');
-            const emailError = document.getElementById('email-error');
-
-            // Clear custom errors when user starts typing
-            inputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    const errorElement = document.getElementById(input.id + '-error');
-                    if (errorElement) {
-                        errorElement.textContent = '';
-                        input.classList.remove('is-invalid');
-                    }
-                    // HTML5 validation
-                    if (input.checkValidity() && input.value.trim() !== '') {
-                        input.classList.remove('is-invalid');
-                        input.classList.add('is-valid');
-                    } else {
-                        input.classList.remove('is-valid');
-                        input.classList.add('is-invalid');
-                    }
-                });
-            });
-
-            form.addEventListener('submit', (e) => {
-                let hasErrors = false;
-
-                // Check for empty fields and display custom error messages
-                if (!lastNameInput.value.trim()) {
-                    lastNameError.textContent = 'Last name is required';
-                    lastNameInput.classList.add('is-invalid');
-                    hasErrors = true;
-                }
-                if (!firstNameInput.value.trim()) {
-                    firstNameError.textContent = 'First name is required';
-                    firstNameInput.classList.add('is-invalid');
-                    hasErrors = true;
-                }
-                if (!emailInput.value.trim()) {
-                    emailError.textContent = 'Email is required';
-                    emailInput.classList.add('is-invalid');
-                    hasErrors = true;
-                }
-
-                // HTML5 validation for email format
-                inputs.forEach(input => {
-                    if (!input.checkValidity()) {
-                        input.classList.add('is-invalid');
-                        hasErrors = true;
-                    }
-                });
-
-                if (hasErrors) {
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
 {% endblock %}
