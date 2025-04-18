@@ -296,3 +296,82 @@
     });
   });
 </script>
+
+
+
+
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      // Gestion de l'ajout de commentaire via AJAX
+      document.querySelectorAll('.js-add-comment-form').forEach(function (form) {
+          form.addEventListener('submit', function (e) {
+              e.preventDefault();
+  
+              const postId = this.dataset.postId;
+              const input = this.querySelector('input[name="content"]');
+              const errorDiv = document.getElementById(`comment-errors-${postId}`);
+              const content = input.value.trim();
+  
+              errorDiv.style.display = 'none';
+              errorDiv.innerHTML = '';
+  
+              if (content.length < 2) {
+                  errorDiv.innerHTML = 'Le commentaire est trop court.';
+                  errorDiv.style.display = 'block';
+                  return;
+              }
+  
+              const formData = new FormData(this);
+              fetch(this.action, {
+                  method: 'POST',
+                  body: formData
+              })
+              .then(r => r.json())
+              .then(data => {
+                  if (data.errors) {
+                      errorDiv.innerHTML = data.errors.join('<br>');
+                      errorDiv.style.display = 'block';
+                      return;
+                  }
+  
+                  // Crée dynamiquement le HTML du commentaire
+                  const commentHTML = `
+                    <div class="d-flex align-items-start mb-3">
+                      <img src="${data.user.avatar}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                      <div class="w-100">
+                        <strong>${data.user.nom}</strong>
+                        <p class="mb-1">${data.content}</p>
+                        <small class="text-muted">${data.createdAt}</small>
+                      </div>
+                    </div>
+                  `;
+  
+                  const container = form.closest('.modal-content').querySelector('.overflow-auto');
+                  container.insertAdjacentHTML('beforeend', commentHTML);
+                  
+                  // Vide le champ de saisie
+                  input.value = '';
+  
+                  // Met à jour le compteur de commentaires
+                  const btn = document.querySelector(`[data-bs-target="#commentsModal${postId}"]`);
+                  if (btn) {
+                      let count = parseInt(btn.innerText) + 1;
+                      btn.innerText = count + ' Commentaire' + (count > 1 ? 's' : '');
+                  }
+              })
+              .catch(() => {
+                  errorDiv.innerHTML = 'Refresh.';
+                  errorDiv.style.display = 'block';
+              });
+          });
+      });
+  });
+  </script>
+  
+
+  
+{% endblock %}
