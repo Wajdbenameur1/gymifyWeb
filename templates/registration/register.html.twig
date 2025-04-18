@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Inscription Sportif{% endblock %}
+{% block title %}Athlete Registration{% endblock %}
 
 {% block body %}
     <div class="form-container">
@@ -9,14 +9,14 @@
         </div>
 
         <div class="welcome-text">
-            <p>Inscrivez-vous pour rejoindre notre club et commencer votre parcours fitness.</p>
+            <p>Sign up to join our club and start your fitness journey.</p>
         </div>
 
         {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
                     <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show">
-                        <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-circle' }} me-2"></i>
+                        <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-circle' }} mr-2"></i>
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -26,7 +26,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom', 'data-validate': 'true'}}) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Last Name', 'data-validate': 'true'}}) }}
                 </div>
                 <div class="invalid-feedback mt-1"></div>
                 {{ form_errors(form.nom) }}
@@ -35,7 +35,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom', 'data-validate': 'true'}}) }}
+                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'First Name', 'data-validate': 'true'}}) }}
                 </div>
                 <div class="invalid-feedback mt-1"></div>
                 {{ form_errors(form.prenom) }}
@@ -44,7 +44,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Adresse email', 'data-validate': 'true'}}) }}
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email Address', 'data-validate': 'true'}}) }}
                 </div>
                 <div class="invalid-feedback mt-1"></div>
                 {{ form_errors(form.email) }}
@@ -53,7 +53,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                    {{ form_widget(form.password.first, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe', 'data-validate': 'true'}}) }}
+                    {{ form_widget(form.password.first, {'attr': {'class': 'form-control', 'placeholder': 'Password', 'data-validate': 'true'}}) }}
                 </div>
                 <div class="invalid-feedback mt-1"></div>
                 {{ form_errors(form.password.first) }}
@@ -62,7 +62,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                    {{ form_widget(form.password.second, {'attr': {'class': 'form-control', 'placeholder': 'Confirmer mot de passe', 'data-validate': 'true'}}) }}
+                    {{ form_widget(form.password.second, {'attr': {'class': 'form-control', 'placeholder': 'Confirm Password', 'data-validate': 'true'}}) }}
                 </div>
                 <div class="invalid-feedback mt-1"></div>
                 {{ form_errors(form.password.second) }}
@@ -71,7 +71,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                    {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control', 'placeholder': 'Date de naissance', 'data-validate': 'true'}}) }}
+                    {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control', 'placeholder': 'Date of Birth', 'data-validate': 'true'}}) }}
                 </div>
                 <div class="invalid-feedback mt-1"></div>
                 {{ form_errors(form.dateNaissance) }}
@@ -79,22 +79,22 @@
 
             <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-user-plus me-2"></i>S'inscrire
+                    <i class="fas fa-user-plus mr-2"></i>Sign Up
                 </button>
             </div>
 
             <div class="divider">
-                <span>Déjà membre ?</span>
+                <span>Already a member?</span>
             </div>
 
             <div class="d-grid">
                 <a href="{{ path('app_login') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                    <i class="fas fa-sign-in-alt mr-2"></i>Log In
                 </a>
             </div>
 
             <div class="footer-text">
-                En continuant, vous acceptez nos <a href="#">Conditions d'utilisation</a> et notre <a href="#">Politique de confidentialité</a>.
+                By continuing, you agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.
             </div>
 
         {{ form_end(form) }}
@@ -301,10 +301,10 @@
                 if (name === 'nom' || name === 'prenom') {
                     if (!input.value.trim()) {
                         input.classList.add('is-invalid');
-                        errorElement.textContent = `Le ${name} est requis.`;
+                        errorElement.textContent = `${name === 'nom' ? 'Last Name' : 'First Name'} is required.`;
                     } else if (input.value.length > 50) {
                         input.classList.add('is-invalid');
-                        errorElement.textContent = `Le ${name} ne peut dépasser 50 caractères.`;
+                        errorElement.textContent = `${name === 'nom' ? 'Last Name' : 'First Name'} cannot exceed 50 characters.`;
                     } else {
                         input.classList.remove('is-invalid');
                     }
@@ -312,10 +312,10 @@
                     const email = input.value.trim();
                     if (!email) {
                         input.classList.add('is-invalid');
-                        errorElement.textContent = 'L\'email est requis.';
+                        errorElement.textContent = 'Email is required.';
                     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                         input.classList.add('is-invalid');
-                        errorElement.textContent = 'Veuillez entrer un email valide.';
+                        errorElement.textContent = 'Please enter a valid email address.';
                     } else {
                         try {
                             const response = await fetch('{{ path('api_check_email') }}', {
@@ -326,13 +326,13 @@
                             const data = await response.json();
                             if (data.exists) {
                                 input.classList.add('is-invalid');
-                                errorElement.textContent = 'Cet email est déjà utilisé.';
+                                errorElement.textContent = 'This email is already in use.';
                             } else {
                                 input.classList.remove('is-invalid');
                             }
                         } catch (e) {
                             input.classList.add('is-invalid');
-                            errorElement.textContent = 'Erreur lors de la vérification de l\'email.';
+                            errorElement.textContent = 'Error verifying email.';
                         }
                     }
                 } else if (name === 'password') {
@@ -341,19 +341,19 @@
                     if (!input.value) {
                         input.classList.add('is-invalid');
                         errorElement.textContent = input.id.includes('second') ? 
-                            'La confirmation du mot de passe est requise.' : 
-                            'Le mot de passe est requis.';
+                            'Password confirmation is required.' : 
+                            'Password is required.';
                     } else if (input.value.length < 8) {
                         input.classList.add('is-invalid');
-                        errorElement.textContent = 'Le mot de passe doit contenir au moins 8 caractères.';
+                        errorElement.textContent = 'Password must be at least 8 characters long.';
                     } else if (input.id.includes('second') && password1 !== password2) {
                         input.classList.add('is-invalid');
-                        errorElement.textContent = 'Les mots de passe ne correspondent pas.';
+                        errorElement.textContent = 'Passwords do not match.';
                     } else if (input.id.includes('first') && password2 && password1 !== password2) {
                         const secondInput = document.querySelector('#sportif_password_second');
                         secondInput.classList.add('is-invalid');
                         secondInput.closest('.mb-3').querySelector('.invalid-feedback').textContent = 
-                            'Les mots de passe ne correspondent pas.';
+                            'Passwords do not match.';
                         input.classList.remove('is-invalid');
                     } else {
                         input.classList.remove('is-invalid');
@@ -366,7 +366,7 @@
                 } else if (name === 'dateNaissance') {
                     if (!input.value) {
                         input.classList.add('is-invalid');
-                        errorElement.textContent = 'La date de naissance est requise.';
+                        errorElement.textContent = 'Date of Birth is required.';
                     } else {
                         const birthDate = new Date(input.value);
                         const today = new Date();
@@ -377,7 +377,7 @@
                         }
                         if (age < 12) {
                             input.classList.add('is-invalid');
-                            errorElement.textContent = 'Vous devez avoir au moins 12 ans.';
+                            errorElement.textContent = 'You must be at least 12 years old.';
                         } else {
                             input.classList.remove('is-invalid');
                         }
