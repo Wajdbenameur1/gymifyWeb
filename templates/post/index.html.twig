@@ -92,6 +92,23 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
              <!-- Modal Bootstrap pour les commentaires version Instagram -->
 <div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -137,7 +154,7 @@
         <form 
         action="{{ path('app_comment_new', { postId: post.id }) }}" 
         method="POST" 
-        class="modal-footer d-flex"
+        class="modal-footer d-flex comment-form"
       >
         <input 
           type="text" 
@@ -157,7 +174,14 @@
 </div>
 
 
-              
+
+
+
+
+
+
+
+
 
 
 
@@ -168,6 +192,125 @@
     class="btn btn-secondary"
   >Edit</a>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  {% block javascripts %}
+  {{ parent() }}
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.comment-form').forEach(form => {
+        // n’attacher le handler qu’une seule fois
+        if (form.dataset.ajaxBound) return;
+        form.dataset.ajaxBound = '1';
+    
+        form.addEventListener('submit', async e => {
+          e.preventDefault();
+    
+          const url  = form.action;
+          const data = new URLSearchParams(new FormData(form));
+    
+          try {
+            const resp = await fetch(url, {
+              method: 'POST',
+              headers: { 'X-Requested-With': 'XMLHttpRequest' },
+              body: data
+            });
+    
+            if (!resp.ok) {
+              // pour voir l’erreur renvoyée par Symfony
+              const err = await resp.json().catch(() => null);
+              throw new Error(err?.error || `HTTP ${resp.status}`);
+            }
+    
+            const json = await resp.json();
+            console.log('Nouveau commentaire reçu :', json);
+    
+            // 1) trouver le conteneur
+            const container = form
+              .closest('.modal-content')
+              .querySelector('.modal-body');
+    
+            // 2) supprimer le message “Aucun commentaire”
+            const emptyMsg = container.querySelector('p.text-center');
+            if (emptyMsg) emptyMsg.remove();
+    
+            // 3) créer l’élément HTML du commentaire
+            const div = document.createElement('div');
+            div.className = 'd-flex align-items-start mb-3';
+            div.innerHTML = `
+              <img src="${json.user.avatar}"
+                   alt="Avatar de ${json.user.nom}"
+                   class="rounded-circle me-3"
+                   style="width:40px;height:40px;object-fit:cover;">
+              <div>
+                <strong>${json.user.nom}</strong>
+                <p class="mb-1">${json.content}</p>
+                <small class="text-muted">${json.createdAt}</small>
+              </div>
+            `;
+    
+            // 4) l’ajouter à la fin *et* défiler jusqu’en bas pour le voir
+            container.append(div);
+            container.scrollTop = container.scrollHeight;
+    
+            // 5) vider et refocaliser le champ
+            const input = form.querySelector('input[name="content"]');
+            input.value = '';
+            input.focus();
+    
+          } catch (err) {
+            console.error('Erreur AJAX commentaire :', err);
+            // ici vous pouvez afficher un toast ou un message d’erreur à l’utilisateur
+          }
+        });
+      });
+    });
+    </script>
+   
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  <!-- Bouton pour déclencher le modal -->
 <button 
 class="btn btn-danger ms-2" 
@@ -177,7 +320,7 @@ data-bs-target="#deleteModal{{ post.id }}"
 Delete
 </button>
 
-<!-- Modal Bootstrap -->
+<!-- Modal Bootstrap DELETe-->
 <div 
   class="modal fade" 
   id="deleteModal{{ post.id }}" 
@@ -209,6 +352,21 @@ Delete
         >
           Annuler
         </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <form 
           method="post" 
           action="{{ path('app_post_delete', { id: post.id }) }}"
@@ -255,7 +413,6 @@ Delete
     {% endfor %}
   </div>
 </div>
-
 
 
 {% endblock %}
