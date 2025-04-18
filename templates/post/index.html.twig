@@ -1,535 +1,322 @@
 {% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
-{% block title %}Post index{% endblock %}
+{% block title %}Posts{% endblock %}
 
 {% block stylesheet %}
 <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 {% endblock %}
 
 {% block body %}
-
-
 <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item">Blogs</li>
-    <li class="breadcrumb-item active" aria-current="page"><a href="#">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_post_index') }}">Blogs</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Home</li>
   </ol>
 </nav>
 
-
 <h1 class="mb-4">Posts</h1>
-
-<a href="{{ path('app_post_new') }}" class="btn btn-success btn-rounded">
-  Create new post
-</a>
-<br> <br>
+<a href="{{ path('app_post_new') }}" class="btn btn-success btn-rounded">Create new post</a>
+<br><br>
 <div class="container">
   <div class="row">
     {% for post in posts %}
       <div class="col-12 col-md-6 mb-4">
         <div class="card card-post card-round h-100">
-          {# Image du post s’il y en a #}
           {% if post.imageUrl %}
-            <img 
-              class="card-img-top" 
-              src="{{ asset(post.webPath) }}" 
-              alt="Image du post {{ post.title }}"
-            />
+            <img class="card-img-top" src="{{ asset(post.webPath) }}" alt="Image du post {{ post.title }}" />
           {% endif %}
-
           <div class="card-body d-flex flex-column">
             <div class="d-flex align-items-center mb-2">
-              {# Avatar de l’utilisateur #}
-              <div class="avatar">
-                <img
-                  src="{{ post.user.imageUrl
-                           ? asset(post.user.imageUrl)
-                           : asset('img/screen/user.png') }}"
-                  alt="Avatar de {{ post.user.nom }}"
-                  class="avatar-img rounded-circle"
-                />
-              </div>
-              <div class="info-post ms-2">
+              <img src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}" alt="Avatar de {{ post.user.nom }}" class="avatar-img rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+              <div class="ms-2">
                 <p class="username mb-0">{{ post.user.nom }}</p>
-                <p class="date text-muted mb-0">
-                  {{ post.createdAt ? post.createdAt|date('d M Y') : '—' }}
-                </p>
+                <p class="date text-muted mb-0">{{ post.createdAt ? post.createdAt|date('d M Y') : '—' }}</p>
               </div>
             </div>
-
             <div class="separator-solid mb-2"></div>
-
-            <p class="card-category text-info mb-1">
-              <a href="#">new</a>
-            </p>
-
             <h5 class="card-title">
-              <a href="{{ path('app_post_show', { id: post.id }) }}">
-                {{ post.title }}
-              </a>
+              <a href="{{ path('app_post_show',{id:post.id}) }}">{{ post.title }}</a>
             </h5>
-
-            <p class="card-text flex-grow-1">
-              {# Affichage du contenu avec HTML rendu #}
-              {{ post.content|raw }} {# Assurez-vous que post.content est bien stocké comme du HTML valide #}
-            </p>
-
+            <p class="card-text flex-grow-1">{{ post.content|raw }}</p>
             <div class="mt-auto">
-              <a href="{{ path('app_post_show', { id: post.id }) }}" class="btn btn-primary">
-                  Show
-              </a>
-          
-              <button 
-                  type="button" 
-                  class="btn btn-primary" 
-                  data-bs-toggle="modal" 
-                  data-bs-target="#commentsModal{{ post.id }}">
-                  {{ post.comments|length }} Commentaires
-              </button>
+              <a href="{{ path('app_post_show',{id:post.id}) }}" class="btn btn-primary">Show</a>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentsModal{{ post.id }}">{{ post.comments|length }} Commentaires</button>
+              {% if post.user == app.user %}
+                <a href="{{ path('app_post_edit',{id:post.id}) }}" class="btn btn-secondary ms-2">Edit</a>
+                <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">Delete</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
 
+        {# Modal commentaires #}
+        <div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content" style="border-radius:10px;overflow:hidden;">
+              <div class="modal-body p-0 d-flex" style="height:80vh;">
 
+                <div class="col-md-7 d-none d-md-block bg-dark">
+                  {% if post.imageUrl %}
+                    <img src="{{ asset(post.webPath) }}" class="w-100 h-100" style="object-fit:cover;" alt="Post image">
+                  {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white">Pas d'image</div>
+                  {% endif %}
+                </div>
 
+                <div class="col-md-5 d-flex flex-column bg-white">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-             <!-- Modal Bootstrap pour les commentaires version Instagram -->
-             <div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-content" style="border-radius: 10px; overflow: hidden;">
-                  <div class="modal-body p-0 d-flex" style="height: 80vh;">
-                    
-                    <!-- Colonne gauche : Image du post -->
-                    <div class="col-md-7 d-none d-md-block bg-dark">
-                      {% if post.imageUrl %}
-                      <img src="{{ asset(post.webPath) }}" class="w-100 h-100" style="object-fit: cover;" alt="Post image">
-                      {% else %}
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white">
-                          Pas d'image
+                  <div class="d-flex align-items-center p-3 border-bottom">
+                    <img src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                    <strong>{{ post.user.nom }}</strong>
+                  </div>
+                  <div class="p-3 border-bottom">
+                    <h5>{{ post.title }}</h5>
+                    <p class="mb-1">{{ post.content|raw }}</p>
+                    <small class="text-muted">{{ post.createdAt ? post.createdAt|date('d M Y à H:i') : '—' }}</small>
+                  </div>
+                  <div class="flex-grow-1 overflow-auto p-3" style="min-height:0;">
+                    {% for comment in post.comments %}
+                      <div class="d-flex align-items-start mb-3">
+                        <img src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                        <div class="w-100">
+                          <strong>{{ comment.user.nom }}</strong>
+                          <p class="mb-1">{{ comment.content }}</p>
+                          <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+                          {% if comment.user == app.user %}
+                            <div class="mt-1">
+                              <a href="{{ path('app_comment_edit',{id:comment.id}) }}" class="btn btn-sm btn-link p-0 me-2">Modifier</a>
+                              <form action="{{ path('app_comment_delete',{id:comment.id}) }}" method="post" class="js-delete-comment-form d-inline" data-post-id="{{ post.id }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                              </form>
+                            </div>
+                          {% endif %}
                         </div>
-                      {% endif %}
-                    </div>
-            
-                    <!-- Colonne droite : Commentaires -->
-                    <div class="col-md-5 d-flex flex-column bg-white">
-                      
-                      <!-- Header -->
-                      <div class="d-flex align-items-center p-3 border-bottom">
-                        <img 
-                          src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}" 
-                          class="rounded-circle me-2" 
-                          style="width: 32px; height: 32px; object-fit: cover;"
-                        >
-                        <strong>{{ post.user.nom }}</strong>
                       </div>
-            
-                      <!-- Commentaires -->
-                      <div class="flex-grow-1 p-3 overflow-auto" style="min-height: 0;">
-                        {% for comment in post.comments %}
-                          <div class="d-flex align-items-start mb-3">
-                            <img 
-                              src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}" 
-                              alt="Avatar" 
-                              class="rounded-circle me-2" 
-                              style="width: 32px; height: 32px; object-fit: cover;"
-                            >
-                            <div>
-                              <strong>{{ comment.user.nom }}</strong>
-                              <p class="mb-1">{{ comment.content }}</p>
-                              <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
-                            
-                            
-                            
-
-
-
-
-{# === Ici : boutons Modifier/Supprimer pour l’auteur du commentaire === #}
-{% if comment.user == app.user %}
-<div class="mt-1">
-  <a 
-    href="{{ path('app_comment_edit', { id: comment.id }) }}" 
-    class="btn btn-sm btn-link p-0 me-2"
-  >
-    Modifier
-  </a>
-  
-  <form 
-    action="{{ path('app_comment_delete', { id: comment.id }) }}"
-    method="post"
-    class="delete-comment-form"
-    data-comment-id="{{ comment.id }}"
-    onsubmit="return handleDeleteComment(event)"
+                    {% else %}
+                      <p class="text-center text-muted">Aucun commentaire.</p>
+                    {% endfor %}
+                  </div>
+                  <div class="border-top p-3 d-flex align-items-center">
+                    <img src="{{ app.user.imageUrl ? asset(app.user.imageUrl) : asset('img/screen/user.png') }}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                   
+                   
+                   
+                    <form 
+    action="{{ path('app_comment_new',{postId:post.id}) }}" 
+    method="post" 
+    class="js-add-comment-form w-100 d-flex" 
+    data-post-id="{{ post.id }}"
 >
-    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
-    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+    {# champ CSRF obligatoire #}
+    <input type="hidden" name="_token" 
+           value="{{ csrf_token('comment' ~ post.id) }}">
+    <input 
+        type="text" 
+        name="content" 
+        class="form-control me-2 border-0 bg-light" 
+        placeholder="Ajouter un commentaire..." 
+        required
+    >
+    <button type="submit" class="btn btn-primary">
+        Ajouter
+    </button>
 </form>
 
 
 
 
-
-</div>
-{% endif %}
-
-
-
-
-                            
-                            
-                            </div>
-                          </div>
-                        {% else %}
-                          <p class="text-center text-muted">Aucun commentaire pour ce post.</p>
-                        {% endfor %}
-                      </div>
-                      
-
-                      
-
-
-
-
-                      <!-- Formulaire ajout -->
-                      <div class="border-top p-3">
-                        <div id="comment-errors-{{ post.id }}" class="text-danger" style="display: none;"></div>
-
-
-                        <form 
-                          action="{{ path('app_comment_new', { postId: post.id }) }}" 
-                          method="POST" 
-                          class="d-flex align-items-center"
-                          data-post-id="{{ post.id }}"  
-
-                        >
-                          <img 
-                            src="{{ app.user.imageUrl ? asset(app.user.imageUrl) : asset('img/screen/user.png') }}" 
-                            alt="Votre avatar" 
-                            class="rounded-circle me-2" 
-                            style="width: 32px; height: 32px; object-fit: cover;"
-                          >
-                          <input 
-                            type="text" 
-                            name="content" 
-                            class="form-control me-2 border-0 bg-light" 
-                            placeholder="Ajouter un commentaire..." 
-                            required
-                          >
-                          <button type="submit" class="btn btn-primary">Publier</button>
-                        </form>
-                      </div>
-            
-                    </div>
                   </div>
                 </div>
+
               </div>
-            </div>
-            
-
-
-
-
-
-
-
-
-
-
-
-
-              
-              {% if post.user == app.user %}
-  <a 
-    href="{{ path('app_post_edit', { id: post.id }) }}" 
-    class="btn btn-secondary"
-  >Edit</a>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- <!-- Bouton pour déclencher le modal -->
-<button 
-class="btn btn-danger ms-2" 
-data-bs-toggle="modal" 
-data-bs-target="#deleteModal{{ post.id }}"
->
-Delete
-</button>
-
-<!-- Modal Bootstrap DELETe-->
-<div 
-  class="modal fade" 
-  id="deleteModal{{ post.id }}" 
-  tabindex="-1" 
-  aria-labelledby="deleteModalLabel{{ post.id }}" 
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center">
-      
-      <div class="modal-header justify-content-center border-0">
-        <h5 class="modal-title w-100" id="deleteModalLabel{{ post.id }}">
-          <i class="fas fa-trash-alt fa-3x text-danger"></i>
-        </h5>
-      </div>
-
-      <div class="modal-body">
-        <p class="mb-2">
-          Es-tu sûr(e) de vouloir supprimer ce post :
-        </p>
-        <p><strong>{{ post.title }}</strong> ?</p>
-      </div>
-
-      <div class="modal-footer justify-content-center">
-        <button 
-          type="button" 
-          class="btn btn-secondary" 
-          data-bs-dismiss="modal"
-        >
-          Annuler
-        </button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        {% for comment in post.comments %}
-        <form 
-          action="{{ path('app_comment_delete', { id: comment.id }) }}" 
-          method="post" 
-          class="d-inline delete-comment-form"
-          data-post-id="{{ post.id }}"
-          data-comment-id="{{ comment.id }}"
-        >
-          <input 
-            type="hidden" 
-            name="_token" 
-            value="{{ csrf_token('delete' ~ comment.id) }}"
-          >
-          <button 
-            type="submit" 
-            class="btn btn-sm btn-link text-danger p-0"
-          >
-            Supprimer
-          </button>
-        </form>
-      {% endfor %}
-      
-
-
-
-
-
-
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-{% endif %}
-
-
-
-
             </div>
           </div>
         </div>
+
+        {# Modal suppression du post #}
+        {% if post.user == app.user %}
+        <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1" aria-labelledby="deletePostLabel{{ post.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+              <div class="modal-header border-0 justify-content-center">
+                <h5 class="modal-title" id="deletePostLabel{{ post.id }}"><i class="fas fa-trash-alt fa-3x text-danger"></i></h5>
+              </div>
+              <div class="modal-body">
+                <p>Es-tu sûr(e) de vouloir supprimer ce post :</p>
+                <p><strong>{{ post.title }}</strong> ?</p>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form action="{{ path('app_post_delete',{id:post.id}) }}" method="post" class="js-delete-post-form d-inline">
+                  <input type="hidden" name="_token" value="{{ csrf_token('delete-post' ~ post.id) }}">
+                  <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
       </div>
     {% else %}
-      <div class="col-12">
-        <p class="text-center">Aucun post trouvé.</p>
-      </div>
+      <div class="col-12"><p class="text-center text-muted">Aucun post trouvé.</p></div>
     {% endfor %}
   </div>
 </div>
-
-
-{% endblock %} 
-
-
-
-
-
+{% endblock %}
 
 {% block javascripts %}
-  {{ parent() }}
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
+{{ parent() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // suppression AJAX des commentaires
+    document.querySelectorAll('.js-delete-comment-form').forEach(function(form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return;
+        var postId = this.dataset.postId;
+        var submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        fetch(this.action, { method:'POST', body: new FormData(this) })
+          .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+          .then(() => {
+            var div = form.closest('.d-flex.align-items-start.mb-3'); if (div) div.remove();
+            var btn = document.querySelector(`[data-bs-target="#commentsModal${postId}"]`);
+            if (btn) { let count = parseInt(btn.innerText) - 1; btn.innerText = count + ' Commentaire' + (count>1?'s':''); }
+          })
+          .catch(()=> alert('Erreur suppression commentaire'))
+          .finally(()=> submitBtn.disabled = false);
+      });
+    });
+  });
+</script>
 
-      // 1) Code d’ajout de commentaire
-      document.querySelectorAll('form[data-post-id]').forEach(function (form) {
-        form.addEventListener('submit', function (e) {
-          e.preventDefault();
 
-          var formData = new FormData(this);
-          var postId = this.dataset.postId;
-          var submitButton = this.querySelector('button[type="submit"]');
-          submitButton.disabled = true;
-          submitButton.innerText = "Envoi...";
 
-          fetch(
-            "{{ path('app_comment_new', { postId: '__postId__' }) }}"
-              .replace('__postId__', postId),
-            {
-              method: "POST",
-              body: formData,
+{% block javascripts_head %}
+        <script src="{{ asset('js/webfont.min.js') }}"></script>
+        <script>
+          WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+              families: [
+                "Font Awesome 5 Solid",
+                "Font Awesome 5 Regular",
+                "Font Awesome 5 Brands",
+                "simple-line-icons",
+              ],
+              urls: ["{{ asset('css/fonts.min.css') }}"]
+            },
+            active: function() {
+              sessionStorage.fonts = true;
             }
-          )
-            .then(response => {
+          });
+        </script>
+    {% endblock %}
+</head>
+<body>
+  <div class="wrapper d-flex">  {# bootstrap flex-container #}
+        {% include 'sportifdashboard/sidebar.html.twig' %}
+        
+        <div class="main-panel flex-grow-1">
+           {# on peut garder container-fluid ou container selon l’effet désiré #}
+            
+            
+           <div class="container-fluid">
+                <div class="page-inner">
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
+
+            
+            {% include 'sportifdashboard/footer.html.twig' %}
+        </div>
+    </div>
+
+    {% include 'admin/scripts.html.twig' %}
+    
+    {% block javascripts %}
+        <script src="{{ asset('js/script.js') }}"></script>
+
+
+
+        <script>
+          // 1) On log pour s'assurer que notre script est bien chargé
+          console.log('💬 Comment AJAX script loaded');
+        
+          // 2) Event delegation : on capte TOUTES les soumissions de form sur <body>
+          document.body.addEventListener('submit', async function(e) {
+            // Si ce n'est pas un form de commentaire, on quitte
+            if (!e.target.classList.contains('js-add-comment-form')) {
+              return;
+            }
+        
+            e.preventDefault();  // Stoppe absolument la soumission classique
+            const form   = e.target;
+            const postId = form.dataset.postId;
+            console.log('📝 Submitting comment form for post', postId);
+        
+            const formData = new FormData(form);
+        
+            try {
+              const response = await fetch(form.action, {
+                method: 'POST',
+                credentials: 'same-origin',              // ← envoie bien les cookies de session/CSRF
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+              });
+        
+              console.log('Fetch response status:', response.status);
+        
+              let data = null;
+              // on essaie de parser même si le content-type n'est pas strictement JSON
+              try { data = await response.json(); } catch(_){}
+        
               if (!response.ok) {
-                return response.json().then(data => { throw data; });
+                console.error('❌ Comment API Error:', data);
+                const msg = data?.errors?.join("\n") || `Erreur ${response.status}`;
+                alert(msg);
+                return;
               }
-              return response.json();
-            })
-            .then(data => {
-              var commentsSection = document.querySelector(
-                `#commentsModal${postId} .flex-grow-1`
-              );
-              var commentHtml = `
+        
+              // 3) Tout est OK : on insère le nouveau commentaire dans la liste
+              const html = `
                 <div class="d-flex align-items-start mb-3">
-                  <img src="${data.user.avatar}" alt="Avatar"
-                       class="rounded-circle me-2"
+                  <img src="${data.user.avatar}" 
+                       class="rounded-circle me-2" 
                        style="width:32px;height:32px;object-fit:cover;">
-                  <div>
+                  <div class="w-100">
                     <strong>${data.user.nom}</strong>
                     <p class="mb-1">${data.content}</p>
                     <small class="text-muted">${data.createdAt}</small>
                   </div>
                 </div>
               `;
-              commentsSection.insertAdjacentHTML('afterbegin', commentHtml);
+              const commentsContainer = form.closest('.modal-content')
+                                            .querySelector('.flex-grow-1');
+              commentsContainer.insertAdjacentHTML('afterbegin', html);
+        
               form.reset();
-            })
-            .catch(error => {
-              var errorDiv = document.getElementById("comment-errors-" + postId);
-              errorDiv.innerHTML = error.errors
-                ? error.errors.join('<br>')
-                : 'refresh';
-              errorDiv.style.display = 'block';
-            })
-            .finally(() => {
-              submitButton.disabled = false;
-              submitButton.innerText = "Publier";
-            });
-        });
-      });
-
-      // 2) Code de suppression AJAX de commentaire
-      document.querySelectorAll('.delete-comment-form').forEach(function (form) {
-        form.addEventListener('submit', function (e) {
-          e.preventDefault();
-          if (!confirm('Voulez‑vous vraiment supprimer ce commentaire ?')) {
-            return;
-          }
-
-          var postId = this.dataset.postId;
-          var formData = new FormData(this);
-          var submitBtn = this.querySelector('button[type="submit"]');
-          submitBtn.disabled = true;
-
-          fetch(this.action, {
-            method: 'POST',
-            body: formData,
-          })
-            .then(response => {
-              if (!response.ok) throw new Error('Erreur suppression');
-              return response.text();
-            })
-            .then(() => {
-              // Supprime la balise contenant le commentaire
-              var commentDiv = form.closest('.d-flex.align-items-start.mb-3');
-              if (commentDiv) commentDiv.remove();
-
-              // Met à jour le compteur de commentaires sur le bouton du modal
-              var btnModal = document.querySelector(
-                `[data-bs-target="#commentsModal${postId}"]`
-              );
-              if (btnModal) {
-                var count = parseInt(btnModal.innerText) - 1;
-                btnModal.innerText =
-                  count + ' Commentaire' + (count > 1 ? 's' : '');
+        
+              // 4) On met à jour le compteur sur le bouton du modal
+              const btn = document.querySelector(`[data-bs-target="#commentsModal${postId}"]`);
+              if (btn) {
+                let count = parseInt(btn.innerText) + 1;
+                btn.innerText = count + ' Commentaire' + (count>1?'s':'');
               }
-            })
-            .catch(err => {
-              console.error(err);
-              alert('Impossible de supprimer le commentaire.');
-            })
-            .finally(() => {
-              submitBtn.disabled = false;
-            });
-        });
-      });
+        
+            } catch (err) {
+              console.error('🚨 Unexpected fetch error:', err);
+              alert("Erreur lors de l'envoi du commentaire.");
+            }
+          });
+        </script>
+          
 
-    }); // fin DOMContentLoaded
-  </script>
-
+    {% endblock %}
 
 
   
-    
 {% endblock %}

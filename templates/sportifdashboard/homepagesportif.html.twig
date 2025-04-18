@@ -72,6 +72,81 @@
     {% block javascripts %}
         <script src="{{ asset('js/script.js') }}"></script>
 
+
+
+        <script>
+          // 1) On log pour s'assurer que notre script est bien chargé
+          console.log('💬 Comment AJAX script loaded');
+        
+          // 2) Event delegation : on capte TOUTES les soumissions de form sur <body>
+          document.body.addEventListener('submit', async function(e) {
+            // Si ce n'est pas un form de commentaire, on quitte
+            if (!e.target.classList.contains('js-add-comment-form')) {
+              return;
+            }
+        
+            e.preventDefault();  // Stoppe absolument la soumission classique
+            const form   = e.target;
+            const postId = form.dataset.postId;
+            console.log('📝 Submitting comment form for post', postId);
+        
+            const formData = new FormData(form);
+        
+            try {
+              const response = await fetch(form.action, {
+                method: 'POST',
+                credentials: 'same-origin',              // ← envoie bien les cookies de session/CSRF
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+              });
+        
+              console.log('Fetch response status:', response.status);
+        
+              let data = null;
+              // on essaie de parser même si le content-type n'est pas strictement JSON
+              try { data = await response.json(); } catch(_){}
+        
+              if (!response.ok) {
+                console.error('❌ Comment API Error:', data);
+                const msg = data?.errors?.join("\n") || `Erreur ${response.status}`;
+                alert(msg);
+                return;
+              }
+        
+              // 3) Tout est OK : on insère le nouveau commentaire dans la liste
+              const html = `
+                <div class="d-flex align-items-start mb-3">
+                  <img src="${data.user.avatar}" 
+                       class="rounded-circle me-2" 
+                       style="width:32px;height:32px;object-fit:cover;">
+                  <div class="w-100">
+                    <strong>${data.user.nom}</strong>
+                    <p class="mb-1">${data.content}</p>
+                    <small class="text-muted">${data.createdAt}</small>
+                  </div>
+                </div>
+              `;
+              const commentsContainer = form.closest('.modal-content')
+                                            .querySelector('.flex-grow-1');
+              commentsContainer.insertAdjacentHTML('afterbegin', html);
+        
+              form.reset();
+        
+              // 4) On met à jour le compteur sur le bouton du modal
+              const btn = document.querySelector(`[data-bs-target="#commentsModal${postId}"]`);
+              if (btn) {
+                let count = parseInt(btn.innerText) + 1;
+                btn.innerText = count + ' Commentaire' + (count>1?'s':'');
+              }
+        
+            } catch (err) {
+              console.error('🚨 Unexpected fetch error:', err);
+              alert("Erreur lors de l'envoi du commentaire.");
+            }
+          });
+        </script>
+          
+
     {% endblock %}
 
 
