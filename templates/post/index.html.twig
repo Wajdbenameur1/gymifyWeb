@@ -110,69 +110,86 @@
 
 
              <!-- Modal Bootstrap pour les commentaires version Instagram -->
-<div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title" id="commentsModalLabel{{ post.id }}">Commentaires</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body d-flex flex-column" style="max-height: 500px; overflow-y: auto;">
-        <!-- Liste des commentaires -->
-        {% for comment in post.comments %}
-          <div class="d-flex align-items-start mb-3">
-            <img 
-              src="{{ comment.user.imageUrl 
-                       ? asset(comment.user.imageUrl) 
-                       : asset('img/screen/user.png') }}" 
-              alt="Avatar de {{ comment.user.nom }}" 
-              class="rounded-circle me-3" 
-              style="width: 40px; height: 40px; object-fit: cover;"
-            >
-            <div>
-              <strong>{{ comment.user.nom }}</strong>
-              <p class="mb-1">{{ comment.content }}</p>
-              <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+             <div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content" style="border-radius: 10px; overflow: hidden;">
+                  <div class="modal-body p-0 d-flex" style="height: 80vh;">
+                    
+                    <!-- Colonne gauche : Image du post -->
+                    <div class="col-md-7 d-none d-md-block bg-dark">
+                      {% if post.imageUrl %}
+                      <img src="{{ asset(post.webPath) }}" class="w-100 h-100" style="object-fit: cover;" alt="Post image">
+                      {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white">
+                          Pas d'image
+                        </div>
+                      {% endif %}
+                    </div>
+            
+                    <!-- Colonne droite : Commentaires -->
+                    <div class="col-md-5 d-flex flex-column bg-white">
+                      
+                      <!-- Header -->
+                      <div class="d-flex align-items-center p-3 border-bottom">
+                        <img 
+                          src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}" 
+                          class="rounded-circle me-2" 
+                          style="width: 32px; height: 32px; object-fit: cover;"
+                        >
+                        <strong>{{ post.user.nom }}</strong>
+                      </div>
+            
+                      <!-- Commentaires -->
+                      <div class="flex-grow-1 p-3 overflow-auto" style="min-height: 0;">
+                        {% for comment in post.comments %}
+                          <div class="d-flex align-items-start mb-3">
+                            <img 
+                              src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}" 
+                              alt="Avatar" 
+                              class="rounded-circle me-2" 
+                              style="width: 32px; height: 32px; object-fit: cover;"
+                            >
+                            <div>
+                              <strong>{{ comment.user.nom }}</strong>
+                              <p class="mb-1">{{ comment.content }}</p>
+                              <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+                            </div>
+                          </div>
+                        {% else %}
+                          <p class="text-center text-muted">Aucun commentaire pour ce post.</p>
+                        {% endfor %}
+                      </div>
+            
+                      <!-- Formulaire ajout -->
+                      <div class="border-top p-3">
+                        <form 
+                          action="{{ path('app_comment_new', { postId: post.id }) }}" 
+                          method="POST" 
+                          class="d-flex align-items-center"
+                        >
+                          <img 
+                            src="{{ app.user.imageUrl ? asset(app.user.imageUrl) : asset('img/screen/user.png') }}" 
+                            alt="Votre avatar" 
+                            class="rounded-circle me-2" 
+                            style="width: 32px; height: 32px; object-fit: cover;"
+                          >
+                          <input 
+                            type="text" 
+                            name="content" 
+                            class="form-control me-2 border-0 bg-light" 
+                            placeholder="Ajouter un commentaire..." 
+                            required
+                          >
+                          <button type="submit" class="btn btn-primary">Publier</button>
+                        </form>
+                      </div>
+            
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        {% else %}
-          <p class="text-center">Aucun commentaire pour ce post.</p>
-        {% endfor %}
-      </div>
-
-      <!-- Formulaire d'ajout de commentaire -->
-      <div class="modal-footer border-0 d-flex align-items-center">
-        <img 
-          src="{{ app.user.imageUrl 
-                   ? asset(app.user.imageUrl) 
-                   : asset('img/screen/user.png') }}" 
-          alt="Votre avatar" 
-          class="rounded-circle me-2" 
-          style="width: 40px; height: 40px; object-fit: cover;"
-        >
-        <form 
-        action="{{ path('app_comment_new', { postId: post.id }) }}" 
-        method="POST" 
-        class="modal-footer d-flex comment-form"
-      >
-        <input 
-          type="text" 
-          name="content"                   
-          placeholder="Ajouter un commentaire..." 
-          class="form-control me-2" 
-          required
-        >
-        <button type="submit" class="btn btn-primary">
-          Add new comment 
-        </button>
-      </form>
-      
-      </div>
-    </div>
-  </div>
-</div>
-
+            
 
 
 
