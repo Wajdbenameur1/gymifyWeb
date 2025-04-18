@@ -12,11 +12,12 @@
             --secondary-color: #6c757d;
             --light-bg: #f8f9fa;
             --danger-color: #dc3545;
+            --success-color: #28a745;
         }
         
         .container-fluid {
             max-width: 1400px;
-            padding: 1.5rem 1rem;
+            padding: 2rem;
         }
         
         .text-gradient {
@@ -34,11 +35,19 @@
             border-radius: 1rem;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             background: rgba(255, 255, 255, 0.95);
+            border: none;
+            overflow: hidden;
         }
         
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem 2rem;
         }
         
         .floating-label-group {
@@ -88,35 +97,18 @@
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.2);
         }
         
-        .form-control.is-valid {
-            border-color: #28a745;
-            background-image: none;
-        }
-        
-        .form-control.is-valid:focus {
-            border-color: #28a745;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-        }
-        
-        .form-select.is-valid {
-            border-color: #28a745;
-        }
-        
-        .form-select.is-valid:focus {
-            border-color: #28a745;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-        }
-        
         .invalid-feedback {
             font-size: 0.875rem;
             color: var(--danger-color);
             margin-top: 0.25rem;
             position: relative;
-            display: none;
         }
         
-        .is-invalid ~ .invalid-feedback {
-            display: block;
+        .valid-feedback {
+            font-size: 0.875rem;
+            color: var(--success-color);
+            margin-top: 0.25rem;
+            position: relative;
         }
         
         .btn-primary {
@@ -145,7 +137,8 @@
             display: none;
             border: 2px solid #fff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
+            border-radius: 0.5rem;
+            object-fit: cover;
         }
         
         .remove-image-btn {
@@ -156,17 +149,76 @@
             right: calc(50% - 60px);
             border: 2px solid #fff;
             border-radius: 50%;
-            position: absolute;
+            background-color: var(--danger-color);
+            color: white;
+            font-size: 14px;
+            line-height: 1;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .remove-image-btn:hover {
+            background-color: #c82333;
+            transform: scale(1.1);
         }
         
         .upload-btn {
             transition: all 0.2s ease;
             border-radius: 0.5rem;
+            border: 1px dashed #cbd5e1;
+            background: #f8fafc;
+            padding: 0.75rem 1.5rem;
         }
         
         .upload-btn:hover {
             background-color: var(--primary-color);
             color: #fff;
+            border-color: var(--primary-color);
+        }
+        
+        #map-container {
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        
+        #address-results {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            width: calc(100% - 2rem);
+            border-radius: 0.5rem;
+            max-height: 240px;
+            overflow-y: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: none;
+            margin-top: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .address-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            color: #0f172a;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .address-item:last-child {
+            border-bottom: none;
+        }
+        
+        .address-item:hover {
+            background: #f8fafc;
+            color: var(--primary-color);
         }
         
         .floating-alert {
@@ -183,45 +235,18 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        #map-container {
-            margin-top: 1.5rem;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        .hover-scale {
+            transition: transform 0.2s ease;
         }
         
-        #map {
-            height: 400px;
-            width: 100%;
-        }
-        
-        #address-results {
-            position: absolute;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            width: calc(100% - 2rem);
-            border-radius: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: none;
-            margin-top: 0.5rem;
-        }
-        
-        .address-item {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            font-family: 'Nunito', sans-serif;
-            color: #2d3748;
-            transition: all 0.3s ease;
-        }
-        
-        .address-item:hover {
-            background: var(--primary-color);
-            color: white;
+        .hover-scale:hover {
+            transform: scale(1.05);
         }
         
         @media (max-width: 576px) {
+            .container-fluid {
+                padding: 1.5rem;
+            }
             .card-body {
                 padding: 1.5rem;
             }
@@ -232,6 +257,9 @@
             .preview-image {
                 width: 100px;
                 height: 100px;
+            }
+            .remove-image-btn {
+                right: calc(50% - 50px);
             }
             .floating-alert {
                 min-width: 90%;
@@ -249,7 +277,6 @@
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
@@ -258,7 +285,7 @@
             <h1 class="fw-bold text-gradient">
                 <i class="fas fa-plus me-2"></i>Add New Gym Room
             </h1>
-            <a href="{{ path('admin_salle_index') }}" class="btn btn-outline-secondary rounded-pill hover-scale">
+            <a href="{{ path('admin_salle_index') }}" class="btn btn-outline-primary rounded-pill hover-scale">
                 <i class="fas fa-arrow-left me-2"></i>Back to List
             </a>
         </div>
@@ -267,7 +294,7 @@
             <ol class="breadcrumb bg-white p-3 rounded-3 shadow-sm">
                 <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none"><i class="fas fa-home me-1"></i> Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{{ path('admin_salle_index') }}" class="text-decoration-none"><i class="fas fa-dumbbell me-1"></i> Gym Rooms</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-plus me-1"></i> Add</li>
+                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-plus me-1"></i> Add New</li>
             </ol>
         </nav>
 
@@ -286,10 +313,10 @@
         <div class="card border-0 shadow-sm overflow-hidden rounded-4">
             <div class="card-header bg-gradient-primary text-white py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-dumbbell me-2"></i>New Gym Room Form
+                    <i class="fas fa-dumbbell me-2"></i>Gym Room Details
                 </h5>
                 <div class="badge bg-white text-primary rounded-pill">
-                    <i class="fas fa-info-circle me-1"></i> Required Fields (*)
+                    <i class="fas fa-asterisk me-1"></i> Required Fields
                 </div>
             </div>
             <div class="card-body p-4 p-md-5 bg-light">
@@ -297,20 +324,33 @@
                 
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.nom, {'attr': {'class': 'form-control floating-input' ~ (form.nom.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Name'}}) }}
-                            {{ form_label(form.nom, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.nom) ?: 'Name is required (max 200 characters).' }}
+                        <div class="floating-label-group">
+                            {{ form_widget(form.nom, {'attr': {
+                                'class': 'form-control floating-input',
+                                'placeholder': 'Name',
+                                'required': 'required',
+                                'pattern': '.{3,50}',
+                                'title': 'Name must be between 3 and 50 characters'
+                            }}) }}
+                            {{ form_label(form.nom, 'Name', {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback">
+                                Please provide a valid name (3-50 characters)
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.num_tel, {'attr': {'class': 'form-control floating-input' ~ (form.num_tel.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Phone Number'}}) }}
-                            {{ form_label(form.num_tel, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.num_tel) ?: 'Please enter a valid phone number (e.g., +216 55 325 658).' }}
+                        <div class="floating-label-group">
+                            {{ form_widget(form.num_tel, {'attr': {
+                                'class': 'form-control floating-input',
+                                'placeholder': 'Phone Number',
+                                'required': 'required',
+                                'pattern': '\\+216\\s\\d{2}\\s\\d{3}\\s\\d{3}',
+                                'title': 'Phone number must be in format: +216 XX XXX XXX',
+                                'oninput': 'formatPhoneNumber(this)'
+                            }}) }}
+                            {{ form_label(form.num_tel, 'Phone Number', {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback">
+                                Please provide a valid phone number (+216 XX XXX XXX)
                             </div>
                         </div>
                     </div>
@@ -318,70 +358,101 @@
 
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control floating-input' ~ (form.email.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Email'}}) }}
-                            {{ form_label(form.email, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.email) ?: 'Please enter a valid email address (e.g., username@domain.com, max 100 characters).' }}
+                        <div class="floating-label-group">
+                            {{ form_widget(form.email, {'attr': {
+                                'class': 'form-control floating-input',
+                                'placeholder': 'Email',
+                                'required': 'required',
+                                'type': 'email',
+                                'pattern': '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
+                                'title': 'Email must be in format: a@g.c'
+                            }}) }}
+                            {{ form_label(form.email, 'Email', {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback">
+                                Please provide a valid email (format: a@g.c)
+                            </div>
+                            <div class="valid-feedback">
+                                <i class="fas fa-check-circle me-1"></i> Valid email
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-floating floating-label-group">
-                            {{ form_widget(form.responsable, {'attr': {'class': 'form-select floating-input' ~ (form.responsable.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Manager'}}) }}
-                            {{ form_label(form.responsable, null, {'label_attr': {'class': 'floating-label'}}) }}
-                            <div class="invalid-feedback animated-feedback">
-                                {{ form_errors(form.responsable) ?: 'Manager is required.' }}
+                        <div class="floating-label-group">
+                            {{ form_widget(form.responsable, {'attr': {
+                                'class': 'form-select floating-input',
+                                'placeholder': 'Manager',
+                                'required': 'required'
+                            }}) }}
+                            {{ form_label(form.responsable, 'Manager', {'label_attr': {'class': 'floating-label'}}) }}
+                            <div class="invalid-feedback">
+                                Please select a manager
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-floating mb-4 floating-label-group">
-                    {{ form_widget(form.details, {'attr': {'class': 'form-control floating-input' ~ (form.details.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Details'}}) }}
-                    {{ form_label(form.details, null, {'label_attr': {'class': 'floating-label'}}) }}
-                    <div class="invalid-feedback animated-feedback">
-                        {{ form_errors(form.details) ?: 'Details are required (max 500 characters).' }}
+                <div class="floating-label-group mb-4">
+                    {{ form_widget(form.details, {'attr': {
+                        'class': 'form-control floating-input',
+                        'placeholder': 'Description',
+                        'required': 'required',
+                        'style': 'height: 120px',
+                        'minlength': '10',
+                        'maxlength': '500',
+                        'title': 'Details must be between 10-500 characters'
+                    }}) }}
+                    {{ form_label(form.details, 'Description', {'label_attr': {'class': 'floating-label'}}) }}
+                    <div class="invalid-feedback">
+                        Please provide valid details (10-500 characters)
                     </div>
-                </div>
-
-                <div class="form-floating mb-4 floating-label-group">
-                    {{ form_widget(form.adresse, {'attr': {'id': 'salle_adresse', 'autocomplete': 'off', 'class': 'form-control floating-input' ~ (form.adresse.vars.errors|length ? ' is-invalid' : ''), 'placeholder': 'Address'}}) }}
-                    {{ form_label(form.adresse, null, {'label_attr': {'class': 'floating-label'}}) }}
-                    <div class="invalid-feedback animated-feedback">
-                        {{ form_errors(form.adresse) ?: 'Address is required (max 200 characters).' }}
-                    </div>
-                    <div id="address-results"></div>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label fw-semibold d-flex align-items-center">
-                        <i class="fas fa-camera me-2"></i> Room Image
+                        <i class="fas fa-image me-2 text-primary"></i> Gym Image
                         <span class="badge bg-secondary-subtle text-secondary ms-2">Optional</span>
                     </label>
                     <div class="image-upload-wrapper">
                         <button type="button" class="btn btn-outline-primary rounded-pill mb-3 upload-btn">
-                            <i class="fas fa-upload me-2"></i>Upload Image
+                            <i class="fas fa-upload me-2"></i>Choose Image
                         </button>
-                        {{ form_widget(form.image, {'attr': {'class': 'd-none', 'accept': 'image/jpeg,image/png,image/webp'}}) }}
+                        {{ form_widget(form.image, {'attr': {
+                            'class': 'd-none',
+                            'accept': 'image/jpeg,image/png,image/webp'
+                        }}) }}
                         <div class="text-center position-relative">
-                            <img id="image-preview" class="rounded-circle shadow object-fit-cover preview-image" alt="Image Preview">
-                            <button id="remove-image" class="btn btn-danger btn-sm rounded-circle position-absolute remove-image-btn">
+                            <img id="image-preview" class="preview-image" alt="Image Preview">
+                            <button id="remove-image" class="btn remove-image-btn">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                         <div class="form-text text-muted mt-2">
                             Accepted formats: JPG, PNG, WebP (max 2MB)
                         </div>
-                        <div class="invalid-feedback animated-feedback" id="image-error">
-                            {{ form_errors(form.image) }}
-                        </div>
+                        <div class="invalid-feedback" id="image-error"></div>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <p class="fw-semibold">Room Location</p>
-                    <p class="form-text text-muted">Search for an address or click on the map to set the location</p>
+                <div class="floating-label-group mb-4">
+                    {{ form_widget(form.adresse, {'attr': {
+                        'id': 'salle_adresse',
+                        'class': 'form-control floating-input',
+                        'placeholder': 'Address',
+                        'required': 'required',
+                        'autocomplete': 'off'
+                    }}) }}
+                    {{ form_label(form.adresse, 'Address', {'label_attr': {'class': 'floating-label'}}) }}
+                    <div class="invalid-feedback">
+                        Please provide a valid address
+                    </div>
+                    <div id="address-results"></div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="form-label fw-semibold d-flex align-items-center mb-3">
+                        <i class="fas fa-map-marked-alt me-2 text-primary"></i> Location on Map
+                    </label>
+                    <p class="text-muted mb-3">Search for an address above or click on the map to set the location</p>
                     <div id="map-container">
                         <div id="map"></div>
                     </div>
@@ -404,7 +475,28 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Map and address search functionality
+            // Phone number formatting
+            function formatPhoneNumber(input) {
+                let value = input.value.replace(/\D/g, '');
+                if (value.length > 3) {
+                    value = value.replace(/^(\d{3})(\d{2})/, '$1 $2');
+                }
+                if (value.length > 6) {
+                    value = value.replace(/^(\d{3}\s\d{2})(\d{3})/, '$1 $2');
+                }
+                if (value.length > 10) {
+                    value = value.replace(/^(\d{3}\s\d{2}\s\d{3})(\d{3})/, '$1 $3');
+                }
+                if (!value.startsWith('+')) {
+                    value = '+' + value;
+                }
+                if (value.length > 13) {
+                    value = value.substring(0, 13);
+                }
+                input.value = value;
+            }
+
+            // Initialize map
             const addressInput = document.getElementById('salle_adresse');
             const addressResults = document.getElementById('address-results');
             const form = document.querySelector('#gym-form');
@@ -424,27 +516,6 @@
                 map.setView([lat, lng], 16);
                 addressInput.value = address;
                 validateField(addressInput);
-            }
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                const address = data.display_name || "Address not available";
-                                placeMarker(lat, lng, address);
-                            })
-                            .catch(error => {
-                                console.error('Reverse geocoding error:', error);
-                                placeMarker(lat, lng, "Address not available");
-                            });
-                    },
-                    error => console.error("Geolocation error:", error.message),
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
             }
 
             map.on('click', function(e) {
@@ -479,6 +550,7 @@
                                     addressInput.value = item.display_name;
                                     addressResults.style.display = 'none';
                                     placeMarker(parseFloat(item.lat), parseFloat(item.lon), item.display_name);
+                                    validateField(addressInput);
                                 });
                                 addressResults.appendChild(div);
                             });
@@ -502,92 +574,6 @@
                 }
             });
 
-            // Validation function
-            const fields = [
-                {
-                    id: 'salle_nom',
-                    validate: value => value.trim() !== '' && value.length <= 200,
-                    errorMsg: 'Name is required (max 200 characters).'
-                },
-                {
-                    id: 'salle_num_tel',
-                    validate: value => /^\+216\s\d{2}\s\d{3}\s\d{3}$/.test(value),
-                    errorMsg: 'Please enter a valid phone number (e.g., +216 55 325 658).'
-                },
-                {
-                    id: 'salle_email',
-                    validate: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 100,
-                    errorMsg: 'Please enter a valid email address (e.g., username@domain.com, max 100 characters).'
-                },
-                {
-                    id: 'salle_responsable',
-                    validate: value => value !== '',
-                    errorMsg: 'Manager is required.'
-                },
-                {
-                    id: 'salle_details',
-                    validate: value => value.trim() !== '' && value.length <= 500,
-                    errorMsg: 'Details are required (max 500 characters).'
-                },
-                {
-                    id: 'salle_adresse',
-                    validate: value => value.trim() !== '' && value.length <= 200,
-                    errorMsg: 'Address is required (max 200 characters).'
-                }
-            ];
-
-            function validateField(input) {
-                const field = fields.find(f => f.id === input.id);
-                if (!field) return;
-                const feedback = input.parentElement.querySelector('.invalid-feedback');
-                const isValid = field.validate(input.value);
-                input.classList.toggle('is-invalid', !isValid);
-                input.classList.toggle('is-valid', isValid);
-                feedback.textContent = isValid ? '' : field.errorMsg;
-            }
-
-            fields.forEach(field => {
-                const input = document.getElementById(field.id);
-                input.addEventListener('input', () => validateField(input));
-                input.addEventListener('blur', () => validateField(input));
-                input.addEventListener('change', () => validateField(input));
-            });
-
-            form.addEventListener('submit', function(event) {
-                let hasErrors = false;
-                fields.forEach(field => {
-                    const input = document.getElementById(field.id);
-                    validateField(input);
-                    if (input.classList.contains('is-invalid')) hasErrors = true;
-                });
-
-                const imageInput = document.querySelector('[name="salle[image]"]');
-                const imageError = document.querySelector('#image-error');
-                if (imageInput.files[0]) {
-                    const file = imageInput.files[0];
-                    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
-                    if (!validImageTypes.includes(file.type)) {
-                        imageError.textContent = 'Please select a valid image file (JPEG, PNG, WebP).';
-                        imageError.style.display = 'block';
-                        hasErrors = true;
-                    } else if (file.size > 2 * 1024 * 1024) {
-                        imageError.textContent = 'Image must not exceed 2MB.';
-                        imageError.style.display = 'block';
-                        hasErrors = true;
-                    } else {
-                        imageError.style.display = 'none';
-                    }
-                }
-
-                if (hasErrors) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    const firstError = form.querySelector('.is-invalid');
-                    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                form.classList.add('was-validated');
-            });
-
             // Image upload functionality
             const imageInput = document.querySelector('[name="salle[image]"]');
             const imagePreview = document.querySelector('#image-preview');
@@ -601,16 +587,24 @@
                 const file = this.files[0];
                 if (file) {
                     const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    imageError.textContent = '';
+                    imageError.style.display = 'none';
+                    imageInput.classList.remove('is-invalid');
+                    
                     if (!validImageTypes.includes(file.type)) {
-                        imageError.textContent = 'Please select a valid image file (JPEG, PNG, WebP).';
+                        imageError.textContent = 'Please upload a valid image (JPEG, PNG, WebP).';
                         imageError.style.display = 'block';
+                        imageInput.classList.add('is-invalid');
                         return;
                     }
+                    
                     if (file.size > 2 * 1024 * 1024) {
                         imageError.textContent = 'Image must not exceed 2MB.';
                         imageError.style.display = 'block';
+                        imageInput.classList.add('is-invalid');
                         return;
                     }
+                    
                     updateImagePreview(file);
                 }
             });
@@ -631,7 +625,98 @@
                 imageInput.value = '';
                 imagePreview.style.display = 'none';
                 removeImageBtn.style.display = 'none';
+                imageError.textContent = '';
                 imageError.style.display = 'none';
+                imageInput.classList.remove('is-invalid');
+            });
+
+            // Form validation
+            function validateField(input) {
+                input.classList.remove('is-valid', 'is-invalid');
+                
+                if (input.required && !input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    return false;
+                }
+                
+                if (input.name === 'salle[num_tel]') {
+                    if (!/^\+216\s\d{2}\s\d{3}\s\d{3}$/.test(input.value)) {
+                        input.classList.add('is-invalid');
+                        return false;
+                    }
+                }
+                
+                if (input.type === 'email') {
+                    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(input.value)) {
+                        input.classList.add('is-invalid');
+                        return false;
+                    }
+                }
+                
+                if (input.pattern && !new RegExp(input.pattern).test(input.value)) {
+                    input.classList.add('is-invalid');
+                    return false;
+                }
+                
+                if (input.minlength && input.value.length < input.minlength) {
+                    input.classList.add('is-invalid');
+                    return false;
+                }
+                
+                if (input.maxlength && input.value.length > input.maxlength) {
+                    input.classList.add('is-invalid');
+                    return false;
+                }
+                
+                if (input.type === 'file' && input.files.length > 0) {
+                    const file = input.files[0];
+                    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    
+                    if (!validImageTypes.includes(file.type)) {
+                        input.classList.add('is-invalid');
+                        return false;
+                    }
+                    
+                    if (file.size > 2 * 1024 * 1024) {
+                        input.classList.add('is-invalid');
+                        return false;
+                    }
+                }
+                
+                if (input.value.trim() !== '') {
+                    input.classList.add('is-valid');
+                }
+                
+                return true;
+            }
+
+            const inputs = form.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => validateField(input));
+                input.addEventListener('input', () => {
+                    if (input.classList.contains('is-invalid')) {
+                        validateField(input);
+                    }
+                });
+            });
+
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (!validateField(input)) {
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const firstError = form.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                form.classList.add('was-validated');
             });
         });
     </script>

@@ -1,13 +1,250 @@
-{% extends 'base.html.twig' %}
+{% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
-{% block title %}Edit Post{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+    <link rel="stylesheet" href="{{ asset('/css/PostStyle.css') }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          integrity="sha512-R6HkF9T/5xk6slM7e4rWJZlGJrxO46hKBGG+1ZC43nlGQskM3Qj8Zc+V9OeGmFUyPNKO6kVoZ8iI2EN9MdXYUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Post</h1>
+<div class="container-fluid mt-5 px-4">
+    <h2 class="mb-4 post-title-animated">EDIT POST</h2>
 
-    {{ include('post/_form.html.twig', {'button_label': 'Update'}) }}
+    {{ form_start(form, {
+        'attr': {'data-parsley-validate': '', 'enctype': 'multipart/form-data'}
+    }) }}
 
-    <a href="{{ path('app_post_index') }}">back to list</a>
+    {# ========== TITLE ========== #}
+    <div class="mb-4">
+        {{ form_label(form.title, 'Title <span class="text-danger">*</span>', {
+            'label_attr': {'class': 'form-label'},
+            'label_html': true
+        }) }}
+        {{ form_widget(form.title, {
+            'attr': {
+                'class': 'form-control',
+                'data-parsley-trigger': 'keyup',
+                'data-parsley-minlength': '3',
+                'data-parsley-minlength-message': 'Le titre doit contenir au moins 3 caractères.'
+            }
+        }) }}
+        <div class="text-danger">{{ form_errors(form.title) }}</div>
+    </div>
 
-    {{ include('post/_delete_form.html.twig') }}
+    {# ========== ROW DROPZONE + CONTENT ========== #}
+    <div class="row align-items-start">
+        {# -- Colonne gauche -- #}
+        <div class="col-lg-6">
+            <div class="mb-4">
+                <label class="form-label d-block">Image</label>
+                <div id="dropzone"
+                     class="dropzone"
+                     data-existing="{{ existingImage ? asset(existingImage) : '' }}">
+                     <i class="fas fa-cloud-upload-alt fa-3x dropzone-icon" style="color: #74C0FC;"></i>
+                </div>
+            </div>
+            <div class="mb-4">
+                {{ form_label(form.webImage, "Url", {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.webImage, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': "Choose url or drop file"
+                    }
+                }) }}
+                <div class="text-danger">{{ form_errors(form.webImage) }}</div>
+            </div>
+            <div style="display:none">{{ form_row(form.imageFile) }}</div>
+        </div>
+
+        {# -- Colonne droite -- #}
+        <div class="col-lg-6">
+            <div class="mb-4">
+                {{ form_label(form.content, 'Content <span class="text-danger">*</span>', {
+                    'label_attr': {'class': 'form-label'},
+                    'label_html': true
+                }) }}
+                {{ form_widget(form.content, {
+                    'attr': {
+                        'class': 'form-control',
+                        'id': 'post_content',
+                        'data-parsley-trigger': 'keyup',
+                        'data-parsley-cleancontent': '',
+                        'data-parsley-forbiddenwords': ''
+                    }
+                }) }}
+                <div class="text-danger">{{ form_errors(form.content) }}</div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <button type="button" id="speechToTextBtn" class="btn btn-warning speech-btn">
+                    <i class="fas fa-microphone"></i> Try our ai speech to text
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="hstack gap-2 justify-content-center mb-3">
+        <button class="btn btn-primary">Update</button>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" crossorigin="anonymous"></script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        const webImageInput = document.querySelector('input[name="post[webImage]"]');
+        const fileInput = document.querySelector('input[name="post[imageFile]"]');
+        const formElt = document.querySelector('form[data-parsley-validate]');
+        const uploadIcon = document.querySelector('.dropzone-icon');
+
+        const myDropzone = new Dropzone("#dropzone", {
+            url: "#",
+            autoProcessQueue: false,
+            clickable: "#dropzone",
+            maxFiles: 1,
+            acceptedFiles: 'image/*',
+            addRemoveLinks: true,
+            
+            
+            
+            
+            
+            
+            init: function() {
+                const dz = this;
+                const existing = dz.element.dataset.existing;
+            
+                if (existing) {
+                    // Si c'est une URL distante, on la met dans le champ et on désactive le dropzone
+                    if (/^https?:\/\//.test(existing)) {
+                        webImageInput.value = existing;
+                        uploadIcon.style.display = 'none';
+                        dz.disable();
+                    }
+                    // Sinon, pour un fichier déjà uploadé côté serveur
+                    else {
+                        webImageInput.value = '';
+                        webImageInput.readOnly = true;
+                        uploadIcon.style.display = 'none';
+            
+                        const filename = existing.split('/').pop();
+                        // MockFile minimal
+                        const mockFile = { name: filename, size: 12345, accepted: true };
+            
+                        // Ajout à l’UI
+                        dz.emit("addedfile", mockFile);
+                        dz.emit("complete", mockFile);
+            
+                        // Création de la vignette à partir de l’URL publique
+                        dz.createThumbnailFromUrl(
+                            mockFile,
+                            existing,
+                            dz.options.thumbnailWidth,
+                            dz.options.thumbnailHeight,
+                            false,
+                            (thumbnailUrl) => dz.emit("thumbnail", mockFile, thumbnailUrl)
+                        );
+            
+                        dz.files.push(mockFile);
+                    }
+                }
+            
+                // === handlers classiques ===
+                dz.on("addedfile", file => {
+                    if (webImageInput.value.trim()) {
+                        dz.removeFile(file);
+                        return alert('Vous avez déjà saisi une URL. Choisissez soit un fichier, soit une URL.');
+                    }
+                    webImageInput.value = '';
+                    webImageInput.readOnly = true;
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                    uploadIcon.style.display = 'none';
+                });
+            
+                dz.on("removedfile", () => {
+                    fileInput.value = "";
+                    webImageInput.readOnly = false;
+                    uploadIcon.style.display = 'block';
+                });
+            }
+            
+
+
+
+        });
+
+
+
+
+
+
+
+
+
+
+
+        webImageInput.addEventListener('input', function () {
+            if (this.value.trim() !== '') {
+                if (myDropzone.files.length) myDropzone.removeAllFiles(true);
+                myDropzone.disable();
+            } else {
+                myDropzone.enable();
+            }
+        });
+
+        // CKEditor
+        const editor = CKEDITOR.replace('post_content', {
+            allowedContent: true,
+            removePlugins: 'elementspath',
+            height: 300,
+            on: {
+                change: () => {
+                    editor.updateElement();
+                    document.getElementById('post_content').dispatchEvent(new Event('input'));
+                }
+            }
+        });
+
+        // Parsley validators
+        window.Parsley.addValidator('cleancontent', {
+            validateString: () => {
+                const text = editor.getData().replace(/<[^>]*>/g, ' ').trim();
+                return text.length >= 10;
+            },
+            messages: { fr: 'Le contenu doit contenir au moins 10 caractères (sans HTML).' }
+        });
+        window.Parsley.addValidator('forbiddenwords', {
+            validateString: () => {
+                const text = editor.getData().toLowerCase();
+                const bad = ['spam','arnaque','insulte'];
+                return !bad.some(w => text.includes(w));
+            },
+            messages: { fr: 'Le contenu contient des mots interdits.' }
+        });
+
+        formElt.addEventListener('submit', e => {
+            editor.updateElement();
+            const text = editor.getData().replace(/<[^>]*>/g, ' ').trim();
+            if (text.length < 10) {
+                e.preventDefault();
+                document.getElementById('post_content').parsley().reset().validate();
+                return;
+            }
+            if (webImageInput.value.trim() !== '' && fileInput.files.length) {
+                e.preventDefault();
+                alert('Veuillez choisir soit une URL, soit un fichier, pas les deux.');
+            }
+        });
+    </script>
 {% endblock %}

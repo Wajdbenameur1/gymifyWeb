@@ -70,6 +70,8 @@ class UserType extends AbstractType
                 'choices' => $options['role_choices'] ?? [
                     'Sportif' => Role::SPORTIF,
                     'Entraîneur' => Role::ENTRAINEUR,
+                    'Admin' => Role::ADMIN, // Ajouter Admin ici
+                    'Responsable de Salle' => Role::RESPONSABLE_SALLE, // Ajouter Responsable de Salle ici
                 ],
                 'required' => true,
                 'choice_value' => fn($choice) => $choice instanceof Role ? $choice->value : $choice,

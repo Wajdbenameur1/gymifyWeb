@@ -6,7 +6,6 @@ use App\Repository\SalleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SalleRepository::class)]
 class Salle
@@ -17,51 +16,21 @@ class Salle
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
-    #[Assert\NotBlank(message: "Le nom de la salle est requis.")]
-    #[Assert\Length(
-        max: 200,
-        maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
-    )]
     private ?string $nom = null;
 
     #[ORM\Column(length: 200)]
-    #[Assert\NotBlank(message: "L’adresse est requise.")]
-    #[Assert\Length(
-        max: 200,
-        maxMessage: "L’adresse ne peut pas dépasser {{ limit }} caractères."
-    )]
     private ?string $adresse = null;
 
     #[ORM\Column(length: 500)]
-    #[Assert\NotBlank(message: "Les détails sont requis.")]
-    #[Assert\Length(
-        max: 500,
-        maxMessage: "Les détails ne peuvent pas dépasser {{ limit }} caractères."
-    )]
     private ?string $details = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: "Le numéro de téléphone est requis.")]
-    #[Assert\Regex(
-        pattern: "/^\+216\s\d{2}\s\d{3}\s\d{3}$/",
-        message: "Le format doit être: +216 XX XXX XXX"
-    )]
     private ?string $num_tel = null;
 
     #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: "L’email est requis.")]
-    #[Assert\Email(message: "L’email n’est pas valide.")]
-    #[Assert\Length(
-        max: 100,
-        maxMessage: "L’email ne peut pas dépasser {{ limit }} caractères."
-    )]
     private ?string $email = null;
 
-    #[ORM\Column(length: 500, nullable: true)]
-    #[Assert\Length(
-        max: 500,
-        maxMessage: "Le chemin de l’image ne peut pas dépasser {{ limit }} caractères."
-    )]
+    #[ORM\Column(length: 500)]
     private ?string $url_photo = null;
 
     /**
@@ -72,7 +41,6 @@ class Salle
 
     #[ORM\OneToMany(targetEntity: Activité::class, mappedBy: 'salle')]
     private Collection $activites;
-
     /**
      * @var Collection<int, Events>
      */
@@ -80,8 +48,7 @@ class Salle
     private Collection $events;
 
     #[ORM\OneToOne(targetEntity: ResponsableSalle::class, inversedBy: 'salle')]
-    #[ORM\JoinColumn(name: 'responsable_id', referencedColumnName: 'id', nullable: false)]
-    #[Assert\NotNull(message: "Le responsable est requis.")]
+    #[ORM\JoinColumn(name: 'responsable_id', referencedColumnName: 'id')]
     private ?ResponsableSalle $responsable = null;
 
     public function __construct()
@@ -156,7 +123,7 @@ class Salle
         return $this->url_photo;
     }
 
-    public function setUrlPhoto(?string $url_photo): self
+    public function setUrlPhoto(string $url_photo): self
     {
         $this->url_photo = $url_photo;
         return $this;
@@ -227,6 +194,7 @@ class Salle
         return $this;
     }
 
+    // Méthode magique pour afficher le nom de la salle lorsqu'elle est convertie en string
     public function __toString(): string
     {
         return $this->nom ?? '';
@@ -237,7 +205,7 @@ class Salle
         return $this->activites;
     }
 
-    public function addActivite(Activité $activite): self
+    public function addActivite(Activité $activite): static
     {
         if (!$this->activites->contains($activite)) {
             $this->activites->add($activite);
@@ -246,22 +214,22 @@ class Salle
         return $this;
     }
 
-    public function removeActivite(Activité $activite): self
+    public function removeActivite(Activité $activite): static
     {
         if ($this->activites->removeElement($activite)) {
             $activite->setSalle(null);
         }
         return $this;
     }
-
-    public function getAbonnements(): array
-    {
-        $abonnements = [];
-        foreach ($this->activites as $activite) {
-            foreach ($activite->getAbonnements() as $abonnement) {
-                $abonnements[] = $abonnement;
-            }
+    // Ajoutez cette méthode pour récupérer les abonnements via les activités
+public function getAbonnements(): array
+{
+    $abonnements = [];
+    foreach ($this->activites as $activite) {
+        foreach ($activite->getAbonnements() as $abonnement) {
+            $abonnements[] = $abonnement;
         }
-        return $abonnements;
     }
+    return $abonnements;
+}
 }

@@ -2,79 +2,109 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    {# Inclusion des styles ParsleyJS #}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.css" integrity="sha512-ey..." crossorigin="anonymous" />
-    <style>
-        /* Bordure rouge pour les erreurs Parsley */
-        input.parsley-error,
-        select.parsley-error,
-        textarea.parsley-error {
-            border-color: #ff0000 !important;
-        }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+    <link rel="stylesheet" href="{{ asset('/css/PostStyle.css') }}" />
 
-        /* Bordure verte lorsque la validation est correcte */
-        input.parsley-success,
-        select.parsley-success,
-        textarea.parsley-success {
-            border-color: #00cc00 !important; /* vous pouvez ajuster la nuance de vert */
-        }
+    <!-- Font Awesome 6 -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
-        /* Style pour la liste d'erreurs si besoin */
-        .parsley-errors-list {
-            margin: 2px 0 0;
-            padding: 0;
-            list-style: none;
-            color: #ff0000;
-            font-size: 0.9em;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-R6HkF9T/5xk6slM7e4rWJZlGJrxO46hKBGG+1ZC43nlGQskM3Qj8Zc+V9OeGmFUyPNKO6kVoZ8iI2EN9MdXYUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
 {% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="mb-4">Créer un nouveau post</h1>
+<div class="container-fluid mt-5 px-4">
+    <h2 class=" mb-4 post-title-animated">
+        CREATE NEW POST
+    </h2>
+    
+    {{ form_start(form, {'attr': {'data-parsley-validate': '', 'enctype': 'multipart/form-data'}}) }}
 
-    {# Ajout de l'attribut data-parsley-validate pour activer la validation ParsleyJS #}
-    {{ form_start(form, {'attr': {'data-parsley-validate': ''}}) }}
-
-    <div class="mb-3">
-        {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}}) }}
+    <!-- Titre du post -->
+    <div class="mb-4">
+        {{ form_label(form.title, 'Title <span class="text-danger">*</span>', {
+            'label_attr': {'class': 'form-label'},
+            'label_html': true
+        }) }}
         {{ form_widget(form.title, {
             'attr': {
                 'class': 'form-control',
                 'data-parsley-trigger': 'keyup',
-                'data-parsley-minlength': '3',  
+                'data-parsley-minlength': '3',
                 'data-parsley-minlength-message': 'Le titre doit contenir au moins 3 caractères.'
             }
         }) }}
-        <div class="text-danger">
-            {{ form_errors(form.title) }}
-        </div>
+        <div class="text-danger">{{ form_errors(form.title) }}</div>
     </div>
 
-    <div class="mb-3">
-        {{ form_label(form.content, 'Contenu', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.content, {
-            'attr': {
-                'class': 'form-control',
-                'data-parsley-trigger': 'keyup',
-                'data-parsley-minlength': '10',  
-                'data-parsley-minlength-message': 'Le contenu doit contenir au moins 10 caractères.'
-            }
-        }) }}
-        <div class="text-danger">
-            {{ form_errors(form.content) }}
+    <!-- Ligne principale: Dropzone & URL à gauche, Éditeur à droite -->
+    <div class="row align-items-start">
+        <!-- Colonne gauche: Dropzone + URL -->
+        <div class="col-lg-6">
+            <!-- Dropzone -->
+            <div class="mb-4">
+
+
+
+                <label class="form-label d-block">Image</label>
+                <div id="dropzone" class="dropzone">
+                    
+  
+
+                    <i class="fas fa-cloud-upload-alt fa-3x dropzone-icon" style="color: #74C0FC;"></i>  </div>
+            </div>
+             <!-- Champ URL -->
+            <div class="mb-4">
+                <!--<label class="form-label d-block text-center">Télécharger une image</label>-->
+                {{ form_label(form.webImage, "Url", {'label_attr': {'class': 'form-label'}}) }}
+                
+                {{ form_widget(form.webImage, {'attr': {'class': 'form-control', 'placeholder': "Choose url or drop file"}}) }}
+                
+                <div class="text-danger">{{ form_errors(form.webImage) }}</div>
+            </div>
+            <!-- Champ image caché -->
+            <div style="display:none">{{ form_row(form.imageFile) }}</div>
+        </div>
+
+        <!-- Colonne droite: Éditeur de contenu -->
+        <div class="col-lg-6">
+            <!-- Content -->
+            <div class="mb-4">
+                {{ form_label(form.content, 'Content <span class="text-danger">*</span>', {
+                    'label_attr': {'class': 'form-label'},
+                    'label_html': true
+                }) }}
+                                {{ form_widget(form.content, {
+                    'attr': {
+                        'class': 'form-control',
+                        'id': 'post_content',
+                        'data-parsley-trigger': 'keyup',
+                        'data-parsley-cleancontent': '',
+                        'data-parsley-forbiddenwords': ''
+                    }
+                }) }}
+                
+                <div class="text-danger">{{ form_errors(form.content) }}</div>
+             
+            </div>
+            <!-- Ligne contenant "you can try" et le bouton en parallèle avec URL -->
+            
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <!--<p class="mb-0" style="font-weight: 500;">you can try our ai speech to text</p>-->
+                
+                <button type="button" id="speechToTextBtn" class="btn btn-warning speech-btn">
+                    <i class="fas fa-microphone"></i> Try our ai speech to text
+                </button>
+            </div>
+            
         </div>
     </div>
-
-    <div class="mb-3">
-        {{ form_label(form.imageFile) }}
-        {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.imageFile) }}
+     <!-- Bouton submit -->
+    <div class="hstack gap-2 justify-content-center mb-3">
+        <button class="btn btn-primary">Publish</button>
     </div>
     
-
-    <button type="submit" class="btn btn-primary">Publier</button>
 
     {{ form_end(form) }}
 </div>
@@ -82,11 +112,120 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" crossorigin="anonymous"></script>
 
-    {# Inclusion du script ParsleyJS #}
-    {# Inclusion du script ParsleyJS #}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.2/parsley.min.js" integrity="sha512-ey..." crossorigin="anonymous"></script>
+    <script>
+        Dropzone.autoDiscover = false;
+        const myDropzone = new Dropzone("#dropzone", {
+            url: "#",
+            autoProcessQueue: false,
+            clickable: "#dropzone",
+            maxFiles: 1,
+            acceptedFiles: 'image/*',
+            addRemoveLinks: true,
+        });
 
+        const webImageInput = document.querySelector('input[name="post[webImage]"]');
+        const fileInput = document.querySelector('input[name="post[imageFile]"]');
+        const formElt = document.querySelector('form[data-parsley-validate]');
+        const uploadIcon = document.querySelector('.dropzone-icon');
+
+        // CKEditor init
+        const editor = CKEDITOR.replace('post_content', {
+            allowedContent: true,
+            removePlugins: 'elementspath',
+            height: 300,
+            on: {
+                change: function() {
+                    this.updateElement();
+                    document.getElementById('post_content').dispatchEvent(new Event('input'));
+                }
+            }
+        });
+
+        // Parsley custom validator for clean content length
+        window.Parsley.addValidator('cleancontent', {
+            validateString: function(value) {
+                const html = editor.getData();
+                const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                return text.length >= 10;
+            },
+            messages: { fr: 'Le contenu doit contenir au moins 10 caractères (sans HTML).' }
+        });
+
+        // Parsley validator for forbidden words
+        window.Parsley.addValidator('forbiddenwords', {
+            validateString: function(value) {
+                const html = editor.getData();
+                const text = html.replace(/<[^>]*>/g, ' ').toLowerCase();
+                const forbidden = ['spam', 'arnaque', 'insulte'];
+                return !forbidden.some(word => text.includes(word));
+            },
+            messages: { fr: 'Le contenu contient des mots interdits.' }
+        });
+
+        // Gestion du champ URL vs Dropzone
+        webImageInput.addEventListener('input', function () {
+            if (this.value.trim() !== '') {
+                if (myDropzone.files.length) myDropzone.removeAllFiles(true);
+                myDropzone.disable();
+            } else {
+                myDropzone.enable();
+            }
+        });
+
+        // Lorsqu’un fichier est ajouté
+        myDropzone.on("addedfile", function(file) {
+            if (webImageInput.value.trim() !== '') {
+                this.removeFile(file);
+                alert('Vous avez déjà saisi une URL. Choisissez soit un fichier, soit une URL.');
+                return;
+            }
+            webImageInput.value = '';
+            webImageInput.readOnly = true;
+
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            if (uploadIcon) uploadIcon.style.display = 'none';
+        });
+
+        // Lorsqu’un fichier est retiré
+        myDropzone.on("removedfile", function() {
+            fileInput.value = "";
+            webImageInput.readOnly = false;
+            if (uploadIcon) uploadIcon.style.display = 'block';
+        });
+
+        // Vérification avant envoi
+        formElt.addEventListener('submit', function(e) {
+            editor.updateElement();
+            const html = editor.getData();
+            const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+            if (text.length < 10) {
+                e.preventDefault();
+                document.getElementById('post_content').parsley().reset().validate();
+                return;
+            }
+            if (webImageInput.value.trim() !== '' && fileInput.files.length) {
+                e.preventDefault();
+                alert('Veuillez choisir soit une URL, soit un fichier, pas les deux.');
+            }
+        });
+    </script>
+    <script>const ckeFrame = document.querySelector('.cke_chrome');
+
+        if (ckeFrame) {
+            ckeFrame.addEventListener('focusin', () => {
+                ckeFrame.style.boxShadow = '0 0 5px rgba(0, 123, 255, 0.8)';
+                ckeFrame.style.borderColor = '#007bff';
+            });
+        
+            ckeFrame.addEventListener('focusout', () => {
+                ckeFrame.style.boxShadow = 'none';
+                ckeFrame.style.borderColor = '#ced4da';
+            });
+        }</script>
 {% endblock %}
-
-

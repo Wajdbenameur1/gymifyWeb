@@ -9,15 +9,15 @@
                 <i class="fas fa-user me-2"></i>{{ page_title }}
             </h1>
             <a href="{{ path('responsable_user_index') }}" class="btn btn-outline-secondary rounded-pill hover-scale">
-                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                <i class="fas fa-arrow-left me-2"></i>Back to List
             </a>
         </div>
 
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb bg-white p-3 rounded-3 shadow-sm">
                 <li class="breadcrumb-item"><a href="{{ path('app_responsable_dashboard') }}" class="text-decoration-none"><i class="fas fa-home me-1"></i> Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ path('responsable_user_index') }}" class="text-decoration-none"><i class="fas fa-users me-1"></i> Utilisateurs</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-user me-1"></i> Détails</li>
+                <li class="breadcrumb-item"><a href="{{ path('responsable_user_index') }}" class="text-decoration-none"><i class="fas fa-users me-1"></i> Users</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-user me-1"></i> Details</li>
             </ol>
         </nav>
 
@@ -36,7 +36,7 @@
         <div class="card border-0 shadow-sm overflow-hidden rounded-4">
             <div class="card-header bg-gradient-primary text-white py-3">
                 <h5 class="mb-0">
-                    <i class="fas fa-user me-2"></i>Détails de l'utilisateur
+                    <i class="fas fa-user me-2"></i>User Details
                 </h5>
             </div>
             <div class="card-body p-4 p-md-5 bg-light">
@@ -66,11 +66,11 @@
                             <dt class="col-sm-4 fw-semibold">Email</dt>
                             <dd class="col-sm-8">{{ user.email }}</dd>
 
-                            <dt class="col-sm-4 fw-semibold">Date de naissance</dt>
+                            <dt class="col-sm-4 fw-semibold">Date of Birth</dt>
                             <dd class="col-sm-8">{{ user.dateNaissance|date('d/m/Y') }}</dd>
 
                             {% if user.role.value == 'entraineur' and user.specialite %}
-                                <dt class="col-sm-4 fw-semibold">Spécialité</dt>
+                                <dt class="col-sm-4 fw-semibold">Specialty</dt>
                                 <dd class="col-sm-8">{{ user.specialite|capitalize }}</dd>
                             {% endif %}
                         </dl>
@@ -78,16 +78,16 @@
                             {% if user.role.value not in ['admin', 'responsable_salle'] %}
                                 <a href="{{ path('responsable_user_edit', {'id': user.id}) }}"
                                    class="btn btn-outline-primary rounded-pill">
-                                    <i class="fas fa-edit me-2"></i>Modifier
+                                    <i class="fas fa-edit me-2"></i>Edit
                                 </a>
                                 <form action="{{ path('responsable_user_delete', {'id': user.id}) }}"
                                       method="POST"
                                       class="d-inline"
-                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                      onsubmit="return confirm('Are you sure you want to delete this user?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
                                     <button type="submit"
                                             class="btn btn-outline-danger rounded-pill">
-                                        <i class="fas fa-trash me-2"></i>Supprimer
+                                        <i class="fas fa-trash me-2"></i>Delete
                                     </button>
                                 </form>
                             {% endif %}
