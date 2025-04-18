@@ -54,50 +54,50 @@ final class CommentController extends AbstractController
                 ->setContent($content)
                 ->setCreatedAt(new \DateTime());
     
-        // ✅ Validation
-        $errors = $validator->validate($comment);  // On valide l'entité
-    
-        if (count($errors) > 0) {
-            // Si des erreurs existent, on les récupère
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[] = $error->getMessage();  // Ajout des messages d'erreur
-            }
-    
-            // Si c'est une requête AJAX, on renvoie les erreurs en JSON
-            if ($request->isXmlHttpRequest()) {
-                return new JsonResponse(['errors' => $errorMessages], 400);  // Code 400 pour erreur
-            }
-    
-            // Sinon, ajout des erreurs dans les flash messages
-            $this->addFlash('error', implode(' ', $errorMessages));
-    
-            // Redirection avec un message flash
-            return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
+          // ✅ Validation
+    $errors = $validator->validate($comment);  // On valide l'entité
+
+    if (count($errors) > 0) {
+        // Si des erreurs existent, on les récupère
+        $errorMessages = [];
+        foreach ($errors as $error) {
+            $errorMessages[] = $error->getMessage();  // Ajout des messages d'erreur
         }
-    
-        // ✅ Aucun problème → on persiste
-        $em->persist($comment);
-        $em->flush();
-    
-        // Si c'est une requête AJAX, renvoie les données du commentaire créé
+
+        // Si c'est une requête AJAX, on renvoie les erreurs en JSON
         if ($request->isXmlHttpRequest()) {
-            return $this->json([
-                'id'        => $comment->getId(),
-                'content'   => $comment->getContent(),
-                'user'      => [
-                    'nom'    => $comment->getUser()->getNom(),
-                    'avatar' => $comment->getUser()->getImageUrl()
-                        ? $this->getParameter('uploads_base_url').'/'.$comment->getUser()->getImageUrl()
-                        : $this->getParameter('app.base_path').'/img/screen/user.png',
-                ],
-                'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
-            ]);
+            return new JsonResponse(['errors' => $errorMessages], 400);  // Code 400 pour erreur
         }
-    
-        // Redirection classique après succès
+
+        // Sinon, ajout des erreurs dans les flash messages
+        $this->addFlash('error', implode(' ', $errorMessages));
+
+        // Redirection avec un message flash
         return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
     }
+
+    // ✅ Aucun problème → on persiste
+    $em->persist($comment);
+    $em->flush();
+
+    // Si c'est une requête AJAX, renvoie les données du commentaire créé
+    if ($request->isXmlHttpRequest()) {
+        return $this->json([
+            'id'        => $comment->getId(),
+            'content'   => $comment->getContent(),
+            'user'      => [
+                'nom'    => $comment->getUser()->getNom(),
+                'avatar' => $comment->getUser()->getImageUrl()
+                    ? $this->getParameter('uploads_base_url').'/'.$comment->getUser()->getImageUrl()
+                    : $this->getParameter('app.base_path').'/img/screen/user.png',
+            ],
+            'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
+        ]);
+    }
+
+    // Redirection classique après succès
+    return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
+}
 
 
 

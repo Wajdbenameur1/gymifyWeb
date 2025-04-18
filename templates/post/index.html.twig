@@ -162,10 +162,15 @@
             
                       <!-- Formulaire ajout -->
                       <div class="border-top p-3">
+                        <div id="comment-errors-{{ post.id }}" class="text-danger" style="display: none;"></div>
+
+
                         <form 
                           action="{{ path('app_comment_new', { postId: post.id }) }}" 
                           method="POST" 
                           class="d-flex align-items-center"
+                          data-post-id="{{ post.id }}"  <!-- Ajouter cet attribut -->
+
                         >
                           <img 
                             src="{{ app.user.imageUrl ? asset(app.user.imageUrl) : asset('img/screen/user.png') }}" 
@@ -351,8 +356,52 @@ Delete
 
 
 
-
-
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Écouter tous les formulaires de commentaire sur la page
+        document.querySelectorAll('form').forEach(function(form) {
+          form.addEventListener('submit', function(e) {
+              e.preventDefault();  // Empêche l'envoi classique du formulaire
+      
+              var formData = new FormData(this);
+              var postId = this.dataset.postId;  // Récupérer l'ID du post depuis un attribut data-post-id
+      
+              // Désactiver le bouton de soumission pour éviter les soumissions multiples
+              var submitButton = this.querySelector('button[type="submit"]');
+              submitButton.disabled = true;
+              submitButton.innerText = "Envoi en cours...";  // Optionnel : Changer le texte du bouton
+      
+              // Envoi de la requête AJAX
+              fetch("{{ path('app_comment_new', { postId: '__postId__' }) }}".replace('__postId__', postId), {
+                  method: "POST",
+                  body: formData,
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.errors) {
+                      // Si des erreurs sont retournées, afficher les erreurs
+                      var errorDiv = document.getElementById("comment-errors-" + postId);
+                      errorDiv.innerHTML = data.errors.join('<br>');
+                      errorDiv.style.display = 'block';  // Afficher les erreurs
+                  } else {
+                      // Si aucune erreur, on peut rafraîchir ou ajouter dynamiquement le commentaire
+                      location.reload();  // Recharger la page ou ajouter dynamiquement le commentaire
+                  }
+              })
+              .catch(error => {
+                  console.error("Erreur lors de l'ajout du commentaire:", error);
+              })
+              .finally(() => {
+                  // Réactiver le bouton après la soumission (en cas d'erreur ou succès)
+                  submitButton.disabled = false;
+                  submitButton.innerText = "Publier";  // Optionnel : Restaurer le texte du bouton
+              });
+          });
+      });
+      
+    </script>
+{% endblock %}
 
 
 

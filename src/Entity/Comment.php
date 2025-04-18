@@ -20,9 +20,7 @@ class Comment
     #[ORM\Column]
     private ?int $id = null;
 
-
-
-#[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le commentaire ne peut pas être vide.')]
     #[Assert\Length(
         min: 3,
@@ -38,7 +36,6 @@ class Comment
     #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
-    
 
 
      // Relation ManyToOne avec Post
