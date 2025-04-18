@@ -169,7 +169,7 @@
                           action="{{ path('app_comment_new', { postId: post.id }) }}" 
                           method="POST" 
                           class="d-flex align-items-center"
-                          data-post-id="{{ post.id }}"  <!-- Ajouter cet attribut -->
+                          data-post-id="{{ post.id }}"  
 
                         >
                           <img 
@@ -359,50 +359,59 @@ Delete
 {% block javascripts %}
     {{ parent() }}
     <script>
-        // Écouter tous les formulaires de commentaire sur la page
-        document.querySelectorAll('form').forEach(function(form) {
-          form.addEventListener('submit', function(e) {
-              e.preventDefault();  // Empêche l'envoi classique du formulaire
-      
-              var formData = new FormData(this);
-              var postId = this.dataset.postId;  // Récupérer l'ID du post depuis un attribut data-post-id
-      
-              // Désactiver le bouton de soumission pour éviter les soumissions multiples
-              var submitButton = this.querySelector('button[type="submit"]');
-              submitButton.disabled = true;
-              submitButton.innerText = "Envoi en cours...";  // Optionnel : Changer le texte du bouton
-      
-              // Envoi de la requête AJAX
-              fetch("{{ path('app_comment_new', { postId: '__postId__' }) }}".replace('__postId__', postId), {
-                  method: "POST",
-                  body: formData,
-              })
-              .then(response => response.json())
-              .then(data => {
-                  if (data.errors) {
-                      // Si des erreurs sont retournées, afficher les erreurs
-                      var errorDiv = document.getElementById("comment-errors-" + postId);
-                      errorDiv.innerHTML = data.errors.join('<br>');
-                      errorDiv.style.display = 'block';  // Afficher les erreurs
-                  } else {
-                      // Si aucune erreur, on peut rafraîchir ou ajouter dynamiquement le commentaire
-                      location.reload();  // Recharger la page ou ajouter dynamiquement le commentaire
-                  }
-              })
-              .catch(error => {
-                  console.error("Erreur lors de l'ajout du commentaire:", error);
-              })
-              .finally(() => {
-                  // Réactiver le bouton après la soumission (en cas d'erreur ou succès)
-                  submitButton.disabled = false;
-                  submitButton.innerText = "Publier";  // Optionnel : Restaurer le texte du bouton
-              });
+        document.addEventListener('DOMContentLoaded', function () {
+          // Sélectionner uniquement les formulaires de commentaires
+          document.querySelectorAll('form[data-post-id]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                var formData = new FormData(this);
+                var postId = this.dataset.postId;
+
+                var submitButton = this.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.innerText = "Envoi...";
+
+                fetch("{{ path('app_comment_new', { postId: '__postId__' }) }}".replace('__postId__', postId), {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => { throw data; });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Ajout dynamique du commentaire
+                    var commentsSection = document.querySelector(`#commentsModal${postId} .flex-grow-1`);
+                    var commentHtml = `
+                        <div class="d-flex align-items-start mb-3">
+                            <img src="${data.user.avatar}" alt="Avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                            <div>
+                                <strong>${data.user.nom}</strong>
+                                <p class="mb-1">${data.content}</p>
+                                <small class="text-muted">${data.createdAt}</small>
+                            </div>
+                        </div>
+                    `;
+                    commentsSection.insertAdjacentHTML('afterbegin', commentHtml);
+                    form.reset();
+                })
+                .catch(error => {
+                    var errorDiv = document.getElementById("comment-errors-" + postId);
+                    errorDiv.innerHTML = error.errors ? error.errors.join('<br>') : 'refresh';
+                    errorDiv.style.display = 'block';
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerText = "Publier";
+                });
+            });
           });
-      });
-      
+        });
     </script>
 {% endblock %}
-
 
 
 

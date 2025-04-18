@@ -28,76 +28,62 @@ final class CommentController extends AbstractController
 
 
 
-    
 
-    #[Route('/new/{postId}', name: 'app_comment_new', methods: ['POST'])]
-    public function new(
-        Request $request,
-        EntityManagerInterface $em,
-        PostRepository $postRepo,
-        ValidatorInterface $validator,  // Injection du service Validator
-        int $postId
-    ): Response {
-        // Trouver le post
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    #[Route('/comment/{postId}', name: 'app_comment_new', methods: ['POST'])]
+    public function new(Request $request, PostRepository $postRepo, EntityManagerInterface $em, int $postId): JsonResponse|RedirectResponse
+    {
         $post = $postRepo->find($postId);
         if (!$post) {
-            throw $this->createNotFoundException('Le post n\'existe pas.');
+            return new JsonResponse(['errors' => ['Post introuvable']], 404);
         }
     
-        // Récupérer le contenu du commentaire
-        $content = trim($request->request->get('content', ''));
+        $content = $request->request->get('content');
     
-        // Créer l'objet Comment
+        if (!$content || strlen(trim($content)) < 2) {
+            return new JsonResponse(['errors' => ['Le commentaire est trop court']], 400);
+        }
+    
         $comment = new Comment();
-        $comment->setPost($post)
-                ->setUser($this->getUser())
-                ->setContent($content)
-                ->setCreatedAt(new \DateTime());
+        $comment->setContent($content);
+        $comment->setPost($post);
+        $comment->setUser($this->getUser());
+        $comment->setCreatedAt(new \DateTime());
     
-          // ✅ Validation
-    $errors = $validator->validate($comment);  // On valide l'entité
-
-    if (count($errors) > 0) {
-        // Si des erreurs existent, on les récupère
-        $errorMessages = [];
-        foreach ($errors as $error) {
-            $errorMessages[] = $error->getMessage();  // Ajout des messages d'erreur
-        }
-
-        // Si c'est une requête AJAX, on renvoie les erreurs en JSON
+        $em->persist($comment);
+        $em->flush();
+    
+        // Réponse AJAX
         if ($request->isXmlHttpRequest()) {
-            return new JsonResponse(['errors' => $errorMessages], 400);  // Code 400 pour erreur
+            return new JsonResponse([
+                'content' => $comment->getContent(),
+                'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
+                'user' => [
+                    'nom' => $comment->getUser()->getNom(),
+                    'avatar' => $comment->getUser()->getImageUrl()
+                        ? $this->get('assets.packages')->getUrl($comment->getUser()->getImageUrl())
+                        : $this->get('assets.packages')->getUrl('img/screen/user.png')
+                ]
+            ]);
         }
-
-        // Sinon, ajout des erreurs dans les flash messages
-        $this->addFlash('error', implode(' ', $errorMessages));
-
-        // Redirection avec un message flash
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
+    
+        // Si jamais appel non AJAX, fallback (optionnel)
+        return $this->redirectToRoute('app_post_show', ['id' => $postId]);
     }
-
-    // ✅ Aucun problème → on persiste
-    $em->persist($comment);
-    $em->flush();
-
-    // Si c'est une requête AJAX, renvoie les données du commentaire créé
-    if ($request->isXmlHttpRequest()) {
-        return $this->json([
-            'id'        => $comment->getId(),
-            'content'   => $comment->getContent(),
-            'user'      => [
-                'nom'    => $comment->getUser()->getNom(),
-                'avatar' => $comment->getUser()->getImageUrl()
-                    ? $this->getParameter('uploads_base_url').'/'.$comment->getUser()->getImageUrl()
-                    : $this->getParameter('app.base_path').'/img/screen/user.png',
-            ],
-            'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
-        ]);
-    }
-
-    // Redirection classique après succès
-    return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
-}
+    
 
 
 
