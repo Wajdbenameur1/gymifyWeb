@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\PostRepository;                // <- Assurez‑vous d’importer LE BON namespace
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 
 #[Route('/comment')]
@@ -40,51 +40,44 @@ final class CommentController extends AbstractController
 
 
 
-
-
-    
-    
     #[Route('/{postId}', name: 'app_comment_new', methods: ['POST'])]
-    public function new(Request $request, PostRepository $postRepo, EntityManagerInterface $em, int $postId): JsonResponse|RedirectResponse
-    {
+    public function new(
+        Request $request,
+        PostRepository $postRepo,
+        EntityManagerInterface $em,
+        int $postId
+    ): JsonResponse {
         $post = $postRepo->find($postId);
         if (!$post) {
-            return new JsonResponse(['errors' => ['Post introuvable']], 404);
+            return new JsonResponse(['errors' => ['Post introuvable']], JsonResponse::HTTP_NOT_FOUND);
         }
-    
-        $content = $request->request->get('content');
-    
-        if (!$content || strlen(trim($content)) < 2) {
-            return new JsonResponse(['errors' => ['Le commentaire est trop court']], 400);
+
+        $content = trim($request->request->get('content', ''));
+        if (strlen($content) < 2) {
+            return new JsonResponse(['errors' => ['Le commentaire est trop court']], JsonResponse::HTTP_BAD_REQUEST);
         }
-    
+
         $comment = new Comment();
         $comment->setContent($content);
         $comment->setPost($post);
         $comment->setUser($this->getUser());
         $comment->setCreatedAt(new \DateTime());
-    
+
         $em->persist($comment);
         $em->flush();
-    
-        // Réponse AJAX
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse([
-                'content' => $comment->getContent(),
-                'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
-                'user' => [
-                    'nom' => $comment->getUser()->getNom(),
-                    'avatar' => $comment->getUser()->getImageUrl()
-                        ? $this->get('assets.packages')->getUrl($comment->getUser()->getImageUrl())
-                        : $this->get('assets.packages')->getUrl('img/screen/user.png')
-                ]
-            ]);
-        }
-    
-        // Si jamais appel non AJAX, fallback (optionnel)
-        return $this->redirectToRoute('app_post_show', ['id' => $postId]);
+
+        // On renvoie toujours du JSON, pour AJAX comme pour un fallback
+        return new JsonResponse([
+            'content'   => $comment->getContent(),
+            'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
+            'user'      => [
+                'nom'    => $comment->getUser()->getNom(),
+                'avatar' => $comment->getUser()->getImageUrl()
+                    ? $this->get('assets.packages')->getUrl($comment->getUser()->getImageUrl())
+                    : $this->get('assets.packages')->getUrl('img/screen/user.png'),
+            ],
+        ]);
     }
-    
 
 
 
