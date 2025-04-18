@@ -127,19 +127,26 @@ final class CommentController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_comment_delete', methods: ['POST'])]
-    public function delete(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
+    #[Route('/delete/{id}', name: 'app_comment_delete', methods: ['POST'])]
+    public function delete(Request $request, CommentRepository $commentRepo, int $id, EntityManagerInterface $entityManager): Response
     {
-        // Vérifier si l'utilisateur est bien celui qui a créé le commentaire (optionnel)
+        $comment = $commentRepo->find($id);
+    
+        if (!$comment) {
+            throw $this->createNotFoundException('Commentaire introuvable');
+        }
+    
         if ($comment->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à supprimer ce commentaire.');
         }
-
-        if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->request->get('_token'))) {
+    
+        if ($this->isCsrfTokenValid('delete' . $comment->getId(), $request->request->get('_token'))) {
             $entityManager->remove($comment);
             $entityManager->flush();
         }
-
-        return $this->redirectToRoute('app_post_show', ['id' => $comment->getPost()->getId()], Response::HTTP_SEE_OTHER);
+    
+        return $this->redirectToRoute('app_post_show', [
+            'id' => $comment->getPost()->getId()
+        ], Response::HTTP_SEE_OTHER);
     }
 }
