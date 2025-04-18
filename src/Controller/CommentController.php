@@ -44,77 +44,51 @@ final class CommentController extends AbstractController
 
     
     
-    #[Route('/new/{postId}', name: 'app_comment_new', methods: ['POST'])]
-    public function new(
-        Request $request,
-        PostRepository $postRepo,
-        EntityManagerInterface $em,
-        int $postId
-    ): JsonResponse {
-        try {
-            // 1) Récupération du Post
-            $post = $postRepo->find($postId);
-            if (!$post) {
-                return new JsonResponse(['errors' => ['Post introuvable']], Response::HTTP_NOT_FOUND);
-            }
-
-            // 2) Utilisateur connecté ?
-            $user = $this->getUser();
-            if (!$user) {
-                return new JsonResponse(['errors' => ['Utilisateur non connecté']], Response::HTTP_FORBIDDEN);
-            }
-
-            // 3) CSRF
-            $token = $request->request->get('_token', '');
-            if (!$this->isCsrfTokenValid('comment'.$postId, $token)) {
-                return new JsonResponse(['errors' => ['Token CSRF invalide']], Response::HTTP_FORBIDDEN);
-            }
-
-            // 4) Contenu
-            $content = trim($request->request->get('content', ''));
-            if (strlen($content) < 2) {
-                return new JsonResponse(['errors' => ['Le commentaire est trop court']], Response::HTTP_BAD_REQUEST);
-            }
-
-            // 5) Création et persistance
-            $comment = (new Comment())
-                ->setContent($content)
-                ->setPost($post)
-                ->setUser($user)
-                ->setCreatedAt(new \DateTime())
-            ;
-
-            $em->persist($comment);
-            $em->flush();
-
-            // 6) Construction de l’URL de l’avatar
-            $path = $comment->getUser()->getImageUrl() ?: 'img/screen/user.png';
-            $avatarUrl = $this->assets->getUrl($path);
-
-            // 7) Réponse JSON
-            return new JsonResponse([
-                'content'   => $comment->getContent(),
-                'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
-                'user'      => [
-                    'nom'    => $user->getNom(),
-                    'avatar' => $avatarUrl,
-                ],
-            ], Response::HTTP_CREATED);
-
-        } catch (\Throwable $e) {
-            // Log détaillé pour comprendre la cause du 500
-            $this->logger->error('Erreur création commentaire : '.$e->getMessage(), [
-                'exception' => $e,
-                'postId'    => $postId,
-                'userId'    => $this->getUser()?->getId(),
-            ]);
-
-            return new JsonResponse(
-                ['errors' => ['Une erreur interne est survenue.']],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+    #[Route('/{postId}', name: 'app_comment_new', methods: ['POST'])]
+    public function new(Request $request, PostRepository $postRepo, EntityManagerInterface $em, int $postId): JsonResponse|RedirectResponse
+    {
+        $post = $postRepo->find($postId);
+        if (!$post) {
+            return new JsonResponse(['errors' => ['Post introuvable']], 404);
         }
+    
+        $content = $request->request->get('content');
+    
+        if (!$content || strlen(trim($content)) < 2) {
+            return new JsonResponse(['errors' => ['Le commentaire est trop court']], 400);
+        }
+    
+        $comment = new Comment();
+        $comment->setContent($content);
+        $comment->setPost($post);
+        $comment->setUser($this->getUser());
+        $comment->setCreatedAt(new \DateTime());
+    
+        $em->persist($comment);
+        $em->flush();
+    
+        // Réponse AJAX
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'content' => $comment->getContent(),
+                'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
+                'user' => [
+                    'nom' => $comment->getUser()->getNom(),
+                    'avatar' => $comment->getUser()->getImageUrl()
+                        ? $this->get('assets.packages')->getUrl($comment->getUser()->getImageUrl())
+                        : $this->get('assets.packages')->getUrl('img/screen/user.png')
+                ]
+            ]);
+        }
+    
+        // Si jamais appel non AJAX, fallback (optionnel)
+        return $this->redirectToRoute('app_post_show', ['id' => $postId]);
     }
+    
+
+
+
+
 
 
 
