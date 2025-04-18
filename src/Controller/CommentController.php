@@ -127,6 +127,26 @@ final class CommentController extends AbstractController
         ]);
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #[Route('/delete/{id}', name: 'app_comment_delete', methods: ['POST'])]
     public function delete(Request $request, CommentRepository $commentRepo, int $id, EntityManagerInterface $entityManager): Response
     {
@@ -149,4 +169,28 @@ final class CommentController extends AbstractController
             'id' => $comment->getPost()->getId()
         ], Response::HTTP_SEE_OTHER);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 }

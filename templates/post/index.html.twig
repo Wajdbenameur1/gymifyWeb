@@ -350,25 +350,34 @@ Delete
 
 
 
+        {% for comment in post.comments %}
         <form 
-        action="{{ path('app_comment_delete', { id: comment.id }) }}" 
-        method="post" 
-        class="d-inline delete-comment-form"
-        data-post-id="{{ post.id }}"
-        data-comment-id="{{ comment.id }}"
-      >
-        <input 
-          type="hidden" 
-          name="_token" 
-          value="{{ csrf_token('delete' ~ comment.id) }}"
+          action="{{ path('app_comment_delete', { id: comment.id }) }}" 
+          method="post" 
+          class="d-inline delete-comment-form"
+          data-post-id="{{ post.id }}"
+          data-comment-id="{{ comment.id }}"
         >
-        <button 
-          type="submit" 
-          class="btn btn-sm btn-link text-danger p-0"
-        >
-          Supprimer
-        </button>
-      </form>
+          <input 
+            type="hidden" 
+            name="_token" 
+            value="{{ csrf_token('delete' ~ comment.id) }}"
+          >
+          <button 
+            type="submit" 
+            class="btn btn-sm btn-link text-danger p-0"
+          >
+            Supprimer
+          </button>
+        </form>
+      {% endfor %}
+      
+
+
+
+
+
+
       </div>
       
     </div>
