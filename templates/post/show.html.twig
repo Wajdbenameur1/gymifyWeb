@@ -1,26 +1,119 @@
+{% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
-<h1>{{ post.title }}</h1>
-<p>{{ post.content }}</p>
-<p><strong>Imaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaage :</strong> {{ post.imageUrl }}</p>
-<p><strong>Date :</strong> {{ post.createdAt ? post.createdAt|date('Y-m-d H:i') : 'N/A' }}</p>
+{% block title %}{{ post.title }}{% endblock %}
 
-<h3>Auteur</h3>
-<p>{{ post.user.username }}</p>
+{% block stylesheet %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
 
-<h3>Commentaires</h3>
-<ul>
-    {% for comment in post.comments %}
-        <li>{{ comment.content }} (par {{ comment.user.username }})</li>
-    {% else %}
-        <li>Aucun commentaire</li>
-    {% endfor %}
-</ul>
+{% block body %}
+<nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ path('app_post_index') }}">Blogs</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ post.title }}</li>
+  </ol>
+</nav>
 
-<h3>Réactions</h3>
-<ul>
-    {% for reaction in post.reactions %}
-        <li>{{ reaction.type }} par {{ reaction.user.username }}</li>
-    {% else %}
-        <li>Aucune réaction</li>
-    {% endfor %}
-</ul>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-10 p-0">
+      <div class="d-flex" style="height: 80vh; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+
+        {# Colonne gauche : image du post #}
+        <div class="col-md-7 d-none d-md-block bg-dark p-0">
+          {% if post.imageUrl %}
+            <img src="{{ asset(post.webPath) }}" class="w-100 h-100" style="object-fit: cover;" alt="Image du post">
+          {% else %}
+            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white">
+              Pas d'image
+            </div>
+          {% endif %}
+        </div>
+
+        {# Colonne droite : contenu & commentaires #}
+        <div class="col-md-5 d-flex flex-column bg-white p-0">
+
+          {# Header avec avatar et auteur #}
+          <div class="d-flex align-items-center p-3 border-bottom">
+            <img 
+              src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}"
+              class="rounded-circle me-2" 
+              style="width:32px; height:32px; object-fit:cover;"
+              alt="Avatar {{ post.user.nom }}">
+            <strong>{{ post.user.nom }}</strong>
+          </div>
+
+          {# Contenu du post #}
+          <div class="p-3 border-bottom flex-grow-0">
+            <h5>{{ post.title }}</h5>
+            <p class="mb-1">{{ post.content|raw }}</p>
+            <small class="text-muted">{{ post.createdAt ? post.createdAt|date('d M Y à H:i') : '—' }}</small>
+          </div>
+
+          {# Section commentaires (scrollable) #}
+          <div class="flex-grow-1 overflow-auto p-3" style="min-height:0;">
+            {% for comment in post.comments %}
+              <div class="d-flex align-items-start mb-3">
+                <img 
+                  src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}"
+                  alt="Avatar commentateur"
+                  class="rounded-circle me-2"
+                  style="width:32px; height:32px; object-fit:cover;"
+                >
+                <div class="w-100">
+                  <strong>{{ comment.user.nom }}</strong>
+                  <p class="mb-1">{{ comment.content }}</p>
+                  <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+
+                  {% if comment.user == app.user %}
+                    <div class="mt-1">
+                      <a href="{{ path('app_comment_edit', { id: comment.id }) }}" class="btn btn-sm btn-link p-0 me-2">Modifier</a>
+                      <form 
+                        action="{{ path('app_comment_delete', { id: comment.id }) }}" 
+                        method="post" 
+                        class="d-inline"
+                        onsubmit="return confirm('Confirmer la suppression du commentaire ?');"
+                      >
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                      </form>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% else %}
+              <p class="text-center text-muted">Aucun commentaire pour ce post.</p>
+            {% endfor %}
+          </div>
+
+          {# Formulaire d’ajout de commentaire #}
+          <div class="border-top p-3 d-flex align-items-center">
+            <img 
+              src="{{ app.user.imageUrl ? asset(app.user.imageUrl) : asset('img/screen/user.png') }}" 
+              class="rounded-circle me-2" 
+              style="width:32px; height:32px; object-fit:cover;" 
+              alt="Votre avatar">
+            <form 
+              action="{{ path('app_comment_new', { postId: post.id }) }}" 
+              method="post" 
+              class="w-100 d-flex"
+            >
+              <input 
+                type="text" 
+                name="content" 
+                class="form-control me-2 border-0 bg-light" 
+                placeholder="Ajouter un commentaire..." 
+                required
+              >
+              <button type="submit" class="btn btn-primary">Publier</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

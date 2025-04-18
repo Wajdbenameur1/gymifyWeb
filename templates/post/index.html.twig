@@ -171,23 +171,20 @@
   </a>
   
   <form 
-    action="{{ path('app_comment_delete', { id: comment.id }) }}" 
-    method="post" 
-    class="d-inline"
-    onsubmit="return confirm('Voulez‑vous vraiment supprimer ce commentaire ?');"
-  >
-    <input 
-      type="hidden" 
-      name="_token" 
-      value="{{ csrf_token('delete' ~ comment.id) }}"
-    >
-    <button 
-      type="submit" 
-      class="btn btn-sm btn-link text-danger p-0"
-    >
-      Supprimer
-    </button>
-  </form>
+    action="{{ path('app_comment_delete', { id: comment.id }) }}"
+    method="post"
+    class="delete-comment-form"
+    data-comment-id="{{ comment.id }}"
+    onsubmit="return handleDeleteComment(event)"
+>
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+</form>
+
+
+
+
+
 </div>
 {% endif %}
 
@@ -530,4 +527,9 @@ Delete
 
     }); // fin DOMContentLoaded
   </script>
+
+
+
+  
+    
 {% endblock %}
