@@ -64,4 +64,19 @@ class OrderController extends AbstractController
         $this->addFlash('success', 'La commande a été supprimée.');
         return $this->redirectToRoute('admin_orders_index');
     }
+
+    #[Route('/admin/orders/{id}/update', name: 'admin_order_update', methods: ['POST'])]
+    public function update(Request $request, Commande $commande, EntityManagerInterface $entityManager): Response
+    {
+        $status = $request->request->get('status');
+        
+        if ($status) {
+            $commande->setStatus($status);
+            $entityManager->flush();
+            
+            $this->addFlash('success', 'Statut de la commande mis à jour avec succès');
+        }
+
+        return $this->redirectToRoute('admin_order_show', ['id' => $commande->getId()]);
+    }
 } 

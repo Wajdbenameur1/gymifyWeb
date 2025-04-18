@@ -3,3 +3,49 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Admin routes
+admin_dashboard:
+    path: /admin
+    controller: App\Controller\Admin\DashboardController::index
+    methods: GET
+
+admin_product_index:
+    path: /admin/products
+    controller: App\Controller\Admin\ProductController::index
+    methods: GET
+
+admin_product_new:
+    path: /admin/products/new
+    controller: App\Controller\Admin\ProductController::new
+    methods: [GET, POST]
+
+admin_product_edit:
+    path: /admin/products/{idP}/edit
+    controller: App\Controller\Admin\ProductController::edit
+    methods: [GET, POST]
+
+admin_product_delete:
+    path: /admin/products/{idP}/delete
+    controller: App\Controller\Admin\ProductController::delete
+    methods: POST
+
+admin_order_index:
+    path: /admin/orders
+    controller: App\Controller\Admin\OrderController::index
+    methods: GET
+
+admin_order_show:
+    path: /admin/orders/{idC}
+    controller: App\Controller\Admin\OrderController::show
+    methods: GET
+
+admin_order_update:
+    path: /admin/orders/{idC}/update
+    controller: App\Controller\Admin\OrderController::update
+    methods: POST
+
+# Security routes
+app_logout:
+    path: /logout
+    methods: GET

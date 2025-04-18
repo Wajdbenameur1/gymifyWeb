@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-#[Route('/admin/product')]
+#[Route('/admin/products')]
 class ProductController extends AbstractController
 {
     #[Route('/', name: 'admin_product_index', methods: ['GET'])]
@@ -63,7 +63,7 @@ class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/{idP}/edit', name: 'admin_product_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'admin_product_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Produit $produit, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $form = $this->createForm(ProduitType::class, $produit);
@@ -94,7 +94,7 @@ class ProductController extends AbstractController
                     $produit->setImagePath($newFilename);
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Une erreur est survenue lors de l\'upload de l\'image');
-                    return $this->redirectToRoute('admin_product_edit', ['idP' => $produit->getIdP()]);
+                    return $this->redirectToRoute('admin_product_edit', ['id' => $produit->getId()]);
                 }
             }
 
@@ -110,10 +110,10 @@ class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/{idP}', name: 'admin_product_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'admin_product_delete', methods: ['POST'])]
     public function delete(Request $request, Produit $produit, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$produit->getIdP(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$produit->getId(), $request->request->get('_token'))) {
             // Delete image file if exists
             if ($produit->getImagePath()) {
                 $imagePath = $this->getParameter('kernel.project_dir').'/public/uploads/products/'.$produit->getImagePath();
