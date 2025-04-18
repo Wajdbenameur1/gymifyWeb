@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\PostRepository;                // <- Assurez‑vous d’importer LE BON namespace
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 
@@ -30,49 +31,73 @@ final class CommentController extends AbstractController
     
 
     #[Route('/new/{postId}', name: 'app_comment_new', methods: ['POST'])]
-public function new(
-    Request $request,
-    EntityManagerInterface $em,
-    PostRepository $postRepo,
-    int $postId
-): Response {
-    $post = $postRepo->find($postId);
-    if (!$post) {
-        throw $this->createNotFoundException('Le post n\'existe pas.');
-    }
-
- // 2. Récupérer le contenu envoyé (scalar simple)
- $content = trim($request->request->get('content', ''));
-        if ($content !== '') {
+    public function new(
+        Request $request,
+        EntityManagerInterface $em,
+        PostRepository $postRepo,
+        ValidatorInterface $validator,  // Injection du service Validator
+        int $postId
+    ): Response {
+        // Trouver le post
+        $post = $postRepo->find($postId);
+        if (!$post) {
+            throw $this->createNotFoundException('Le post n\'existe pas.');
+        }
+    
+        // Récupérer le contenu du commentaire
+        $content = trim($request->request->get('content', ''));
+    
+        // Créer l'objet Comment
         $comment = new Comment();
         $comment->setPost($post)
                 ->setUser($this->getUser())
                 ->setContent($content)
                 ->setCreatedAt(new \DateTime());
-
+    
+        // ✅ Validation
+        $errors = $validator->validate($comment);  // On valide l'entité
+    
+        if (count($errors) > 0) {
+            // Si des erreurs existent, on les récupère
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();  // Ajout des messages d'erreur
+            }
+    
+            // Si c'est une requête AJAX, on renvoie les erreurs en JSON
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(['errors' => $errorMessages], 400);  // Code 400 pour erreur
+            }
+    
+            // Sinon, ajout des erreurs dans les flash messages
+            $this->addFlash('error', implode(' ', $errorMessages));
+    
+            // Redirection avec un message flash
+            return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
+        }
+    
+        // ✅ Aucun problème → on persiste
         $em->persist($comment);
         $em->flush();
-
-        // Si c'est une requête AJAX, renvoyer du JSON
+    
+        // Si c'est une requête AJAX, renvoie les données du commentaire créé
         if ($request->isXmlHttpRequest()) {
             return $this->json([
                 'id'        => $comment->getId(),
                 'content'   => $comment->getContent(),
                 'user'      => [
-                    'nom'      => $comment->getUser()->getNom(),
-                    'avatar'   => $comment->getUser()->getImageUrl()
-                                   ? $this->getParameter('uploads_base_url').'/'.$comment->getUser()->getImageUrl()
-                                   : $this->getParameter('app.base_path').'/img/screen/user.png',
+                    'nom'    => $comment->getUser()->getNom(),
+                    'avatar' => $comment->getUser()->getImageUrl()
+                        ? $this->getParameter('uploads_base_url').'/'.$comment->getUser()->getImageUrl()
+                        : $this->getParameter('app.base_path').'/img/screen/user.png',
                 ],
                 'createdAt' => $comment->getCreatedAt()->format('d M Y à H:i'),
             ]);
         }
+    
+        // Redirection classique après succès
+        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
     }
-
-    // Sinon (pas AJAX) : redirection classique
-    return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_post_index'));
-}
-
 
 
 

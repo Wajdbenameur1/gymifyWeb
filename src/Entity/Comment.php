@@ -7,6 +7,10 @@ use App\Entity\Post;  // Importation de l'entité Post
 use App\Entity\User;  // Importation de l'entité User
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+
+
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 class Comment
@@ -16,11 +20,25 @@ class Comment
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+
+
+#[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le commentaire ne peut pas être vide.')]
+    #[Assert\Length(
+        min: 3,
+        minMessage: 'Le commentaire doit contenir au moins {{ limit }} caractères.'
+    )]
+    #[Assert\Regex(
+        pattern: '/\b(arnaque|insulte|escroc|arnaquer|injure)\b/i',
+        match: false,
+        message: 'Ce commentaire contient des mots inappropriés.'
+    )]
     private ?string $content = null;
 
     #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
+
+    
 
 
      // Relation ManyToOne avec Post
