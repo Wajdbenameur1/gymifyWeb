@@ -1,122 +1,301 @@
 {% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
-{% block title %}Post index{% endblock %}
-
+{% block title %}Posts{% endblock %}
 
 {% block stylesheet %}
 <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    {% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
 {% block body %}
+<nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ path('app_post_index') }}">Blogs</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Home</li>
+  </ol>
+</nav>
 
-
-
-
-
-
-
-
-
-    <div class="container">
-        <div class="page-inner">
-          <div class="page-header">
-            <h4 class="page-title">Dashboard</h4>
-            <ul class="breadcrumbs">
-              <li class="nav-home">
-                <a href="#">
-                  <i class="icon-home"></i>
-                </a>
-              </li>
-              <li class="separator">
-                <i class="icon-arrow-right"></i>
-              </li>
-              <li class="nav-item">
-                <a href="#">Pages</a>
-              </li>
-              <li class="separator">
-                <i class="icon-arrow-right"></i>
-              </li>
-              <li class="nav-item">
-                <a href="#">Starter Page</a>
-              </li>
-            </ul>
+<h1 class="mb-4">Posts</h1>
+<a href="{{ path('app_post_new') }}" class="btn btn-success btn-rounded">Create new post</a>
+<br><br>
+<div class="container">
+  <div class="row">
+    {% for post in posts %}
+      <div class="col-12 col-md-6 mb-4">
+        <div class="card card-post card-round h-100">
+          {% if post.imageUrl %}
+            <img class="card-img-top" src="{{ asset(post.webPath) }}" alt="Image du post {{ post.title }}" />
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex align-items-center mb-2">
+              <img src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}" alt="Avatar de {{ post.user.nom }}" class="avatar-img rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+              <div class="ms-2">
+                <p class="username mb-0">{{ post.user.nom }}</p>
+                <p class="date text-muted mb-0">{{ post.createdAt ? post.createdAt|date('d M Y') : '—' }}</p>
+              </div>
+            </div>
+            <div class="separator-solid mb-2"></div>
+            <h5 class="card-title">
+              <a href="{{ path('app_post_show',{id:post.id}) }}">{{ post.title }}</a>
+            </h5>
+            <p class="card-text flex-grow-1">{{ post.content|raw }}</p>
+            <div class="mt-auto">
+              <a href="{{ path('app_post_show',{id:post.id}) }}" class="btn btn-primary">Show</a>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentsModal{{ post.id }}">{{ post.comments|length }} Commentaires</button>
+              {% if post.user == app.user %}
+                <a href="{{ path('app_post_edit',{id:post.id}) }}" class="btn btn-secondary ms-2">Edit</a>
+                <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">Delete</button>
+              {% endif %}
+            </div>
           </div>
-          <div class="page-category">Inner page content goes here</div>
+        </div>
 
 
-          <div class="feed feed-centered" style="margin-left: 100px;">
-            {% for post in posts %}
-                <div class="post">
-                    <div class="post-header">
-                        <img src="" alt="user" />
-                        <strong>username</strong>
-                        <div class="post-date">
-                            {{ post.createdAt|date('d M Y H:i') }}
-                        </div>
-                    </div>
-    
-                    <div class="post-image">
-                        <img src="{{ post.imageUrl }}" alt="post image">
-                    </div>
-    
-                    <div class="post-actions">
-                        <i class="fa-regular fa-heart"></i>
-                        <i class="fa-regular fa-comment"></i>
-                        <i class="fa-regular fa-paper-plane"></i>
-                    </div>
-    
-                    <div class="post-content">
-                        <strong>username</strong> {{ post.content }}
-                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {# Modal commentaires #}
+        <div class="modal fade" id="commentsModal{{ post.id }}" tabindex="-1" aria-labelledby="commentsModalLabel{{ post.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content" style="border-radius:10px;overflow:hidden;">
+              <div class="modal-body p-0 d-flex" style="height:80vh;">
+
+                <div class="col-md-7 d-none d-md-block bg-dark">
+                  {% if post.imageUrl %}
+                    <img src="{{ asset(post.webPath) }}" class="w-100 h-100" style="object-fit:cover;" alt="Post image">
+                  {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white">Pas d'image</div>
+                  {% endif %}
                 </div>
-            {% else %}
-                <p>Aucun post trouvé.</p>
-            {% endfor %}
+
+                <div class="col-md-5 d-flex flex-column bg-white">
+
+                  <div class="d-flex align-items-center p-3 border-bottom">
+                    <img src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                    <strong>{{ post.user.nom }}</strong>
+                  </div>
+                  <div class="p-3 border-bottom">
+                    <h5>{{ post.title }}</h5>
+                    <p class="mb-1">{{ post.content|raw }}</p>
+                    <small class="text-muted">{{ post.createdAt ? post.createdAt|date('d M Y à H:i') : '—' }}</small>
+                  </div>
+                  <div class="flex-grow-1 overflow-auto p-3" style="min-height:0;">
+                    {% for comment in post.comments %}
+                      <div class="d-flex align-items-start mb-3">
+                        <img src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                        <div class="w-100">
+                          <strong>{{ comment.user.nom }}</strong>
+                          <p class="mb-1">{{ comment.content }}</p>
+                          <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+                          {% if comment.user == app.user %}
+                            <div class="mt-1">
+                              <a href="{{ path('app_comment_edit',{id:comment.id}) }}" class="btn btn-sm btn-link p-0 me-2">Modifier</a>
+                              <form action="{{ path('app_comment_delete',{id:comment.id}) }}" method="post" class="js-delete-comment-form d-inline" data-post-id="{{ post.id }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                              </form>
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% else %}
+                      <p class="text-center text-muted">Aucun commentaire.</p>
+                    {% endfor %}
+                  </div>
+                  <div class="border-top p-3 d-flex align-items-center">
+                    <img src="{{ app.user.imageUrl ? asset(app.user.imageUrl) : asset('img/screen/user.png') }}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                   
+                   
+                    <div id="comment-errors-{{ post.id }}" class="text-danger mb-2" style="display: none;"></div>
+
+
+                    
+
+
+
+                    <form 
+    action="{{ path('app_comment_new',{postId:post.id}) }}" 
+    method="post" 
+    class="js-add-comment-form w-100 d-flex" 
+    data-post-id="{{ post.id }}"
+>
+    {# champ CSRF obligatoire #}
+    <input type="hidden" name="_token" 
+           value="{{ csrf_token('comment' ~ post.id) }}">
+    <input 
+        type="text" 
+        name="content" 
+        class="form-control me-2 border-0 bg-light" 
+        placeholder="Ajouter un commentaire..." 
+        required
+    >
+    <button type="submit" class="btn btn-primary">
+        Ajouter
+    </button>
+</form>
+
+
+
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {# Modal suppression du post #}
+        {% if post.user == app.user %}
+        <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1" aria-labelledby="deletePostLabel{{ post.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+              <div class="modal-header border-0 justify-content-center">
+                <h5 class="modal-title" id="deletePostLabel{{ post.id }}"><i class="fas fa-trash-alt fa-3x text-danger"></i></h5>
+              </div>
+              <div class="modal-body">
+                <p>Es-tu sûr(e) de vouloir supprimer ce post :</p>
+                <p><strong>{{ post.title }}</strong> ?</p>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form action="{{ path('app_post_delete',{id:post.id}) }}" method="post" class="js-delete-post-form d-inline">
+                  <input type="hidden" name="_token" value="{{ csrf_token('delete-post' ~ post.id) }}">
+                  <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
+        {% endif %}
+
       </div>
-
-
-    
-    <h1>Post index</h1>
-<div class="row">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Content</th>
-                <th>Image_url</th>
-                <th>CreatedAt</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for post in posts %}
-            <tr>
-                <td>{{ post.id }}</td>
-                <td>{{ post.title }}</td>
-                <td>{{ post.content }}</td>
-                <td>{{ post.imageUrl }}</td>
-                <td>{{ post.createdAt ? post.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_post_show', {'id': post.id}) }}">show</a>
-                    <a href="{{ path('app_post_edit', {'id': post.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_post_new') }}">Create new</a>
+    {% else %}
+      <div class="col-12"><p class="text-center text-muted">Aucun post trouvé.</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
 
 
 
-    
+
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // suppression AJAX des commentaires
+    document.querySelectorAll('.js-delete-comment-form').forEach(function(form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return;
+        var postId = this.dataset.postId;
+        var submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        fetch(this.action, { method:'POST', body: new FormData(this) })
+          .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+          .then(() => {
+            var div = form.closest('.d-flex.align-items-start.mb-3'); if (div) div.remove();
+            var btn = document.querySelector(`[data-bs-target="#commentsModal${postId}"]`);
+            if (btn) { let count = parseInt(btn.innerText) - 1; btn.innerText = count + ' Commentaire' + (count>1?'s':''); }
+          })
+          .catch(()=> alert('Erreur suppression commentaire'))
+          .finally(()=> submitBtn.disabled = false);
+      });
+    });
+  });
+</script>
 
 
 
@@ -125,9 +304,74 @@
 
 
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      // Gestion de l'ajout de commentaire via AJAX
+      document.querySelectorAll('.js-add-comment-form').forEach(function (form) {
+          form.addEventListener('submit', function (e) {
+              e.preventDefault();
+  
+              const postId = this.dataset.postId;
+              const input = this.querySelector('input[name="content"]');
+              const errorDiv = document.getElementById(`comment-errors-${postId}`);
+              const content = input.value.trim();
+  
+              errorDiv.style.display = 'none';
+              errorDiv.innerHTML = '';
+  
+              if (content.length < 2) {
+                  errorDiv.innerHTML = 'Le commentaire est trop court.';
+                  errorDiv.style.display = 'block';
+                  return;
+              }
+  
+              const formData = new FormData(this);
+              fetch(this.action, {
+                  method: 'POST',
+                  body: formData
+              })
+              .then(r => r.json())
+              .then(data => {
+                  if (data.errors) {
+                      errorDiv.innerHTML = data.errors.join('<br>');
+                      errorDiv.style.display = 'block';
+                      return;
+                  }
+  
+                  // Crée dynamiquement le HTML du commentaire
+                  const commentHTML = `
+                    <div class="d-flex align-items-start mb-3">
+                      <img src="${data.user.avatar}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                      <div class="w-100">
+                        <strong>${data.user.nom}</strong>
+                        <p class="mb-1">${data.content}</p>
+                        <small class="text-muted">${data.createdAt}</small>
+                      </div>
+                    </div>
+                  `;
+  
+                  const container = form.closest('.modal-content').querySelector('.overflow-auto');
+                  container.insertAdjacentHTML('beforeend', commentHTML);
+                  
+                  // Vide le champ de saisie
+                  input.value = '';
+  
+                  // Met à jour le compteur de commentaires
+                  const btn = document.querySelector(`[data-bs-target="#commentsModal${postId}"]`);
+                  if (btn) {
+                      let count = parseInt(btn.innerText) + 1;
+                      btn.innerText = count + ' Commentaire' + (count > 1 ? 's' : '');
+                  }
+              })
+              .catch(() => {
+                  errorDiv.innerHTML = 'Refresh.';
+                  errorDiv.style.display = 'block';
+              });
+          });
+      });
+  });
+  </script>
+  
 
-
-
-    
-
+  
 {% endblock %}

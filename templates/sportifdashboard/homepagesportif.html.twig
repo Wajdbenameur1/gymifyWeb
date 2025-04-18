@@ -27,49 +27,65 @@
 
     {% endblock %}
     
+    
     {% block javascripts_head %}
-        <script src="{{ asset('js/webfont.min.js') }}"></script>
-        <script>
-          WebFont.load({
-            google: { families: ["Public Sans:300,400,500,600,700"] },
-            custom: {
-              families: [
-                "Font Awesome 5 Solid",
-                "Font Awesome 5 Regular",
-                "Font Awesome 5 Brands",
-                "simple-line-icons",
-              ],
-              urls: ["{{ asset('css/fonts.min.css') }}"]
-            },
-            active: function() {
-              sessionStorage.fonts = true;
-            }
-          });
-        </script>
-    {% endblock %}
+    <script src="{{ asset('js/webfont.min.js') }}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["{{ asset('css/fonts.min.css') }}"]
+        },
+        active: function() {
+          sessionStorage.fonts = true;
+        }
+      });
+    </script>
+{% endblock %}
 </head>
 <body>
-    <div class="wrapper">
-        {% include 'sportifdashboard/sidebar.html.twig' %}
-        
-        <div class="main-panel">
-            
-            
-            <div class="container">
-                <div class="page-inner">
-                    {% block body %}{% endblock %}
-                </div>
-            </div>
-
-            
-            {% include 'sportifdashboard/footer.html.twig' %}
-        </div>
-    </div>
-
-    {% include 'admin/scripts.html.twig' %}
+<div class="wrapper d-flex">  {# bootstrap flex-container #}
+    {% include 'sportifdashboard/sidebar.html.twig' %}
     
-    {% block javascripts %}
-        <script src="{{ asset('js/script.js') }}"></script>
-    {% endblock %}
+    <div class="main-panel flex-grow-1">
+       {# on peut garder container-fluid ou container selon l’effet désiré #}
+        
+        
+       <div class="container-fluid">
+            <div class="page-inner">
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+
+        
+        {% include 'sportifdashboard/footer.html.twig' %}
+    </div>
+</div>
+
+
+
+{% include 'admin/scripts.html.twig' %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/script.js') }}"></script>
+
+
+
+  
+      
+
+{% endblock %}
+
+  
+      
+
+
 </body>
+
 </html>
