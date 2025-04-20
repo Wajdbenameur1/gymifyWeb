@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Entity;
+
 use App\Enum\Role;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -49,25 +51,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateNaissance = null;
 
-    // Relation OneToMany avec Post (Les posts d'un utilisateur)
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $specialite = null;
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Post::class)]
     private Collection $posts;
 
-   #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
     private Collection $comments;
-    #[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Cours::class)]
+
+    #[ORM\OneToMany(mappedBy: 'entraineur', targetEntity: Cours::class)]
     private Collection $cours;
-    #[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Planning::class)]
+
+    #[ORM\OneToMany(mappedBy: 'entraineur', targetEntity: Planning::class)]
     private Collection $plannings;
     #[ORM\OneToMany(mappedBy: 'sportif', targetEntity: Infosportif::class)]
     private Collection $Infosportifs;
 
-
-
-#[ORM\Column(type: 'string', length: 100, nullable: true)]
-private ?string $specialite = null;
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
-private Collection $reactions;
+    private Collection $reactions;
 
     /**
      * @var Collection<int, Infosportif>
@@ -75,12 +77,15 @@ private Collection $reactions;
     #[ORM\OneToMany(targetEntity: Infosportif::class, mappedBy: 'sportif')]
     private Collection $sportif;
 
+    #[ORM\ManyToOne(inversedBy: 'equipes')]
+    private ?Equipe $equipe = null;
 
     public function __construct()
     {
-        $this->role = Role::SPORTIF; 
-        $this->entaineur = new ArrayCollection();
         $this->posts = new ArrayCollection();
+        $this->comments = new ArrayCollection();
+        $this->cours = new ArrayCollection();
+        $this->plannings = new ArrayCollection();
         $this->reactions = new ArrayCollection();
         $this->sportif = new ArrayCollection();
         $this->infosportifs = new ArrayCollection();
@@ -88,8 +93,6 @@ private Collection $reactions;
     
 
     }
-
-    
 
     public function getId(): ?int
     {
@@ -140,12 +143,12 @@ private Collection $reactions;
         return $this;
     }
 
-        public function getImageUrl(): ?string
+    public function getImageUrl(): ?string
     {
         return $this->imageUrl;
     }
 
-    public function setImageUrl(?string $imageUrl): self
+    public function setImageUrl(?string $imageUrl): static
     {
         $this->imageUrl = $imageUrl;
         return $this;
@@ -173,66 +176,117 @@ private Collection $reactions;
         return $this;
     }
 
-    
-
     /**
      * @return Collection<int, Cours>
      */
-    public function getEntaineur(): Collection
+    public function getCours(): Collection
     {
-        return $this->entaineur;
+        return $this->cours;
     }
 
-    public function addEntaineur(Cours $entaineur): static
+    public function addCours(Cours $cours): static
     {
-        if (!$this->entaineur->contains($entaineur)) {
-            $this->entaineur[] = $entaineur;
-            $entaineur->setEntaineurId($this);
+        if (!$this->cours->contains($cours)) {
+            $this->cours[] = $cours;
+            $cours->setEntraineur($this);
         }
         return $this;
     }
 
-    public function removeEntaineur(Cours $entaineur): static
+    public function removeCours(Cours $cours): static
     {
-        if ($this->entaineur->removeElement($entaineur) && $entaineur->getEntaineur() === $this) {
-            $entaineur->setEntaineur(null);
+        if ($this->cours->removeElement($cours) && $cours->getEntraineur() === $this) {
+            $cours->setEntraineur(null);
         }
         return $this;
     }
 
-  
+    public function getPlannings(): Collection
+    {
+        return $this->plannings;
+    }
 
-public function getRole(): Role
-{
-    return match (true) {
-        $this instanceof \App\Entity\Admin => Role::ADMIN,
-        $this instanceof \App\Entity\Sportif => Role::SPORTIF,
-        $this instanceof \App\Entity\ResponsableSalle => Role::RESPONSABLE_SALLE,
-        $this instanceof \App\Entity\Entraineur => Role::ENTRAINEUR,
-        default => Role::SPORTIF,
-    };
-}
+    public function addPlanning(Planning $planning): static
+    {
+        if (!$this->plannings->contains($planning)) {
+            $this->plannings[] = $planning;
+            $planning->setEntraineur($this);
+        }
+        return $this;
+    }
 
-public function setRole(Role $role): self
-{
-    $this->role = $role;
-    return $this;
-}
-    
+    public function removePlanning(Planning $planning): static
+    {
+        if ($this->plannings->removeElement($planning) && $planning->getEntraineur() === $this) {
+            $planning->setEntraineur(null);
+        }
+        return $this;
+    }
+
+    public function getReactions(): Collection
+    {
+        return $this->reactions;
+    }
+
+    public function addReaction(Reactions $reaction): static
+    {
+        if (!$this->reactions->contains($reaction)) {
+            $this->reactions[] = $reaction;
+            $reaction->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeReaction(Reactions $reaction): static
+    {
+        if ($this->reactions->removeElement($reaction) && $reaction->getUser() === $this) {
+            $reaction->setUser(null);
+        }
+        return $this;
+    }
+
+    public function getEquipe(): ?Equipe
+    {
+        return $this->equipe;
+    }
+
+    public function setEquipe(?Equipe $equipe): static
+    {
+        $this->equipe = $equipe;
+        return $this;
+    }
+
+    public function getRole(): Role
+    {
+        return match (true) {
+            $this instanceof Admin => Role::ADMIN,
+            $this instanceof Sportif => Role::SPORTIF,
+            $this instanceof ResponsableSalle => Role::RESPONSABLE_SALLE,
+            $this instanceof Entraineur => Role::ENTRAINEUR,
+            default => Role::SPORTIF,
+        };
+    }
+
+    public function setRole(Role $role): static
+    {
+        // Ce champ n'est pas mappé car le rôle est défini par héritage
+        return $this;
+    }
 
     public function getRoles(): array
     {
         return match (true) {
-            $this instanceof \App\Entity\Admin => ['ROLE_ADMIN'],
-            $this instanceof \App\Entity\Sportif => ['ROLE_SPORTIF'],
-            $this instanceof \App\Entity\ResponsableSalle => ['ROLE_RESPONSABLE_SALLE'],
-            $this instanceof \App\Entity\Entraineur => ['ROLE_ENTRAINEUR'],
+            $this instanceof Admin => ['ROLE_ADMIN'],
+            $this instanceof Sportif => ['ROLE_SPORTIF'],
+            $this instanceof ResponsableSalle => ['ROLE_RESPONSABLE_SALLE'],
+            $this instanceof Entraineur => ['ROLE_ENTRAINEUR'],
             default => ['ROLE_USER'],
         };
     }
+
     public function eraseCredentials(): void
     {
-        // No sensitive data to erase
+        // Aucun champ sensible temporaire à effacer
     }
 
     public function getUserIdentifier(): string
@@ -270,3 +324,4 @@ public function setRole(Role $role): self
         return $this;
     }
 }
+

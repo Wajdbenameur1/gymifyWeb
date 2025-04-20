@@ -19,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
 
 final class SportifController extends AbstractController
@@ -54,8 +54,8 @@ final class SportifController extends AbstractController
                 'color' => $this->getColorForObjectif($cour->getObjectif()),
                 'description' => $cour->getDescription(),
                 'extendedProps' => [
-                    'activite' => $cour->getActivité() ? $cour->getActivité()->getNom() : null,
-                    'salle' => $cour->getSalle() ? $cour->getSalle()->getNom() : null,
+                    'activite' => $cour->getActivité()?->getNom(),
+                    'salle' => $cour->getSalle()?->getNom(),
                 ],
             ];
         }
@@ -65,19 +65,28 @@ final class SportifController extends AbstractController
         ]);
     }
 
+    #[Route('/sportif/cours', name: 'cours_sportif')]
+    public function coursSportif(CoursRepository $coursRepository): Response
+    {
+        $cours = $coursRepository->findAll();
+
+        return $this->render('sportif/cours.html.twig', [
+            'cours' => $cours,
+        ]);
+    }
+
     #[Route('/sportif/salle/{id}', name: 'sportif_salle_details')]
     public function salleDetails(
         Salle $salle,
         AbonnementRepository $abonnementRepository,
         EquipeEventRepository $equipeEventRepository
     ): Response {
-        $abonnements = $abonnementRepository->findBy(['salle' => $salle]);
         $equipeEvents = $equipeEventRepository->findBySalle($salle);
 
         return $this->render('sportif/salle_details.html.twig', [
             'salle' => $salle,
-            'abonnements' => $abonnementRepository->findBy(['salle' => $salle]), // ou votre requête personnalisée
-            'equipe_events' => $equipeEvents
+            'abonnements' => $abonnementRepository->findBy(['salle' => $salle]),
+            'equipe_events' => $equipeEvents,
         ]);
     }
 
@@ -94,12 +103,12 @@ final class SportifController extends AbstractController
                 'id' => $equipeEvent->getId(),
                 'nom' => $event->getNom(),
                 'imageUrl' => $event->getImageUrl(),
-                'type' => $event->getType() ? $event->getType()->value : 'N/A',
+                'type' => $event->getType()?->value ?? 'N/A',
                 'dateDay' => $event->getDate()->format('d'),
                 'dateMonth' => $event->getDate()->format('M'),
                 'heureDebut' => $event->getHeureDebut()->format('H:i'),
                 'heureFin' => $event->getHeureFin()->format('H:i'),
-                'reward' => $event->getReward() ? $event->getReward()->value : 'N/A',
+                'reward' => $event->getReward()?->value ?? 'N/A',
                 'description' => $event->getDescription(),
                 'lieu' => $event->getLieu(),
                 'equipeNom' => $equipe->getNom(),
@@ -117,18 +126,16 @@ final class SportifController extends AbstractController
         EquipeEvent $equipeEvent,
         EntityManagerInterface $entityManager
     ): Response {
-        // Get the logged-in user (Sportif)
         /** @var User $sportif */
         $sportif = $this->getUser();
 
-        // Check if the user is logged in and has the ROLE_SPORTIF
         if (!$sportif || !in_array('ROLE_SPORTIF', $sportif->getRoles(), true)) {
-            $this->logger->debug('User not logged in or not a sportif');
             $this->addFlash('error', 'Vous devez être connecté en tant que sportif pour participer.');
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
+            ]);
         }
 
-        // Check if the sportif is already in this team for this event
         $existingParticipation = $entityManager->getRepository(User::class)
             ->createQueryBuilder('u')
             ->where('u.id = :sportifId')
@@ -139,40 +146,41 @@ final class SportifController extends AbstractController
             ->getOneOrNullResult();
 
         if ($existingParticipation) {
-            $this->logger->debug('Sportif already in team', ['sportif_id' => $sportif->getId(), 'equipe_id' => $equipeEvent->getEquipe()->getId()]);
             $this->addFlash('error', 'Vous participez déjà à cette équipe pour cet événement.');
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
+            ]);
         }
 
-        // Check if the team is full (max 8 members)
         $equipe = $equipeEvent->getEquipe();
         if ($equipe->getNombreMembres() >= 8) {
-            $this->logger->debug('Team is full', ['equipe_id' => $equipe->getId()]);
             $this->addFlash('error', 'Cette équipe est complète (8/8).');
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
+            ]);
         }
 
-        // Create the form pre-filled with the sportif's data
         $form = $this->createForm(SportifParticipationType::class, $sportif);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Update the sportif's equipe
             $sportif->setEquipe($equipe);
-            // Increment the number of members in the equipe
             $equipe->setNombreMembres($equipe->getNombreMembres() + 1);
 
             $entityManager->persist($sportif);
             $entityManager->persist($equipe);
             $entityManager->flush();
 
-            $this->logger->info('Sportif joined team event', [
-                'sportif_id' => $sportif->getId(),
-                'equipe_id' => $equipe->getId(),
-                'event_id' => $equipeEvent->getEvent()->getId()
+            $this->addFlash('success', sprintf(
+                'Le sportif %s %s a été ajouté à l\'équipe %s pour cet événement !',
+                $sportif->getPrenom(),
+                $sportif->getNom(),
+                $equipe->getNom()
+            ));
+
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
             ]);
-            $this->addFlash('success', sprintf('Le sportif %s %s a été ajouté à l\'équipe %s pour cet événement !', $sportif->getPrenom(), $sportif->getNom(), $equipe->getNom()));
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
         return $this->render('sportif/join_equipe_event.html.twig', [
@@ -189,47 +197,22 @@ final class SportifController extends AbstractController
         ]);
     }
 
-    /**
-     * Merge a DateTime date with a DateTime time into a full ISO string.
-     *
-     * @param \DateTime $date
-     * @param \DateTime $time
-     * @return string
-     */
     private function mergeDateTime(\DateTime $date, \DateTime $time): string
     {
-        $dateStr = $date->format('Y-m-d');
-        $timeStr = $time->format('H:i:s');
-        return $dateStr . 'T' . $timeStr;
+        return $date->format('Y-m-d') . 'T' . $time->format('H:i:s');
     }
 
-    /**
-     * Get color based on the course objective.
-     *
-     * @param ObjectifCours|null $objectif
-     * @return string
-     */
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
-        if (null === $objectif) {
-            return '#CCCCCC';
-        }
-
         return match ($objectif) {
-            ObjectifCours::PERTE_POIDS => '#FF5733',
+            ObjectifCours::FORCE => '#ff4d4f',
+            ObjectifCours::ENDURANCE => '#1890ff',
+            ObjectifCours::FLEXIBILITE => '#13c2c2',
+            ObjectifCours::PERTE_DE_POIDS => '#52c41a',
+            ObjectifCours::MAIGRIR => '#f5222d',
             ObjectifCours::PRISE_DE_MASSE => '#33FF57',
-            ObjectifCours::ENDURANCE => '#3357FF',
             ObjectifCours::RELAXATION => '#F033FF',
             default => '#CCCCCC',
         };
-    }
-    #[Route('/sportif/cours', name: 'cours_sportif')]
-    public function cours(CoursRepository $repo)
-    {
-        $cours = $repo->findAll();
-        foreach ($cours as $c) {
-            dump($c->getEntaineur());
-        }
-        return $this->render('sportif/cours.html.twig', ['cours' => $cours]);
     }
 }

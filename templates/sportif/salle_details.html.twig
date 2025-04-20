@@ -29,15 +29,17 @@
                     <div class="gym-image">
                         {% if salle.urlPhoto %}
                             <img src="{{ asset('Uploads/images/' ~ salle.urlPhoto) }}" alt="{{ salle.nom }}">
+                            <div class="image-overlay"></div>
                         {% else %}
                             <img src="{{ asset('img/placeholder-gym.jpg') }}" alt="Default Gym Image">
+                            <div class="image-overlay"></div>
                         {% endif %}
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="gym-content">
                         <h2>{{ salle.nom }}</h2>
-                        <p>{{ salle.details }}</p>
+                        <p>{{ salle.details|default('No description available') }}</p>
                         <ul class="gym-meta">
                             <li><i class="fa fa-map-marker"></i> {{ salle.adresse }}</li>
                             <li><i class="fa fa-user"></i> {% if salle.responsable %}{{ salle.responsable.prenom|default('') }} {{ salle.responsable.nom|default('N/A') }}{% else %}No manager{% endif %}</li>
@@ -45,9 +47,9 @@
                             <li><i class="fa fa-envelope"></i> {{ salle.email }}</li>
                         </ul>
                         <div class="gym-actions">
-                            <a href="#subscriptions" class="primary-btn" data-tooltip="View available subscriptions">View Subscriptions</a>
-                            <a href="#events" class="primary-btn" data-tooltip="View upcoming events">View Events</a>
-                            <a href="{{ path('home') }}" class="primary-btn" data-tooltip="Return to homepage">Back</a>
+                            <a href="#subscriptions" class="primary-btn" data-tooltip="View available subscriptions" aria-label="View subscriptions">View Subscriptions</a>
+                            <a href="#events" class="primary-btn" data-tooltip="View upcoming events" aria-label="View events">View Events</a>
+                            <a href="{{ path('app_home') }}" class="primary-btn" data-tooltip="Return to homepage" aria-label="Go back to home">Back</a>
                         </div>
                     </div>
                 </div>
@@ -62,7 +64,7 @@
                 <div class="col-lg-12">
                     <div class="section-title">
                         <span>Discover Our</span>
-                        <h2>AVAILABLE SUBSCRIPTIONS</h2>
+                        <h2>Available Subscriptions</h2>
                     </div>
                 </div>
             </div>
@@ -111,7 +113,7 @@
                                                         </li>
                                                         <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
                                                     </ul>
-                                                    <a href="#" class="subscription-btn" data-tooltip="Subscribe to this plan">Subscribe</a>
+                                                    <a href="#" class="subscription-btn" data-tooltip="Subscribe to this plan" aria-label="Subscribe to {{ abonnement.type.value|capitalize }}">Subscribe</a>
                                                 </div>
                                             </div>
                                         {% endfor %}
@@ -123,7 +125,10 @@
                 </div>
             {% else %}
                 <div class="col-lg-12 text-center">
-                    <p>No subscriptions available at the moment.</p>
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle fa-2x mb-3"></i>
+                        <p>No subscriptions available for this gym currently.</p>
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -136,7 +141,7 @@
                 <div class="col-lg-12">
                     <div class="section-title">
                         <span>Discover Our</span>
-                        <h2>AVAILABLE EVENTS</h2>
+                        <h2>Available Events</h2>
                     </div>
                 </div>
             </div>
@@ -166,31 +171,65 @@
 
             <div class="row" id="events-container">
                 {% for equipe_event in equipe_events %}
+                    {% set event = equipe_event.event %}
+                    {% set equipe = equipe_event.equipe %}
                     <div class="col-lg-4 col-md-6">
                         <div class="event-card" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
-                            <div class="event-pic">
-                                {% if equipe_event.event.imageUrl %}
-                                    <img src="{{ asset('Uploads/evenements/' ~ equipe_event.event.imageUrl) }}" alt="{{ equipe_event.event.nom }}">
+                            <div class="event-image-wrapper">
+                                {% if event.imageUrl %}
+                                    <img src="{{ asset('Uploads/evenements/' ~ event.imageUrl) }}" alt="{{ event.nom }}">
                                 {% else %}
                                     <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
                                 {% endif %}
+                                <div class="event-overlay">
+                                    <div class="event-type-badge">{{ event.type ? event.type.value|capitalize : 'Not defined' }}</div>
+                                </div>
+                                <div class="event-date">
+                                    <span>{{ event.date|date('d') }}</span>
+                                    <p>{{ event.date|date('M') }}</p>
+                                </div>
                             </div>
-                            <div class="event-text">
-                                <span>{{ equipe_event.event.type ? equipe_event.event.type.value|capitalize : 'Not defined' }}</span>
-                                <h5>{{ equipe_event.event.nom }}</h5>
-                                <p>{{ equipe_event.event.description|length > 100 ? equipe_event.event.description|slice(0, 100) ~ '...' : equipe_event.event.description }}</p>
-                                <ul class="event-details">
-                                    <li><i class="fa fa-calendar"></i> {{ equipe_event.event.date|date('d/m/Y') }}</li>
-                                    <li><i class="fa fa-clock-o"></i> {{ equipe_event.event.heureDebut|date('H:i') }} - {{ equipe_event.event.heureFin|date('H:i') }}</li>
-                                    <li><i class="fa fa-map-marker"></i> {{ equipe_event.event.lieu|default('Not specified') }}</li>
+                            <div class="event-content">
+                                <h3>{{ event.nom }}</h3>
+                                <ul class="details-list">
+                                    <li>
+                                        <i class="fa fa-users icon"></i>
+                                        <strong>Team:</strong> {{ equipe.nom|default('Not specified') }}
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-info-circle icon"></i>
+                                        <strong>Description:</strong> {{ event.description|default('No description')|slice(0, 60) ~ '...' }}
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-clock-o icon"></i>
+                                        <strong>Time:</strong> {{ event.heureDebut|date('H:i') }} - {{ event.heureFin|date('H:i') }}
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-trophy icon reward-icon"></i>
+                                        <strong>Reward:</strong> {{ event.reward.value|default('None')|capitalize }}
+                                    </li>
+                                    <li class="location-item">
+                                        <i class="fa fa-map-marker icon"></i>
+                                        <strong>Location:</strong> <span class="location-text">{{ event.lieu|default('Not specified') }}</span>
+                                    </li>
                                 </ul>
-                                <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn" data-tooltip="View event details">Details</a>
+                                <div class="event-actions">
+                                    <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn" data-tooltip="View event details" aria-label="View details for {{ event.nom }}">
+                                        <i class="fa fa-info-circle me-2"></i>Details
+                                    </a>
+                                    <a href="{{ path('app_equipe_event_join', {'id': equipe_event.id}) }}" class="join-btn" data-tooltip="Join this event" aria-label="Join {{ event.nom }}">
+                                        <i class="fas fa-user-plus me-2"></i>Join
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 {% else %}
                     <div class="col-lg-12 text-center">
-                        <p>No events available at the moment.</p>
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle fa-2x mb-3"></i>
+                            <p>No team events scheduled for this gym currently.</p>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
@@ -291,6 +330,15 @@
             width: 100%;
             height: auto;
             object-fit: cover;
+        }
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+            z-index: 1;
         }
         .gym-content {
             z-index: 1;
@@ -486,7 +534,7 @@
         }
         .activity-name {
             padding: 20px;
-            background: linear-gradient(90deg,rgb(96, 94, 94),rgb(133, 130, 130));
+            background: linear-gradient(90deg, rgb(96, 94, 94), rgb(133, 130, 130));
             color: #e0e0e0;
             text-align: center;
             display: flex;
@@ -641,99 +689,203 @@
         /* Events */
         .event-card {
             background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             transition: all 0.4s ease;
-            margin-bottom: 30px;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
             animation: fadeInUp 0.6s ease-in-out;
             position: relative;
             z-index: 1;
         }
         .event-card:hover {
-            transform: translateY(-5px) rotate(-0.5deg);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
         }
-        .event-pic {
+        .event-image-wrapper {
+            position: relative;
+            height: 200px;
             overflow: hidden;
         }
-        .event-pic img {
+        .event-image-wrapper img {
             width: 100%;
-            height: 240px;
+            height: 100%;
             object-fit: cover;
-            transition: transform 0.6s ease;
+            transition: transform 0.5s ease;
         }
-        .event-card:hover .event-pic img {
-            transform: scale(1.1);
+        .event-card:hover .event-image-wrapper img {
+            transform: scale(1.08);
         }
-        .event-text {
-            padding: 25px;
-            text-align: center;
+        .event-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
         }
-        .event-text span {
-            color: #f36100;
-            font-size: 15px;
-            text-transform: uppercase;
-            font-weight: 700;
-            display: block;
-            margin-bottom: 15px;
-            font-family: 'Oswald', sans-serif;
-        }
-        .event-text h5 {
-            font-size: 24px;
-            color: #1a1a1a;
-            font-weight: 700;
-            margin-bottom: 15px;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
-        }
-        .event-text p {
-            color: #333333;
-            font-size: 15px;
-            line-height: 1.9;
-            margin-bottom: 20px;
-            font-family: 'Muli', sans-serif;
-        }
-        .event-details {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 25px;
-        }
-        .event-details li {
-            font-size: 15px;
-            color: #333333;
-            margin-bottom: 12px;
-            font-family: 'Muli', sans-serif;
-        }
-        .event-details li i {
-            color: #f36100;
-            margin-right: 12px;
-            font-size: 18px;
-            transition: color 0.3s ease;
-        }
-        .event-details li:hover i {
-            color: #ff8c00;
-        }
-        .event-btn {
-            display: inline-block;
+        .event-type-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
             background: linear-gradient(90deg, #f36100, #ff8c00);
             color: #ffffff;
-            padding: 12px 22px;
-            border-radius: 50px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
             text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-family: 'Oswald', sans-serif;
+        }
+        .event-date {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(90deg, #ff6200, #ff8c00);
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            width: 60px;
+        }
+        .event-date span {
+            font-size: 24px;
+            font-weight: 700;
+            display: block;
+            font-family: 'Oswald', sans-serif;
+        }
+        .event-date p {
+            font-size: 12px;
+            margin: 0;
+            text-transform: uppercase;
+            font-family: 'Muli', sans-serif;
+        }
+        .event-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-content h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f36100;
+            padding-bottom: 10px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+        .details-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .details-list li {
+            font-size: 14px;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.5;
+            transition: color 0.3s ease;
+            font-family: 'Muli', sans-serif;
+        }
+        .details-list li:hover {
+            color: #1a1a1a;
+        }
+        .details-list li strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        .details-list .icon {
+            color: #f36100;
+            font-size: 16px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .details-list .reward-icon {
+            color: #FFD700; /* Gold for reward */
+            font-size: 16px;
+        }
+        .details-list li:hover .icon {
+            transform: scale(1.2);
+            color: #ff8c00;
+        }
+        .details-list li:hover .reward-icon {
+            transform: scale(1.2);
+            color: #FFC107; /* Brighter gold on hover */
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.2); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1.2); }
+        }
+        .location-item {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .location-item .icon {
+            font-size: 18px;
+        }
+        .location-item:hover .icon {
+            color: #ff6200;
+        }
+        .location-text {
+            color: #333333;
+            background: rgba(243, 97, 0, 0.05);
+            padding: 5px 8px;
+            border-radius: 5px;
+            max-width: 80%;
+            display: inline-block;
+        }
+        .location-text:empty:before, .location-text:contains('Not specified') {
+            content: 'Not specified';
+            font-style: italic;
+            color: #888888;
+        }
+        .event-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .event-btn, .join-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px 18px;
+            border-radius: 50px;
             font-size: 15px;
             font-weight: 700;
-            transition: all 0.4s ease;
+            text-transform: uppercase;
             text-decoration: none;
             font-family: 'Oswald', sans-serif;
-            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.3);
+            transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
         }
+        .event-btn {
+            background: linear-gradient(90deg, #6c757d, #adb5bd);
+            color: #ffffff;
+            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+            border: 2px solid #6c757d;
+        }
         .event-btn:hover {
-            background: linear-gradient(90deg, #ff8c00, #f36100);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 10px 20px rgba(243, 97, 0, 0.4);
+            background: linear-gradient(90deg, #adb5bd, #6c757d);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.4);
+            border-color: #adb5bd;
+        }
+        .event-btn i {
+            transition: transform 0.3s ease;
+        }
+        .event-btn:hover i {
+            transform: scale(1.2);
         }
         .event-btn::before {
             content: '';
@@ -748,10 +900,42 @@
         .event-btn:hover::before {
             left: 100%;
         }
-        .event-btn[data-tooltip] {
+        .join-btn {
+            background: linear-gradient(90deg, #ff6200, #ff8c00);
+            color: #ffffff;
+            box-shadow: 0 6px 15px rgba(255, 98, 0, 0.3);
+            border: 2px solid #ff6200;
+        }
+        .join-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #ff6200);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(255, 98, 0, 0.4);
+            border-color: #ff8c00;
+        }
+        .join-btn i {
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .join-btn:hover i {
+            transform: scale(1.2);
+            color: #ff8c00;
+        }
+        .join-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .join-btn:hover::before {
+            left: 100%;
+        }
+        .event-btn[data-tooltip], .join-btn[data-tooltip] {
             position: relative;
         }
-        .event-btn[data-tooltip]::after {
+        .event-btn[data-tooltip]::after, .join-btn[data-tooltip]::after {
             content: attr(data-tooltip);
             position: absolute;
             bottom: 100%;
@@ -769,9 +953,30 @@
             transition: all 0.3s ease;
             margin-bottom: 10px;
         }
-        .event-btn[data-tooltip]:hover::after {
+        .event-btn[data-tooltip]:hover::after, .join-btn[data-tooltip]:hover::after {
             opacity: 1;
             visibility: visible;
+        }
+
+        /* Flash Message Styles */
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-family: 'Muli', sans-serif;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
         }
 
         /* Responsive Design */
@@ -782,8 +987,8 @@
             .section-title h2 {
                 font-size: 40px;
             }
-            .event-pic img {
-                height: 220px;
+            .event-image-wrapper {
+                height: 180px;
             }
             .subscriptions-container {
                 grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -805,8 +1010,8 @@
             .section-title h2 {
                 font-size: 36px;
             }
-            .event-pic img {
-                height: 200px;
+            .event-image-wrapper {
+                height: 160px;
             }
             .subscriptions-container {
                 grid-template-columns: 1fr;
@@ -815,8 +1020,11 @@
                 flex-direction: column;
                 gap: 15px;
             }
-            .primary-btn {
+            .primary-btn, .event-btn, .join-btn {
                 padding: 12px 20px;
+            }
+            .event-actions {
+                flex-direction: column;
             }
         }
         @media (max-width: 576px) {
@@ -829,15 +1037,15 @@
             .section-title h2 {
                 font-size: 32px;
             }
-            .primary-btn, .subscription-btn, .event-btn {
+            .primary-btn, .subscription-btn, .event-btn, .join-btn {
                 width: 100%;
                 text-align: center;
                 padding: 12px 15px;
             }
-            .event-pic img {
-                height: 180px;
+            .event-image-wrapper {
+                height: 140px;
             }
-            .activity-name h3, .subscription-header h4, .event-text h5 {
+            .activity-name h3, .subscription-header h4, .event-content h3 {
                 font-size: 20px;
             }
             .subscription-header .price {
@@ -845,6 +1053,15 @@
             }
             .activity-name i {
                 font-size: 18px;
+            }
+            .event-content h3 {
+                font-size: 18px;
+            }
+            .details-list li {
+                font-size: 13px;
+            }
+            .details-list .icon, .details-list .reward-icon {
+                font-size: 14px;
             }
         }
     </style>
@@ -856,14 +1073,14 @@
             fetch('{{ path('sportif_salle_events', {'id': salle.id}) }}')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Fetched events data:', data); // Log the JSON response for debugging
+                    console.log('Fetched events data:', data);
                     const eventsContainer = document.getElementById('events-container');
-                    eventsContainer.innerHTML = ''; // Clear existing content
+                    eventsContainer.innerHTML = '';
 
                     if (data.equipe_events.length === 0) {
                         eventsContainer.innerHTML = `
-                            <div class="col-12">
-                                <div class="alert alert-info text-center">
+                            <div class="col-lg-12 text-center">
+                                <div class="alert alert-info">
                                     <i class="fa fa-info-circle fa-2x mb-3"></i>
                                     <p>No team events scheduled for this gym currently.</p>
                                 </div>
@@ -877,7 +1094,7 @@
                             <div class="col-lg-4 col-md-6">
                                 <div class="event-card">
                                     <div class="event-image-wrapper">
-                                        <img src="${eventData.imageUrl || '/img/event-default.jpg'}" alt="${eventData.nom}">
+                                        <img src="${eventData.imageUrl || '{{ asset('img/event-default.jpg') }}'}" alt="${eventData.nom}">
                                         <div class="event-overlay">
                                             <div class="event-type-badge">${eventData.type}</div>
                                         </div>
@@ -902,8 +1119,8 @@
                                                 <strong>Time:</strong> ${eventData.heureDebut} - ${eventData.heureFin}
                                             </li>
                                             <li>
-                                                <i class="fa fa-award icon"></i>
-                                                <strong>Reward:</strong> ${eventData.reward || 'None'}
+                                                <i class="fas fa-trophy icon reward-icon"></i>
+                                                <strong>Reward:</strong> ${eventData.reward ? eventData.reward.charAt(0).toUpperCase() + eventData.reward.slice(1) : 'None'}
                                             </li>
                                             <li class="location-item">
                                                 <i class="fa fa-map-marker icon"></i>
@@ -911,11 +1128,11 @@
                                             </li>
                                         </ul>
                                         <div class="event-actions">
-                                            <a href="${eventData.detailsUrl}" class="event-btn" aria-label="View details for ${eventData.nom}">
+                                            <a href="${eventData.detailsUrl}" class="event-btn" data-tooltip="View event details" aria-label="View details for ${eventData.nom}">
                                                 <i class="fa fa-info-circle me-2"></i>Details
                                             </a>
-                                            <a href="${eventData.joinUrl}" class="join-btn" aria-label="Join ${eventData.nom}">
-                                                <i class="fa fa-sign-in-alt me-2"></i>Join
+                                            <a href="${eventData.joinUrl}" class="join-btn" data-tooltip="Join this event" aria-label="Join ${eventData.nom}">
+                                                <i class="fas fa-user-plus me-2"></i>Join
                                             </a>
                                         </div>
                                     </div>
@@ -934,5 +1151,4 @@
         // Initial refresh on page load
         document.addEventListener('DOMContentLoaded', refreshEvents);
     </script>
-
 {% endblock %}
