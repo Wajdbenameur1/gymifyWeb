@@ -50,11 +50,18 @@ final class ResponsableController extends AbstractController
 
     #[Route('/responsable/profile', name: 'app_responsable_profile')]
     public function profile(): Response
-    {
-        return $this->render('responsable/profile.html.twig', [
-            'page_title' => 'Profil Responsable'
-        ]);
-    }
+  
+       {
+           $user = $this->getUser();
+           if (!$user) {
+               throw $this->createAccessDeniedException('Vous devez être connecté pour voir votre profil.');
+           }
+   
+           return $this->render('/responsable/user/show.html.twig', [
+               'user' => $user,
+               'page_title' => 'Mon Profil'
+           ]);
+       }
 
     #[Route('/responsable/login', name: 'app_responsable_login')]
     public function login(): Response
@@ -103,7 +110,7 @@ final class ResponsableController extends AbstractController
         $salle = $user->getSalle();
         if (!$salle) {
             $this->addFlash('warning', 'Aucune salle associée à votre compte');
-            return $this->redirectToRoute('app_salle_create');
+            return $this->redirectToRoute('app_responsable_mygym');
         }
     
         // 4. Chargement des relations avec une méthode existante du repository

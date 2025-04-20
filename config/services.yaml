@@ -6,12 +6,12 @@
 parameters:
     activities_image_directory: '%kernel.project_dir%/public/uploads/activities'
     uploads_directory: '%kernel.project_dir%/public/uploads'
-
     images_directory: '%kernel.project_dir%/public/uploads/images'
-    users_images_directory: '%kernel.project_dir%/public/uploads/images'
+    users_images_directory: '%kernel.project_dir%/public/uploads/images/users'
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
     teams_images_directory: '%kernel.project_dir%/public/uploads/teams'
 
+    uploads_public_path: '/uploads'
 
 
 services:
@@ -19,12 +19,15 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
     App\Controller\AdminReclamationController:
         arguments:
             $logger: '@monolog.logger'
+
     App\Service\EmailUniquenessValidator:
         arguments:
-           ^ $entityManager: '@doctrine.orm.entity_manager'
+            $entityManager: '@doctrine.orm.entity_manager'
+
     App\Service\EmailService:
         arguments:
             $mailer: '@mailer'

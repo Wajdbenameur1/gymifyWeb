@@ -2,7 +2,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="{{ path('app_home') }}" class="logo">
-                <img src="{{ asset('img/kaiadmin/logo_light.svg') }}" alt="Logo" class="navbar-brand" height="20">
+                <img src="{{ asset('img/logocopy.png') }}" alt="Logo" class="navbar-brand" height="100">
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar">
@@ -26,27 +26,30 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                  <li class="nav-item {{ app.request.get('_route') == 'app_activity' ? 'active' }}">
+                <li class="nav-item {{ app.request.get('_route') starts with 'admin_salle' ? 'active' }}">
+                    <a href="{{ path('admin_salle_index') }}">
+                        <i class="fas fa-building"></i>
+                        <p>Gyms</p>
+                    </a>
+                </li>
+                <li class="nav-item {{ app.request.get('_route') == 'app_activity' ? 'active' }}">
                     <a href="{{ path('app_activity') }}">
-                    <i class="fas fa-dumbbell"></i>
+                        <i class="fas fa-dumbbell"></i>
                         <p>Activity</p>
                     </a>
-             </li>
-               <li class="nav-item {{ app.request.get('_route') == 'user_index' ? 'active' }}">
-              <a href="{{ path('user_index') }}">
-                 <i class="fas fa-dumbbell"></i>
-                 <p>Utilisateurs</p>
-               </a>
-             </li>
-               <li class="nav-item {{ app.request.get('_route') == 'user_index' ? 'active' }}">
-              <a href="{{ path('app_admin_reclamation_index') }}">
-                 <i class="fas fa-dumbbell"></i>
-                 <p>reclamation</p>
-               </a>
-             </li>
-            
-                {# Ajoutez ici les autres éléments du menu #}
-                
+                </li>
+                <li class="nav-item {{ app.request.get('_route') == 'user_index' ? 'active' }}">
+                    <a href="{{ path('user_index') }}">
+                        <i class="fas fa-users"></i>
+                        <p>Users</p>
+                    </a>
+                </li>
+                <li class="nav-item {{ app.request.get('_route') == 'app_admin_reclamation_index' ? 'active' }}">
+                    <a href="{{ path('app_admin_reclamation_index') }}">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Reclamation</p>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

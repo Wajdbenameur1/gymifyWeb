@@ -35,19 +35,18 @@ class Post
 )]
 private ?string $title = null;
 
-#[ORM\Column(length: 1000)]
+#[ORM\Column(type: Types::TEXT)] // Changement de TEXT pour supporter le HTML
 #[Assert\NotBlank(message: 'Le contenu est obligatoire.')]
-#[Assert\Length(
-    min: 10,
-    max: 1000,
-    minMessage: 'Le contenu doit contenir au moins {{ limit }} caractères.',
-    maxMessage: 'Le contenu ne peut pas dépasser {{ limit }} caractères.'
-)]
 #[Assert\Regex(
-    pattern: '/^(?!.*\b(spam|arnaque|insulte)\b).*/i',
-    message: 'Le contenu contient un mot interdit.'
+    pattern: '/\b(spam|arnaque|insulte)\b/i',
+    message: 'Contenu inapproprié détecté !',
+    match: false
 )]
 private ?string $content = null;
+
+
+
+
 
 #[ORM\Column(length: 255, nullable: true)]
 #[Assert\Url(message: 'Veuillez saisir une URL valide (http(s)://...) pour l’image.')]
@@ -203,6 +202,32 @@ public function removeReaction(Reactions $reaction): static
     return $this;
 }
 
-   
+  
+
+
+
+public function getWebPath(): ?string
+{
+    if ($this->image_url === null) {
+        return null;
+    }
+
+    // Normalise le chemin (Windows -> compatible avec URL)
+    $path = str_replace('\\', '/', $this->image_url);
+
+    // Enlève la partie absolue jusqu'à "public"
+    $publicPos = strpos($path, '/public');
+
+    if ($publicPos !== false) {
+        return substr($path, $publicPos + 7); // 7 = longueur de "/public"
+    }
+
+    // Si le chemin ne contient pas "public", on retourne tel quel
+    return $path;
+}
+
+
+
+
 
 }

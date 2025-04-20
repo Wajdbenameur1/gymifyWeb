@@ -99,6 +99,8 @@ when@test:
         - { path: ^/reclamation, roles: ROLE_USER }
 
 
+        - { path: ^/responsable/user, roles: ROLE_RESPONSABLE_SALLE }
+        - { path: ^/responsable, roles: ROLE_RESPONSABLE_SALLE }
 
         - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY } # Explicit rule
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

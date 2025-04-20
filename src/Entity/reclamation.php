@@ -2,6 +2,8 @@
 namespace App\Entity;
 
 use App\Repository\ReclamationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,6 +34,15 @@ class Reclamation
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
     private ?User $user = null;
+
+    #[ORM\OneToMany(mappedBy: 'reclamation', targetEntity: Reponse::class, cascade: ['persist', 'remove'])]
+    private Collection $reponses;
+
+    public function __construct()
+    {
+        $this->dateCreation = new \DateTime();
+        $this->reponses = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -90,6 +101,31 @@ class Reclamation
     public function setUser(?User $user): self
     {
         $this->user = $user;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reponse>
+     */
+    public function getReponses(): Collection
+    {
+        return $this->reponses;
+    }
+
+    public function addReponse(Reponse $reponse): self
+    {
+        if (!$this->reponses->contains($reponse)) {
+            $this->reponses[] = $reponse;
+            $reponse->setReclamation($this);
+        }
+        return $this;
+    }
+
+    public function removeReponse(Reponse $reponse): self
+    {
+        if ($this->reponses->removeElement($reponse) && $reponse->getReclamation() === $this) {
+            $reponse->setReclamation(null);
+        }
         return $this;
     }
 }

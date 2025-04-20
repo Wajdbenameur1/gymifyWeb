@@ -82,7 +82,6 @@ public function index(
             'form' => $form->createView(),
         ]);
     }
-
     #[Route('/{id}/edit', name: 'responsable_abonnement_edit', methods: ['GET', 'POST'])]
     public function edit(
         Request $request,

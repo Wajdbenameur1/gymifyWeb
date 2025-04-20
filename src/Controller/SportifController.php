@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Salle;
+use App\Enum\ActivityType;
 use App\Entity\Abonnement;
 use App\Entity\EquipeEvent;
 use App\Entity\User;
@@ -53,8 +54,8 @@ final class SportifController extends AbstractController
                 'color' => $this->getColorForObjectif($cour->getObjectif()),
                 'description' => $cour->getDescription(),
                 'extendedProps' => [
-                    'activite' => $cour->getActivité() ? $cour->getActivité()->getNom() : null,
-                    'salle' => $cour->getSalle() ? $cour->getSalle()->getNom() : null,
+                    'activite' => $cour->getActivité()?->getNom(),
+                    'salle' => $cour->getSalle()?->getNom(),
                 ],
             ];
         }
@@ -67,7 +68,6 @@ final class SportifController extends AbstractController
     #[Route('/sportif/cours', name: 'cours_sportif')]
     public function coursSportif(CoursRepository $coursRepository): Response
     {
-        // Récupérer tous les cours
         $cours = $coursRepository->findAll();
 
         return $this->render('sportif/cours.html.twig', [
@@ -81,12 +81,11 @@ final class SportifController extends AbstractController
         AbonnementRepository $abonnementRepository,
         EquipeEventRepository $equipeEventRepository
     ): Response {
-        $abonnements = $abonnementRepository->findBy(['salle' => $salle]);
         $equipeEvents = $equipeEventRepository->findBySalle($salle);
 
         return $this->render('sportif/salle_details.html.twig', [
             'salle' => $salle,
-            'abonnements' => $abonnements,
+            'abonnements' => $abonnementRepository->findBy(['salle' => $salle]),
             'equipe_events' => $equipeEvents,
         ]);
     }
@@ -104,12 +103,12 @@ final class SportifController extends AbstractController
                 'id' => $equipeEvent->getId(),
                 'nom' => $event->getNom(),
                 'imageUrl' => $event->getImageUrl(),
-                'type' => $event->getType() ? $event->getType()->value : 'N/A',
+                'type' => $event->getType()?->value ?? 'N/A',
                 'dateDay' => $event->getDate()->format('d'),
                 'dateMonth' => $event->getDate()->format('M'),
                 'heureDebut' => $event->getHeureDebut()->format('H:i'),
                 'heureFin' => $event->getHeureFin()->format('H:i'),
-                'reward' => $event->getReward() ? $event->getReward()->value : 'N/A',
+                'reward' => $event->getReward()?->value ?? 'N/A',
                 'description' => $event->getDescription(),
                 'lieu' => $event->getLieu(),
                 'equipeNom' => $equipe->getNom(),
@@ -127,18 +126,16 @@ final class SportifController extends AbstractController
         EquipeEvent $equipeEvent,
         EntityManagerInterface $entityManager
     ): Response {
-        // Get the logged-in user (Sportif)
         /** @var User $sportif */
         $sportif = $this->getUser();
 
-        // Check if the user is logged in and has the ROLE_SPORTIF
         if (!$sportif || !in_array('ROLE_SPORTIF', $sportif->getRoles(), true)) {
-            $this->logger->debug('User not logged in or not a sportif');
             $this->addFlash('error', 'Vous devez être connecté en tant que sportif pour participer.');
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
+            ]);
         }
 
-        // Check if the sportif is already in this team for this event
         $existingParticipation = $entityManager->getRepository(User::class)
             ->createQueryBuilder('u')
             ->where('u.id = :sportifId')
@@ -149,40 +146,41 @@ final class SportifController extends AbstractController
             ->getOneOrNullResult();
 
         if ($existingParticipation) {
-            $this->logger->debug('Sportif already in team', ['sportif_id' => $sportif->getId(), 'equipe_id' => $equipeEvent->getEquipe()->getId()]);
             $this->addFlash('error', 'Vous participez déjà à cette équipe pour cet événement.');
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
+            ]);
         }
 
-        // Check if the team is full (max 8 members)
         $equipe = $equipeEvent->getEquipe();
         if ($equipe->getNombreMembres() >= 8) {
-            $this->logger->debug('Team is full', ['equipe_id' => $equipe->getId()]);
             $this->addFlash('error', 'Cette équipe est complète (8/8).');
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
+            ]);
         }
 
-        // Create the form pre-filled with the sportif's data
         $form = $this->createForm(SportifParticipationType::class, $sportif);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Update the sportif's equipe
             $sportif->setEquipe($equipe);
-            // Increment the number of members in the equipe
             $equipe->setNombreMembres($equipe->getNombreMembres() + 1);
 
             $entityManager->persist($sportif);
             $entityManager->persist($equipe);
             $entityManager->flush();
 
-            $this->logger->info('Sportif joined team event', [
-                'sportif_id' => $sportif->getId(),
-                'equipe_id' => $equipe->getId(),
-                'event_id' => $equipeEvent->getEvent()->getId()
+            $this->addFlash('success', sprintf(
+                'Le sportif %s %s a été ajouté à l\'équipe %s pour cet événement !',
+                $sportif->getPrenom(),
+                $sportif->getNom(),
+                $equipe->getNom()
+            ));
+
+            return $this->redirectToRoute('sportif_salle_details', [
+                'id' => $equipeEvent->getEvent()->getSalle()->getId()
             ]);
-            $this->addFlash('success', sprintf('Le sportif %s %s a été ajouté à l\'équipe %s pour cet événement !', $sportif->getPrenom(), $sportif->getNom(), $equipe->getNom()));
-            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
         return $this->render('sportif/join_equipe_event.html.twig', [
@@ -201,24 +199,20 @@ final class SportifController extends AbstractController
 
     private function mergeDateTime(\DateTime $date, \DateTime $time): string
     {
-        $dateStr = $date->format('Y-m-d');
-        $timeStr = $time->format('H:i:s');
-        return $dateStr . 'T' . $timeStr;
+        return $date->format('Y-m-d') . 'T' . $time->format('H:i:s');
     }
 
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
-        if (!$objectif) {
-            return '#808080'; // Default gray color
-        }
-
         return match ($objectif) {
-            ObjectifCours::FORCE => '#ff4d4f', // Red for strength
-            ObjectifCours::ENDURANCE => '#1890ff', // Blue for endurance
-            ObjectifCours::FLEXIBILITE => '#13c2c2', // Cyan for flexibility
-            ObjectifCours::PERTE_DE_POIDS => '#52c41a', // Green for weight loss
-            ObjectifCours::MAIGRIR => '#f5222d', // Red for losing weight
-            default => '#808080', // Default gray
+            ObjectifCours::FORCE => '#ff4d4f',
+            ObjectifCours::ENDURANCE => '#1890ff',
+            ObjectifCours::FLEXIBILITE => '#13c2c2',
+            ObjectifCours::PERTE_DE_POIDS => '#52c41a',
+            ObjectifCours::MAIGRIR => '#f5222d',
+            ObjectifCours::PRISE_DE_MASSE => '#33FF57',
+            ObjectifCours::RELAXATION => '#F033FF',
+            default => '#CCCCCC',
         };
     }
 }
