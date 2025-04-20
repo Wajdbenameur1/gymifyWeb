@@ -59,6 +59,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $cours;
     #[ORM\OneToMany(mappedBy: 'entaineur', targetEntity: Planning::class)]
     private Collection $plannings;
+    #[ORM\OneToMany(mappedBy: 'sportif', targetEntity: Infosportif::class)]
+    private Collection $Infosportifs;
 
 
 
@@ -67,6 +69,12 @@ private ?string $specialite = null;
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
 private Collection $reactions;
 
+    /**
+     * @var Collection<int, Infosportif>
+     */
+    #[ORM\OneToMany(targetEntity: Infosportif::class, mappedBy: 'sportif')]
+    private Collection $sportif;
+
 
     public function __construct()
     {
@@ -74,6 +82,9 @@ private Collection $reactions;
         $this->entaineur = new ArrayCollection();
         $this->posts = new ArrayCollection();
         $this->reactions = new ArrayCollection();
+        $this->sportif = new ArrayCollection();
+        $this->infosportifs = new ArrayCollection();
+
     
 
     }
@@ -227,5 +238,35 @@ public function setRole(Role $role): self
     public function getUserIdentifier(): string
     {
         return $this->email;
+    }
+
+    /**
+     * @return Collection<int, Infosportif>
+     */
+    public function getSportif(): Collection
+    {
+        return $this->sportif;
+    }
+
+    public function addSportif(Infosportif $sportif): static
+    {
+        if (!$this->sportif->contains($sportif)) {
+            $this->sportif->add($sportif);
+            $sportif->setSportif($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSportif(Infosportif $sportif): static
+    {
+        if ($this->sportif->removeElement($sportif)) {
+            // set the owning side to null (unless already changed)
+            if ($sportif->getSportif() === $this) {
+                $sportif->setSportif(null);
+            }
+        }
+
+        return $this;
     }
 }
