@@ -205,11 +205,8 @@ final class SportifController extends AbstractController
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
         return match ($objectif) {
-            ObjectifCours::FORCE => '#ff4d4f',
-            ObjectifCours::ENDURANCE => '#1890ff',
-            ObjectifCours::FLEXIBILITE => '#13c2c2',
-            ObjectifCours::PERTE_DE_POIDS => '#52c41a',
-            ObjectifCours::MAIGRIR => '#f5222d',
+          ObjectifCours::ENDURANCE => '#1890ff',
+            ObjectifCours::PERTE_POIDS => '#52c41a',
             ObjectifCours::PRISE_DE_MASSE => '#33FF57',
             ObjectifCours::RELAXATION => '#F033FF',
             default => '#CCCCCC',
