@@ -18,6 +18,15 @@ enum ObjectifCours: string
             self::RELAXATION => 'Relaxation',
         };
     }
+    public function iconClass(): string
+    {
+        return match($this) {
+            self::PERTE_POIDS => 'fas fa-weight',
+            self::PRISE_DE_MASSE => 'fas fa-dumbbell',
+            self::ENDURANCE => 'fas fa-heartbeat',
+            self::RELAXATION => 'fas fa-spa',
+        };
+    }
 
     
 }

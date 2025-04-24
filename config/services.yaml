@@ -11,6 +11,9 @@ parameters:
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
     teams_images_directory: '%kernel.project_dir%/public/uploads/teams'
 
+    uploads_public_path: '/uploads'
+
+
 services:
     # default configuration for services in *this* file
     _defaults:

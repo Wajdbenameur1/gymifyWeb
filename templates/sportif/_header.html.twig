@@ -1,3 +1,70 @@
+<!-- Header Section Begin -->
+<header class="header-section">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="logo">
+                    <a href="{{ path('home') }}">
+                        <img src="{{ asset('img/logo.png') }}" alt="Gym Logo">
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <nav class="nav-menu">
+                    <ul>
+                        <li class="{{ app.request.get('_route') == 'home' ? 'active' }}"><a href="{{ path('home') }}">Home</a></li>
+                        <li class="{{ app.request.get('_route') == 'about_us' ? 'active' }}"><a href="#">About Us</a></li>
+                        <li class="{{ app.request.get('_route') == 'app_reclamation_index' ? 'active' }}"><a href="{{ path('app_reclamation_index') }}">Reclamation</a></li>
+                        <li class="{{ app.request.get('_route') == 'cours_sportif' ? 'active' }}"><a href="{{ path('cours_sportif') }}">Classes</a></li>
+                        <li class="{{ app.request.get('_route') == 'activity_sportif' ? 'active' }}"><a href="{{ path('activity_sportif') }}">Activity</a></li>
+                        <li class="{{ app.request.get('_route') == 'sportif_salle_details' ? 'active' }}"><a href="{{ path('home') }}">Gym Events</a></li>
+                        <li class="{{ app.request.attributes.get('_route') starts with 'pages_' ? 'active' }}">
+                            <a href="#">Pages</a>
+                            <ul class="dropdown">
+                                <li><a href="#">About us</a></li>
+                                <li><a href="{{ path('plan') }}">Classes timetable</a></li>
+                                <li><a href="{{path('recommendations')}}">Bmi calculate</a></li>
+                                <li><a href="#">Our team</a></li>
+                                <li><a href="#">Gallery</a></li>
+                                <li><a href="{{ path('app_sportifdashboard') }}">Our blogs</a></li>
+                            </ul>
+                        </li>
+                        <li class="{{ app.request.get('_route') == 'contact' ? 'active' }}"><a href="#">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-lg-3">
+                <div class="top-option">
+                    <div class="to-search search-switch">
+                        <i class="fa fa-search"></i>
+                    </div>
+                    <div class="to-social">
+                        <a href="#"><i class="fa fa-facebook"></i></a>
+                        <a href="#"><i class="fa fa-twitter"></i></a>
+                        <a href="#"><i class="fa fa-youtube-play"></i></a>
+                        <a href="#"><i class="fa fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="canvas-open">
+            <i class="fa fa-bars"></i>
+        </div>
+    </div>
+</header>
+<!-- Header End -->
+
+<!-- Search model Begin -->
+<div class="search-model">
+    <div class="h-100 d-flex align-items-center justify-content-center">
+        <div class="search-close-switch">+</div>
+        <form class="search-model-form">
+            <input type="text" id="search-input" placeholder="Search here.....">
+        </form>
+    </div>
+</div>
+<!-- Search model end -->
+
 <!-- Offcanvas Menu Section Begin -->
 <div class="offcanvas-menu-overlay"></div>
 <div class="offcanvas-menu-wrapper">
@@ -9,24 +76,23 @@
     </div>
     <nav class="canvas-menu mobile-menu">
         <ul>
-            <li><a href="{{path('home')}}">Home</a></li>
-            <li><a href="">About Us</a></li>
-            <li><a href="{{path('activity_sportif')}}">Activity</a></li>
-             <li><a href="{{path('app_reclamation_index')}}">reclamation</a></li>
-            <li><a href="{{path('cours_sportif')}}">Classes</a></li>
-            <li><a href="">Our Team</a></li>
+            <li><a href="{{ path('home') }}">Home</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="{{ path('app_reclamation_index') }}">Reclamation</a></li>
+            <li><a href="{{ path('cours_sportif') }}">Classes</a></li>
+            <li><a href="{{ path('activity_sportif') }}">Activity</a></li>
+            <li><a href="{{ path('home') }}">Gym Events</a></li>
             <li><a href="#">Pages</a>
                 <ul class="dropdown">
-                    <li><a href="">About us</a></li>
-                    <li><a href="{{path('plan')}}">Classes timetable</a></li>
-                    <li><a href="">Bmi calculate</a></li>
-                    <li><a href="">Our team</a></li>
-                    <li><a href="">Gallery</a></li>
-                    <li><a href="">Our blog</a></li>
-                     
+                    <li><a href="#">About us</a></li>
+                    <li><a href="{{ path('plan') }}">Classes timetable</a></li>
+                    <li><a href="{{path('recommendations')}}">Bmi calculate</a></li>
+                    <li><a href="#">Our team</a></li>
+                    <li><a href="#">Gallery</a></li>
+                    <li><a href="{{ path('app_sportifdashboard') }}">Our blogs</a></li>
                 </ul>
             </li>
-            <li><a href="">Contact</a></li>
+            <li><a href="#">Contact</a></li>
         </ul>
     </nav>
     <div id="mobile-menu-wrap"></div>
@@ -38,46 +104,3 @@
     </div>
 </div>
 <!-- Offcanvas Menu Section End -->
-
-<!-- Header Section Begin -->
-<header class="header-section">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-3">
-                <div class="logo">
-                    <a href="">
-                        <img src="{{ asset('img/logo.png') }}" alt="">
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <nav class="nav-menu">
-                    <ul>
-                        <li class="{{ app.request.get('_route') == 'homepage' ? 'active' }}"><a href="{{path('home')}}">Home</a></li>
-                        <li class="{{ app.request.get('_route') == 'about_us' ? 'active' }}"><a href="">About Us</a></li>
-                        <li class="{{ app.request.get('_route') == 'classes' ? 'active' }}"><a href="{{path('app_reclamation_index')}}">reclamation</a></li>
-                        <li class="{{ app.request.get('_route') == 'classes' ? 'active' }}"><a href="{{path('cours_sportif')}}">Classes</a></li>
-                        <li class="{{ app.request.get('_route') == 'services' ? 'active' }}"><a href="{{path('activity_sportif')}}">Activity</a></li>
-                        <li class="{{ app.request.get('_route') == 'team' ? 'active' }}"><a href="">Our Team</a></li>
-                        <li class="{{ app.request.attributes.get('_route') starts with 'pages_' ? 'active' }}">
-                            <a href="#">Pages</a>
-                            <ul class="dropdown">
-                                <li><a href="">About us</a></li>
-                                <li><a href="{{path('plan')}}">Classes timetable</a></li>
-                                <li><a href="">Bmi calculate</a></li>
-                                <li><a href="">Our team</a></li>
-                                <li><a href="">Gallery</a></li>
-                                <li><a href="{{ path('app_sportifdashboard') }}">Our blogs</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            
-        </div>
-        <div class="canvas-open">
-            <i class="fa fa-bars"></i>
-        </div>
-    </div>
-</header>
-<!-- Header End -->

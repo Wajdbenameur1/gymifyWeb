@@ -28,8 +28,10 @@ class Infosportif
     #[ORM\Column(length: 255)]
     private ?string $objectif = null;
 
-    #[ORM\OneToOne(mappedBy: 'sportif', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'sportif')]
     private ?User $sportif = null;
+
+  
 
     
 
@@ -105,20 +107,9 @@ class Infosportif
 
     public function setSportif(?User $sportif): static
     {
-        // unset the owning side of the relation if necessary
-        if ($sportif === null && $this->sportif !== null) {
-            $this->sportif->setSportif(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($sportif !== null && $sportif->getSportif() !== $this) {
-            $sportif->setSportif($this);
-        }
-
         $this->sportif = $sportif;
 
         return $this;
     }
 
-    
 }

@@ -4,6 +4,11 @@
 
 {% block stylesheets %}
     <style>
+    .page-spacer {
+    height: 50px;
+    width: 100%;
+    clear: both;
+}
         .badge-orange {
             background-color: #FFA500; /* Orange */
             color: white;
@@ -81,10 +86,14 @@
 {% block body %}
 <section class="classes-section spad">
     <div class="container">
+            <div class="page-spacer"></div>
+
         <div class="section-title">
             <h2>Nos Activités</h2>
             <p>Choisissez l'activité qui vous correspond</p>
         </div>
+        <div class="page-spacer"></div>
+
 
         {# Filtres centrés avec flex-wrap #}
         <div class="row">
