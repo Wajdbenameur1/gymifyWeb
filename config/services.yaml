@@ -11,7 +11,8 @@ parameters:
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
     teams_images_directory: '%kernel.project_dir%/public/uploads/teams'
     uploads_public_path: '/uploads'
-    
+    teams_images_base_url: '/uploads/teams/' # Define the missing parameter
+
 
 
 services:

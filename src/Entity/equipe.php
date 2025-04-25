@@ -7,8 +7,11 @@ use App\Repository\EquipeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
+#[UniqueEntity(fields: ['nom'], message: 'Team name already exists.')]
 class Equipe
 {
     #[ORM\Id]
@@ -17,15 +20,21 @@ class Equipe
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Team name is required.')]
+    #[Assert\Length(max: 255, maxMessage: 'Team name cannot exceed 255 characters.')]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image_url = null;
 
     #[ORM\Column(type: 'string', enumType: Niveau::class)]
+    #[Assert\NotNull(message: 'Level is required.')]
     private ?Niveau $niveau = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'Number of members is required.')]
+    #[Assert\GreaterThanOrEqual(value: 0, message: 'Number of members must be 0 or greater.')]
+    #[Assert\LessThanOrEqual(value: 8, message: 'Number of members cannot exceed 8.')]
     private ?int $nombre_membres = null;
 
     /**
