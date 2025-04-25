@@ -14,6 +14,7 @@ use App\Repository\AbonnementRepository;
 use App\Repository\EquipeEventRepository;
 use App\Repository\SalleRepository;
 use App\Repository\CoursRepository;
+use App\Service\WeatherService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -79,14 +80,32 @@ final class SportifController extends AbstractController
     public function salleDetails(
         Salle $salle,
         AbonnementRepository $abonnementRepository,
-        EquipeEventRepository $equipeEventRepository
+        EquipeEventRepository $equipeEventRepository,
+        WeatherService $weatherService,
+        Request $request
     ): Response {
         $equipeEvents = $equipeEventRepository->findBySalle($salle);
+
+        // Gestion de la météo
+        $weatherData = null;
+        $forecastData = null;
+        $location = $request->query->get('location', $salle->getAdresse() ?? 'Tunis');
+        $days = 7;
+
+        try {
+            $weatherData = $weatherService->getCurrentWeather($location);
+            $forecastData = $weatherService->getForecast($location, $days);
+        } catch (\Exception $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
 
         return $this->render('sportif/salle_details.html.twig', [
             'salle' => $salle,
             'abonnements' => $abonnementRepository->findBy(['salle' => $salle]),
             'equipe_events' => $equipeEvents,
+            'weatherData' => $weatherData,
+            'forecastData' => $forecastData,
+            'location' => $location,
         ]);
     }
 
@@ -205,7 +224,7 @@ final class SportifController extends AbstractController
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
         return match ($objectif) {
-          ObjectifCours::ENDURANCE => '#1890ff',
+            ObjectifCours::ENDURANCE => '#1890ff',
             ObjectifCours::PERTE_POIDS => '#52c41a',
             ObjectifCours::PRISE_DE_MASSE => '#33FF57',
             ObjectifCours::RELAXATION => '#F033FF',
