@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Edit Team</title>
+        <title>{{ page_title }}</title>
         <link rel="stylesheet" href="/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
         <link rel="stylesheet" href="/css/fonts.min.css">
@@ -29,8 +29,10 @@
                 border: 1px solid #dc3545 !important;
             }
             .invalid-feedback {
-                color: #dc3545;
+                color: #dc3545 !important;
                 font-size: 0.875em;
+                display: block;
+                margin-top: 0.25rem;
             }
             .border-dashed {
                 border: 2px dashed #dee2e6;
@@ -61,6 +63,22 @@
                 bottom: 0;
                 width: 100%;
                 font-size: 0.9rem;
+            }
+            .card {
+                border-radius: 15px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+            .form-label {
+                font-weight: 600;
+                color: #495057;
+            }
+            .form-control, .form-select {
+                border-radius: 8px;
+                padding: 10px 15px;
+            }
+            .btn {
+                border-radius: 25px;
+                padding: 10px 20px;
             }
         </style>
         <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
@@ -104,25 +122,33 @@
                     <div class="page-inner">
                         <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
                             <div>
-                                <h3 class="fw-bold mb-3">Edit Team</h3>
+                                <h3 class="fw-bold mb-3">{{ page_title }}</h3>
                                 <h6 class="op-7 mb-2">Edit an Existing Team</h6>
                             </div>
                         </div>
+
+                        {% for message in app.flashes('success') %}
+                            <div class="alert alert-success">{{ message }}</div>
+                        {% endfor %}
+                        {% for message in app.flashes('error') %}
+                            <div class="alert alert-danger">{{ message }}</div>
+                        {% endfor %}
+
                         <div class="row justify-content-center">
                             <div class="col-lg-10">
                                 <div class="card shadow-sm">
                                     <div class="card-body p-4">
-                                        <form method="post" action="{{ path('app_equipe_edit', {'id': equipe.id}) }}" enctype="multipart/form-data" class="needs-validation" novalidate id="equipeForm">
+                                        {{ form_start(form, {'method': 'POST', 'action': path('app_equipe_edit', {'id': equipe.id}), 'attr': {'enctype': 'multipart/form-data', 'class': 'needs-validation', 'id': 'equipeForm', 'novalidate': 'novalidate'}}) }}
                                             <div class="mb-3">
-                                                <label for="equipe_nom" class="form-label fw-bold text-muted small">Team Name</label>
+                                                {{ form_label(form.nom, 'Team Name', {'label_attr': {'class': 'form-label fw-bold text-muted small'}}) }}
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light"><i class="fas fa-heading text-primary"></i></span>
-                                                    <input type="text" id="equipe_nom" name="equipe[nom]" maxlength="255" class="form-control" value="{{ equipe.nom }}" placeholder="Enter team name" required="required"/>
+                                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Enter team name'}}) }}
                                                 </div>
-                                                <div class="invalid-feedback">Please enter a team name (max 255 characters).</div>
+                                                {{ form_errors(form.nom, {'attr': {'class': 'invalid-feedback'}}) }}
                                             </div>
                                             <div class="mb-3 image-upload-container">
-                                                <label for="imageInput" class="form-label fw-bold text-muted small">Team Image</label>
+                                                {{ form_label(form.imageFile, 'Team Image', {'label_attr': {'class': 'form-label fw-bold text-muted small'}}) }}
                                                 <div class="image-preview-container text-center mb-3 position-relative">
                                                     <img id="imagePreview" src="{{ equipe.imageUrl ? asset(equipe.imageUrl) : '' }}" class="image-preview shadow-sm mx-auto d-block" style="display: {{ equipe.imageUrl ? 'block' : 'none' }};">
                                                     <div id="placeholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light" style="display: {{ equipe.imageUrl ? 'none' : 'block' }};">
@@ -132,40 +158,36 @@
                                                 </div>
                                                 <div class="d-flex gap-3">
                                                     <div class="flex-grow-1">
-                                                        <input type="file" id="imageInput" name="equipe[imageFile]" class="form-control d-none" accept="image/*"/>
-                                                        <label for="imageInput" class="btn btn-outline-primary w-100 py-2"><i class="fas fa-camera me-2"></i>Choose Image</label>
+                                                        {{ form_widget(form.imageFile, {'attr': {'class': 'form-control d-none', 'accept': 'image/*'}}) }}
+                                                        <label for="{{ form.imageFile.vars.id }}" class="btn btn-outline-primary w-100 py-2"><i class="fas fa-camera me-2"></i>Choose Image</label>
                                                     </div>
                                                     <button type="button" id="removeImageBtn" class="btn btn-outline-danger py-2" style="display: {{ equipe.imageUrl ? 'block' : 'none' }};"><i class="fas fa-trash-alt me-2"></i>Remove</button>
                                                 </div>
-                                                <div class="invalid-feedback">Please select a valid image (JPG, PNG, WEBP, max 2MB).</div>
+                                                {{ form_errors(form.imageFile, {'attr': {'class': 'invalid-feedback'}}) }}
+                                                <small class="text-muted d-block mt-2">Recommended size: 1200x800px</small>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="equipe_niveau" class="form-label fw-bold text-muted small">Level</label>
+                                                {{ form_label(form.niveau, 'Level', {'label_attr': {'class': 'form-label fw-bold text-muted small'}}) }}
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light"><i class="fas fa-list text-primary"></i></span>
-                                                    <select id="equipe_niveau" name="equipe[niveau]" class="form-control" required="required">
-                                                        <option value="DEBUTANT" {{ equipe.niveau.value == 'DEBUTANT' ? 'selected' : '' }}>Debutant</option>
-                                                        <option value="INTERMEDIAIRE" {{ equipe.niveau.value == 'INTERMEDIAIRE' ? 'selected' : '' }}>Intermediaire</option>
-                                                        <option value="AVANCE" {{ equipe.niveau.value == 'AVANCE' ? 'selected' : '' }}>Avance</option>
-                                                        <option value="PROFESSIONNEL" {{ equipe.niveau.value == 'PROFESSIONNEL' ? 'selected' : '' }}>Professionnel</option>
-                                                    </select>
+                                                    {{ form_widget(form.niveau, {'attr': {'class': 'form-control form-select'}}) }}
                                                 </div>
-                                                <div class="invalid-feedback">Please select a level.</div>
+                                                {{ form_errors(form.niveau, {'attr': {'class': 'invalid-feedback'}}) }}
                                             </div>
                                             <div class="mb-3">
-                                                <label for="equipe_nombre_membres" class="form-label fw-bold text-muted small">Number of Members</label>
+                                                {{ form_label(form.nombre_membres, 'Number of Members', {'label_attr': {'class': 'form-label fw-bold text-muted small'}}) }}
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light"><i class="fas fa-users text-primary"></i></span>
-                                                    <input type="number" id="equipe_nombre_membres" name="equipe[nombre_membres]" class="form-control" value="{{ equipe.nombreMembres }}" min="0" required="required"/>
+                                                    {{ form_widget(form.nombre_membres, {'attr': {'class': 'form-control', 'placeholder': 'Enter number of members'}}) }}
                                                 </div>
-                                                <div class="invalid-feedback">Please enter a valid number of members (0 or more).</div>
+                                                {{ form_errors(form.nombre_membres, {'attr': {'class': 'invalid-feedback'}}) }}
                                             </div>
                                             {{ form_row(form._token) }}
                                             <div class="d-flex justify-content-end gap-3">
                                                 <button type="button" id="cancelBtn" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Cancel</button>
-                                                <button type="submit" id="submitBtn" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save</button>
+                                                {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary', 'id': 'submitBtn'}}) }}
                                             </div>
-                                        </form>
+                                        {{ form_end(form, {'render_rest': false}) }}
                                     </div>
                                 </div>
                             </div>
@@ -199,70 +221,11 @@
         <script src="/js/kaiadmin.min.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                const form = document.getElementById('equipeForm');
-                const imageInput = document.getElementById('imageInput');
+                const imageInput = document.getElementById('{{ form.imageFile.vars.id }}');
                 const imagePreview = document.getElementById('imagePreview');
                 const placeholderText = document.getElementById('placeholderText');
                 const removeImageBtn = document.getElementById('removeImageBtn');
                 const cancelBtn = document.getElementById('cancelBtn');
-                const submitBtn = document.getElementById('submitBtn');
-
-                function showError(input, message) {
-                    let formGroup = input.closest('.mb-3') || input.closest('.image-upload-container');
-                    let errorElement = formGroup.querySelector('.invalid-feedback');
-                    if (!errorElement) {
-                        errorElement = document.createElement('div');
-                        errorElement.className = 'invalid-feedback d-block';
-                        formGroup.appendChild(errorElement);
-                    }
-                    errorElement.textContent = message;
-                    input.classList.add('is-invalid');
-                    if (input === imageInput) {
-                        placeholderText.classList.add('border-danger');
-                        placeholderText.innerHTML = '<i class="fas fa-exclamation-circle fa-3x text-danger mb-3 d-block"></i><p class="text-danger">' + message + '</p>';
-                    }
-                }
-
-                function clearError(input) {
-                    let formGroup = input.closest('.mb-3') || input.closest('.image-upload-container');
-                    const errorElement = formGroup.querySelector('.invalid-feedback');
-                    if (errorElement) errorElement.remove();
-                    input.classList.remove('is-invalid');
-                    if (input === imageInput && !imageInput.files.length && !imagePreview.src) {
-                        placeholderText.classList.remove('border-danger');
-                        placeholderText.innerHTML = '<i class="fas fa-camera fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No image selected</p>';
-                    }
-                }
-
-                function validateField(input) {
-                    if (input === imageInput) {
-                        if (imageInput.files.length) {
-                            const file = imageInput.files[0];
-                            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-                            const maxSize = 2 * 1024 * 1024;
-                            if (!validTypes.includes(file.type)) {
-                                showError(input, 'Invalid file type. Use JPG, PNG, or WEBP.');
-                                return false;
-                            }
-                            if (file.size > maxSize) {
-                                showError(input, 'File too large. Maximum 2MB.');
-                                return false;
-                            }
-                        }
-                        if (!imageInput.files.length && !imagePreview.src) {
-                            showError(input, 'Please select an image.');
-                            return false;
-                        }
-                    } else if (input.hasAttribute('required') && !input.value.trim()) {
-                        showError(input, 'This field is required.');
-                        return false;
-                    } else if (input.type === 'number' && input.value < 0) {
-                        showError(input, 'Number must be 0 or greater.');
-                        return false;
-                    }
-                    clearError(input);
-                    return true;
-                }
 
                 imageInput.addEventListener('change', function() {
                     const file = this.files[0];
@@ -273,7 +236,6 @@
                             imagePreview.style.display = 'block';
                             placeholderText.style.display = 'none';
                             removeImageBtn.style.display = 'block';
-                            clearError(imageInput);
                         };
                         reader.readAsDataURL(file);
                     }
@@ -285,31 +247,15 @@
                     imagePreview.style.display = 'none';
                     placeholderText.style.display = 'block';
                     this.style.display = 'none';
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'remove_image';
-                    input.value = '1';
-                    form.appendChild(input);
-                });
-
-                form.addEventListener('submit', function(e) {
-                    form.classList.add('was-validated');
-                    let isValid = true;
-                    const requiredFields = [form.querySelector('[name="equipe[nom]"]'), imageInput,
-                        form.querySelector('[name="equipe[niveau]"]'), form.querySelector('[name="equipe[nombre_membres]"]')];
-
-                    requiredFields.forEach(field => {
-                        if (!validateField(field)) isValid = false;
-                    });
-
-                    if (!isValid) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const firstInvalid = form.querySelector('.is-invalid');
-                        if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    } else {
-                        submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving...';
+                    // Add hidden input to indicate image removal
+                    const form = document.getElementById('equipeForm');
+                    let removeInput = form.querySelector('input[name="remove_image"]');
+                    if (!removeInput) {
+                        removeInput = document.createElement('input');
+                        removeInput.type = 'hidden';
+                        removeInput.name = 'remove_image';
+                        removeInput.value = '1';
+                        form.appendChild(removeInput);
                     }
                 });
 

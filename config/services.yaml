@@ -13,8 +13,8 @@ parameters:
     uploads_public_path: '/uploads'
     deepinfra_api_key: '%env(DEEPINFRA_API_KEY)%'
     
-
-
+    stripe_secret_key: 'sk_test_51R6XfmCvMipSUHQuaVylRxEIETrWqy4OtYXPBegkEIcFhkUUkByDt8EixxdDNh1ekcHSdVAUGNRr7BUsfXFEc5VX00CqsNejm0'
+    stripe_public_key: 'pk_test_51R6XfmCvMipSUHQuBPuvGSEoyT4USxinzYkBENoYz4C2LSYzsB46fd6CgJaXzAtDOUP7prhW651vB3CP6CM9PgvL009edX6abt'
 services:
 
 
@@ -44,8 +44,14 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/Tests/'
 
-    
+    # Controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Service\StripeService:
+        arguments:
+            $stripeSecretKey: '%stripe_secret_key%'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+        
+
+    # Add any other service definitions below

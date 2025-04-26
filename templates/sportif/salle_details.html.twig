@@ -113,7 +113,7 @@
                                                         </li>
                                                         <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
                                                     </ul>
-                                                    <a href="#" class="subscription-btn" data-tooltip="Subscribe to this plan" aria-label="Subscribe to {{ abonnement.type.value|capitalize }}">Subscribe</a>
+                                                    <button class="subscription-btn" data-abonnement-id="{{ abonnement.id }}" data-abonnement-tarif="{{ abonnement.tarif }}" data-abonnement-type="{{ abonnement.type.value|capitalize }}" data-abonnement-activite="{{ activite.nom }}" data-tooltip="Subscribe to this plan">Subscribe</button>
                                                 </div>
                                             </div>
                                         {% endfor %}
@@ -133,6 +133,62 @@
             {% endif %}
         </div>
     </section>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="payment-modal">
+        <div class="payment-content">
+            <span class="close-modal">×</span>
+            <div class="payment-container">
+                <div class="payment-header">
+                    <h2>Paiement de votre abonnement</h2>
+                    <p>Finalisez votre inscription en toute sécurité</p>
+                </div>
+                <div class="payment-body">
+                    <form id="payment-form">
+                        <div id="card-element"></div>
+                        <button id="submit" type="submit">
+                            <span class="spinner"></span>
+                            Payer <span id="payment-amount"></span> DT
+                        </button>
+                        <div id="error-message"></div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="confirmation-modal" id="confirmation-modal">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                    </div>
+                    <h3 class="confirmation-title">Paiement réussi !</h3>
+                    <p>Votre abonnement a été activé avec succès.</p>
+                    
+                    <div class="confirmation-details">
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Type d'abonnement:</span>
+                            <span class="confirmation-detail-value" id="confirmation-type"></span>
+                        </div>
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Activité:</span>
+                            <span class="confirmation-detail-value" id="confirmation-activity"></span>
+                        </div>
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Date de début:</span>
+                            <span class="confirmation-detail-value" id="confirmation-start"></span>
+                        </div>
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Date de fin:</span>
+                            <span class="confirmation-detail-value" id="confirmation-end"></span>
+                        </div>
+                    </div>
+                    
+                    <button class="confirmation-button" id="confirmation-button">Voir mes abonnements</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Events Section -->
     <section id="events" class="events-section spad">
@@ -233,6 +289,113 @@
                     </div>
                 {% endfor %}
             </div>
+        </div>
+    </section>
+
+    <!-- Weather Section -->
+    <section id="weather" class="weather-section spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title">
+                        <span>Check the</span>
+                        <h2>Local Weather</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Weather Search Form -->
+                    <form method="get" action="{{ path('sportif_salle_details', {'id': salle.id}) }}" class="weather-search-form">
+                        <div class="weather-search-container">
+                            <label for="location" class="sr-only">Enter a city</label>
+                            <input type="text" id="location" name="location" value="{{ location }}" placeholder="Enter a city (e.g., Tunis)" class="weather-search-input">
+                            <button type="submit" class="weather-search-btn" data-tooltip="Search weather" aria-label="Search weather for the entered city">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button type="button" onclick="getLocation()" class="weather-geo-btn" data-tooltip="Use my current location" aria-label="Get weather for my current location">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% if weatherData %}
+                <div class="weather-widget">
+                    <!-- Current Weather -->
+                    <div class="current-weather">
+                        <div class="weather-header">
+                            <h3>{{ weatherData.location.name }}</h3>
+                            <p class="current-date"><i class="fas fa-calendar-alt"></i> Today: {{ "now"|date('D, d M Y') }}</p>
+                        </div>
+                        <div class="weather-body">
+                            <div class="weather-main">
+                                <div class="weather-icon">
+                                    <img src="{{ weatherData.current.condition.icon }}" alt="{{ weatherData.current.condition.text }}">
+                                    <span class="condition">{{ weatherData.current.condition.text }}</span>
+                                </div>
+                                <div class="weather-temp">
+                                    <h2>{{ weatherData.current.temp_c }}°C</h2>
+                                </div>
+                            </div>
+                            <div class="weather-details">
+                                <p><i class="fas fa-wind"></i> <strong>Wind:</strong> {{ weatherData.current.wind_kph }} km/h, {{ weatherData.current.wind_dir }}</p>
+                                <p><i class="fas fa-cloud-rain"></i> <strong>Precipitation:</strong> {{ weatherData.current.precip_mm }} mm</p>
+                                <p><i class="fas fa-tachometer-alt"></i> <strong>Pressure:</strong> {{ weatherData.current.pressure_mb }} mb</p>
+                                <p><i class="fas fa-tint"></i> <strong>Humidity:</strong> {{ weatherData.current.humidity }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Forecast Weather -->
+                    {% if forecastData %}
+                        <div class="forecast-weather-container">
+                            <button class="scroll-btn scroll-left" onclick="scrollForecast('left')">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="forecast-weather-wrapper">
+                                <div class="forecast-weather">
+                                    {% for day in forecastData.forecast.forecastday|slice(0, 7) %}
+                                        <div class="forecast-day" onclick="showForecastDetails({{ loop.index0 }})" data-index="{{ loop.index0 }}">
+                                            <p class="day">{{ day.date|date('D, d M') }}</p>
+                                            <img src="{{ day.day.condition.icon }}" alt="{{ day.day.condition.text }}" class="forecast-icon">
+                                            <p class="temp">{{ day.day.maxtemp_c }}°C / {{ day.day.mintemp_c }}°C</p>
+                                            <p class="condition">{{ day.day.condition.text }}</p>
+                                            <!-- Hidden forecast details -->
+                                            <div class="forecast-details-hidden" id="forecast-details-{{ loop.index0 }}" style="display: none;">
+                                                <p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong> {{ day.date|date('Y-m-d') }}</p>
+                                                <p><i class="fas fa-cloud"></i> <strong>Condition:</strong> {{ day.day.condition.text }}</p>
+                                                <p><i class="fas fa-temperature-high"></i> <strong>Max Temp:</strong> {{ day.day.maxtemp_c }}°C</p>
+                                                <p><i class="fas fa-temperature-low"></i> <strong>Min Temp:</strong> {{ day.day.mintemp_c }}°C</p>
+                                                <p><i class="fas fa-cloud-rain"></i> <strong>Precipitation:</strong> {{ day.day.totalprecip_mm }} mm</p>
+                                                <p><i class="fas fa-umbrella"></i> <strong>Chance of Rain:</strong> {{ day.day.daily_chance_of_rain }}%</p>
+                                                <p><i class="fas fa-wind"></i> <strong>Wind:</strong> {{ day.day.maxwind_kph }} km/h</p>
+                                                <p><i class="fas fa-tint"></i> <strong>Humidity:</strong> {{ day.day.avghumidity }}%</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <button class="scroll-btn scroll-right" onclick="scrollForecast('right')">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <!-- Forecast Details Display -->
+                        <div class="forecast-details-display" id="forecast-details-display">
+                            <h4>Forecast Details</h4>
+                            <div id="forecast-details-content">
+                                <p>Click a day to see detailed forecast information.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="col-lg-12 text-center">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle fa-2x mb-3"></i>
+                        <p>Enter a city or use your current location to view the weather.</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}
@@ -458,12 +621,12 @@
         }
 
         /* Subscriptions and Events Sections */
-        .subscriptions-section, .events-section {
+        .subscriptions-section, .events-section, .weather-section {
             padding: 100px 0;
             background: #fafafa;
             position: relative;
         }
-        .subscriptions-section::before, .events-section::before {
+        .subscriptions-section::before, .events-section::before, .weather-section::before {
             content: '';
             position: absolute;
             top: 0;
@@ -641,6 +804,8 @@
             box-shadow: 0 6px 15px rgba(243, 97, 0, 0.3);
             position: relative;
             overflow: hidden;
+            border: none;
+            cursor: pointer;
         }
         .subscription-btn:hover {
             background: linear-gradient(90deg, #ff8c00, #f36100);
@@ -684,6 +849,235 @@
         .subscription-btn[data-tooltip]:hover::after {
             opacity: 1;
             visibility: visible;
+        }
+
+        /* Payment Modal Styling */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .payment-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .payment-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .payment-modal.active .payment-content {
+            transform: translateY(0);
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close-modal:hover {
+            color: #f36100;
+        }
+        .payment-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+        .payment-container:hover {
+            transform: translateY(-5px);
+        }
+        .payment-header {
+            background: linear-gradient(135deg, #f36100, #ff8c00);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .payment-header h2 {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-family: 'Oswald', sans-serif;
+        }
+        .payment-header p {
+            font-family: 'Muli', sans-serif;
+        }
+        .payment-body {
+            padding: 25px;
+        }
+        #card-element {
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+        .card-element.StripeElement--focus {
+            border-color: #f36100;
+            box-shadow: 0 0 0 1px #f36100;
+        }
+        #card-element.StripeElement--invalid {
+            border-color: #EF4444;
+        }
+        #submit {
+            width: 100%;
+            background: linear-gradient(135deg, #f36100, #ff8c00);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+        }
+        .submit:disabled {
+            background: #E5E7EB;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #submit .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        #submit.processing .spinner {
+            display: block;
+        }
+        #error-message {
+            color: #EF4444;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+            min-height: 20px;
+            font-family: 'Muli', sans-serif;
+        }
+        .confirmation-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .confirmation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .confirmation-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .confirmation-modal.active .confirmation-content {
+            transform: translateY(0);
+        }
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+            background: #10B981;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px;
+        }
+        .confirmation-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        .confirmation-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+            font-family: 'Oswald', sans-serif;
+        }
+        .confirmation-details {
+            margin: 20px 0;
+            text-align: left;
+            background: #F9FAFB;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .confirmation-detail {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .confirmation-detail:last-child {
+            margin-bottom: 0;
+        }
+        .confirmation-detail-label {
+            font-weight: 500;
+            color: #1a1a1a;
+            width: 120px;
+            font-family: 'Muli', sans-serif;
+        }
+        .confirmation-detail-value {
+            color: #6B7280;
+            font-family: 'Muli', sans-serif;
+        }
+        .confirmation-button {
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            font-family: 'Oswald', sans-serif;
+        }
+        .confirmation-button:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Events */
@@ -958,6 +1352,327 @@
             visibility: visible;
         }
 
+        /* Weather Section Styling */
+        .weather-search-form {
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .weather-search-container {
+            display: inline-flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 50px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+        }
+        .weather-search-input {
+            border: none;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-family: 'Muli', sans-serif;
+            flex: 1;
+            outline: none;
+            border-radius: 50px 0 0 50px;
+            transition: all 0.3s ease;
+        }
+        .weather-search-input:focus {
+            box-shadow: inset 0 0 5px rgba(243, 97, 0, 0.3);
+        }
+        .weather-search-btn, .weather-geo-btn {
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .weather-search-btn {
+            border-radius: 0 50px 50px 0;
+        }
+        .weather-geo-btn {
+            border-radius: 50px;
+            margin-left: 5px;
+        }
+        .weather-search-btn:hover, .weather-geo-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.4);
+        }
+        .weather-search-btn::before, .weather-geo-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .weather-search-btn:hover::before, .weather-geo-btn:hover::before {
+            left: 100%;
+        }
+        .weather-search-btn[data-tooltip]::after, .weather-geo-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .weather-search-btn[data-tooltip]:hover::after, .weather-geo-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Weather Widget Styling */
+        .weather-widget {
+            background: linear-gradient(135deg, #d3d3d3, #87CEEB); /* Light gray to light blue */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .weather-widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/light-gray-tiles.png');
+            opacity: 0.1;
+            z-index: -1;
+        }
+        .current-weather {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .weather-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .weather-header h3 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .current-date {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2F4F4F;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .current-date i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .weather-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .weather-icon {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        .weather-icon img {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .weather-icon .condition {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2F4F4F; /* Dark slate gray for text */
+            margin-left: 10px;
+            text-transform: capitalize;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .weather-temp h2 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .weather-details {
+            text-align: center;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+        .weather-details p {
+            font-size: 14px;
+            margin: 5px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .weather-details p i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .weather-details strong {
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+
+        /* Forecast Weather with Arrows */
+        .forecast-weather-container {
+            position: relative;
+            width: 100%;
+            border-top: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        .forecast-weather-wrapper {
+            width: 100%;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .forecast-weather {
+            display: flex;
+            padding: 15px 0;
+            width: max-content;
+        }
+        .forecast-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #2F4F4F; /* Dark slate gray for text */
+            padding: 10px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .forecast-day:hover {
+            transform: scale(1.05);
+        }
+        .forecast-day.active {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .forecast-day .day {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .forecast-day .temp {
+            font-size: 16px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-day .condition {
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: capitalize;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        .scroll-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .scroll-left {
+            left: -20px;
+        }
+        .scroll-right {
+            right: -20px;
+        }
+        .scroll-btn i {
+            font-size: 18px;
+        }
+        .forecast-details-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-align: center;
+        }
+        .forecast-details-display h4 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-details-display p {
+            font-size: 14px;
+            margin: 5px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .forecast-details-display p i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .forecast-details-display strong {
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+
         /* Flash Message Styles */
         .alert {
             margin-bottom: 20px;
@@ -996,9 +1711,30 @@
             .activity-card, .event-card {
                 animation: none;
             }
+            .weather-main {
+                flex-direction: column;
+                text-align: center;
+            }
+            .weather-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .forecast-day {
+                min-width: 140px;
+            }
+            .scroll-btn {
+                width: 35px;
+                height: 35px;
+            }
+            .scroll-left {
+                left: -15px;
+            }
+            .scroll-right {
+                right: -15px;
+            }
         }
         @media (max-width: 768px) {
-            .gym-details-section, .subscriptions-section, .events-section {
+            .gym-details-section, .subscriptions-section, .events-section, .weather-section {
                 padding: 80px 0;
             }
             .gym-image {
@@ -1020,11 +1756,52 @@
                 flex-direction: column;
                 gap: 15px;
             }
-            .primary-btn, .event-btn, .join-btn {
+            .primary-btn, .event-btn, .join-btn, .weather-search-btn, .weather-geo-btn {
                 padding: 12px 20px;
             }
             .event-actions {
                 flex-direction: column;
+            }
+            .weather-search-container {
+                flex-direction: column;
+                max-width: 100%;
+            }
+            .weather-search-input {
+                border-radius: 50px;
+                margin-bottom: 10px;
+            }
+            .weather-search-btn, .weather-geo-btn {
+                width: 100%;
+                border-radius: 50px;
+            }
+            .weather-geo-btn {
+                margin-left: 0;
+            }
+            .weather-temp h2 {
+                font-size: 36px;
+            }
+            .weather-icon img {
+                width: 50px;
+                height: 50px;
+            }
+            .weather-icon .condition {
+                font-size: 16px;
+            }
+            .forecast-day {
+                min-width: 130px;
+            }
+            .scroll-btn {
+                width: 30px;
+                height: 30px;
+            }
+            .scroll-left {
+                left: -10px;
+            }
+            .scroll-right {
+                right: -10px;
+            }
+            .scroll-btn i {
+                font-size: 16px;
             }
         }
         @media (max-width: 576px) {
@@ -1037,7 +1814,7 @@
             .section-title h2 {
                 font-size: 32px;
             }
-            .primary-btn, .subscription-btn, .event-btn, .join-btn {
+            .primary-btn, .subscription-btn, .event-btn, .join-btn, .weather-search-btn, .weather-geo-btn {
                 width: 100%;
                 text-align: center;
                 padding: 12px 15px;
@@ -1063,92 +1840,287 @@
             .details-list .icon, .details-list .reward-icon {
                 font-size: 14px;
             }
+            .weather-header h3 {
+                font-size: 24px;
+            }
+            .weather-temp h2 {
+                font-size: 32px;
+            }
+            .weather-icon img {
+                width: 40px;
+                height: 40px;
+            }
+            .weather-icon .condition {
+                font-size: 14px;
+            }
+            .forecast-icon {
+                width: 30px;
+                height: 30px;
+            }
+            .forecast-day .day {
+                font-size: 12px;
+            }
+            .forecast-day .temp {
+                font-size: 14px;
+            }
+            .forecast-details-display h4 {
+                font-size: 18px;
+            }
+            .forecast-details-display p {
+                font-size: 12px;
+            }
+            .forecast-day {
+                min-width: 120px;
+            }
+            .scroll-btn {
+                width: 25px;
+                height: 25px;
+            }
+            .scroll-left {
+                left: -5px;
+            }
+            .scroll-right {
+                right: -5px;
+            }
+            .scroll-btn i {
+                font-size: 14px;
+            }
         }
     </style>
+{% endblock %}
 
-    <!-- JavaScript -->
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // Function to fetch and refresh events
-        function refreshEvents() {
-            fetch('{{ path('sportif_salle_events', {'id': salle.id}) }}')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Fetched events data:', data);
-                    const eventsContainer = document.getElementById('events-container');
-                    eventsContainer.innerHTML = '';
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM chargé, initialisation du script de paiement');
 
-                    if (data.equipe_events.length === 0) {
-                        eventsContainer.innerHTML = `
-                            <div class="col-lg-12 text-center">
-                                <div class="alert alert-info">
-                                    <i class="fa fa-info-circle fa-2x mb-3"></i>
-                                    <p>No team events scheduled for this gym currently.</p>
-                                </div>
-                            </div>
-                        `;
+            const stripe = Stripe('{{ stripe_public_key }}');
+            const elements = stripe.elements();
+            const card = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#1F2937',
+                        '::placeholder': { color: '#9CA3AF' },
+                    },
+                }
+            });
+
+            const paymentModal = document.getElementById('payment-modal');
+            const closeModal = document.querySelector('.close-modal');
+            const paymentForm = document.getElementById('payment-form');
+            const submitButton = document.getElementById('submit');
+            const errorMessage = document.getElementById('error-message');
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const confirmationButton = document.getElementById('confirmation-button');
+            const paymentAmount = document.getElementById('payment-amount');
+            let currentAbonnementId;
+            let paymentIntentId;
+
+            // Formatage des dates
+            function formatDate(date) {
+                try {
+                    return new Date(date).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                } catch (e) {
+                    console.error('Erreur de formatage de date:', e);
+                    return 'Date invalide';
+                }
+            }
+
+            // Vérifier si les boutons existent
+            const subscriptionButtons = document.querySelectorAll('.subscription-btn');
+            console.log('Nombre de boutons .subscription-btn trouvés:', subscriptionButtons.length);
+            if (subscriptionButtons.length === 0) {
+                console.warn('Aucun bouton de souscription trouvé. Vérifiez le rendu des abonnements.');
+            }
+
+            // Forcer l'affichage du modal pour tester
+            function showPaymentModal(errorMsg = '') {
+                console.log('Tentative d\'affichage du modal de paiement');
+                if (!card._complete) {
+                    card.mount('#card-element');
+                    console.log('Élément Stripe card monté');
+                }
+                paymentModal.classList.add('active');
+                if (errorMsg) {
+                    errorMessage.textContent = errorMsg;
+                }
+                console.log('Modal de paiement affiché');
+            }
+
+            // Ouvrir le modal de paiement avec AJAX
+            subscriptionButtons.forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    console.log('Bouton Subscribe cliqué:', button);
+
+                    const abonnementId = button.dataset.abonnementId;
+                    const abonnementTarif = button.dataset.abonnementTarif;
+                    const abonnementType = button.dataset.abonnementType;
+                    const abonnementActivite = button.dataset.abonnementActivite;
+
+                    console.log('Données du bouton:', { abonnementId, abonnementTarif, abonnementType, abonnementActivite });
+
+                    if (!abonnementId) {
+                        console.error('Abonnement ID manquant dans le bouton');
+                        showPaymentModal('ID de l\'abonnement manquant');
                         return;
                     }
 
-                    data.equipe_events.forEach(eventData => {
-                        const eventHtml = `
-                            <div class="col-lg-4 col-md-6">
-                                <div class="event-card">
-                                    <div class="event-image-wrapper">
-                                        <img src="${eventData.imageUrl || '{{ asset('img/event-default.jpg') }}'}" alt="${eventData.nom}">
-                                        <div class="event-overlay">
-                                            <div class="event-type-badge">${eventData.type}</div>
-                                        </div>
-                                        <div class="event-date">
-                                            <span>${eventData.dateDay}</span>
-                                            <p>${eventData.dateMonth}</p>
-                                        </div>
-                                    </div>
-                                    <div class="event-content">
-                                        <h3>${eventData.nom}</h3>
-                                        <ul class="details-list">
-                                            <li>
-                                                <i class="fa fa-users icon"></i>
-                                                <strong>Team:</strong> ${eventData.equipeNom}
-                                            </li>
-                                            <li>
-                                                <i class="fa fa-info-circle icon"></i>
-                                                <strong>Description:</strong> ${eventData.description.slice(0, 60)}...
-                                            </li>
-                                            <li>
-                                                <i class="fa fa-clock-o icon"></i>
-                                                <strong>Time:</strong> ${eventData.heureDebut} - ${eventData.heureFin}
-                                            </li>
-                                            <li>
-                                                <i class="fas fa-trophy icon reward-icon"></i>
-                                                <strong>Reward:</strong> ${eventData.reward ? eventData.reward.charAt(0).toUpperCase() + eventData.reward.slice(1) : 'None'}
-                                            </li>
-                                            <li class="location-item">
-                                                <i class="fa fa-map-marker icon"></i>
-                                                <strong>Location:</strong> <span class="location-text">${eventData.lieu || 'Not specified'}</span>
-                                            </li>
-                                        </ul>
-                                        <div class="event-actions">
-                                            <a href="${eventData.detailsUrl}" class="event-btn" data-tooltip="View event details" aria-label="View details for ${eventData.nom}">
-                                                <i class="fa fa-info-circle me-2"></i>Details
-                                            </a>
-                                            <a href="${eventData.joinUrl}" class="join-btn" data-tooltip="Join this event" aria-label="Join ${eventData.nom}">
-                                                <i class="fas fa-user-plus me-2"></i>Join
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        eventsContainer.innerHTML += eventHtml;
+                    currentAbonnementId = abonnementId;
+                    paymentAmount.textContent = abonnementTarif || 'N/A';
+                    document.getElementById('confirmation-type').textContent = abonnementType || 'N/A';
+                    document.getElementById('confirmation-activity').textContent = abonnementActivite || 'N/A';
+
+                    try {
+                        console.log('Envoi de la requête à /subscribe/' + abonnementId + '/pay');
+                        const response = await fetch(`/subscribe/${abonnementId}/pay`, {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/json' }
+                        });
+
+                        console.log('Statut de la réponse:', response.status);
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Erreur HTTP:', response.status, errorText);
+                            showPaymentModal(`Erreur serveur (${response.status}) : ${errorText}`);
+                            return;
+                        }
+
+                        const data = await response.json();
+                        console.log('Réponse de /subscribe/pay:', data);
+
+                        if (data.error) {
+                            console.error('Erreur renvoyée par le serveur:', data.error);
+                            showPaymentModal(data.error);
+                            return;
+                        }
+
+                        if (!data.paymentIntentId) {
+                            console.error('PaymentIntent ID manquant dans la réponse:', data);
+                            showPaymentModal('PaymentIntent ID non fourni par le serveur');
+                            return;
+                        }
+
+                        paymentIntentId = data.paymentIntentId;
+                        console.log('PaymentIntent ID assigné:', paymentIntentId);
+                        showPaymentModal();
+                    } catch (error) {
+                        console.error('Erreur lors de la requête /subscribe/pay:', error);
+                        showPaymentModal('Erreur lors de la récupération des détails de paiement : ' + error.message);
+                    }
+                });
+            });
+
+            // Fermer le modal de paiement
+            closeModal.addEventListener('click', () => {
+                console.log('Fermeture du modal de paiement');
+                paymentModal.classList.remove('active');
+                if (card._complete) {
+                    card.unmount();
+                }
+                paymentForm.reset();
+                errorMessage.textContent = '';
+                paymentIntentId = null;
+            });
+
+            // Gérer la soumission du formulaire
+            paymentForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                console.log('Soumission du formulaire de paiement');
+                submitButton.disabled = true;
+                submitButton.classList.add('processing');
+                errorMessage.textContent = '';
+
+                if (!paymentIntentId) {
+                    console.error('PaymentIntent ID manquant lors de la soumission');
+                    errorMessage.textContent = 'PaymentIntent ID manquant';
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('processing');
+                    return;
+                }
+                if (!currentAbonnementId) {
+                    console.error('Abonnement ID manquant lors de la soumission');
+                    errorMessage.textContent = 'ID de l\'abonnement manquant';
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('processing');
+                    return;
+                }
+
+                try {
+                    const { paymentMethod, error } = await stripe.createPaymentMethod({
+                        type: 'card',
+                        card: card,
                     });
-                })
-                .catch(error => console.error('Error refreshing events:', error));
-        }
 
-        // Refresh events every 30 seconds
-        setInterval(refreshEvents, 30000);
+                    if (error || !paymentMethod || !paymentMethod.id) {
+                        console.error('Erreur lors de la création du PaymentMethod:', error);
+                        errorMessage.textContent = error ? error.message : 'Erreur lors de la création de la méthode de paiement';
+                        submitButton.disabled = false;
+                        submitButton.classList.remove('processing');
+                        return;
+                    }
 
-        // Initial refresh on page load
-        document.addEventListener('DOMContentLoaded', refreshEvents);
+                    console.log('Données envoyées à /subscribe/confirm:', {
+                        paymentIntentId,
+                        paymentMethodId: paymentMethod.id,
+                        abonnementId: currentAbonnementId
+                    });
+
+                    const response = await fetch('{{ path('sportif_subscribe_confirm') }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            paymentIntentId,
+                            paymentMethodId: paymentMethod.id,
+                            abonnementId: currentAbonnementId
+                        }),
+                    });
+
+                    const result = await response.json();
+                    console.log('Réponse de /subscribe/confirm:', result);
+
+                    if (result.error) {
+                        console.error('Erreur renvoyée par /subscribe/confirm:', result.error);
+                        errorMessage.textContent = result.error;
+                        submitButton.disabled = false;
+                        submitButton.classList.remove('processing');
+                        return;
+                    }
+
+                    if (result.status === 'succeeded') {
+                        document.getElementById('confirmation-start').textContent = formatDate(result.dateDebut);
+                        document.getElementById('confirmation-end').textContent = formatDate(result.dateFin);
+
+                        paymentModal.classList.remove('active');
+                        confirmationModal.classList.add('active');
+                        console.log('Modal de confirmation affiché');
+
+                        let redirectTimeout = setTimeout(() => {
+                            window.location.href = '{{ path('sportif_abonnements') }}';
+                        }, 5000);
+
+                        confirmationButton.addEventListener('click', () => {
+                            console.log('Bouton de confirmation cliqué');
+                            clearTimeout(redirectTimeout);
+                            window.location.href = '{{ path('sportif_abonnements') }}';
+                        }, { once: true });
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la requête /subscribe/confirm:', error);
+                    errorMessage.textContent = 'Erreur lors de la confirmation du paiement : ' + error.message;
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('processing');
+                }
+            });
+        });
     </script>
 {% endblock %}
