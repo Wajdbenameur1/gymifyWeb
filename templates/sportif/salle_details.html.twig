@@ -111,7 +111,7 @@
                                                         </li>
                                                         <li><i class="fas fa-calendar-alt"></i> {{ abonnement.joursAcces|default([])|join(', ') }}</li>
                                                     </ul>
-                                                    <a href="#" class="subscription-btn" data-tooltip="Subscribe to this plan">Subscribe</a>
+                                                    <button class="subscription-btn" data-abonnement-id="{{ abonnement.id }}" data-abonnement-tarif="{{ abonnement.tarif }}" data-abonnement-type="{{ abonnement.type.value|capitalize }}" data-abonnement-activite="{{ activite.nom }}" data-tooltip="Subscribe to this plan">Subscribe</button>
                                                 </div>
                                             </div>
                                         {% endfor %}
@@ -128,6 +128,62 @@
             {% endif %}
         </div>
     </section>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="payment-modal">
+        <div class="payment-content">
+            <span class="close-modal">×</span>
+            <div class="payment-container">
+                <div class="payment-header">
+                    <h2>Paiement de votre abonnement</h2>
+                    <p>Finalisez votre inscription en toute sécurité</p>
+                </div>
+                <div class="payment-body">
+                    <form id="payment-form">
+                        <div id="card-element"></div>
+                        <button id="submit" type="submit">
+                            <span class="spinner"></span>
+                            Payer <span id="payment-amount"></span> DT
+                        </button>
+                        <div id="error-message"></div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="confirmation-modal" id="confirmation-modal">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                    </div>
+                    <h3 class="confirmation-title">Paiement réussi !</h3>
+                    <p>Votre abonnement a été activé avec succès.</p>
+                    
+                    <div class="confirmation-details">
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Type d'abonnement:</span>
+                            <span class="confirmation-detail-value" id="confirmation-type"></span>
+                        </div>
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Activité:</span>
+                            <span class="confirmation-detail-value" id="confirmation-activity"></span>
+                        </div>
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Date de début:</span>
+                            <span class="confirmation-detail-value" id="confirmation-start"></span>
+                        </div>
+                        <div class="confirmation-detail">
+                            <span class="confirmation-detail-label">Date de fin:</span>
+                            <span class="confirmation-detail-value" id="confirmation-end"></span>
+                        </div>
+                    </div>
+                    
+                    <button class="confirmation-button" id="confirmation-button">Voir mes abonnements</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Events Section -->
     <section id="events" class="events-section spad">
@@ -569,6 +625,8 @@
             box-shadow: 0 6px 15px rgba(243, 97, 0, 0.3);
             position: relative;
             overflow: hidden;
+            border: none;
+            cursor: pointer;
         }
         .subscription-btn:hover {
             background: linear-gradient(90deg, #ff8c00, #f36100);
@@ -612,6 +670,235 @@
         .subscription-btn[data-tooltip]:hover::after {
             opacity: 1;
             visibility: visible;
+        }
+
+        /* Payment Modal Styling */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .payment-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .payment-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .payment-modal.active .payment-content {
+            transform: translateY(0);
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close-modal:hover {
+            color: #f36100;
+        }
+        .payment-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+        .payment-container:hover {
+            transform: translateY(-5px);
+        }
+        .payment-header {
+            background: linear-gradient(135deg, #f36100, #ff8c00);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .payment-header h2 {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-family: 'Oswald', sans-serif;
+        }
+        .payment-header p {
+            font-family: 'Muli', sans-serif;
+        }
+        .payment-body {
+            padding: 25px;
+        }
+        #card-element {
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+        .card-element.StripeElement--focus {
+            border-color: #f36100;
+            box-shadow: 0 0 0 1px #f36100;
+        }
+        #card-element.StripeElement--invalid {
+            border-color: #EF4444;
+        }
+        #submit {
+            width: 100%;
+            background: linear-gradient(135deg, #f36100, #ff8c00);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+        }
+        .submit:disabled {
+            background: #E5E7EB;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #submit .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        #submit.processing .spinner {
+            display: block;
+        }
+        #error-message {
+            color: #EF4444;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+            min-height: 20px;
+            font-family: 'Muli', sans-serif;
+        }
+        .confirmation-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .confirmation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .confirmation-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .confirmation-modal.active .confirmation-content {
+            transform: translateY(0);
+        }
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+            background: #10B981;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px;
+        }
+        .confirmation-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        .confirmation-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+            font-family: 'Oswald', sans-serif;
+        }
+        .confirmation-details {
+            margin: 20px 0;
+            text-align: left;
+            background: #F9FAFB;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .confirmation-detail {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .confirmation-detail:last-child {
+            margin-bottom: 0;
+        }
+        .confirmation-detail-label {
+            font-weight: 500;
+            color: #1a1a1a;
+            width: 120px;
+            font-family: 'Muli', sans-serif;
+        }
+        .confirmation-detail-value {
+            color: #6B7280;
+            font-family: 'Muli', sans-serif;
+        }
+        .confirmation-button {
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            font-family: 'Oswald', sans-serif;
+        }
+        .confirmation-button:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Events */
@@ -825,4 +1112,240 @@
             }
         }
     </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM chargé, initialisation du script de paiement');
+
+            const stripe = Stripe('{{ stripe_public_key }}');
+            const elements = stripe.elements();
+            const card = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#1F2937',
+                        '::placeholder': { color: '#9CA3AF' },
+                    },
+                }
+            });
+
+            const paymentModal = document.getElementById('payment-modal');
+            const closeModal = document.querySelector('.close-modal');
+            const paymentForm = document.getElementById('payment-form');
+            const submitButton = document.getElementById('submit');
+            const errorMessage = document.getElementById('error-message');
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const confirmationButton = document.getElementById('confirmation-button');
+            const paymentAmount = document.getElementById('payment-amount');
+            let currentAbonnementId;
+            let paymentIntentId;
+
+            // Formatage des dates
+            function formatDate(date) {
+                try {
+                    return new Date(date).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                } catch (e) {
+                    console.error('Erreur de formatage de date:', e);
+                    return 'Date invalide';
+                }
+            }
+
+            // Vérifier si les boutons existent
+            const subscriptionButtons = document.querySelectorAll('.subscription-btn');
+            console.log('Nombre de boutons .subscription-btn trouvés:', subscriptionButtons.length);
+            if (subscriptionButtons.length === 0) {
+                console.warn('Aucun bouton de souscription trouvé. Vérifiez le rendu des abonnements.');
+            }
+
+            // Forcer l'affichage du modal pour tester
+            function showPaymentModal(errorMsg = '') {
+                console.log('Tentative d\'affichage du modal de paiement');
+                if (!card._complete) {
+                    card.mount('#card-element');
+                    console.log('Élément Stripe card monté');
+                }
+                paymentModal.classList.add('active');
+                if (errorMsg) {
+                    errorMessage.textContent = errorMsg;
+                }
+                console.log('Modal de paiement affiché');
+            }
+
+            // Ouvrir le modal de paiement avec AJAX
+            subscriptionButtons.forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    console.log('Bouton Subscribe cliqué:', button);
+
+                    const abonnementId = button.dataset.abonnementId;
+                    const abonnementTarif = button.dataset.abonnementTarif;
+                    const abonnementType = button.dataset.abonnementType;
+                    const abonnementActivite = button.dataset.abonnementActivite;
+
+                    console.log('Données du bouton:', { abonnementId, abonnementTarif, abonnementType, abonnementActivite });
+
+                    if (!abonnementId) {
+                        console.error('Abonnement ID manquant dans le bouton');
+                        showPaymentModal('ID de l\'abonnement manquant');
+                        return;
+                    }
+
+                    currentAbonnementId = abonnementId;
+                    paymentAmount.textContent = abonnementTarif || 'N/A';
+                    document.getElementById('confirmation-type').textContent = abonnementType || 'N/A';
+                    document.getElementById('confirmation-activity').textContent = abonnementActivite || 'N/A';
+
+                    try {
+                        console.log('Envoi de la requête à /subscribe/' + abonnementId + '/pay');
+                        const response = await fetch(`/subscribe/${abonnementId}/pay`, {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/json' }
+                        });
+
+                        console.log('Statut de la réponse:', response.status);
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Erreur HTTP:', response.status, errorText);
+                            showPaymentModal(`Erreur serveur (${response.status}) : ${errorText}`);
+                            return;
+                        }
+
+                        const data = await response.json();
+                        console.log('Réponse de /subscribe/pay:', data);
+
+                        if (data.error) {
+                            console.error('Erreur renvoyée par le serveur:', data.error);
+                            showPaymentModal(data.error);
+                            return;
+                        }
+
+                        if (!data.paymentIntentId) {
+                            console.error('PaymentIntent ID manquant dans la réponse:', data);
+                            showPaymentModal('PaymentIntent ID non fourni par le serveur');
+                            return;
+                        }
+
+                        paymentIntentId = data.paymentIntentId;
+                        console.log('PaymentIntent ID assigné:', paymentIntentId);
+                        showPaymentModal();
+                    } catch (error) {
+                        console.error('Erreur lors de la requête /subscribe/pay:', error);
+                        showPaymentModal('Erreur lors de la récupération des détails de paiement : ' + error.message);
+                    }
+                });
+            });
+
+            // Fermer le modal de paiement
+            closeModal.addEventListener('click', () => {
+                console.log('Fermeture du modal de paiement');
+                paymentModal.classList.remove('active');
+                if (card._complete) {
+                    card.unmount();
+                }
+                paymentForm.reset();
+                errorMessage.textContent = '';
+                paymentIntentId = null;
+            });
+
+            // Gérer la soumission du formulaire
+            paymentForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                console.log('Soumission du formulaire de paiement');
+                submitButton.disabled = true;
+                submitButton.classList.add('processing');
+                errorMessage.textContent = '';
+
+                if (!paymentIntentId) {
+                    console.error('PaymentIntent ID manquant lors de la soumission');
+                    errorMessage.textContent = 'PaymentIntent ID manquant';
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('processing');
+                    return;
+                }
+                if (!currentAbonnementId) {
+                    console.error('Abonnement ID manquant lors de la soumission');
+                    errorMessage.textContent = 'ID de l\'abonnement manquant';
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('processing');
+                    return;
+                }
+
+                try {
+                    const { paymentMethod, error } = await stripe.createPaymentMethod({
+                        type: 'card',
+                        card: card,
+                    });
+
+                    if (error || !paymentMethod || !paymentMethod.id) {
+                        console.error('Erreur lors de la création du PaymentMethod:', error);
+                        errorMessage.textContent = error ? error.message : 'Erreur lors de la création de la méthode de paiement';
+                        submitButton.disabled = false;
+                        submitButton.classList.remove('processing');
+                        return;
+                    }
+
+                    console.log('Données envoyées à /subscribe/confirm:', {
+                        paymentIntentId,
+                        paymentMethodId: paymentMethod.id,
+                        abonnementId: currentAbonnementId
+                    });
+
+                    const response = await fetch('{{ path('sportif_subscribe_confirm') }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            paymentIntentId,
+                            paymentMethodId: paymentMethod.id,
+                            abonnementId: currentAbonnementId
+                        }),
+                    });
+
+                    const result = await response.json();
+                    console.log('Réponse de /subscribe/confirm:', result);
+
+                    if (result.error) {
+                        console.error('Erreur renvoyée par /subscribe/confirm:', result.error);
+                        errorMessage.textContent = result.error;
+                        submitButton.disabled = false;
+                        submitButton.classList.remove('processing');
+                        return;
+                    }
+
+                    if (result.status === 'succeeded') {
+                        document.getElementById('confirmation-start').textContent = formatDate(result.dateDebut);
+                        document.getElementById('confirmation-end').textContent = formatDate(result.dateFin);
+
+                        paymentModal.classList.remove('active');
+                        confirmationModal.classList.add('active');
+                        console.log('Modal de confirmation affiché');
+
+                        let redirectTimeout = setTimeout(() => {
+                            window.location.href = '{{ path('sportif_abonnements') }}';
+                        }, 5000);
+
+                        confirmationButton.addEventListener('click', () => {
+                            console.log('Bouton de confirmation cliqué');
+                            clearTimeout(redirectTimeout);
+                            window.location.href = '{{ path('sportif_abonnements') }}';
+                        }, { once: true });
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la requête /subscribe/confirm:', error);
+                    errorMessage.textContent = 'Erreur lors de la confirmation du paiement : ' + error.message;
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('processing');
+                }
+            });
+        });
+    </script>
 {% endblock %}

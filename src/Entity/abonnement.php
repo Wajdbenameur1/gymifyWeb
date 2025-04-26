@@ -12,7 +12,7 @@ class Abonnement
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id_Abonnement')]
+    #[ORM\Column(name: 'id_Abonnement', type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(name: 'type_abonnement', type: 'string', enumType: TypeAbonnement::class)]
