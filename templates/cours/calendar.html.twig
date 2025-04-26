@@ -72,7 +72,7 @@
             border-radius: 6px !important;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             border-left: 3px solid rgba(0,0,0,0.2) !important;
-            cursor: default !important; /* Change le curseur pour indiquer que ce n'est pas déplaçable */
+            cursor: default !important;
         }
         
         .fc-event:hover {
@@ -109,10 +109,10 @@
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'fr',
-                firstDay: 1, // Lundi comme premier jour
-                navLinks: true, // Liens cliquables
-                nowIndicator: true, // Indicateur de temps actuel
-                dayMaxEvents: true, // Affiche "+X more" si trop d'événements
+                firstDay: 1,
+                navLinks: true,
+                nowIndicator: true,
+                dayMaxEvents: true,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -126,7 +126,7 @@
                     list: 'Liste'
                 },
                 events: {{ events|raw }},
-                editable: false, // Désactive complètement le déplacement et la modification
+                editable: false,
                 eventContent: function(info) {
                     return {
                         html: `
@@ -155,36 +155,21 @@
             });
             calendar.render();
         });
-        document.getElementById('sync-button').addEventListener('click', function(e) {
-    e.preventDefault();
-    const btn = this;
-    const originalHtml = btn.innerHTML;
-    
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Synchronisation...';
-    btn.disabled = true;
-    
-    fetch(btn.href)
-        .then(response => response.ok ? window.location.reload() : Promise.reject())
-        .catch(() => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-        });
-        });
     </script>
-        
-              
 {% endblock %}
 
 {% block body %}
     <div class="container-fluid">
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
-              <a href="" class="btn btn-success" id="sync-button">
-                 <i class="fas fa-sync-alt me-2"></i> Synchroniser avec Google Calendar
-               </a>
+            <a href="{{ path('google_auth') }}" class="btn btn-success" id="sync-button">
+                <i class="fas fa-sync-alt me-2"></i> Connecter avec Google Calendar
+            </a>
+            <a href="{{ path('import_cours_to_calendar') }}" class="btn btn-success">
+    Importer mes cours dans Google Calendar
+</a>
 
         </div>
-          
         
         <div class="card shadow mb-4">
             <div class="card-body">

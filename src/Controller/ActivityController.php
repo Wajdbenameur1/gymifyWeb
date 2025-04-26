@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use App\Entity\Cours;
 
 class ActivityController extends AbstractController
 {
@@ -184,7 +185,7 @@ class ActivityController extends AbstractController
         ]);
     }
     
-    #[Route('/activity/delete/{id}', name: 'app_activity_delete', methods: ['POST'])]
+    #[Route('/admin/activity/{id}/delete', name: 'app_activity_delete', methods: ['POST'])]
     public function delete(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -196,6 +197,10 @@ class ActivityController extends AbstractController
             $this->addFlash('error', 'Activity not found');
             return $this->redirectToRoute('app_activity_index');
         }
+        $cours = $entityManager->getRepository(Cours::class)->findBy(['activité' => $activity]);
+         foreach ($cours as $cour) {
+          $entityManager->remove($cour);
+          }
 
         if (!$this->isCsrfTokenValid('delete'.$activity->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid CSRF token');

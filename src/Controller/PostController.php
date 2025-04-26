@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 #[Route('/post')]
 final class PostController extends AbstractController
@@ -23,6 +24,9 @@ final class PostController extends AbstractController
         ]);
     }
 
+
+
+
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -30,59 +34,52 @@ final class PostController extends AbstractController
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
     
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Vérifie si un utilisateur est connecté
-            $user = $this->getUser();
+        $imageFile = $form->get('imageFile')->getData();
+        $webImage  = $form->get('webImage')->getData();
     
-            // Si l'utilisateur n'est pas connecté, utilise l'utilisateur avec l'ID 1
-            if (!$user) {
-                $user = $entityManager->getRepository(User::class)->find(1);
-                if (!$user) {
-                    throw new \Exception("L'utilisateur par défaut avec l'ID 1 n'existe pas.");
+        if ($imageFile && $webImage) {
+            $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
+            return $this->render('post/new.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        }
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $this->getUser() ?: $entityManager->getRepository(User::class)->find(1);
+            $post->setUser($user)->setCreatedAt(new \DateTime());
+    
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = preg_replace('/[^a-z0-9_]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $originalFilename)));
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+    
+                try {
+                    // Déplacement du fichier vers le dossier absolute défini
+                $targetDir    = $this->getParameter('uploads_directory');
+                $imageFile->move($targetDir, $newFilename);
+
+                // Construction du chemin absolu à stocker
+                $absolutePath = $targetDir . DIRECTORY_SEPARATOR . $newFilename;
+                $post->setImageUrl($absolutePath);  // Chemin web
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload');
+                    return $this->render('post/new.html.twig', ['form' => $form]);
                 }
+            } elseif ($webImage) {
+                $post->setImageUrl($webImage);
             }
     
-            // Traitement de l'image (si nécessaire)
-// Traiteement de l'image (si nécessaire)
-$imageFile = $form->get('imageFile')->getData();
-if ($imageFile) {
-    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-    $safeFilename = $originalFilename; // Tu peux ajouter un slugger si nécessaire
-    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-    try {
-        // Move the uploaded file to the desired directory and get the absolute path
-        $imageFile->move(
-            $this->getParameter('uploads_directory'),
-            $newFilename
-        );
-        
-        // Save the absolute path in the database (update the image URL)
-        $imageUrl = $this->getParameter('uploads_directory') . '\\' . $newFilename;
-        $post->setImageUrl($imageUrl);
-    } catch (FileException $e) {
-        // Handle the error if necessary
-        $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+            $entityManager->persist($post);
+            $entityManager->flush();
+    
+            $this->addFlash('success', 'Post créé !');
+            return $this->redirectToRoute('app_post_index');
+        }
+    
+        return $this->render('post/new.html.twig', ['form' => $form]);
     }
-}
-
-$post->setUser($user);
-$post->setCreatedAt(new \DateTime());
-$entityManager->persist($post);
-$entityManager->flush();
-
-$this->addFlash('success', 'Le post a été créé avec succès.');
-return $this->redirectToRoute('app_post_index');
-}
-
-return $this->render('post/new.html.twig', [
-'form' => $form->createView(),
-]);
-}
 
     
-
-
 
 
 
@@ -112,23 +109,102 @@ return $this->render('post/new.html.twig', [
 
 
 
-    #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
+
+
+   
+    #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
+
+        // ✅ Vérifier que l'utilisateur est bien le créateur du post
+    $user = $this->getUser();
+    if ($user !== $post->getUser()) {
+        throw new AccessDeniedHttpException('Vous n\'êtes pas autorisé à modifier ce post.');
+    }
+
+    
+        // 1) Création du form et pré-remplissage du champ URL si nécessaire
         $form = $this->createForm(PostType::class, $post);
+        $form->get('webImage')->setData(
+            filter_var($post->getImageUrl(), FILTER_VALIDATE_URL)
+                ? $post->getImageUrl()
+                : ''
+        );
+
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+        // 2) Récupération des uploads
+        $imageFile = $form->get('imageFile')->getData();
+        $webImage  = $form->get('webImage')->getData();
 
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+        // 3) Soumission du form
+        if ($form->isSubmitted() && $form->isValid()) {
+            // 3.a) Check exclusivité fichier vs URL
+            if ($imageFile && $webImage) {
+                $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
+            } else {
+                // 3.b) Traitement du fichier
+                if ($imageFile) {
+                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = preg_replace('/[^a-z0-9_]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $originalFilename)));
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+                    try {
+                        $targetDir = $this->getParameter('uploads_directory');
+                        $imageFile->move($targetDir, $newFilename);
+                        $post->setImageUrl(
+                            // ici le chemin complet exposé au web, ex. '/uploads/nom-de-fichier.jpg'
+                            '/uploads/'.$newFilename
+                        );
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Erreur lors de l’upload de l’image.');
+                        return $this->render('post/edit.html.twig', [
+                            'form' => $form->createView(),
+                            'post' => $post,
+                        ]);
+                    }
+                }
+                // 3.c) Traitement de l’URL
+                if ($webImage && !$imageFile) {
+                    $post->setImageUrl($webImage);
+                }
+
+                // 3.d) Sauvegarde
+                $entityManager->flush();
+                $this->addFlash('success', 'Post modifié avec succès !');
+                return $this->redirectToRoute('app_post_index');
+            }
         }
 
+        // 4) Affichage du template
         return $this->render('post/edit.html.twig', [
+            'form' => $form->createView(),
             'post' => $post,
-            'form' => $form,
+            'existingImage' => $post->getImageUrl(),
         ]);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     #[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
     public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response

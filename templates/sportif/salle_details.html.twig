@@ -29,15 +29,17 @@
                     <div class="gym-image">
                         {% if salle.urlPhoto %}
                             <img src="{{ asset('Uploads/images/' ~ salle.urlPhoto) }}" alt="{{ salle.nom }}">
+                            <div class="image-overlay"></div>
                         {% else %}
                             <img src="{{ asset('img/placeholder-gym.jpg') }}" alt="Default Gym Image">
+                            <div class="image-overlay"></div>
                         {% endif %}
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="gym-content">
                         <h2>{{ salle.nom }}</h2>
-                        <p>{{ salle.details }}</p>
+                        <p>{{ salle.details|default('No description available') }}</p>
                         <ul class="gym-meta">
                             <li><i class="fa fa-map-marker"></i> {{ salle.adresse }}</li>
                             <li><i class="fa fa-user"></i> {% if salle.responsable %}{{ salle.responsable.prenom|default('') }} {{ salle.responsable.nom|default('N/A') }}{% else %}No manager{% endif %}</li>
@@ -45,9 +47,9 @@
                             <li><i class="fa fa-envelope"></i> {{ salle.email }}</li>
                         </ul>
                         <div class="gym-actions">
-                            <a href="#subscriptions" class="primary-btn" data-tooltip="View available subscriptions">View Subscriptions</a>
-                            <a href="#events" class="primary-btn" data-tooltip="View upcoming events">View Events</a>
-                            <a href="{{ path('home') }}" class="primary-btn" data-tooltip="Return to homepage">Back</a>
+                            <a href="#subscriptions" class="primary-btn" data-tooltip="View available subscriptions" aria-label="View subscriptions">View Subscriptions</a>
+                            <a href="#events" class="primary-btn" data-tooltip="View upcoming events" aria-label="View events">View Events</a>
+                            <a href="{{ path('app_home') }}" class="primary-btn" data-tooltip="Return to homepage" aria-label="Go back to home">Back</a>
                         </div>
                     </div>
                 </div>
@@ -62,7 +64,7 @@
                 <div class="col-lg-12">
                     <div class="section-title">
                         <span>Discover Our</span>
-                        <h2>AVAILABLE SUBSCRIPTIONS</h2>
+                        <h2>Available Subscriptions</h2>
                     </div>
                 </div>
             </div>
@@ -123,7 +125,10 @@
                 </div>
             {% else %}
                 <div class="col-lg-12 text-center">
-                    <p>No subscriptions available at the moment.</p>
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle fa-2x mb-3"></i>
+                        <p>No subscriptions available for this gym currently.</p>
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -192,40 +197,205 @@
                 <div class="col-lg-12">
                     <div class="section-title">
                         <span>Discover Our</span>
-                        <h2>AVAILABLE EVENTS</h2>
+                        <h2>Available Events</h2>
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+            <!-- Display Flash Messages -->
+            {% set errorMessages = app.flashes('error') %}
+            {% if errorMessages is not empty %}
+                <div class="alert alert-danger">
+                    {% for message in errorMessages %}
+                        {% if message|trim is not empty %}
+                            {{ message }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% set successMessages = app.flashes('success') %}
+            {% if successMessages is not empty %}
+                <div class="alert alert-success">
+                    {% for message in successMessages %}
+                        {% if message|trim is not empty %}
+                            {{ message }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="row" id="events-container">
                 {% for equipe_event in equipe_events %}
+                    {% set event = equipe_event.event %}
+                    {% set equipe = equipe_event.equipe %}
                     <div class="col-lg-4 col-md-6">
                         <div class="event-card" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
-                            <div class="event-pic">
-                                {% if equipe_event.event.imageUrl %}
-                                    <img src="{{ asset('Uploads/evenements/' ~ equipe_event.event.imageUrl) }}" alt="{{ equipe_event.event.nom }}">
+                            <div class="event-image-wrapper">
+                                {% if event.imageUrl %}
+                                    <img src="{{ asset('Uploads/evenements/' ~ event.imageUrl) }}" alt="{{ event.nom }}">
                                 {% else %}
                                     <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
                                 {% endif %}
+                                <div class="event-overlay">
+                                    <div class="event-type-badge">{{ event.type ? event.type.value|capitalize : 'Not defined' }}</div>
+                                </div>
+                                <div class="event-date">
+                                    <span>{{ event.date|date('d') }}</span>
+                                    <p>{{ event.date|date('M') }}</p>
+                                </div>
                             </div>
-                            <div class="event-text">
-                                <span>{{ equipe_event.event.type ? equipe_event.event.type.value|capitalize : 'Not defined' }}</span>
-                                <h5>{{ equipe_event.event.nom }}</h5>
-                                <p>{{ equipe_event.event.description|length > 100 ? equipe_event.event.description|slice(0, 100) ~ '...' : equipe_event.event.description }}</p>
-                                <ul class="event-details">
-                                    <li><i class="fa fa-calendar"></i> {{ equipe_event.event.date|date('d/m/Y') }}</li>
-                                    <li><i class="fa fa-clock-o"></i> {{ equipe_event.event.heureDebut|date('H:i') }} - {{ equipe_event.event.heureFin|date('H:i') }}</li>
-                                    <li><i class="fa fa-map-marker"></i> {{ equipe_event.event.lieu|default('Not specified') }}</li>
+                            <div class="event-content">
+                                <h3>{{ event.nom }}</h3>
+                                <ul class="details-list">
+                                    <li>
+                                        <i class="fa fa-users icon"></i>
+                                        <strong>Team:</strong> {{ equipe.nom|default('Not specified') }}
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-info-circle icon"></i>
+                                        <strong>Description:</strong> {{ event.description|default('No description')|slice(0, 60) ~ '...' }}
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-clock-o icon"></i>
+                                        <strong>Time:</strong> {{ event.heureDebut|date('H:i') }} - {{ event.heureFin|date('H:i') }}
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-trophy icon reward-icon"></i>
+                                        <strong>Reward:</strong> {{ event.reward.value|default('None')|capitalize }}
+                                    </li>
+                                    <li class="location-item">
+                                        <i class="fa fa-map-marker icon"></i>
+                                        <strong>Location:</strong> <span class="location-text">{{ event.lieu|default('Not specified') }}</span>
+                                    </li>
                                 </ul>
-                                <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn" data-tooltip="View event details">Details</a>
+                                <div class="event-actions">
+                                    <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn" data-tooltip="View event details" aria-label="View details for {{ event.nom }}">
+                                        <i class="fa fa-info-circle me-2"></i>Details
+                                    </a>
+                                    <a href="{{ path('app_equipe_event_join', {'id': equipe_event.id}) }}" class="join-btn" data-tooltip="Join this event" aria-label="Join {{ event.nom }}">
+                                        <i class="fas fa-user-plus me-2"></i>Join
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 {% else %}
                     <div class="col-lg-12 text-center">
-                        <p>No events available at the moment.</p>
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle fa-2x mb-3"></i>
+                            <p>No team events scheduled for this gym currently.</p>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
+        </div>
+    </section>
+
+    <!-- Weather Section -->
+    <section id="weather" class="weather-section spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title">
+                        <span>Check the</span>
+                        <h2>Local Weather</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Weather Search Form -->
+                    <form method="get" action="{{ path('sportif_salle_details', {'id': salle.id}) }}" class="weather-search-form">
+                        <div class="weather-search-container">
+                            <label for="location" class="sr-only">Enter a city</label>
+                            <input type="text" id="location" name="location" value="{{ location }}" placeholder="Enter a city (e.g., Tunis)" class="weather-search-input">
+                            <button type="submit" class="weather-search-btn" data-tooltip="Search weather" aria-label="Search weather for the entered city">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button type="button" onclick="getLocation()" class="weather-geo-btn" data-tooltip="Use my current location" aria-label="Get weather for my current location">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% if weatherData %}
+                <div class="weather-widget">
+                    <!-- Current Weather -->
+                    <div class="current-weather">
+                        <div class="weather-header">
+                            <h3>{{ weatherData.location.name }}</h3>
+                            <p class="current-date"><i class="fas fa-calendar-alt"></i> Today: {{ "now"|date('D, d M Y') }}</p>
+                        </div>
+                        <div class="weather-body">
+                            <div class="weather-main">
+                                <div class="weather-icon">
+                                    <img src="{{ weatherData.current.condition.icon }}" alt="{{ weatherData.current.condition.text }}">
+                                    <span class="condition">{{ weatherData.current.condition.text }}</span>
+                                </div>
+                                <div class="weather-temp">
+                                    <h2>{{ weatherData.current.temp_c }}°C</h2>
+                                </div>
+                            </div>
+                            <div class="weather-details">
+                                <p><i class="fas fa-wind"></i> <strong>Wind:</strong> {{ weatherData.current.wind_kph }} km/h, {{ weatherData.current.wind_dir }}</p>
+                                <p><i class="fas fa-cloud-rain"></i> <strong>Precipitation:</strong> {{ weatherData.current.precip_mm }} mm</p>
+                                <p><i class="fas fa-tachometer-alt"></i> <strong>Pressure:</strong> {{ weatherData.current.pressure_mb }} mb</p>
+                                <p><i class="fas fa-tint"></i> <strong>Humidity:</strong> {{ weatherData.current.humidity }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Forecast Weather -->
+                    {% if forecastData %}
+                        <div class="forecast-weather-container">
+                            <button class="scroll-btn scroll-left" onclick="scrollForecast('left')">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="forecast-weather-wrapper">
+                                <div class="forecast-weather">
+                                    {% for day in forecastData.forecast.forecastday|slice(0, 7) %}
+                                        <div class="forecast-day" onclick="showForecastDetails({{ loop.index0 }})" data-index="{{ loop.index0 }}">
+                                            <p class="day">{{ day.date|date('D, d M') }}</p>
+                                            <img src="{{ day.day.condition.icon }}" alt="{{ day.day.condition.text }}" class="forecast-icon">
+                                            <p class="temp">{{ day.day.maxtemp_c }}°C / {{ day.day.mintemp_c }}°C</p>
+                                            <p class="condition">{{ day.day.condition.text }}</p>
+                                            <!-- Hidden forecast details -->
+                                            <div class="forecast-details-hidden" id="forecast-details-{{ loop.index0 }}" style="display: none;">
+                                                <p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong> {{ day.date|date('Y-m-d') }}</p>
+                                                <p><i class="fas fa-cloud"></i> <strong>Condition:</strong> {{ day.day.condition.text }}</p>
+                                                <p><i class="fas fa-temperature-high"></i> <strong>Max Temp:</strong> {{ day.day.maxtemp_c }}°C</p>
+                                                <p><i class="fas fa-temperature-low"></i> <strong>Min Temp:</strong> {{ day.day.mintemp_c }}°C</p>
+                                                <p><i class="fas fa-cloud-rain"></i> <strong>Precipitation:</strong> {{ day.day.totalprecip_mm }} mm</p>
+                                                <p><i class="fas fa-umbrella"></i> <strong>Chance of Rain:</strong> {{ day.day.daily_chance_of_rain }}%</p>
+                                                <p><i class="fas fa-wind"></i> <strong>Wind:</strong> {{ day.day.maxwind_kph }} km/h</p>
+                                                <p><i class="fas fa-tint"></i> <strong>Humidity:</strong> {{ day.day.avghumidity }}%</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <button class="scroll-btn scroll-right" onclick="scrollForecast('right')">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <!-- Forecast Details Display -->
+                        <div class="forecast-details-display" id="forecast-details-display">
+                            <h4>Forecast Details</h4>
+                            <div id="forecast-details-content">
+                                <p>Click a day to see detailed forecast information.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="col-lg-12 text-center">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle fa-2x mb-3"></i>
+                        <p>Enter a city or use your current location to view the weather.</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}
@@ -323,6 +493,15 @@
             width: 100%;
             height: auto;
             object-fit: cover;
+        }
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+            z-index: 1;
         }
         .gym-content {
             z-index: 1;
@@ -442,12 +621,12 @@
         }
 
         /* Subscriptions and Events Sections */
-        .subscriptions-section, .events-section {
+        .subscriptions-section, .events-section, .weather-section {
             padding: 100px 0;
             background: #fafafa;
             position: relative;
         }
-        .subscriptions-section::before, .events-section::before {
+        .subscriptions-section::before, .events-section::before, .weather-section::before {
             content: '';
             position: absolute;
             top: 0;
@@ -518,7 +697,7 @@
         }
         .activity-name {
             padding: 20px;
-            background: linear-gradient(90deg,rgb(96, 94, 94),rgb(133, 130, 130));
+            background: linear-gradient(90deg, rgb(96, 94, 94), rgb(133, 130, 130));
             color: #e0e0e0;
             text-align: center;
             display: flex;
@@ -904,100 +1083,203 @@
         /* Events */
         .event-card {
             background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             transition: all 0.4s ease;
-            margin-bottom: 30px;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
             animation: fadeInUp 0.6s ease-in-out;
             position: relative;
             z-index: 1;
         }
         .event-card:hover {
-            transform: translateY(-5px) rotate(-0.5deg);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
         }
-        .event-pic {
-            overflow: hidden;
+        .event-image-wrapper {
             position: relative;
+            height: 200px;
+            overflow: hidden;
         }
-        .event-pic img {
+        .event-image-wrapper img {
             width: 100%;
-            height: 240px;
+            height: 100%;
             object-fit: cover;
-            transition: transform 0.6s ease;
+            transition: transform 0.5s ease;
         }
-        .event-card:hover .event-pic img {
-            transform: scale(1.1);
+        .event-card:hover .event-image-wrapper img {
+            transform: scale(1.08);
         }
-        .event-text {
-            padding: 25px;
-            text-align: center;
+        .event-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
         }
-        .event-text span {
-            color: #f36100;
-            font-size: 15px;
-            text-transform: uppercase;
-            font-weight: 700;
-            display: block;
-            margin-bottom: 15px;
-            font-family: 'Oswald', sans-serif;
-        }
-        .event-text h5 {
-            font-size: 24px;
-            color: #1a1a1a;
-            font-weight: 700;
-            margin-bottom: 15px;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
-        }
-        .event-text p {
-            color: #333333;
-            font-size: 15px;
-            line-height: 1.9;
-            margin-bottom: 20px;
-            font-family: 'Muli', sans-serif;
-        }
-        .event-details {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 25px;
-        }
-        .event-details li {
-            font-size: 15px;
-            color: #333333;
-            margin-bottom: 12px;
-            font-family: 'Muli', sans-serif;
-        }
-        .event-details li i {
-            color: #f36100;
-            margin-right: 12px;
-            font-size: 18px;
-            transition: color 0.3s ease;
-        }
-        .event-details li:hover i {
-            color: #ff8c00;
-        }
-        .event-btn {
-            display: inline-block;
+        .event-type-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
             background: linear-gradient(90deg, #f36100, #ff8c00);
             color: #ffffff;
-            padding: 12px 22px;
-            border-radius: 50px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
             text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-family: 'Oswald', sans-serif;
+        }
+        .event-date {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(90deg, #ff6200, #ff8c00);
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            width: 60px;
+        }
+        .event-date span {
+            font-size: 24px;
+            font-weight: 700;
+            display: block;
+            font-family: 'Oswald', sans-serif;
+        }
+        .event-date p {
+            font-size: 12px;
+            margin: 0;
+            text-transform: uppercase;
+            font-family: 'Muli', sans-serif;
+        }
+        .event-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-content h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f36100;
+            padding-bottom: 10px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+        .details-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .details-list li {
+            font-size: 14px;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.5;
+            transition: color 0.3s ease;
+            font-family: 'Muli', sans-serif;
+        }
+        .details-list li:hover {
+            color: #1a1a1a;
+        }
+        .details-list li strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        .details-list .icon {
+            color: #f36100;
+            font-size: 16px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .details-list .reward-icon {
+            color: #FFD700; /* Gold for reward */
+            font-size: 16px;
+        }
+        .details-list li:hover .icon {
+            transform: scale(1.2);
+            color: #ff8c00;
+        }
+        .details-list li:hover .reward-icon {
+            transform: scale(1.2);
+            color: #FFC107; /* Brighter gold on hover */
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.2); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1.2); }
+        }
+        .location-item {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .location-item .icon {
+            font-size: 18px;
+        }
+        .location-item:hover .icon {
+            color: #ff6200;
+        }
+        .location-text {
+            color: #333333;
+            background: rgba(243, 97, 0, 0.05);
+            padding: 5px 8px;
+            border-radius: 5px;
+            max-width: 80%;
+            display: inline-block;
+        }
+        .location-text:empty:before, .location-text:contains('Not specified') {
+            content: 'Not specified';
+            font-style: italic;
+            color: #888888;
+        }
+        .event-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .event-btn, .join-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px 18px;
+            border-radius: 50px;
             font-size: 15px;
             font-weight: 700;
-            transition: all 0.4s ease;
+            text-transform: uppercase;
             text-decoration: none;
             font-family: 'Oswald', sans-serif;
-            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.3);
+            transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
         }
+        .event-btn {
+            background: linear-gradient(90deg, #6c757d, #adb5bd);
+            color: #ffffff;
+            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+            border: 2px solid #6c757d;
+        }
         .event-btn:hover {
-            background: linear-gradient(90deg, #ff8c00, #f36100);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 10px 20px rgba(243, 97, 0, 0.4);
+            background: linear-gradient(90deg, #adb5bd, #6c757d);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.4);
+            border-color: #adb5bd;
+        }
+        .event-btn i {
+            transition: transform 0.3s ease;
+        }
+        .event-btn:hover i {
+            transform: scale(1.2);
         }
         .event-btn::before {
             content: '';
@@ -1012,10 +1294,42 @@
         .event-btn:hover::before {
             left: 100%;
         }
-        .event-btn[data-tooltip] {
+        .join-btn {
+            background: linear-gradient(90deg, #ff6200, #ff8c00);
+            color: #ffffff;
+            box-shadow: 0 6px 15px rgba(255, 98, 0, 0.3);
+            border: 2px solid #ff6200;
+        }
+        .join-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #ff6200);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(255, 98, 0, 0.4);
+            border-color: #ff8c00;
+        }
+        .join-btn i {
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .join-btn:hover i {
+            transform: scale(1.2);
+            color: #ff8c00;
+        }
+        .join-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .join-btn:hover::before {
+            left: 100%;
+        }
+        .event-btn[data-tooltip], .join-btn[data-tooltip] {
             position: relative;
         }
-        .event-btn[data-tooltip]::after {
+        .event-btn[data-tooltip]::after, .join-btn[data-tooltip]::after {
             content: attr(data-tooltip);
             position: absolute;
             bottom: 100%;
@@ -1033,9 +1347,351 @@
             transition: all 0.3s ease;
             margin-bottom: 10px;
         }
-        .event-btn[data-tooltip]:hover::after {
+        .event-btn[data-tooltip]:hover::after, .join-btn[data-tooltip]:hover::after {
             opacity: 1;
             visibility: visible;
+        }
+
+        /* Weather Section Styling */
+        .weather-search-form {
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .weather-search-container {
+            display: inline-flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 50px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+        }
+        .weather-search-input {
+            border: none;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-family: 'Muli', sans-serif;
+            flex: 1;
+            outline: none;
+            border-radius: 50px 0 0 50px;
+            transition: all 0.3s ease;
+        }
+        .weather-search-input:focus {
+            box-shadow: inset 0 0 5px rgba(243, 97, 0, 0.3);
+        }
+        .weather-search-btn, .weather-geo-btn {
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .weather-search-btn {
+            border-radius: 0 50px 50px 0;
+        }
+        .weather-geo-btn {
+            border-radius: 50px;
+            margin-left: 5px;
+        }
+        .weather-search-btn:hover, .weather-geo-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.4);
+        }
+        .weather-search-btn::before, .weather-geo-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .weather-search-btn:hover::before, .weather-geo-btn:hover::before {
+            left: 100%;
+        }
+        .weather-search-btn[data-tooltip]::after, .weather-geo-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .weather-search-btn[data-tooltip]:hover::after, .weather-geo-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Weather Widget Styling */
+        .weather-widget {
+            background: linear-gradient(135deg, #d3d3d3, #87CEEB); /* Light gray to light blue */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .weather-widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/light-gray-tiles.png');
+            opacity: 0.1;
+            z-index: -1;
+        }
+        .current-weather {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .weather-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .weather-header h3 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .current-date {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2F4F4F;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .current-date i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .weather-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .weather-icon {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        .weather-icon img {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .weather-icon .condition {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2F4F4F; /* Dark slate gray for text */
+            margin-left: 10px;
+            text-transform: capitalize;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .weather-temp h2 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .weather-details {
+            text-align: center;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+        .weather-details p {
+            font-size: 14px;
+            margin: 5px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .weather-details p i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .weather-details strong {
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+
+        /* Forecast Weather with Arrows */
+        .forecast-weather-container {
+            position: relative;
+            width: 100%;
+            border-top: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        .forecast-weather-wrapper {
+            width: 100%;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .forecast-weather {
+            display: flex;
+            padding: 15px 0;
+            width: max-content;
+        }
+        .forecast-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #2F4F4F; /* Dark slate gray for text */
+            padding: 10px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .forecast-day:hover {
+            transform: scale(1.05);
+        }
+        .forecast-day.active {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .forecast-day .day {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .forecast-day .temp {
+            font-size: 16px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-day .condition {
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: capitalize;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        .scroll-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .scroll-left {
+            left: -20px;
+        }
+        .scroll-right {
+            right: -20px;
+        }
+        .scroll-btn i {
+            font-size: 18px;
+        }
+        .forecast-details-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-align: center;
+        }
+        .forecast-details-display h4 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-details-display p {
+            font-size: 14px;
+            margin: 5px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .forecast-details-display p i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .forecast-details-display strong {
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+
+        /* Flash Message Styles */
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-family: 'Muli', sans-serif;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
         }
 
         /* Responsive Design */
@@ -1046,8 +1702,8 @@
             .section-title h2 {
                 font-size: 40px;
             }
-            .event-pic img {
-                height: 220px;
+            .event-image-wrapper {
+                height: 180px;
             }
             .subscriptions-container {
                 grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1055,9 +1711,30 @@
             .activity-card, .event-card {
                 animation: none;
             }
+            .weather-main {
+                flex-direction: column;
+                text-align: center;
+            }
+            .weather-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .forecast-day {
+                min-width: 140px;
+            }
+            .scroll-btn {
+                width: 35px;
+                height: 35px;
+            }
+            .scroll-left {
+                left: -15px;
+            }
+            .scroll-right {
+                right: -15px;
+            }
         }
         @media (max-width: 768px) {
-            .gym-details-section, .subscriptions-section, .events-section {
+            .gym-details-section, .subscriptions-section, .events-section, .weather-section {
                 padding: 80px 0;
             }
             .gym-image {
@@ -1069,8 +1746,8 @@
             .section-title h2 {
                 font-size: 36px;
             }
-            .event-pic img {
-                height: 200px;
+            .event-image-wrapper {
+                height: 160px;
             }
             .subscriptions-container {
                 grid-template-columns: 1fr;
@@ -1079,8 +1756,52 @@
                 flex-direction: column;
                 gap: 15px;
             }
-            .primary-btn {
+            .primary-btn, .event-btn, .join-btn, .weather-search-btn, .weather-geo-btn {
                 padding: 12px 20px;
+            }
+            .event-actions {
+                flex-direction: column;
+            }
+            .weather-search-container {
+                flex-direction: column;
+                max-width: 100%;
+            }
+            .weather-search-input {
+                border-radius: 50px;
+                margin-bottom: 10px;
+            }
+            .weather-search-btn, .weather-geo-btn {
+                width: 100%;
+                border-radius: 50px;
+            }
+            .weather-geo-btn {
+                margin-left: 0;
+            }
+            .weather-temp h2 {
+                font-size: 36px;
+            }
+            .weather-icon img {
+                width: 50px;
+                height: 50px;
+            }
+            .weather-icon .condition {
+                font-size: 16px;
+            }
+            .forecast-day {
+                min-width: 130px;
+            }
+            .scroll-btn {
+                width: 30px;
+                height: 30px;
+            }
+            .scroll-left {
+                left: -10px;
+            }
+            .scroll-right {
+                right: -10px;
+            }
+            .scroll-btn i {
+                font-size: 16px;
             }
         }
         @media (max-width: 576px) {
@@ -1093,15 +1814,15 @@
             .section-title h2 {
                 font-size: 32px;
             }
-            .primary-btn, .subscription-btn, .event-btn {
+            .primary-btn, .subscription-btn, .event-btn, .join-btn, .weather-search-btn, .weather-geo-btn {
                 width: 100%;
                 text-align: center;
                 padding: 12px 15px;
             }
-            .event-pic img {
-                height: 180px;
+            .event-image-wrapper {
+                height: 140px;
             }
-            .activity-name h3, .subscription-header h4, .event-text h5 {
+            .activity-name h3, .subscription-header h4, .event-content h3 {
                 font-size: 20px;
             }
             .subscription-header .price {
@@ -1109,6 +1830,60 @@
             }
             .activity-name i {
                 font-size: 18px;
+            }
+            .event-content h3 {
+                font-size: 18px;
+            }
+            .details-list li {
+                font-size: 13px;
+            }
+            .details-list .icon, .details-list .reward-icon {
+                font-size: 14px;
+            }
+            .weather-header h3 {
+                font-size: 24px;
+            }
+            .weather-temp h2 {
+                font-size: 32px;
+            }
+            .weather-icon img {
+                width: 40px;
+                height: 40px;
+            }
+            .weather-icon .condition {
+                font-size: 14px;
+            }
+            .forecast-icon {
+                width: 30px;
+                height: 30px;
+            }
+            .forecast-day .day {
+                font-size: 12px;
+            }
+            .forecast-day .temp {
+                font-size: 14px;
+            }
+            .forecast-details-display h4 {
+                font-size: 18px;
+            }
+            .forecast-details-display p {
+                font-size: 12px;
+            }
+            .forecast-day {
+                min-width: 120px;
+            }
+            .scroll-btn {
+                width: 25px;
+                height: 25px;
+            }
+            .scroll-left {
+                left: -5px;
+            }
+            .scroll-right {
+                right: -5px;
+            }
+            .scroll-btn i {
+                font-size: 14px;
             }
         }
     </style>

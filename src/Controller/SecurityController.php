@@ -8,6 +8,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use App\Entity\User;
 use App\Enum\Role;
+use App\Entity\Infosportif;
+use Doctrine\ORM\EntityManagerInterface;
+
+
 
 class SecurityController extends AbstractController
 {

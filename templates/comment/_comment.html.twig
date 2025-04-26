@@ -1,0 +1,16 @@
+{# templates/comment/_comment.html.twig #}
+
+<div class="comment d-flex gap-2 mb-3">
+    <img src="{{ comment.user.imageUrl ? asset('uploads/' ~ comment.user.imageUrl) : asset('img/screen/user.png') }}"
+         alt="avatar"
+         class="rounded-circle"
+         style="width: 40px; height: 40px; object-fit: cover;">
+
+    <div>
+        <div class="bg-light p-2 rounded">
+            <strong>{{ comment.user.nom }}</strong><br>
+            <span>{{ comment.content }}</span>
+        </div>
+        <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+    </div>
+</div>

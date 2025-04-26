@@ -1,8 +1,9 @@
-<div class="sidebar" data-background-color="dark">
-    <div class="sidebar-logo">
-        <div class="logo-header" data-background-color="blue">
+<div class="sidebar" style="background-color: #181a20;">
+  <div class="sidebar-logo">
+        <div class="logo-header" style="background-color: #181a20;">
             <a href="{{ path('app_home') }}" class="logo">
-                <img src="{{ asset('img/kaiadmin/logo_light.svg') }}" alt="Logo" class="navbar-brand" height="20">
+                <!--<img src="{{ asset('img/kaiadmin/logo_light.svg') }}" alt="Logo" class="navbar-brand" height="20">-->
+                <h2 style="color: rgb(32, 159, 205);">   G Y M I F Y</h2>
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar">
@@ -23,38 +24,55 @@
             
             
             <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#base">
-               <!--bl fas msh fa awesom 5 -->
-                <i class="fas fa-comment"></i>
-                
-                <p>BLogs</p>
-                <span class="caret"></span>
-              </a>
+              
               <div class="collapse" id="base">
-                <ul class="nav nav-collapse">
-                    <li>
-                      
 
 
-                        <a href="{{ path('app_sportif_blogs') }}">
-                          <span class="sub-item">All Blogs</span>
-                      </a>
-                      </li>
-                  <li>
-                    <a href="{{ path('app_sportif_create_post') }}" class="btn btn-primary">
-                      <span class="sub-item">New Blog</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="components/buttons.html">
-                      <span class="sub-item">My BLogs</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="components/gridsystem.html">
-                      <span class="sub-item">Statistics</span>
-                    </a>
-                  </li>
+
+                <li class="nav-section">
+                  <span class="sidebar-mini-icon">
+                    <i class="fa fa-ellipsis-h"></i>
+                  </span>
+                  <h4 class="text-section">Blogs</h4>
+                </li>
+
+
+               
+
+                <li class="nav-item">
+                  <a href="{{ path('app_sportif_blogs') }}">
+                    <i class="fas fa-home"></i>
+                    <p>Home</p>
+                    <span class="badge badge-warning">4</span>
+                  </a>
+                </li>
+
+
+                <li class="nav-item">
+                    <a href="{{ path('app_sportif_create_post') }}">
+                    <i class="fas fa-plus"></i>
+                    <p>New Blog</p>
+                  </a>
+                </li>
+
+
+                <li class="nav-item">
+                  <a href="widgets.html">
+                    <i class="fas fa-comment"></i>
+                    <p>My blogs</p>
+                  </a>
+                </li>
+
+
+                <li class="nav-item">
+                  <a href="widgets.html">
+                    <i class="fas fa-chart-line"></i>
+                                        <p>Statistics</p>
+                  </a>
+                </li>
+
+                
+                  
                   
                   
                   

@@ -43,7 +43,6 @@ class RegistrationController extends AbstractController
                 $plainPassword = $form->get('password')->getData();
                 $hashedPassword = $passwordHasher->hashPassword($sportif, $plainPassword);
                 $sportif->setPassword($hashedPassword);
-
                 $entityManager->persist($sportif);
                 $entityManager->flush();
 

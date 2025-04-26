@@ -38,7 +38,7 @@ class Planning
   )]
 
     private ?\DateTimeInterface $dateFin = null;
-    #[ORM\ManyToOne(inversedBy: 'entaineur')]
+    #[ORM\ManyToOne(inversedBy: 'plannings')]
     private ?User $entaineur = null;
 
     /**
