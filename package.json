@@ -4,6 +4,7 @@
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",
+    "@hotwired/turbo": "^8.0.13",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.8",
     "datatables.net-bs5": "^2.2.2",
@@ -27,6 +28,7 @@
     "sass": "^1.86.0",
     "sass-loader": "^16.0.5",
     "stimulus": "^3.2.2",
-    "webpack": "^5.98.0"
+    "webpack": "^5.98.0",
+    "@hotwired/turbo": "^7.0.0"
   }
 }
