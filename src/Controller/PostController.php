@@ -5,22 +5,47 @@ use App\Entity\User;
 
 use App\Entity\Post;
 use App\Form\PostType;
+use App\Entity\Reactions;           // ← Ajoutez cet import
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use App\Form\PostFilterType;
 
 #[Route('/post')]
 final class PostController extends AbstractController
 {
     #[Route('/', name: 'app_post_index', methods: ['GET'])]
-    public function index(PostRepository $postRepository): Response
+    public function index(Request $request, PostRepository $postRepository, PaginatorInterface $paginator): Response
     {
+        // Create the filter form
+        $form = $this->createForm(PostFilterType::class);
+        $form->handleRequest($request);
+        
+        // Apply filters
+        $filters = $form->isSubmitted() && $form->isValid() ? $form->getData() : [];
+        
+        // Get filtered query
+        $query = $postRepository->findByFilters($filters);
+        
+        // Determine items per page
+        $itemsPerPage = isset($filters['itemsPerPage']) ? (int)$filters['itemsPerPage'] : 4;
+        
+        // Paginate the results
+        $posts = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            $itemsPerPage
+        );
+        
         return $this->render('post/index.html.twig', [
-            'posts' => $postRepository->findAll(),
+            'posts' => $posts,
+            'reactionTypes' => Reactions::TYPES,
+            'filter_form' => $form->createView(),
         ]);
     }
 
@@ -90,10 +115,22 @@ final class PostController extends AbstractController
 
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
-    public function show(Post $post): Response
+    public function show(Request $request, Post $post, PaginatorInterface $paginator): Response
     {
+        // Get comments for the post
+        $comments = $post->getComments();
+        
+        // Create a paginator from the collection
+        $pagination = $paginator->paginate(
+            $comments,
+            $request->query->getInt('page', 1), // Current page, default is 1
+            5 // Items per page
+        );
+        
         return $this->render('post/show.html.twig', [
             'post' => $post,
+            'comments' => $pagination,
+            'reactionTypes' => Reactions::TYPES,
         ]);
     }
 
@@ -157,14 +194,14 @@ final class PostController extends AbstractController
                             '/uploads/'.$newFilename
                         );
                     } catch (FileException $e) {
-                        $this->addFlash('error', 'Erreur lors de l’upload de l’image.');
+                        $this->addFlash('error', "Erreur lors de l'upload de l'image.");
                         return $this->render('post/edit.html.twig', [
                             'form' => $form->createView(),
                             'post' => $post,
                         ]);
                     }
                 }
-                // 3.c) Traitement de l’URL
+                // 3.c) Traitement de l'URL
                 if ($webImage && !$imageFile) {
                     $post->setImageUrl($webImage);
                 }
