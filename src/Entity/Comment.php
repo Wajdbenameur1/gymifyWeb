@@ -99,4 +99,36 @@ class Comment
       $this->user = $user;
       return $this;
   }
+
+  /**
+   * Vérifie si le commentaire est sensible
+   */
+  public function isSensitive(): bool
+  {
+      return strpos($this->content, '[SENSITIVE]') === 0;
+  }
+  
+  /**
+   * Récupère le contenu original (sans le préfixe [SENSITIVE])
+   */
+  public function getOriginalContent(): ?string
+  {
+      if ($this->isSensitive()) {
+          return substr($this->content, 11); // Enlever le préfixe '[SENSITIVE]'
+      }
+      
+      return $this->content;
+  }
+  
+  /**
+   * Récupère le contenu à afficher (avec avertissement pour les commentaires sensibles)
+   */
+  public function getDisplayContent(): ?string
+  {
+      if ($this->isSensitive()) {
+          return '⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.';
+      }
+      
+      return $this->content;
+  }
 }

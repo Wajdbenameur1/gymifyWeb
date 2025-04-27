@@ -384,7 +384,15 @@
                         <img src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
                         <div class="comment-container w-100 position-relative">
                           <strong>{{ comment.user.nom }}</strong>
-                          <p class="comment-content mb-1">{{ comment.content }}</p>
+                          <p class="comment-content mb-1" {% if comment.isSensitive %}data-real-content="{{ comment.originalContent }}"{% endif %}>
+                            {% if comment.isSensitive %}
+                              <div class="sensitive-warning" style="color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 4px; margin-bottom: 5px;">
+                                <i class="fas fa-exclamation-triangle"></i> ⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.
+                              </div>
+                            {% else %}
+                              {{ comment.content }}
+                            {% endif %}
+                          </p>
                           <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
                           {% if comment.user == app.user %}
                             <div class="comment-actions">
@@ -503,7 +511,16 @@
 {% block javascripts %}
 {{ parent() }}
 <script>
+// Activer la journalisation de debug pour suivre les opérations de commentaires
+const DEBUG = true;
+function debugLog(...args) {
+    if (DEBUG) {
+        console.log('[DEBUG COMMENTS]', ...args);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    debugLog('Initialisation du système de commentaires');
     // Cacher le formulaire de filtre au chargement de la page
     const filterFormContainer = document.getElementById('filter-form-container');
     const showFiltersBtn = document.getElementById('show-filters-btn');
@@ -625,100 +642,139 @@ document.addEventListener('DOMContentLoaded', function() {
     function createCommentElement(data, postId) {
         const div = document.createElement('div');
         div.className = 'd-flex align-items-start mb-3';
-        div.innerHTML = `
-            <img src="${data.user.avatar}" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
-            <div class="comment-container w-100 position-relative">
-                <strong>${data.user.nom}</strong>
-                <p class="comment-content mb-1">${data.content}</p>
-                <small class="text-muted">${data.createdAt}</small>
-                <div class="comment-actions">
-                    <button class="btn-icon edit js-edit-comment-btn" 
-                            data-comment-id="${data.id}" 
-                            data-token="${data.tokens.edit}"
-                            data-tooltip="Modifier">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <form action="/comment/delete/${data.id}" method="post" 
-                          class="js-delete-comment-form d-inline" 
-                          data-post-id="${postId}">
-                        <input type="hidden" name="_token" value="${data.tokens.delete}">
-                        <button type="submit" class="btn-icon delete" data-tooltip="Supprimer">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        `;
         
-        // Appliquer directement les styles aux nouveaux éléments créés
-        setTimeout(() => {
-            const actionsDiv = div.querySelector('.comment-actions');
-            if (actionsDiv) {
-                actionsDiv.style.opacity = "0";
-                actionsDiv.style.display = "inline-flex";
-                actionsDiv.style.gap = "12px";
-                actionsDiv.style.position = "absolute";
-                actionsDiv.style.right = "10px";
-                actionsDiv.style.top = "50%";
-                actionsDiv.style.transform = "translateY(-50%)";
-                actionsDiv.style.zIndex = "100";
-            }
-            
-            const editBtn = div.querySelector('.btn-icon.edit');
-            if (editBtn) {
-                editBtn.style.backgroundColor = "#2196F3";
-                editBtn.style.padding = "8px";
-                editBtn.style.borderRadius = "50%";
-                editBtn.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
-                editBtn.style.border = "none";
-                editBtn.style.display = "flex";
-                editBtn.style.alignItems = "center";
-                editBtn.style.justifyContent = "center";
-                editBtn.style.width = "36px";
-                editBtn.style.height = "36px";
-                editBtn.querySelector('i').style.color = "white";
-            }
-            
-            const deleteBtn = div.querySelector('.btn-icon.delete');
-            if (deleteBtn) {
-                deleteBtn.style.backgroundColor = "#dc3545";
-                deleteBtn.style.padding = "8px";
-                deleteBtn.style.borderRadius = "50%";
-                deleteBtn.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
-                deleteBtn.style.border = "none";
-                deleteBtn.style.display = "flex";
-                deleteBtn.style.alignItems = "center";
-                deleteBtn.style.justifyContent = "center";
-                deleteBtn.style.width = "36px";
-                deleteBtn.style.height = "36px";
-                deleteBtn.querySelector('i').style.color = "white";
-            }
-            
-            // Ajouter les événements hover
-            const container = div.querySelector('.comment-container');
-            if (container) {
-                container.addEventListener('mouseenter', function() {
-                    const actions = this.querySelector('.comment-actions');
-                    if (actions) actions.style.opacity = "1";
-                });
-                
-                container.addEventListener('mouseleave', function() {
-                    const actions = this.querySelector('.comment-actions');
-                    if (actions) actions.style.opacity = "0";
-                });
-            }
-            
-            // Réattacher les événements aux nouveaux boutons
-            const newEditBtn = div.querySelector('.js-edit-comment-btn');
-            if (newEditBtn) {
-                attachEditButtonEvents(newEditBtn);
-            }
-            
-            const newDeleteForm = div.querySelector('.js-delete-comment-form');
-            if (newDeleteForm) {
-                attachDeleteFormEvents(newDeleteForm);
-            }
-        }, 50);
+        // Vérifier si le commentaire est sensible (toxicité entre 0.4 et 0.6)
+        const isSensitive = data.toxicityScore > 0.4 && data.toxicityScore <= 0.6;
+        
+        // Conteneur principal du commentaire
+        const commentContainer = document.createElement('div');
+        commentContainer.className = 'comment-container w-100 position-relative';
+        
+        // Avatar de l'utilisateur
+        const avatar = document.createElement('img');
+        avatar.src = data.user.avatar;
+        avatar.className = 'rounded-circle me-2';
+        avatar.style.width = '32px';
+        avatar.style.height = '32px';
+        avatar.style.objectFit = 'cover';
+        
+        // Nom de l'utilisateur
+        const userNameElement = document.createElement('strong');
+        userNameElement.textContent = data.user.nom;
+        commentContainer.appendChild(userNameElement);
+        
+        // Contenu du commentaire
+        const contentElement = document.createElement('p');
+        contentElement.className = 'comment-content mb-1' + (isSensitive ? ' sensitive-content' : '');
+        
+        if (isSensitive) {
+            // Pour les commentaires sensibles, stocker le contenu original comme attribut data
+            contentElement.dataset.realContent = data.originalContent || '';
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'sensitive-warning';
+            warningDiv.style.color = '#856404';
+            warningDiv.style.backgroundColor = '#fff3cd';
+            warningDiv.style.border = '1px solid #ffeeba';
+            warningDiv.style.padding = '10px';
+            warningDiv.style.borderRadius = '4px';
+            warningDiv.style.marginBottom = '5px';
+            warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.';
+            contentElement.appendChild(warningDiv);
+        } else {
+            contentElement.textContent = data.content;
+        }
+        commentContainer.appendChild(contentElement);
+        
+        // Date du commentaire
+        const dateElement = document.createElement('small');
+        dateElement.className = 'text-muted';
+        dateElement.textContent = data.createdAt;
+        commentContainer.appendChild(dateElement);
+        
+        // Boutons d'action (si l'utilisateur est le créateur du commentaire)
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'comment-actions';
+        actionsDiv.style.opacity = '0';
+        actionsDiv.style.display = 'inline-flex';
+        actionsDiv.style.gap = '12px';
+        actionsDiv.style.position = 'absolute';
+        actionsDiv.style.right = '10px';
+        actionsDiv.style.top = '50%';
+        actionsDiv.style.transform = 'translateY(-50%)';
+        actionsDiv.style.zIndex = '100';
+        
+        // Bouton Modifier
+        const editButton = document.createElement('button');
+        editButton.className = 'btn-icon edit js-edit-comment-btn';
+        editButton.dataset.commentId = data.id;
+        editButton.dataset.token = data.tokens.edit;
+        editButton.dataset.tooltip = 'Modifier';
+        editButton.style.backgroundColor = '#2196F3';
+        editButton.style.padding = '8px';
+        editButton.style.borderRadius = '50%';
+        editButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        editButton.style.border = 'none';
+        editButton.style.display = 'flex';
+        editButton.style.alignItems = 'center';
+        editButton.style.justifyContent = 'center';
+        editButton.style.width = '36px';
+        editButton.style.height = '36px';
+        
+        const editIcon = document.createElement('i');
+        editIcon.className = 'fas fa-edit';
+        editIcon.style.color = 'white';
+        editButton.appendChild(editIcon);
+        actionsDiv.appendChild(editButton);
+        
+        // Formulaire de suppression
+        const deleteForm = document.createElement('form');
+        deleteForm.action = `/comment/delete/${data.id}`;
+        deleteForm.method = 'post';
+        deleteForm.className = 'js-delete-comment-form d-inline';
+        deleteForm.dataset.postId = postId;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = data.tokens.delete;
+        deleteForm.appendChild(csrfToken);
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'submit';
+        deleteButton.className = 'btn-icon delete';
+        deleteButton.dataset.tooltip = 'Supprimer';
+        deleteButton.style.backgroundColor = '#dc3545';
+        deleteButton.style.padding = '8px';
+        deleteButton.style.borderRadius = '50%';
+        deleteButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        deleteButton.style.border = 'none';
+        deleteButton.style.display = 'flex';
+        deleteButton.style.alignItems = 'center';
+        deleteButton.style.justifyContent = 'center';
+        deleteButton.style.width = '36px';
+        deleteButton.style.height = '36px';
+        
+        const deleteIcon = document.createElement('i');
+        deleteIcon.className = 'fas fa-trash-alt';
+        deleteIcon.style.color = 'white';
+        deleteButton.appendChild(deleteIcon);
+        deleteForm.appendChild(deleteButton);
+        actionsDiv.appendChild(deleteForm);
+        
+        commentContainer.appendChild(actionsDiv);
+        
+        // Ajouter les événements hover au conteneur de commentaire
+        commentContainer.addEventListener('mouseenter', function() {
+            actionsDiv.style.opacity = '1';
+        });
+        
+        commentContainer.addEventListener('mouseleave', function() {
+            actionsDiv.style.opacity = '0';
+        });
+        
+        // Assembler le commentaire complet
+        div.appendChild(avatar);
+        div.appendChild(commentContainer);
         
         return div;
     }
@@ -729,7 +785,18 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const commentContainer = this.closest('.comment-container');
             const commentContent = commentContainer.querySelector('.comment-content');
-            const commentText = commentContent.textContent.trim();
+            
+            // Récupérer le contenu réel du commentaire, soit depuis l'attribut data pour les commentaires sensibles,
+            // soit depuis le contenu textuel pour les commentaires normaux
+            let commentText = '';
+            if (commentContent.dataset.realContent) {
+                // Pour les commentaires sensibles, utiliser le contenu réel stocké dans l'attribut data
+                commentText = commentContent.dataset.realContent;
+            } else {
+                // Pour les commentaires normaux, utiliser le contenu textuel
+                commentText = commentContent.textContent.trim();
+            }
+            
             const actionsDiv = commentContainer.querySelector('.comment-actions');
             
             // Masquer les boutons d'action pendant l'édition
@@ -799,7 +866,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     const data = await response.json();
                     
                     // Mettre à jour le contenu et la date
-                    commentContent.textContent = data.content;
+                    if (data.toxicityScore > 0.4 && data.toxicityScore <= 0.6) {
+                        // Commentaire sensible, on affiche un avertissement mais on stocke le contenu original
+                        commentContent.innerHTML = '<div class="sensitive-warning" style="color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 4px; margin-bottom: 5px;"><i class="fas fa-exclamation-triangle"></i> ⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.</div>';
+                        // Stocker le contenu original pour les éditions futures
+                        commentContent.dataset.realContent = data.originalContent || newContent;
+                        commentContent.classList.add('sensitive-content');
+                        // Afficher une alerte spécifique
+                        showAlert('⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.', 'warning', commentContainer.closest('.modal-body'));
+                    } else {
+                        // Commentaire normal - remplacement complet du contenu
+                        commentContent.innerHTML = data.content;
+                        commentContent.classList.remove('sensitive-content');
+                        // Supprimer l'attribut data si existant
+                        delete commentContent.dataset.realContent;
+                        showAlert('Commentaire modifié avec succès', 'success', commentContainer.closest('.modal-body'));
+                    }
+                    
                     updateDateTime(commentContainer, data.createdAt);
                     
                     editForm.remove();
@@ -809,8 +892,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (actionsDiv) {
                         actionsDiv.style.display = 'inline-flex';
                     }
-                    
-                    showAlert('Commentaire modifié avec succès', 'success', commentContainer.closest('.modal-body'));
 
                 } catch (error) {
                     showAlert(error.message, 'danger', commentContainer.closest('.modal-body'));
@@ -877,6 +958,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Attacher les événements aux formulaires de suppression existants
     document.querySelectorAll('.js-delete-comment-form').forEach(form => {
         attachDeleteFormEvents(form);
+    });
+    
+    // Attacher les événements aux formulaires d'ajout de commentaire
+    document.querySelectorAll('.js-add-comment-form').forEach(form => {
+        attachAddCommentFormEvents(form);
     });
 
     // Fonction pour mettre à jour le compteur de commentaires
@@ -1056,15 +1142,23 @@ document.addEventListener('DOMContentLoaded', function() {
     function attachAddCommentFormEvents(form) {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            debugLog('Soumission du formulaire de commentaire', this.action);
             
             const modalBody = this.closest('.modal-body');
             const postId = this.dataset.postId;
             const submitBtn = this.querySelector('button[type="submit"]');
             const errorDiv = document.getElementById(`comment-errors-${postId}`);
             submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi...';
 
             try {
                 const formData = new FormData(this);
+                debugLog('FormData préparée', {
+                    postId: postId,
+                    content: formData.get('content'),
+                    token: formData.get('_token')
+                });
+                
                 const response = await fetch(this.action, {
                     method: 'POST',
                     body: formData,
@@ -1072,17 +1166,44 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
+                debugLog('Réponse reçue', response.status, response.statusText);
 
                 const data = await response.json();
+                debugLog('Données JSON reçues', data);
                 
                 if (!response.ok) {
                     throw new Error(data.error || 'Erreur lors de l\'ajout du commentaire');
                 }
 
+                console.log('Commentaire ajouté avec succès:', data);
+                debugLog('Création de l\'élément commentaire avec ID:', data.id);
+
                 // Créer et ajouter le nouveau commentaire
                 const commentElement = createCommentElement(data, postId);
-                const commentsList = this.closest('.modal-body').querySelector('.comments-list');
-                commentsList.insertBefore(commentElement, commentsList.firstChild);
+                const commentsContainer = modalBody.querySelector('.flex-grow-1.overflow-auto.p-3');
+                
+                // Si la liste est vide, supprimer le message "Aucun commentaire" s'il existe
+                const emptyMessage = commentsContainer.querySelector('.text-center.text-muted');
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+                
+                // Ajouter le commentaire au début de la liste
+                debugLog('Ajout du commentaire au DOM');
+                commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
+                
+                // Attacher les événements d'édition et de suppression
+                const newEditBtn = commentElement.querySelector('.js-edit-comment-btn');
+                if (newEditBtn) {
+                    debugLog('Attachement des événements d\'édition');
+                    attachEditButtonEvents(newEditBtn);
+                }
+                
+                const newDeleteForm = commentElement.querySelector('.js-delete-comment-form');
+                if (newDeleteForm) {
+                    debugLog('Attachement des événements de suppression');
+                    attachDeleteFormEvents(newDeleteForm);
+                }
                 
                 // Réinitialiser le formulaire
                 this.reset();
@@ -1090,14 +1211,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mettre à jour le compteur de commentaires
                 updateCommentCount(postId);
                 
-                showAlert('Commentaire ajouté avec succès', 'success', modalBody);
+                // Afficher le message approprié en fonction du score de toxicité
+                if (data.toxicityScore > 0.4 && data.toxicityScore <= 0.6) {
+                    showAlert('⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.', 'warning', modalBody);
+                } else {
+                    showAlert('Commentaire ajouté avec succès', 'success', modalBody);
+                }
 
             } catch (error) {
+                console.error('Erreur lors de l\'ajout du commentaire:', error);
+                debugLog('ERREUR lors de l\'ajout du commentaire', error);
                 errorDiv.textContent = error.message;
                 errorDiv.style.display = 'block';
                 showAlert(error.message, 'danger', modalBody);
+                
+                // Masquer le message d'erreur après 5 secondes
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
             } finally {
                 submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Ajouter';
             }
         });
     }

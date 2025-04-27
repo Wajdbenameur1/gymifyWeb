@@ -6,6 +6,68 @@
   {{ parent() }}
   <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 4px;
+      z-index: 1050;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    .sensitive-content {
+      background-color: #fff8e1;
+      padding: 10px;
+      border-radius: 4px;
+      position: relative;
+    }
+    
+    .edit-form {
+      margin-top: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('assets/js/comment.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -57,33 +119,29 @@
           </div>
 
           {# Section commentaires (scrollable) #}
-          <div class="flex-grow-1 overflow-auto p-3" style="min-height:0;">
+          <div class="flex-grow-1 overflow-auto p-3 comments-container" style="min-height:0;">
             {% if comments|length > 0 %}
               {% for comment in comments %}
-                <div class="d-flex align-items-start mb-3">
+                <div class="d-flex align-items-start mb-3 comment-box" data-comment-id="{{ comment.id }}">
                   <img 
                     src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}"
                     alt="Avatar commentateur"
-                    class="rounded-circle me-2"
+                    class="rounded-circle me-2 comment-avatar"
                     style="width:32px; height:32px; object-fit:cover;"
                   >
                   <div class="w-100">
-                    <strong>{{ comment.user.nom }}</strong>
-                    <p class="mb-1">{{ comment.content }}</p>
-                    <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
+                    <strong class="comment-username">{{ comment.user.nom }}</strong>
+                    <p class="mb-1 comment-content">{{ comment.content }}</p>
+                    <small class="text-muted comment-date">{{ comment.createdAt|date('d M Y à H:i') }}</small>
 
                     {% if comment.user == app.user %}
-                      <div class="mt-1">
-                        <a href="{{ path('app_comment_edit', { id: comment.id }) }}" class="btn btn-sm btn-link p-0 me-2">Modifier</a>
-                        <form 
-                          action="{{ path('app_comment_delete', { id: comment.id }) }}" 
-                          method="post" 
-                          class="d-inline"
-                          onsubmit="return confirm('Confirmer la suppression du commentaire ?');"
-                        >
-                          <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
-                          <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
-                        </form>
+                      <div class="mt-1 comment-actions">
+                        <button class="btn-edit-comment" data-comment-id="{{ comment.id }}" data-token="{{ csrf_token('edit' ~ comment.id) }}">
+                          <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        <button class="btn-delete-comment" data-comment-id="{{ comment.id }}" data-token="{{ csrf_token('delete' ~ comment.id) }}">
+                          <i class="fas fa-trash"></i> Supprimer
+                        </button>
                       </div>
                     {% endif %}
                   </div>
@@ -107,9 +165,8 @@
               style="width:32px; height:32px; object-fit:cover;" 
               alt="Votre avatar">
             <form 
-              action="{{ path('app_comment_new', { postId: post.id }) }}" 
-              method="post" 
-              class="w-100 d-flex"
+              class="w-100 d-flex comment-form"
+              data-post-id="{{ post.id }}"
             >
               <input type="hidden" name="_token" value="{{ csrf_token('comment' ~ post.id) }}">
               <input 
