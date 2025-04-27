@@ -6,13 +6,17 @@
 parameters:
     activities_image_directory: '%kernel.project_dir%/public/uploads/activities'
     uploads_directory: '%kernel.project_dir%/public/uploads'
-    # chemin public utilisable dans asset() pour afficher l’image
+    # chemin public utilisable dans asset() pour afficher l'image
     uploads_public_path: '/uploads'
 
 
     images_directory: '%kernel.project_dir%/public/uploads/images'
     users_images_directory: '%kernel.project_dir%/public/uploads/images'
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
+    
+    # IBM Watson Speech to Text configuration
+    ibm_watson_api_key: 'JR-LCWjnds3scsjrtCtn2wCNlyR2GWGAQq_hJ1D6Fhh-'
+    ibm_watson_service_url: 'https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/760398a7-3622-4319-83f8-415080a4ee25'
 
 services:
     # default configuration for services in *this* file
@@ -25,6 +29,12 @@ services:
     App\Service\EmailService:
         arguments:
             $mailer: '@mailer'
+            
+    App\Service\SpeechToTextService:
+        arguments:
+            $apiKey: '%ibm_watson_api_key%'
+            $serviceUrl: '%ibm_watson_service_url%'
+            
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
