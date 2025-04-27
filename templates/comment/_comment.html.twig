@@ -1,16 +1,99 @@
 {# templates/comment/_comment.html.twig #}
 
-<div class="comment d-flex gap-2 mb-3">
-    <img src="{{ comment.user.imageUrl ? asset('uploads/' ~ comment.user.imageUrl) : asset('img/screen/user.png') }}"
-         alt="avatar"
-         class="rounded-circle"
-         style="width: 40px; height: 40px; object-fit: cover;">
-
-    <div>
-        <div class="bg-light p-2 rounded">
-            <strong>{{ comment.user.nom }}</strong><br>
-            <span>{{ comment.content }}</span>
+<div class="comment-box" data-comment-id="{{ comment.id }}">
+    <div class="comment-header">
+        <img src="{{ comment.user.imageUrl ? asset('uploads/users/' ~ comment.user.imageUrl) : asset('img/screen/user.png') }}" 
+             alt="Avatar" class="comment-avatar">
+        <div class="comment-info">
+            <span class="comment-username">{{ comment.user.nom }}</span>
+            <span class="comment-date">{{ comment.createdAt|date('d M Y à H:i') }}</span>
         </div>
-        <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
     </div>
+    
+    <div class="comment-content {% if comment.toxicityScore > 0.4 %}sensitive-content{% endif %}">
+        {{ comment.content|raw }}
+    </div>
+    
+    {% if app.user and app.user.id == comment.user.id %}
+        <div class="comment-actions">
+            <button class="btn-edit-comment" data-token="{{ csrf_token('edit-comment' ~ comment.id) }}">
+                <i class="fas fa-edit"></i> Modifier
+            </button>
+            <button class="btn-delete-comment" data-token="{{ csrf_token('delete' ~ comment.id) }}">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>
+        </div>
+    {% endif %}
 </div>
+
+<style>
+.comment-box {
+    background-color: #3A3B3C;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.comment-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-username {
+    color: white;
+    font-weight: bold;
+}
+
+.comment-date {
+    color: #B0B3B8;
+    font-size: 12px;
+}
+
+.comment-content {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.comment-content.sensitive-content {
+    color: orange;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit-comment,
+.btn-delete-comment {
+    background: none;
+    border: none;
+    color: #B0B3B8;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-edit-comment:hover,
+.btn-delete-comment:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-edit-comment i,
+.btn-delete-comment i {
+    margin-right: 5px;
+}
+</style>

@@ -9,7 +9,6 @@ parameters:
     # chemin public utilisable dans asset() pour afficher l'image
     uploads_public_path: '/uploads'
 
-
     images_directory: '%kernel.project_dir%/public/uploads/images'
     users_images_directory: '%kernel.project_dir%/public/uploads/images'
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
@@ -34,6 +33,12 @@ services:
         arguments:
             $apiKey: '%ibm_watson_api_key%'
             $serviceUrl: '%ibm_watson_service_url%'
+            
+    App\Service\PerspectiveApiService:
+        public: true
+        
+    App\Service\EmailJSService:
+        public: true
             
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

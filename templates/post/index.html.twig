@@ -1052,72 +1052,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Attach events to all comment forms
-    document.querySelectorAll('.js-add-comment-form').forEach(form => {
+    // Fonction pour attacher les événements au formulaire d'ajout de commentaire
+    function attachAddCommentFormEvents(form) {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const modalBody = this.closest('.modal-body');
             const postId = this.dataset.postId;
             const submitBtn = this.querySelector('button[type="submit"]');
-            const input = this.querySelector('input[name="content"]');
-            const commentContent = input.value.trim();
-            const errorContainer = document.getElementById(`comment-errors-${postId}`);
-            
-            if (commentContent.length < 3) {
-                errorContainer.textContent = 'Le commentaire doit contenir au moins 3 caractères.';
-                errorContainer.style.display = 'block';
-                return;
-            }
-            
+            const errorDiv = document.getElementById(`comment-errors-${postId}`);
             submitBtn.disabled = true;
-            errorContainer.style.display = 'none';
-            
+
             try {
+                const formData = new FormData(this);
                 const response = await fetch(this.action, {
                     method: 'POST',
-                    body: new FormData(this),
+                    body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-                
+
                 const data = await response.json();
                 
                 if (!response.ok) {
                     throw new Error(data.error || 'Erreur lors de l\'ajout du commentaire');
                 }
+
+                // Créer et ajouter le nouveau commentaire
+                const commentElement = createCommentElement(data, postId);
+                const commentsList = this.closest('.modal-body').querySelector('.comments-list');
+                commentsList.insertBefore(commentElement, commentsList.firstChild);
                 
-                // Ajouter le nouveau commentaire au DOM
-                const commentsContainer = this.closest('.modal-dialog').querySelector('.overflow-auto');
-                if (commentsContainer) {
-                    // Si c'est le premier commentaire, supprimer le message "Aucun commentaire"
-                    const noCommentMessage = commentsContainer.querySelector('.text-center.text-muted');
-                    if (noCommentMessage) {
-                        noCommentMessage.remove();
-                    }
-                    
-                    // Créer l'élément du commentaire
-                    const commentElement = createCommentElement(data, postId);
-                    commentsContainer.appendChild(commentElement);
-                    
-                    // Réinitialiser le formulaire
-                    input.value = '';
-                    
-                    // Mettre à jour le compteur de commentaires
-                    updateCommentCount(postId);
-                    
-                    // Faire défiler jusqu'au nouveau commentaire
-                    commentsContainer.scrollTop = commentsContainer.scrollHeight;
-                }
+                // Réinitialiser le formulaire
+                this.reset();
                 
+                // Mettre à jour le compteur de commentaires
+                updateCommentCount(postId);
+                
+                showAlert('Commentaire ajouté avec succès', 'success', modalBody);
+
             } catch (error) {
-                errorContainer.textContent = error.message;
-                errorContainer.style.display = 'block';
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+                showAlert(error.message, 'danger', modalBody);
             } finally {
                 submitBtn.disabled = false;
             }
         });
-    });
+    }
 });
 </script>
 {% endblock %}

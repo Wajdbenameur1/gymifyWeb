@@ -111,6 +111,7 @@
               method="post" 
               class="w-100 d-flex"
             >
+              <input type="hidden" name="_token" value="{{ csrf_token('comment' ~ post.id) }}">
               <input 
                 type="text" 
                 name="content" 
