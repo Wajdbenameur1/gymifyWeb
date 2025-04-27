@@ -135,42 +135,59 @@ final class CommentController extends AbstractController
             $commentId = null;
             $comment = null;
             $date = new \DateTime();
+            $insertSuccessful = false;
             
-            // Première tentative: avec Doctrine ORM
+            // Première tentative: avec SQL direct (inversion pour fiabilité)
             try {
-                $this->logger->info('Tentative d\'enregistrement via ORM');
-                $comment = new Comment();
-                $comment->setContent($storedContent)
-                       ->setPost($post)
-                       ->setUser($user)
-                       ->setCreatedAt($date);
-                
-                $em->persist($comment);
-                $em->flush();
-                $commentId = $comment->getId();
-                $this->logger->info('Commentaire enregistré avec succès via ORM, ID: ' . $commentId);
-            } catch (\Exception $ormException) {
-                $this->logger->warning('Échec de l\'enregistrement via ORM: ' . $ormException->getMessage());
-                
-                // Seconde tentative: avec SQL direct
+                $this->logger->info('Tentative d\'enregistrement via SQL direct');
                 $userId = $user->getId();
                 $postIdValue = $post->getId();
                 $commentId = $this->directSqlInsertComment($em, $storedContent, $postIdValue, $userId, $date);
                 
-                if (!$commentId) {
-                    throw new \Exception('Impossible d\'enregistrer le commentaire en base de données');
+                if ($commentId) {
+                    $insertSuccessful = true;
+                    $this->logger->info('Commentaire enregistré avec succès via SQL direct, ID: ' . $commentId);
+                    
+                    // Créer un objet Comment pour l'affichage
+                    $comment = new Comment();
+                    $comment->setContent($storedContent)
+                        ->setPost($post)
+                        ->setUser($user)
+                        ->setCreatedAt($date);
+                    
+                    // Assignation manuelle de l'ID
+                    $reflection = new \ReflectionClass($comment);
+                    $property = $reflection->getProperty('id');
+                    $property->setAccessible(true);
+                    $property->setValue($comment, $commentId);
                 }
-                
-                // Création manuelle d'un objet Comment pour la réponse
-                $comment = new Comment();
-                $comment->setContent($storedContent)
-                       ->setPost($post)
-                       ->setUser($user)
-                       ->setCreatedAt($date);
-                $reflection = new \ReflectionClass($comment);
-                $property = $reflection->getProperty('id');
-                $property->setAccessible(true);
-                $property->setValue($comment, $commentId);
+            } catch (\Exception $sqlException) {
+                $this->logger->error('Échec de l\'enregistrement via SQL direct: ' . $sqlException->getMessage());
+            }
+            
+            // Seconde tentative: avec Doctrine ORM si SQL direct a échoué
+            if (!$insertSuccessful) {
+                try {
+                    $this->logger->info('Tentative d\'enregistrement via ORM');
+                    $comment = new Comment();
+                    $comment->setContent($storedContent)
+                        ->setPost($post)
+                        ->setUser($user)
+                        ->setCreatedAt($date);
+                    
+                    $em->persist($comment);
+                    $em->flush();
+                    $commentId = $comment->getId();
+                    $insertSuccessful = true;
+                    $this->logger->info('Commentaire enregistré avec succès via ORM, ID: ' . $commentId);
+                } catch (\Exception $ormException) {
+                    $this->logger->error('Échec de l\'enregistrement via ORM: ' . $ormException->getMessage());
+                    throw new \Exception('Impossible d\'enregistrer le commentaire en base de données: ' . $ormException->getMessage());
+                }
+            }
+
+            if (!$insertSuccessful || !$commentId) {
+                throw new \Exception('Impossible d\'enregistrer le commentaire en base de données');
             }
 
             // Pour la réponse JSON, nous utilisons soit le contenu sensible, soit le contenu original

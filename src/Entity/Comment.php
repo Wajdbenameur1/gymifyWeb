@@ -38,14 +38,14 @@ class Comment
 
 
 
-     // Relation ManyToOne avec Post
+     // Relation ManyToOne avec Post, name matches exact database column name
      #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'comments')]
-     #[ORM\JoinColumn(name: 'postId', referencedColumnName: 'id')]
+     #[ORM\JoinColumn(name: 'postId', referencedColumnName: 'id', nullable: false)]
      private ?Post $post = null;
  
-     // Relation ManyToOne avec User
+     // Relation ManyToOne avec User, name matches exact database column name
      #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'comments')]
-     #[ORM\JoinColumn(name: 'id_User', referencedColumnName: 'id')]
+     #[ORM\JoinColumn(name: 'id_User', referencedColumnName: 'id', nullable: false)]
      private ?User $user = null;
  
     public function getId(): ?int
