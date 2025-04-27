@@ -79,4 +79,22 @@ class OrderController extends AbstractController
 
         return $this->redirectToRoute('admin_order_show', ['id' => $commande->getId()]);
     }
+
+    #[Route('/{id}/export-pdf', name: 'admin_order_export_pdf', methods: ['GET'])]
+    public function exportPdf(Commande $commande): Response
+    {
+        $html = $this->renderView('admin/order/invoice.html.twig', [
+            'commande' => $commande
+        ]);
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $pdfOutput = $dompdf->output();
+        $filename = sprintf('facture_commande_%d.pdf', $commande->getIdC());
+        return new Response($pdfOutput, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 } 

@@ -38,8 +38,10 @@ class ProductController extends AbstractController
             $produits = $produitRepository->findAll();
         }
 
+        $topVentesIds = $produitRepository->findTopVentesIds(3);
         return $this->render('shop/product/index.html.twig', [
-            'produits' => $produits
+            'produits' => $produits,
+            'topVentesIds' => $topVentesIds
         ]);
     }
 

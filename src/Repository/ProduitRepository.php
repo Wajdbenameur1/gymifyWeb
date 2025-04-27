@@ -91,4 +91,21 @@ class ProduitRepository extends ServiceEntityRepository
                  ->getQuery()
                  ->getResult();
     }
+
+    /**
+     * Returns the IDs of the top N best-selling products.
+     */
+    public function findTopVentesIds(int $limit = 3): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT produit_id, COUNT(*) as ventes
+                FROM ligne_commande
+                GROUP BY produit_id
+                ORDER BY ventes DESC
+                LIMIT :limit';
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+        $result = $stmt->executeQuery();
+        return array_column($result->fetchAllAssociative(), 'produit_id');
+    }
 } 
