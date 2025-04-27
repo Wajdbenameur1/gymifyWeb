@@ -77,24 +77,92 @@ class OrderController extends AbstractController
             $this->addFlash('success', 'Statut de la commande mis à jour avec succès');
         }
 
-        return $this->redirectToRoute('admin_order_show', ['id' => $commande->getId()]);
+        return $this->redirectToRoute('admin_order_show', ['id' => $commande->getIdC()]);
     }
 
     #[Route('/{id}/export-pdf', name: 'admin_order_export_pdf', methods: ['GET'])]
     public function exportPdf(Commande $commande): Response
     {
-        $html = $this->renderView('admin/order/invoice.html.twig', [
-            'commande' => $commande
-        ]);
-        $dompdf = new \Dompdf\Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-        $pdfOutput = $dompdf->output();
+        // Create new PDF document
+        $pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        // Set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Your Company');
+        $pdf->SetTitle('Facture - Commande #' . $commande->getIdC());
+
+        // Set default header data
+        $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PDF_HEADER_STRING);
+
+        // Set header and footer fonts
+        $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+        $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+
+        // Set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // Set margins
+        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+        // Set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // Set font
+        $pdf->SetFont('helvetica', '', 12);
+
+        // Company information
+        $html = '<h1 style="text-align: center;">Votre Entreprise</h1>';
+        $html .= '<p style="text-align: center;">123 Rue Example, Ville</p>';
+        $html .= '<p style="text-align: center;">Tél: +216 XX XXX XXX</p>';
+        $html .= '<p style="text-align: center;">Email: contact@example.com</p>';
+        
+        // Invoice title
+        $html .= '<h2 style="text-align: center; margin: 20px 0;">FACTURE</h2>';
+        
+        // Order details
+        $html .= '<table border="1" cellpadding="5">
+            <tr>
+                <th width="40%">Numéro de Commande:</th>
+                <td width="60%">' . $commande->getIdC() . '</td>
+            </tr>
+            <tr>
+                <th>Date:</th>
+                <td>' . $commande->getDateC()->format('d/m/Y H:i:s') . '</td>
+            </tr>
+            <tr>
+                <th>Statut:</th>
+                <td>' . strtoupper($commande->getStatutC()) . '</td>
+            </tr>
+            <tr>
+                <th>Total:</th>
+                <td>' . number_format($commande->getTotalC(), 2, '.', ' ') . ' DT</td>
+            </tr>
+        </table>';
+        
+        // Footer
+        $html .= '<div style="text-align: center; margin-top: 30px;">
+            <strong>Merci de votre confiance!</strong><br>
+            <small>Conditions: Cette facture est valable pendant 30 jours.<br>
+            Pour toute question, veuillez nous contacter.</small>
+        </div>';
+
+        // Output the HTML content
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        // Close and output PDF document
         $filename = sprintf('facture_commande_%d.pdf', $commande->getIdC());
-        return new Response($pdfOutput, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+        return new Response(
+            $pdf->Output($filename, 'S'),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
     }
 } 
