@@ -49,12 +49,12 @@
     </script>
 {% endblock %}
 </head>
-<body>
+<body {% block body_attrs %}{% endblock %}>
 <div class="wrapper d-flex">  {# bootstrap flex-container #}
     {% include 'sportifdashboard/sidebar.html.twig' %}
     
     <div class="main-panel flex-grow-1">
-       {# on peut garder container-fluid ou container selon l’effet désiré #}
+       {# on peut garder container-fluid ou container selon l'effet désiré #}
         
         
        <div class="container-fluid">

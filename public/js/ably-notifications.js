@@ -217,10 +217,17 @@ document.addEventListener('DOMContentLoaded', function() {
     reactionsChannel.subscribe('new-reaction', function(message) {
         const reaction = message.data;
         
+        console.log('Received reaction via Ably:', reaction);
+        
         // Don't show notification for current user's reactions
         if (currentUserId && reaction.user && reaction.user.id == currentUserId) {
+            console.log('This is the current user\'s reaction, ignoring notification');
             return;
         }
+        
+        // Si cette notification concerne un post pour lequel l'utilisateur actuel a une réaction en cours,
+        // mettre à jour juste le compteur mais pas l'icône
+        const hasPendingReaction = window.pendingReactions && window.pendingReactions[reaction.postId];
         
         notificationCount++;
         updateNotificationBadge();
@@ -247,15 +254,74 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show toast
         showToast('Nouvelle réaction', `${reaction.user.nom} ${actionText} ${reactionEmoji} sur "${reaction.postTitle}"`, `/post/${reaction.postId}`);
         
-        // If we're currently viewing the post, update the reactions count
+        // If we're currently viewing the post, update the reactions UI more comprehensively
         if (window.location.pathname === `/post/${reaction.postId}`) {
-            // Update reaction counts on the page
-            Object.keys(reaction.counts).forEach(type => {
-                const countElement = document.querySelector(`.reaction-count[data-type="${type}"]`);
-                if (countElement) {
-                    countElement.textContent = reaction.counts[type];
+            console.log('Updating reactions for current post view');
+            
+            // Si l'utilisateur courant a une réaction en cours, ne pas écraser son icône
+            if (hasPendingReaction) {
+                console.log('User has a pending reaction, only updating counts');
+                
+                // Mettre à jour uniquement les compteurs, pas l'icône
+                const counts = reaction.counts || {};
+                const totalReactions = Object.values(counts).reduce((sum, count) => sum + count, 0);
+                
+                // Update just the counts
+                const countElements = document.querySelectorAll(`.btn-react-toggle[data-post-id="${reaction.postId}"] .reaction-count`);
+                countElements.forEach(el => {
+                    el.textContent = totalReactions;
+                });
+                
+                // Update reaction summary if it exists
+                if (typeof window.updateReactionSummaries === 'function') {
+                    window.updateReactionSummaries(reaction.postId, counts);
                 }
-            });
+            } else {
+                // Get the updated reaction counts
+                const counts = reaction.counts || {};
+                
+                // Call the updateReactionUI function from ably-reactions.js if it exists
+                if (typeof window.updateReactionUI === 'function') {
+                    console.log('Using global updateReactionUI function');
+                    // Pass null for userReaction to avoid changing current user's reaction
+                    window.updateReactionUI(reaction.postId, null, counts);
+                } else {
+                    console.log('Using fallback reaction UI update');
+                    
+                    // Find all buttons for this post 
+                    const buttons = document.querySelectorAll(`.btn-react-toggle[data-post-id="${reaction.postId}"]`);
+                    
+                    buttons.forEach(button => {
+                        // Update total reaction count on the button
+                        const totalReactions = Object.values(counts).reduce((sum, count) => sum + count, 0);
+                        const countElement = button.querySelector('.reaction-count');
+                        if (countElement) {
+                            countElement.textContent = totalReactions;
+                        }
+                    });
+                    
+                    // Update reaction summary counts if they exist
+                    const summaries = document.querySelectorAll(`.reactions-summary[data-post-id="${reaction.postId}"]`);
+                    
+                    summaries.forEach(summary => {
+                        // Update individual reaction type counts
+                        Object.entries(counts).forEach(([type, count]) => {
+                            const iconElement = summary.querySelector(`.react-icon.reaction-${type}`);
+                            if (iconElement) {
+                                const countElement = iconElement.querySelector('.react-count');
+                                if (countElement) {
+                                    countElement.textContent = count > 0 ? count : '';
+                                }
+                                
+                                // Show/hide based on count
+                                iconElement.style.display = count > 0 ? 'inline-flex' : 'none';
+                            }
+                        });
+                    });
+                }
+            }
+        } else {
+            console.log('Not on the post view, skipping UI update');
         }
     });
 }); 

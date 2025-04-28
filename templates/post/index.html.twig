@@ -1,6 +1,11 @@
 {% extends 'sportifdashboard/homepagesportif.html.twig' %}
 
-{% block title %}Posts{% endblock %}
+{% block title %}Tous les articles{% endblock %}
+
+{% block body_attrs %}
+  {{ parent() }}
+  data-user-id="{{ app.user ? app.user.id : '' }}"
+{% endblock %}
 
 {% block stylesheet %}
 <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
@@ -539,6 +544,7 @@
 <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 <script src="{{ asset('js/ably-notifications.js') }}"></script>
 <script src="{{ asset('js/ably-reactions.js') }}"></script>
+<script src="{{ asset('js/reaction-debug.js') }}"></script>
 <script>
 // Activer la journalisation de debug pour suivre les opérations de commentaires
 const DEBUG = true;

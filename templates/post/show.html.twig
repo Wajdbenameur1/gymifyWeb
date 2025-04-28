@@ -2,6 +2,11 @@
 
 {% block title %}{{ post.title }}{% endblock %}
 
+{% block body_attrs %}
+  {{ parent() }}
+  data-user-id="{{ app.user ? app.user.id : '' }}"
+{% endblock %}
+
 {% block stylesheet %}
   {{ parent() }}
   <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
@@ -175,6 +180,7 @@
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
   <script src="{{ asset('js/ably-notifications.js') }}"></script>
   <script src="{{ asset('js/ably-reactions.js') }}"></script>
+  <script src="{{ asset('js/reaction-debug.js') }}"></script>
   <script>
     // Activer la journalisation de debug pour suivre les opérations de commentaires
     const DEBUG = true;
@@ -761,6 +767,48 @@
               <h5>{{ post.title }}</h5>
               <p class="mb-1">{{ post.content|raw }}</p>
               <small class="text-muted">{{ post.createdAt ? post.createdAt|date('d M Y à H:i') : '—' }}</small>
+              
+              <div class="mt-3 post-buttons-container">
+                <button class="btn btn-secondary btn-post-action btn-react-toggle{% if post.userReaction(app.user) %} active{% endif %}" 
+                        data-post-id="{{ post.id }}" 
+                        data-csrf-token="{{ csrf_token('reaction' ~ post.id) }}">
+                  {% set userReaction = post.userReaction(app.user) %}
+                  {% set reactionCounts = post.getReactionsCountByType() %}
+                  {% set totalReactions = 0 %}
+                  {% for count in reactionCounts %}
+                      {% set totalReactions = totalReactions + count %}
+                  {% endfor %}
+                  
+                  {% if userReaction %}
+                    <span class="reaction-{{ userReaction }}">
+                      {{ reactionTypes[userReaction] }}
+                    </span>
+                  {% else %}
+                    <i class="far fa-thumbs-up"></i>
+                  {% endif %}
+                  <span class="reaction-count ms-1">{{ totalReactions }}</span>
+                </button>
+                
+                <div class="reaction-bar d-none">
+                  {% for type, emoji in reactionTypes %}
+                    <span class="react-option" data-type="{{ type }}" data-reaction="{{ type|capitalize }}">
+                      {{ emoji }}
+                    </span>
+                  {% endfor %}
+                </div>
+                
+                <div class="debug-reaction mt-2" style="font-size: 0.8rem; color: #999;">
+                  <strong>Réactions:</strong>
+                  {% for type, count in reactionCounts %}
+                    {% if count > 0 %}
+                      <span class="badge bg-light text-dark me-1">{{ type }}: {{ count }}</span>
+                    {% endif %}
+                  {% endfor %}
+                  {% if app.user and post.userReaction(app.user) %}
+                    <span class="badge bg-primary">Votre réaction: {{ post.userReaction(app.user) }}</span>
+                  {% endif %}
+                </div>
+              </div>
             </div>
 
             {# Section commentaires (scrollable) #}
