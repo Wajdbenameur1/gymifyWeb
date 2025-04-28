@@ -59,83 +59,95 @@ class UserController extends AbstractController
             'users' => $users,
         ]);
     }
-   
     #[Route('/admin/user/create', name: 'user_create', methods: ['GET', 'POST'])]
-    
-public function addUser(Request $request): Response
-{
-    // Utilisé uniquement pour le formulaire vide au départ
-    $user = new Sportif(); // valeur par défaut (car le formulaire a data => Role::SPORTIF)
-    $form = $this->createForm(UserType::class, $user);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Récupère la valeur de rôle sélectionnée dans le formulaire
-        /** @var Role $selectedRole */
-        $selectedRole = $form->get('role')->getData();
-
-        // Crée dynamiquement la bonne instance selon le rôle choisi
-        $userClass = match ($selectedRole) {
-            Role::SPORTIF => Sportif::class,
-            Role::ENTRAINEUR => Entraineur::class,
-            Role::ADMIN => Admin::class,
-            Role::RESPONSABLE_SALLE => ResponsableSalle::class,
-            default => User::class,
-        };
-
-        /** @var User $user */
-        $user = new $userClass();
-
-        // Remplit les données depuis le formulaire vers le bon objet (car le formulaire initial était basé sur Sportif)
+    public function addUser(Request $request): Response
+    {
+        $user = new Sportif(); // Valeur par défaut pour le formulaire
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-
-        // Vérifie si l'email existe déjà
-        $existingUser = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
-        if ($existingUser) {
-            $this->addFlash('danger', 'Cet email est déjà utilisé.');
-            return $this->render('user/create.html.twig', [
-                'form' => $form->createView(),
-                'page_title' => 'Ajouter un utilisateur',
-            ]);
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Role $selectedRole */
+            $selectedRole = $form->get('role')->getData();
+    
+            // Crée dynamiquement la bonne instance selon le rôle
+            $userClass = match ($selectedRole) {
+                Role::SPORTIF => Sportif::class,
+                Role::ENTRAINEUR => Entraineur::class,
+                Role::ADMIN => Admin::class,
+                Role::RESPONSABLE_SALLE => ResponsableSalle::class,
+                default => User::class,
+            };
+    
+            /** @var User $user */
+            $user = new $userClass();
+    
+            // Remplit les données depuis le formulaire
+            $form = $this->createForm(UserType::class, $user);
+            $form->handleRequest($request);
+    
+            // Vérifie si l'email existe déjà
+            $existingUser = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
+            if ($existingUser) {
+                $this->addFlash('danger', 'Cet email est déjà utilisé.');
+                return $this->render('user/create.html.twig', [
+                    'form' => $form->createView(),
+                    'page_title' => 'Ajouter un utilisateur',
+                ]);
+            }
+    
+            // Gestion du mot de passe
+            $plainPassword = $form->get('password')->getData();
+            if (!$plainPassword) {
+                // Générer un mot de passe temporaire si aucun n'est fourni
+                $plainPassword = bin2hex(random_bytes(8)); // Exemple : génère un mot de passe de 16 caractères
+            }
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+            $user->setPassword($hashedPassword);
+    
+            // Gestion de l'image
+            $imageFile = $form->get('imageUrl')->getData();
+            if ($imageFile) {
+                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $imageFile->move(
+                    $this->getParameter('upload_directory'),
+                    $newFilename
+                );
+                $user->setImageUrl($newFilename);
+            }
+    
+            // Persister l'utilisateur
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+    
+            // Envoyer un e-mail avec les identifiants
+            try {
+                $this->emailService->sendEmail(
+                    $user->getEmail(),
+                    'Vos identifiants de connexion',
+                    'emails/user_credentials.html.twig',
+                    [
+                        'email' => $user->getEmail(),
+                        'plainPassword' => $plainPassword,
+                    ]
+                );
+                $this->addFlash('success', 'Utilisateur ajouté et e-mail envoyé avec succès !');
+            } catch (\Exception $e) {
+                $this->logger->error('Erreur lors de l\'envoi de l\'e-mail', [
+                    'message' => $e->getMessage(),
+                    'email' => $user->getEmail(),
+                ]);
+                $this->addFlash('warning', 'Utilisateur ajouté, mais l\'e-mail n\'a pas pu être envoyé.');
+            }
+    
+            return $this->redirectToRoute('user_index');
         }
-
-        // Hash du mot de passe
-        $plainPassword = $form->get('password')->getData();
-        if (!$plainPassword) {
-            $this->addFlash('danger', 'Le mot de passe est requis.');
-            return $this->render('user/create.html.twig', [
-                'form' => $form->createView(),
-                'page_title' => 'Ajouter un utilisateur',
-            ]);
-        }
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
-        $user->setPassword($hashedPassword);
-
-        // Image upload
-        $imageFile = $form->get('imageUrl')->getData();
-        if ($imageFile) {
-            $newFilename = uniqid().'.'.$imageFile->guessExtension();
-            $imageFile->move(
-                $this->getParameter('upload_directory'),
-                $newFilename
-            );
-            $user->setImageUrl($newFilename);
-        }
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $this->addFlash('success', 'Utilisateur ajouté avec succès !');
-
-        return $this->redirectToRoute('user_index');
+    
+        return $this->render('user/create.html.twig', [
+            'form' => $form->createView(),
+            'page_title' => 'Ajouter un utilisateur',
+        ]);
     }
-
-    return $this->render('user/create.html.twig', [
-        'form' => $form->createView(),
-        'page_title' => 'Ajouter un utilisateur',
-    ]);
-}
     #[Route('/admin/user/{id}/edit', name: 'app_user_update', methods: ['GET', 'POST'])]
     public function update(Request $request, User $user): Response
     {
@@ -252,4 +264,38 @@ public function checkEmail(Request $request): JsonResponse
 
     return new JsonResponse(['exists' => $existingUser !== null]);
 }
+#[Route('/admin/user/{id}/toggle-block', name: 'user_toggle_block', methods: ['POST'])]
+public function toggleBlock(Request $request, User $user, EntityManagerInterface $em): Response
+{
+    // Vérifier le jeton CSRF
+    if (!$this->isCsrfTokenValid('toggle_block' . $user->getId(), $request->request->get('_token'))) {
+        $this->addFlash('danger', 'Jeton CSRF invalide.');
+        return $this->redirectToRoute('user_index');
+    }
+
+    try {
+        // Basculer l'état de blocage
+        $user->setIsBlocked(!$user->isBlocked());
+        $em->flush();
+
+        // Logger l'action
+        $status = $user->isBlocked() ? 'bloqué' : 'débloqué';
+        $this->logger->info("Utilisateur $status", [
+            'user_id' => $user->getId(),
+            'email' => $user->getEmail(),
+        ]);
+
+        // Ajouter un message flash
+        $this->addFlash('success', "L'utilisateur a été $status avec succès.");
+    } catch (\Exception $e) {
+        $this->logger->error('Erreur lors du changement d\'état de blocage', [
+            'message' => $e->getMessage(),
+            'user_id' => $user->getId(),
+        ]);
+        $this->addFlash('danger', 'Une erreur est survenue lors du changement d\'état.');
+    }
+
+    return $this->redirectToRoute('user_index');
+}
+
 }
