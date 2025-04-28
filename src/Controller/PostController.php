@@ -152,14 +152,12 @@ final class PostController extends AbstractController
     #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
-
         // ✅ Vérifier que l'utilisateur est bien le créateur du post
-    $user = $this->getUser();
-    if ($user !== $post->getUser()) {
-        throw new AccessDeniedHttpException('Vous n\'êtes pas autorisé à modifier ce post.');
-    }
+        $user = $this->getUser();
+        if ($user !== $post->getUser()) {
+            throw new AccessDeniedHttpException('Vous n\'êtes pas autorisé à modifier ce post.');
+        }
 
-    
         // 1) Création du form et pré-remplissage du champ URL si nécessaire
         $form = $this->createForm(PostType::class, $post);
         $form->get('webImage')->setData(
@@ -179,8 +177,15 @@ final class PostController extends AbstractController
             // 3.a) Check exclusivité fichier vs URL
             if ($imageFile && $webImage) {
                 $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
+                return $this->render('post/edit.html.twig', [
+                    'form' => $form->createView(),
+                    'post' => $post,
+                    'existingImage' => $post->getImageUrl(),
+                ]);
             } else {
-                // 3.b) Traitement du fichier
+                $imageUpdated = false;
+                
+                // 3.b) Traitement du fichier uploadé
                 if ($imageFile) {
                     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = preg_replace('/[^a-z0-9_]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $originalFilename)));
@@ -189,24 +194,33 @@ final class PostController extends AbstractController
                     try {
                         $targetDir = $this->getParameter('uploads_directory');
                         $imageFile->move($targetDir, $newFilename);
-                        $post->setImageUrl(
-                            // ici le chemin complet exposé au web, ex. '/uploads/nom-de-fichier.jpg'
-                            '/uploads/'.$newFilename
-                        );
+                        $post->setImageUrl('/uploads/'.$newFilename);
+                        $imageUpdated = true;
                     } catch (FileException $e) {
                         $this->addFlash('error', "Erreur lors de l'upload de l'image.");
                         return $this->render('post/edit.html.twig', [
                             'form' => $form->createView(),
                             'post' => $post,
+                            'existingImage' => $post->getImageUrl(),
                         ]);
                     }
                 }
-                // 3.c) Traitement de l'URL
-                if ($webImage && !$imageFile) {
+                
+                // 3.c) Traitement de l'URL web
+                if ($webImage) {
                     $post->setImageUrl($webImage);
+                    $imageUpdated = true;
+                } 
+                // 3.d) Si aucune image n'est fournie mais qu'il y avait une image précédente
+                // et que l'utilisateur a explicitement vidé les deux champs, on supprime l'image
+                else if (!$imageFile && !$webImage && $post->getImageUrl() && 
+                         $request->request->has('post') && 
+                         array_key_exists('webImage', $request->request->get('post'))) {
+                    $post->setImageUrl(null);
+                    $imageUpdated = true;
                 }
 
-                // 3.d) Sauvegarde
+                // 3.e) Sauvegarde
                 $entityManager->flush();
                 $this->addFlash('success', 'Post modifié avec succès !');
                 return $this->redirectToRoute('app_post_index');
