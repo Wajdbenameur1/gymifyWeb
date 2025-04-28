@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PaiementRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\TypeAbonnement;
 
 #[ORM\Entity(repositoryClass: PaiementRepository::class)]
 class Paiement
@@ -20,7 +21,7 @@ class Paiement
     private ?string $status = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $payment_intent_id = null;
+    private ?string $paymentIntentId = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
@@ -30,6 +31,20 @@ class Paiement
 
     #[ORM\Column(length: 255)]
     private ?string $currency = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $date_debut = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $date_fin = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false,name: 'id_user',referencedColumnName: 'id')]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(targetEntity: Abonnement::class)]
+    #[ORM\JoinColumn(nullable: false,name: 'id_abonnement',referencedColumnName: 'id_Abonnement')]
+    private ?Abonnement $abonnement = null;
 
     public function getId(): ?int
     {
@@ -44,7 +59,6 @@ class Paiement
     public function setAmount(float $amount): static
     {
         $this->amount = $amount;
-
         return $this;
     }
 
@@ -56,19 +70,17 @@ class Paiement
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 
     public function getPaymentIntentId(): ?string
     {
-        return $this->payment_intent_id;
+        return $this->paymentIntentId;
     }
 
-    public function setPaymentIntentId(string $payment_intent_id): static
+    public function setPaymentIntentId(string $paymentIntentId): static
     {
-        $this->payment_intent_id = $payment_intent_id;
-
+        $this->paymentIntentId = $paymentIntentId;
         return $this;
     }
 
@@ -80,7 +92,6 @@ class Paiement
     public function setCreatedAt(\DateTimeImmutable $created_at): static
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
@@ -92,7 +103,6 @@ class Paiement
     public function setUpdatedAt(\DateTimeImmutable $updated_at): static
     {
         $this->updated_at = $updated_at;
-
         return $this;
     }
 
@@ -104,7 +114,50 @@ class Paiement
     public function setCurrency(string $currency): static
     {
         $this->currency = $currency;
+        return $this;
+    }
 
+    public function getDateDebut(): ?\DateTimeImmutable
+    {
+        return $this->date_debut;
+    }
+
+    public function setDateDebut(\DateTimeImmutable $date_debut): static
+    {
+        $this->date_debut = $date_debut;
+        return $this;
+    }
+
+    public function getDateFin(): ?\DateTimeImmutable
+    {
+        return $this->date_fin;
+    }
+
+    public function setDateFin(\DateTimeImmutable $date_fin): static
+    {
+        $this->date_fin = $date_fin;
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    public function getAbonnement(): ?Abonnement
+    {
+        return $this->abonnement;
+    }
+
+    public function setAbonnement(?Abonnement $abonnement): static
+    {
+        $this->abonnement = $abonnement;
         return $this;
     }
 }

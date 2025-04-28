@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\EquipeEvent;
@@ -17,16 +18,18 @@ use Psr\Log\LoggerInterface;
 class EquipeEventController extends AbstractController
 {
     private $logger;
+    private $entityManager;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, EntityManagerInterface $entityManager)
     {
         $this->logger = $logger;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/equipe/event', name: 'app_equipe_event', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(): Response
     {
-        $equipeEvents = $entityManager->getRepository(EquipeEvent::class)->findAll();
+        $equipeEvents = $this->entityManager->getRepository(EquipeEvent::class)->findAll();
 
         return $this->render('equipe_event/index.html.twig', [
             'equipe_events' => $equipeEvents,
@@ -44,27 +47,24 @@ class EquipeEventController extends AbstractController
     }
 
     #[Route('/equipe/event/{id}/edit', name: 'app_equipe_event_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, EquipeEvent $equipeEvent, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, EquipeEvent $equipeEvent): Response
     {
         $event = $equipeEvent->getEvent();
-        $team = $equipeEvent->getEquipe();
-
-        // Create the event form
         $form = $this->createForm(EventsType::class, $event, [
             'method' => 'POST',
-            'action' => $this->generateUrl('app_equipe_event_edit', ['id' => $equipeEvent->getId()])
+            'action' => $this->generateUrl('app_equipe_event_edit', ['id' => $equipeEvent->getId()]),
+            'is_edit' => true
         ]);
 
-        // Create the team form, pre-filled with the associated team's data
-        $teamForm = $this->createForm(EquipeType::class, $team, [
+        $teamForm = $this->createForm(EquipeType::class, new Equipe(), [
             'method' => 'POST',
-            'action' => $this->generateUrl('app_equipe_edit', ['id' => $team->getId()])
+            'action' => $this->generateUrl('app_equipe_new')
         ]);
 
         $form->handleRequest($request);
 
         if ($request->isXmlHttpRequest() && $request->isMethod('GET')) {
-            $equipeEvents = $entityManager->getRepository(EquipeEvent::class)->findBy(['event' => $event]);
+            $equipeEvents = $this->entityManager->getRepository(EquipeEvent::class)->findBy(['event' => $event]);
             $teams = array_map(function($eqEvent) {
                 $team = $eqEvent->getEquipe();
                 return [
@@ -93,35 +93,61 @@ class EquipeEventController extends AbstractController
             ]);
         }
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('imageFile')->getData();
-            $removeImage = $request->request->get('remove_image');
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $imageFile = $form->get('imageFile')->getData();
+                $removeImage = $request->request->get('remove_image');
 
-            if ($removeImage && $event->getImageUrl()) {
-                $oldImagePath = $this->getParameter('events_images_directory').'/'.basename($event->getImageUrl());
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
-                $event->setImageUrl(null);
-            }
-
-            if ($imageFile) {
-                if ($event->getImageUrl()) {
+                if ($removeImage && $event->getImageUrl()) {
                     $oldImagePath = $this->getParameter('events_images_directory').'/'.basename($event->getImageUrl());
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
+                    $event->setImageUrl(null);
                 }
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
-                try {
-                    $imageFile->move(
-                        $this->getParameter('events_images_directory'),
-                        $newFilename
-                    );
-                    $event->setImageUrl('/uploads/events/'.$newFilename);
-                } catch (\Exception $e) {
-                    $this->logger->error('Failed to upload image: '.$e->getMessage());
-                    $this->addFlash('error', 'Failed to upload image.');
+
+                if ($imageFile) {
+                    if ($event->getImageUrl()) {
+                        $oldImagePath = $this->getParameter('events_images_directory').'/'.basename($event->getImageUrl());
+                        if (file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
+                    }
+                    $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                    try {
+                        $imageFile->move(
+                            $this->getParameter('events_images_directory'),
+                            $newFilename
+                        );
+                        $event->setImageUrl('/uploads/events/'.$newFilename);
+                    } catch (\Exception $e) {
+                        $this->logger->error('Failed to upload image: '.$e->getMessage());
+                        if ($request->isXmlHttpRequest()) {
+                            return new JsonResponse([
+                                'success' => false,
+                                'message' => 'Failed to upload image: ' . $e->getMessage(),
+                            ], Response::HTTP_BAD_REQUEST);
+                        }
+                        $this->addFlash('error', 'Failed to upload image.');
+                        return $this->render('equipe_event/edit.html.twig', [
+                            'equipe_event' => $equipeEvent,
+                            'form' => $form->createView(),
+                            'team_form' => $teamForm->createView(),
+                            'page_title' => 'Edit Team Event',
+                        ]);
+                    }
+                }
+
+                $latitude = $event->getLatitude();
+                $longitude = $event->getLongitude();
+                if ($latitude === null || $longitude === null) {
+                    if ($request->isXmlHttpRequest()) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'message' => 'Please select a location.',
+                        ], Response::HTTP_BAD_REQUEST);
+                    }
+                    $this->addFlash('error', 'Please select a location.');
                     return $this->render('equipe_event/edit.html.twig', [
                         'equipe_event' => $equipeEvent,
                         'form' => $form->createView(),
@@ -129,53 +155,85 @@ class EquipeEventController extends AbstractController
                         'page_title' => 'Edit Team Event',
                     ]);
                 }
-            }
 
-            $latitude = $event->getLatitude();
-            $longitude = $event->getLongitude();
-            if ($latitude === null || $longitude === null) {
-                $this->addFlash('error', 'Please select a location.');
-                return $this->render('equipe_event/edit.html.twig', [
-                    'equipe_event' => $equipeEvent,
-                    'form' => $form->createView(),
-                    'team_form' => $teamForm->createView(),
-                    'page_title' => 'Edit Team Event',
-                ]);
-            }
-
-            // Update team associations
-            $teamsData = $request->request->get('teams');
-            if ($teamsData) {
-                $teamIds = json_decode($teamsData, true);
-                // Remove existing associations for this event
-                $existingEquipeEvents = $entityManager->getRepository(EquipeEvent::class)->findBy(['event' => $event]);
-                foreach ($existingEquipeEvents as $eqEvent) {
-                    if (!in_array($eqEvent->getEquipe()->getId(), $teamIds)) {
-                        $entityManager->remove($eqEvent);
+                $teamsData = $request->request->get('teams');
+                if (!$teamsData || empty(json_decode($teamsData, true))) {
+                    if ($request->isXmlHttpRequest()) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'message' => 'At least one team is required.',
+                        ], Response::HTTP_BAD_REQUEST);
                     }
+                    $this->addFlash('error', 'At least one team is required.');
+                    return $this->render('equipe_event/edit.html.twig', [
+                        'equipe_event' => $equipeEvent,
+                        'form' => $form->createView(),
+                        'team_form' => $teamForm->createView(),
+                        'page_title' => 'Edit Team Event',
+                    ]);
                 }
-                $entityManager->flush();
 
-                // Add new associations
-                if (is_array($teamIds) && !empty($teamIds)) {
-                    foreach ($teamIds as $teamId) {
-                        $team = $entityManager->getRepository(Equipe::class)->find($teamId);
-                        if ($team && !$entityManager->getRepository(EquipeEvent::class)->findOneBy(['event' => $event, 'equipe' => $team])) {
-                            $newEquipeEvent = new EquipeEvent();
-                            $newEquipeEvent->setEvent($event);
-                            $newEquipeEvent->setEquipe($team);
-                            $entityManager->persist($newEquipeEvent);
+                try {
+                    $teamIds = json_decode($teamsData, true);
+                    $existingEquipeEvents = $this->entityManager->getRepository(EquipeEvent::class)->findBy(['event' => $event]);
+                    foreach ($existingEquipeEvents as $eqEvent) {
+                        $this->entityManager->remove($eqEvent);
+                    }
+                    $this->entityManager->flush();
+
+                    if (is_array($teamIds) && !empty($teamIds)) {
+                        foreach ($teamIds as $teamId) {
+                            $team = $this->entityManager->getRepository(Equipe::class)->find((int)$teamId);
+                            if ($team) {
+                                $newEquipeEvent = new EquipeEvent();
+                                $newEquipeEvent->setEvent($event);
+                                $newEquipeEvent->setEquipe($team);
+                                $this->entityManager->persist($newEquipeEvent);
+                            } else {
+                                $this->logger->warning("Team with ID $teamId not found.");
+                            }
                         }
                     }
+
+                    $this->entityManager->persist($event);
+                    $this->entityManager->flush();
+
+                    if ($request->isXmlHttpRequest()) {
+                        return new JsonResponse([
+                            'success' => true,
+                            'message' => 'Event and team associations updated successfully!',
+                            'redirect' => $this->generateUrl('app_equipe_event')
+                        ]);
+                    }
+
+                    $this->addFlash('success', 'Event and team associations updated successfully!');
+                    return $this->redirectToRoute('app_equipe_event');
+                } catch (\Exception $e) {
+                    $this->logger->error('Error updating team event: ' . $e->getMessage());
+                    if ($request->isXmlHttpRequest()) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'message' => 'Error updating team event: ' . $e->getMessage(),
+                        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    }
+                    $this->addFlash('error', 'Error updating team event: ' . $e->getMessage());
+                    return $this->render('equipe_event/edit.html.twig', [
+                        'equipe_event' => $equipeEvent,
+                        'form' => $form->createView(),
+                        'team_form' => $teamForm->createView(),
+                        'page_title' => 'Edit Team Event',
+                    ]);
                 }
+            } else {
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => 'Invalid form data.',
+                        'errors' => $this->getFormErrors($form),
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+                $this->addFlash('error', 'Invalid form data.');
             }
-
-            $entityManager->persist($event);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Team event associations updated successfully!');
-
-            return $this->redirectToRoute('app_equipe_event');
         }
 
         return $this->render('equipe_event/edit.html.twig', [
@@ -187,14 +245,55 @@ class EquipeEventController extends AbstractController
     }
 
     #[Route('/equipe/event/{id}/delete', name: 'app_equipe_event_delete', methods: ['POST'])]
-    public function delete(Request $request, EquipeEvent $equipeEvent, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, EquipeEvent $equipeEvent): Response
     {
         if ($this->isCsrfTokenValid('delete'.$equipeEvent->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($equipeEvent);
-            $entityManager->flush();
-            $this->addFlash('success', 'Team event association deleted successfully!');
+            try {
+                $this->entityManager->remove($equipeEvent);
+                $this->entityManager->flush();
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => true,
+                        'message' => 'Team event association deleted successfully!',
+                    ]);
+                }
+                $this->addFlash('success', 'Team event association deleted successfully!');
+            } catch (\Exception $e) {
+                $this->logger->error('Error deleting team event: ' . $e->getMessage());
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => 'Error deleting team event: ' . $e->getMessage(),
+                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
+                $this->addFlash('error', 'Error deleting team event: ' . $e->getMessage());
+            }
+        } else {
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid CSRF token.',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+            $this->addFlash('error', 'Invalid CSRF token.');
         }
 
         return $this->redirectToRoute('app_equipe_event');
+    }
+
+    private function getFormErrors(\Symfony\Component\Form\FormInterface $form): array
+    {
+        $errors = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $errors[] = $error->getMessage();
+        }
+        foreach ($form->all() as $child) {
+            if (!$child->isValid()) {
+                foreach ($child->getErrors() as $error) {
+                    $errors[$child->getName()] = $error->getMessage();
+                }
+            }
+        }
+        return $errors;
     }
 }

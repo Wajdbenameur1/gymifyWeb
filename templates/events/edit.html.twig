@@ -42,6 +42,7 @@
             border-radius: 8px;
             border: 1px solid #dee2e6;
             z-index: 1;
+            visibility: hidden; /* Hide until map is initialized */
         }
         .leaflet-container {
             height: 100%;
@@ -172,8 +173,8 @@
                     </div>
                     <div class="invalid-feedback">The location is required.</div>
                     <div id="map"></div>
-                    {{ form_widget(form.latitude, {'attr': {'id': 'events_latitude'}}) }}
-                    {{ form_widget(form.longitude, {'attr': {'id': 'events_longitude'}}) }}
+                    {{ form_widget(form.latitude, {'attr': {'id': 'events_latitude', 'type': 'hidden'}}) }}
+                    {{ form_widget(form.longitude, {'attr': {'id': 'events_longitude', 'type': 'hidden'}}) }}
                 </div>
 
                 <!-- CSRF Token -->
@@ -219,24 +220,52 @@
 
         // Check if critical elements exist
         if (!locationInput || !latitudeInput || !longitudeInput || !searchLocationBtn || !form || !submitBtn || !mapContainer || !descriptionInput) {
-            console.error('One or more critical DOM elements are missing');
+            console.error('Missing critical DOM elements:', {
+                locationInput: !!locationInput,
+                latitudeInput: !!latitudeInput,
+                longitudeInput: !!longitudeInput,
+                searchLocationBtn: !!searchLocationBtn,
+                form: !!form,
+                submitBtn: !!submitBtn,
+                mapContainer: !!mapContainer,
+                descriptionInput: !!descriptionInput
+            });
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Critical form elements are missing. Please check the form configuration.'
+            });
             return;
         }
 
-        // Initialize Leaflet Map
-        let map;
-        let marker;
-        try {
-            map = L.map('map').setView([{{ event.latitude ?: 36.8065 }}, {{ event.longitude ?: 10.1815 }}], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            marker = L.marker([{{ event.latitude ?: 36.8065 }}, {{ event.longitude ?: 10.1815 }}]).addTo(map)
-                .bindPopup('Event Location')
-                .openPopup();
-        } catch (error) {
-            console.error('Error initializing map:', error);
+        // Initialize Leaflet Map with delay to ensure DOM is ready
+        let map, marker;
+        function initializeMap() {
+            try {
+                mapContainer.style.visibility = 'visible';
+                map = L.map('map', {
+                    center: [{{ event.latitude ?: 36.8065 }}, {{ event.longitude ?: 10.1815 }}],
+                    zoom: 13,
+                    zoomControl: true
+                });
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }).addTo(map);
+                marker = L.marker([{{ event.latitude ?: 36.8065 }}, {{ event.longitude ?: 10.1815 }}]).addTo(map)
+                    .bindPopup('Event Location')
+                    .openPopup();
+                map.invalidateSize();
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to initialize map. Please try again.'
+                });
+            }
         }
+        setTimeout(initializeMap, 100);
 
         // Character count for description
         function updateCharCount() {
@@ -276,10 +305,11 @@
                 removeImageBtn.style.display = 'block';
             }
 
-            if (data.latitude && data.longitude) {
+            if (data.latitude && data.longitude && map) {
                 map.setView([data.latitude, data.longitude], 15);
                 marker.setLatLng([data.latitude, data.longitude]);
                 marker.bindPopup(`<b>${data.lieu}</b>`).openPopup();
+                map.invalidateSize();
             }
         })
         .catch(error => {
@@ -339,9 +369,12 @@
                     if (data && data.length > 0) {
                         const lat = parseFloat(data[0].lat);
                         const lon = parseFloat(data[0].lon);
-                        map.setView([lat, lon], 15);
-                        marker.setLatLng([lat, lon]);
-                        marker.bindPopup(`<b>${address}</b>`).openPopup();
+                        if (map) {
+                            map.setView([lat, lon], 15);
+                            marker.setLatLng([lat, lon]);
+                            marker.bindPopup(`<b>${address}</b>`).openPopup();
+                            map.invalidateSize();
+                        }
                         latitudeInput.value = lat;
                         longitudeInput.value = lon;
                         clearError(locationInput);
@@ -356,35 +389,67 @@
         });
 
         // Map click handler
-        map.on('click', function(e) {
-            const { lat, lng } = e.latlng;
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(response => response.json())
-                .then(data => {
-                    const address = data.display_name || 'Selected Location';
-                    marker.setLatLng([lat, lng]);
-                    marker.bindPopup(`<b>${address}</b>`).openPopup();
-                    locationInput.value = address;
-                    latitudeInput.value = lat;
-                    longitudeInput.value = lng;
-                    clearError(locationInput);
-                })
-                .catch(error => {
-                    console.error('Error in reverse geocoding:', error);
-                    showError(locationInput, 'Error fetching location.');
-                });
-        });
+        if (map) {
+            map.on('click', function(e) {
+                const { lat, lng } = e.latlng;
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const address = data.display_name || 'Selected Location';
+                        marker.setLatLng([lat, lng]);
+                        marker.bindPopup(`<b>${address}</b>`).openPopup();
+                        locationInput.value = address;
+                        latitudeInput.value = lat;
+                        longitudeInput.value = lng;
+                        clearError(locationInput);
+                    })
+                    .catch(error => {
+                        console.error('Error in reverse geocoding:', error);
+                        showError(locationInput, 'Error fetching location.');
+                    });
+            });
+        }
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+            const fields = [
+                { input: document.getElementById('events_nom'), message: 'Please enter an event name.' },
+                { input: document.getElementById('events_date'), message: 'Please select a date.' },
+                { input: document.getElementById('events_heure_debut'), message: 'Please select a start time.' },
+                { input: document.getElementById('events_heure_fin'), message: 'Please select an end time.' },
+                { input: document.getElementById('events_type'), message: 'Please select an event type.' },
+                { input: document.getElementById('events_reward'), message: 'Please select a reward.' },
+                { input: document.getElementById('events_description'), message: 'Please enter a description.' },
+                { input: document.getElementById('events_lieu'), message: 'Please enter a location.' },
+                { input: document.getElementById('events_latitude'), message: 'Please select a location on the map.' },
+                { input: document.getElementById('events_longitude'), message: 'Please select a location on the map.' }
+            ];
+
+            fields.forEach(field => {
+                if (!field.input || !field.input.value.trim()) {
+                    showError(field.input, field.message);
+                    isValid = false;
+                } else {
+                    clearError(field.input);
+                }
+            });
+
+            if (descriptionInput.value.length > 500) {
+                showError(descriptionInput, 'Description must not exceed 500 characters.');
+                isValid = false;
+            }
+
+            return isValid;
+        }
 
         // Form submission
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(form);
 
-            // Validate description length
-            if (descriptionInput.value.length > 500) {
-                showError(descriptionInput, 'Description must not exceed 500 characters.');
-                return;
-            }
+            if (!validateForm()) return;
+
+            const formData = new FormData(form);
 
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
@@ -397,21 +462,25 @@
             .then(response => {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Save';
-                if (response.ok) {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Event Updated',
-                        text: 'The event has been updated successfully!'
+                        text: data.message || 'Event updated successfully!'
                     }).then(() => {
-                        window.location.href = '{{ path('app_events_index') }}';
+                        window.location.href = data.redirect || '{{ path('app_events_index') }}';
                     });
                 } else {
-                    return response.json().then(data => {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message || 'Failed to update event.'
-                        });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Failed to update event.'
                     });
                 }
             })
@@ -422,7 +491,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'An unexpected error occurred.'
+                    text: `An unexpected error occurred while saving the event: ${error.message}`
                 });
             });
         });
@@ -435,20 +504,24 @@
 
         // Error handling functions
         function showError(input, message) {
-            input.classList.add('is-invalid');
-            let errorElement = input.parentElement.querySelector('.invalid-feedback');
-            if (!errorElement) {
-                errorElement = document.createElement('div');
-                errorElement.className = 'invalid-feedback';
-                input.parentElement.appendChild(errorElement);
+            if (input) {
+                input.classList.add('is-invalid');
+                let errorElement = input.parentElement.querySelector('.invalid-feedback');
+                if (!errorElement) {
+                    errorElement = document.createElement('div');
+                    errorElement.className = 'invalid-feedback';
+                    input.parentElement.appendChild(errorElement);
+                }
+                errorElement.textContent = message;
             }
-            errorElement.textContent = message;
         }
 
         function clearError(input) {
-            input.classList.remove('is-invalid');
-            const errorElement = input.parentElement.querySelector('.invalid-feedback');
-            if (errorElement) errorElement.remove();
+            if (input) {
+                input.classList.remove('is-invalid');
+                const errorElement = input.parentElement.querySelector('.invalid-feedback');
+                if (errorElement) errorElement.remove();
+            }
         }
     });
     </script>

@@ -36,13 +36,29 @@
         #map {
             width: 100%;
             height: 400px;
-            margin-top: 10px;
+            margin-top: 15px;
             border-radius: 8px;
+            border: 1px solid #dee2e6;
             z-index: 1;
         }
-        .modal-content {
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .leaflet-container {
+            height: 100%;
+            width: 100%;
+        }
+        #submitBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        #charCount {
+            font-weight: bold;
+            color: #3a7bd5;
+        }
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        .input-group-text {
+            min-width: 45px;
+            justify-content: center;
         }
         .team-list {
             margin-top: 15px;
@@ -57,9 +73,19 @@
             padding: 8px;
             border-bottom: 1px solid #dee2e6;
         }
-        .remove-team-btn {
+        .remove-team-btn, .edit-team-btn {
             cursor: pointer;
+            margin-left: 10px;
+        }
+        .remove-team-btn {
             color: #dc3545;
+        }
+        .edit-team-btn {
+            color: #3a7bd5;
+        }
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
     </style>
 {% endblock %}
@@ -81,16 +107,14 @@
 
     <div class="card card-round shadow-lg">
         <div class="card-body p-5">
-            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'modern-form', 'id': 'eventForm'}}) }}
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'needs-validation modern-form', 'id': 'eventForm', 'novalidate': 'novalidate'}}) }}
 
-                <!-- Event Name -->
                 <div class="form-group mb-4">
                     <label for="events_nom" class="form-label fw-bold text-muted small">EVENT NAME</label>
                     {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg border-0 bg-light rounded-3', 'placeholder': 'Enter event name', 'required': 'required'}}) }}
                     <div class="invalid-feedback">The event name is required.</div>
                 </div>
 
-                <!-- Image Upload -->
                 <div class="form-group mb-4">
                     <label class="form-label fw-bold text-muted small">EVENT IMAGE</label>
                     <div class="image-upload-container">
@@ -117,14 +141,12 @@
                     </div>
                 </div>
 
-                <!-- Date -->
                 <div class="form-group mb-4">
                     <label for="events_date" class="form-label fw-bold text-muted small">DATE</label>
                     {{ form_widget(form.date, {'attr': {'class': 'form-control form-control-lg border-0 bg-light rounded-3', 'required': 'required'}}) }}
                     <div class="invalid-feedback">The date is required.</div>
                 </div>
 
-                <!-- Start and End Time -->
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label for="events_heure_debut" class="form-label fw-bold text-muted small">START TIME</label>
@@ -138,28 +160,25 @@
                     </div>
                 </div>
 
-                <!-- Event Type Selector -->
                 <div class="form-group mb-4">
                     <label for="events_type" class="form-label fw-bold text-muted small">EVENT TYPE</label>
                     {{ form_widget(form.type, {'attr': {'class': 'form-control form-control-lg border-0 bg-light rounded-3', 'required': 'required'}}) }}
                     <div class="invalid-feedback">Please select an event type.</div>
                 </div>
 
-                <!-- Reward Selector -->
                 <div class="form-group mb-4">
                     <label for="events_reward" class="form-label fw-bold text-muted small">REWARD</label>
                     {{ form_widget(form.reward, {'attr': {'class': 'form-control form-control-lg border-0 bg-light rounded-3', 'required': 'required'}}) }}
                     <div class="invalid-feedback">Please select a reward.</div>
                 </div>
 
-                <!-- Description -->
                 <div class="form-group mb-4">
                     <label for="events_description" class="form-label fw-bold text-muted small">DESCRIPTION</label>
                     {{ form_widget(form.description, {'attr': {'class': 'form-control border-0 bg-light rounded-3', 'rows': '4', 'placeholder': 'Describe the event...', 'required': 'required'}}) }}
                     <div class="invalid-feedback">The description is required.</div>
+                    <div class="form-text text-end"><span id="charCount">{{ equipe_event.event.description ? equipe_event.event.description|length : 0 }}</span>/500 characters</div>
                 </div>
 
-                <!-- Location -->
                 <div class="form-group mb-4">
                     <label for="events_lieu" class="form-label fw-bold text-muted small">LOCATION</label>
                     <div class="input-group">
@@ -174,28 +193,19 @@
                     {{ form_widget(form.longitude, {'attr': {'id': 'events_longitude'}}) }}
                 </div>
 
-                <!-- Add Teams Event Button -->
                 <div class="form-group mb-4">
-                    <button type="button" id="addTeamsEventBtn" class="btn btn-outline-success btn-lg rounded-pill py-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addTeamModal">
-                        <i class="fas fa-users me-2"></i> Add Teams Event
+                    <label class="form-label fw-bold text-muted small">TEAMS</label>
+                    <button type="button" id="addTeamsBtn" class="btn btn-outline-success btn-lg rounded-pill py-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addTeamModal">
+                        <i class="fas fa-users me-2"></i> Add Team
                     </button>
-                </div>
-
-                <!-- Team List -->
-                <div class="form-group mb-4">
-                    <label class="form-label fw-bold text-muted small">ADDED TEAMS</label>
-                    <div id="teamList" class="team-list">
-                        <p class="text-muted">Loading teams...</p>
+                    <div id="teamList" class="team-list mt-3">
+                        <p class="text-muted">No teams selected yet.</p>
                     </div>
+                    <input type="hidden" name="teams" id="teamsInput">
                 </div>
 
-                <!-- Hidden field for teams -->
-                <input type="hidden" name="teams" id="teamsInput">
-
-                <!-- CSRF Token -->
                 {{ form_row(form._token) }}
 
-                <!-- Buttons -->
                 <div class="d-flex gap-2 mt-5 justify-content-end">
                     <a href="{{ path('app_equipe_event') }}" class="btn btn-outline-secondary btn-lg rounded-pill py-3 fw-bold" id="cancelBtn">
                         <i class="fas fa-times me-2"></i> Cancel
@@ -209,29 +219,28 @@
         </div>
     </div>
 
-    <!-- Modal for Editing a Team -->
     <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addTeamModalLabel">Edit Team for Event</h5>
+                    <h5 class="modal-title" id="addTeamModalLabel">Add or Edit Team</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    {{ form_start(team_form, {'method': 'POST', 'action': path('app_equipe_edit', {'id': equipe_event.equipe.id}), 'attr': {'enctype': 'multipart/form-data', 'class': 'needs-validation', 'id': 'teamForm', 'novalidate': 'novalidate'}}) }}
+                    {{ form_start(team_form, {'method': 'POST', 'attr': {'enctype': 'multipart/form-data', 'class': 'needs-validation', 'id': 'teamForm', 'novalidate': 'novalidate'}}) }}
                         <div class="mb-3">
                             <label for="equipe_nom" class="form-label fw-bold text-muted small">Team Name</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="fas fa-heading text-primary"></i></span>
-                                <input type="text" id="equipe_nom" name="equipe[nom]" maxlength="255" class="form-control" placeholder="Enter team name" required="required" value="{{ equipe_event.equipe.nom }}"/>
+                                <input type="text" id="equipe_nom" name="equipe[nom]" maxlength="255" class="form-control" placeholder="Enter team name" required="required"/>
                             </div>
                             <div class="invalid-feedback">Please enter a team name (max 255 characters).</div>
                         </div>
                         <div class="mb-3 image-upload-container">
                             <label for="teamImageInput" class="form-label fw-bold text-muted small">Team Image</label>
                             <div class="image-preview-container text-center mb-3 position-relative">
-                                <img id="teamImagePreview" src="{{ equipe_event.equipe.imageUrl ? asset(equipe_event.equipe.imageUrl) : '' }}" class="image-preview shadow-sm mx-auto d-block" style="{{ equipe_event.equipe.imageUrl ? '' : 'display: none;' }}">
-                                <div id="teamPlaceholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light" style="{{ equipe_event.equipe.imageUrl ? 'display: none;' : '' }}">
+                                <img id="teamImagePreview" src="" class="image-preview shadow-sm mx-auto d-block" style="display: none;">
+                                <div id="teamPlaceholderText" class="position-absolute top-50 start-50 translate-middle w-100 py-5 border-2 border-dashed rounded-3 bg-light">
                                     <i class="fas fa-camera fa-3x text-muted mb-3 d-block"></i>
                                     <p class="text-muted mb-0">No image selected</p>
                                 </div>
@@ -241,7 +250,7 @@
                                     <input type="file" id="teamImageInput" name="equipe[imageFile]" class="form-control d-none" accept="image/*"/>
                                     <label for="teamImageInput" class="btn btn-outline-primary w-100 py-2"><i class="fas fa-camera me-2"></i>Choose Image</label>
                                 </div>
-                                <button type="button" id="teamRemoveImageBtn" class="btn btn-outline-danger py-2" style="{{ equipe_event.equipe.imageUrl ? '' : 'display: none;' }}"><i class="fas fa-trash-alt me-2"></i>Remove</button>
+                                <button type="button" id="teamRemoveImageBtn" class="btn btn-outline-danger py-2" style="display: none;"><i class="fas fa-trash-alt me-2"></i>Remove</button>
                             </div>
                             <div class="invalid-feedback">Please select a valid image (JPG, PNG, WEBP, max 2MB).</div>
                             <small class="text-muted d-block mt-2">Recommended size: 1200x800px</small>
@@ -252,10 +261,10 @@
                                 <span class="input-group-text bg-light"><i class="fas fa-list text-primary"></i></span>
                                 <select id="equipe_niveau" name="equipe[niveau]" class="form-control form-select" required="required">
                                     <option value="" disabled>Select a level</option>
-                                    <option value="DEBUTANT" {{ equipe_event.equipe.niveau == 'DEBUTANT' ? 'selected' : '' }}>Debutant</option>
-                                    <option value="INTERMEDIAIRE" {{ equipe_event.equipe.niveau == 'INTERMEDIAIRE' ? 'selected' : '' }}>Intermediaire</option>
-                                    <option value="AVANCE" {{ equipe_event.equipe.niveau == 'AVANCE' ? 'selected' : '' }}>Avance</option>
-                                    <option value="PROFESSIONNEL" {{ equipe_event.equipe.niveau == 'PROFESSIONNEL' ? 'selected' : '' }}>Professionnel</option>
+                                    <option value="DEBUTANT">Debutant</option>
+                                    <option value="INTERMEDIAIRE">Intermediaire</option>
+                                    <option value="AVANCE">Avance</option>
+                                    <option value="PROFESSIONNEL">Professionnel</option>
                                 </select>
                             </div>
                             <div class="invalid-feedback">Please select a level.</div>
@@ -264,7 +273,7 @@
                             <label for="equipe_nombre_membres" class="form-label fw-bold text-muted small">Number of Members</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="fas fa-users text-primary"></i></span>
-                                <input type="number" id="equipe_nombre_membres" name="equipe[nombre_membres]" class="form-control" min="0" max="8" placeholder="Enter number of members" required="required" value="{{ equipe_event.equipe.nombreMembres }}"/>
+                                <input type="number" id="equipe_nombre_membres" name="equipe[nombre_membres]" class="form-control" min="0" max="8" placeholder="Enter number of members" required="required"/>
                             </div>
                             <div class="invalid-feedback">Please enter a valid number of members (0-8).</div>
                         </div>
@@ -300,8 +309,13 @@
         const mapContainer = document.getElementById('map');
         const latitudeInput = document.getElementById('events_latitude');
         const longitudeInput = document.getElementById('events_longitude');
+        const charCount = document.getElementById('charCount');
+        const descriptionInput = document.getElementById('events_description');
         const teamList = document.getElementById('teamList');
         const teamsInput = document.getElementById('teamsInput');
+        const addTeamsBtn = document.getElementById('addTeamsBtn');
+        const addTeamModalEl = document.getElementById('addTeamModal');
+        const addTeamModal = new bootstrap.Modal(addTeamModalEl);
 
         // DOM elements for Team Form (Modal)
         const teamForm = document.getElementById('teamForm');
@@ -310,11 +324,9 @@
         const teamPlaceholderText = document.getElementById('teamPlaceholderText');
         const teamRemoveImageBtn = document.getElementById('teamRemoveImageBtn');
         const saveTeamBtn = document.getElementById('saveTeamBtn');
-        const addTeamModalEl = document.getElementById('addTeamModal');
-        const addTeamModal = new bootstrap.Modal(addTeamModalEl);
 
         // Check if critical elements exist
-        if (!locationInput || !latitudeInput || !longitudeInput || !searchLocationBtn || !form || !submitBtn || !mapContainer || !teamForm || !teamImageInput || !saveTeamBtn || !teamList || !teamsInput || !addTeamModalEl) {
+        if (!locationInput || !latitudeInput || !longitudeInput || !searchLocationBtn || !form || !submitBtn || !mapContainer || !descriptionInput || !teamList || !teamsInput || !addTeamsBtn || !addTeamModalEl || !teamForm || !teamImageInput || !saveTeamBtn) {
             console.error('One or more critical DOM elements are missing');
             return;
         }
@@ -334,7 +346,89 @@
             console.error('Error initializing map:', error);
         }
 
-        // Fetch team-event data
+        // Character count for description
+        function updateCharCount() {
+            const length = descriptionInput.value.length;
+            charCount.textContent = `${length}/500`;
+            charCount.classList.toggle('text-danger', length > 500);
+        }
+        descriptionInput.addEventListener('input', updateCharCount);
+        updateCharCount();
+
+        // Team management
+        let addedTeams = [];
+        let isEditingTeam = false;
+        let editingTeamId = null;
+        const equipeNewUrl = '{{ path('app_equipe_new') }}';
+        const equipeEditBaseUrl = '/equipe/edit/'; // Base URL without ID, appended dynamically
+
+        function updateTeamList() {
+            teamList.innerHTML = '';
+            if (addedTeams.length === 0) {
+                teamList.innerHTML = '<p class="text-muted">No teams selected yet.</p>';
+            } else {
+                addedTeams.forEach(team => {
+                    const teamItem = document.createElement('div');
+                    teamItem.className = 'team-item';
+                    teamItem.innerHTML = `
+                        <span>${team.nom}</span>
+                        <div>
+                            <i class="fas fa-edit edit-team-btn" data-id="${team.id}"></i>
+                            <i class="fas fa-times remove-team-btn" data-id="${team.id}"></i>
+                        </div>
+                    `;
+                    teamList.appendChild(teamItem);
+                });
+
+                document.querySelectorAll('.remove-team-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const teamId = this.getAttribute('data-id');
+                        addedTeams = addedTeams.filter(team => team.id != teamId);
+                        updateTeamList();
+                        updateTeamsInput();
+                    });
+                });
+
+                document.querySelectorAll('.edit-team-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const teamId = this.getAttribute('data-id');
+                        const team = addedTeams.find(t => t.id == teamId);
+                        if (team) {
+                            isEditingTeam = true;
+                            editingTeamId = teamId;
+                            teamForm.action = equipeEditBaseUrl + teamId;
+                            document.getElementById('equipe_nom').value = team.nom || '';
+                            document.getElementById('equipe_niveau').value = team.niveau || '';
+                            document.getElementById('equipe_nombre_membres').value = team.nombre_membres || '';
+                            if (team.imageFile) {
+                                teamImagePreview.src = team.imageFile;
+                                teamImagePreview.style.display = 'block';
+                                teamPlaceholderText.style.display = 'none';
+                                teamRemoveImageBtn.style.display = 'block';
+                            } else {
+                                teamImagePreview.src = '';
+                                teamImagePreview.style.display = 'none';
+                                teamPlaceholderText.style.display = 'block';
+                                teamRemoveImageBtn.style.display = 'none';
+                            }
+                            addTeamModal.show();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Invalid team ID.'
+                            });
+                        }
+                    });
+                });
+            }
+        }
+
+        function updateTeamsInput() {
+            teamsInput.value = JSON.stringify(addedTeams.map(team => team.id));
+        }
+
+        // Fetch event data and teams
         fetch('{{ path('app_equipe_event_edit', {'id': equipe_event.id}) }}', {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -345,7 +439,6 @@
             return response.json();
         })
         .then(data => {
-            // Pre-fill event form
             document.getElementById('events_nom').value = data.nom || '';
             document.getElementById('events_date').value = data.date || '';
             document.getElementById('events_heure_debut').value = data.heure_debut || '';
@@ -375,11 +468,89 @@
             }
         })
         .catch(error => {
-            console.error('Error fetching team-event data:', error);
+            console.error('Error fetching event data:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to load team-event data.'
+                text: 'Failed to load event data.'
+            });
+        });
+
+        // Open modal with team form for adding new team
+        addTeamsBtn.addEventListener('click', function() {
+            isEditingTeam = false;
+            editingTeamId = null;
+            teamForm.action = equipeNewUrl;
+            teamForm.reset();
+            teamImagePreview.src = '';
+            teamImagePreview.style.display = 'none';
+            teamPlaceholderText.style.display = 'block';
+            teamRemoveImageBtn.style.display = 'none';
+            addTeamModal.show();
+        });
+
+        // Save new or edited team
+        saveTeamBtn.addEventListener('click', function() {
+            if (!validateTeamForm()) return;
+
+            const formData = new FormData(teamForm);
+            saveTeamBtn.disabled = true;
+            saveTeamBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+            fetch(teamForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                saveTeamBtn.disabled = false;
+                saveTeamBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save';
+                if (data.success && data.teamId && data.nom) {
+                    if (isEditingTeam && editingTeamId) {
+                        addedTeams = addedTeams.map(team => team.id == editingTeamId ? {
+                            id: data.teamId,
+                            nom: data.nom,
+                            niveau: data.niveau,
+                            nombre_membres: data.nombre_membres,
+                            imageFile: data.imageFile
+                        } : team);
+                    } else {
+                        addedTeams.push({
+                            id: data.teamId,
+                            nom: data.nom,
+                            niveau: data.niveau,
+                            nombre_membres: data.nombre_membres,
+                            imageFile: data.imageFile
+                        });
+                    }
+                    updateTeamList();
+                    updateTeamsInput();
+                    addTeamModal.hide();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: isEditingTeam ? 'Team updated successfully!' : 'Team added successfully!'
+                    });
+                    isEditingTeam = false;
+                    editingTeamId = null;
+                    teamForm.action = equipeNewUrl;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Failed to save team.'
+                    });
+                }
+            })
+            .catch(error => {
+                saveTeamBtn.disabled = false;
+                saveTeamBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while saving the team.'
+                });
             });
         });
 
@@ -415,6 +586,40 @@
             removeImageInput.name = 'remove_image';
             removeImageInput.value = '1';
             form.appendChild(removeImageInput);
+        });
+
+        // Handle team image selection
+        teamImageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    showError(teamImageInput, 'Please select a valid image file');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    teamImagePreview.src = e.target.result;
+                    teamImagePreview.style.display = 'block';
+                    teamPlaceholderText.style.display = 'none';
+                    teamRemoveImageBtn.style.display = 'block';
+                    clearError(teamImageInput);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle team image removal
+        teamRemoveImageBtn.addEventListener('click', function() {
+            teamImageInput.value = '';
+            teamImagePreview.src = '';
+            teamImagePreview.style.display = 'none';
+            teamPlaceholderText.style.display = 'block';
+            this.style.display = 'none';
+            const removeTeamImageInput = document.createElement('input');
+            removeTeamImageInput.type = 'hidden';
+            removeTeamImageInput.name = 'remove_team_image';
+            removeTeamImageInput.value = '1';
+            teamForm.appendChild(removeTeamImageInput);
         });
 
         // Search location
@@ -467,93 +672,47 @@
                 });
         });
 
-        // Team management
-        let addedTeams = [];
+        // Form validation for event
+        function validateForm() {
+            let isValid = true;
+            const fields = [
+                { input: document.getElementById('events_nom'), message: 'Please enter an event name.' },
+                { input: document.getElementById('events_date'), message: 'Please select a date.' },
+                { input: document.getElementById('events_heure_debut'), message: 'Please select a start time.' },
+                { input: document.getElementById('events_heure_fin'), message: 'Please select an end time.' },
+                { input: document.getElementById('events_type'), message: 'Please select an event type.' },
+                { input: document.getElementById('events_reward'), message: 'Please select a reward.' },
+                { input: document.getElementById('events_description'), message: 'Please enter a description.' },
+                { input: document.getElementById('events_lieu'), message: 'Please enter a location.' },
+                { input: document.getElementById('events_latitude'), message: 'Please select a location on the map.' },
+                { input: document.getElementById('events_longitude'), message: 'Please select a location on the map.' }
+            ];
 
-        function updateTeamList() {
-            teamList.innerHTML = '';
-            if (addedTeams.length === 0) {
-                teamList.innerHTML = '<p class="text-muted">No teams added yet.</p>';
-            } else {
-                addedTeams.forEach(team => {
-                    const teamItem = document.createElement('div');
-                    teamItem.className = 'team-item';
-                    teamItem.innerHTML = `
-                        <span>${team.nom}</span>
-                        <i class="fas fa-times remove-team-btn" data-id="${team.id}"></i>
-                    `;
-                    teamList.appendChild(teamItem);
-                });
-
-                document.querySelectorAll('.remove-team-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const teamId = this.getAttribute('data-id');
-                        addedTeams = addedTeams.filter(team => team.id != teamId);
-                        updateTeamList();
-                        updateTeamsInput();
-                    });
-                });
-            }
-        }
-
-        function updateTeamsInput() {
-            teamsInput.value = JSON.stringify(addedTeams.map(team => team.id));
-        }
-
-        // Pre-fill team form when modal opens
-        addTeamModalEl.addEventListener('show.bs.modal', function() {
-            if (addedTeams.length > 0) {
-                const team = addedTeams[0]; // Assuming one team per event for simplicity
-                document.getElementById('equipe_nom').value = team.nom || '';
-                document.getElementById('equipe_niveau').value = team.niveau || '';
-                document.getElementById('equipe_nombre_membres').value = team.nombre_membres || '';
-                if (team.imageFile) {
-                    teamImagePreview.src = team.imageFile;
-                    teamImagePreview.style.display = 'block';
-                    teamPlaceholderText.style.display = 'none';
-                    teamRemoveImageBtn.style.display = 'block';
+            fields.forEach(field => {
+                if (!field.input.value.trim()) {
+                    showError(field.input, field.message);
+                    isValid = false;
                 } else {
-                    teamImagePreview.src = '';
-                    teamImagePreview.style.display = 'none';
-                    teamPlaceholderText.style.display = 'block';
-                    teamRemoveImageBtn.style.display = 'none';
+                    clearError(field.input);
                 }
-            }
-        });
+            });
 
-        // Handle team image selection
-        teamImageInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                if (!file.type.match('image.*')) {
-                    showError(teamImageInput, 'Please select a valid image file');
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    teamImagePreview.src = e.target.result;
-                    teamImagePreview.style.display = 'block';
-                    teamPlaceholderText.style.display = 'none';
-                    teamRemoveImageBtn.style.display = 'block';
-                    clearError(teamImageInput);
-                };
-                reader.readAsDataURL(file);
+            if (descriptionInput.value.length > 500) {
+                showError(descriptionInput, 'Description must not exceed 500 characters.');
+                isValid = false;
             }
-        });
 
-        // Handle team image removal
-        teamRemoveImageBtn.addEventListener('click', function() {
-            teamImageInput.value = '';
-            teamImagePreview.src = '';
-            teamImagePreview.style.display = 'none';
-            teamPlaceholderText.style.display = 'block';
-            this.style.display = 'none';
-            const removeTeamImageInput = document.createElement('input');
-            removeTeamImageInput.type = 'hidden';
-            removeTeamImageInput.name = 'remove_team_image';
-            removeTeamImageInput.value = '1';
-            teamForm.appendChild(removeTeamImageInput);
-        });
+            if (addedTeams.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'At least one team is required.'
+                });
+                isValid = false;
+            }
+
+            return isValid;
+        }
 
         // Validate Team Form
         function validateTeamForm() {
@@ -573,8 +732,8 @@
                 }
             });
 
-            const membres = document.getElementById('equipe_nombre_membres').value;
-            if (membres < 0 || membres > 8) {
+            const membres = parseInt(document.getElementById('equipe_nombre_membres').value);
+            if (isNaN(membres) || membres < 0 || membres > 8) {
                 showError(document.getElementById('equipe_nombre_membres'), 'Number of members must be between 0 and 8.');
                 isValid = false;
             }
@@ -582,50 +741,12 @@
             return isValid;
         }
 
-        // Save Team
-        saveTeamBtn.addEventListener('click', function() {
-            if (!validateTeamForm()) return;
-
-            const formData = new FormData(teamForm);
-            saveTeamBtn.disabled = true;
-            saveTeamBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
-
-            fetch(teamForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                saveTeamBtn.disabled = false;
-                saveTeamBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save';
-                if (data.success && data.teamId && data.nom) {
-                    addedTeams = addedTeams.map(team => team.id === data.teamId ? { id: data.teamId, nom: data.nom, niveau: data.niveau, nombre_membres: data.nombre_membres, imageFile: data.imageFile } : team);
-                    updateTeamList();
-                    updateTeamsInput();
-                    addTeamModal.hide();
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Failed to update team.'
-                    });
-                }
-            })
-            .catch(error => {
-                saveTeamBtn.disabled = false;
-                saveTeamBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save';
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while updating the team.'
-                });
-            });
-        });
-
-        // Form submission
+        // Form submission for event
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+
+            if (!validateForm()) return;
+
             const formData = new FormData(form);
             formData.set('teams', teamsInput.value);
 
@@ -637,24 +758,23 @@
                 body: formData,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
-            .then(response => {
+            .then(response => response.json())
+            .then(data => {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-save me-2"></i> Save';
-                if (response.ok || response.redirected) {
+                if (data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Team Event Updated',
-                        text: 'The team-event association has been updated successfully!'
+                        title: 'Event Updated',
+                        text: 'The event and team associations have been updated successfully!'
                     }).then(() => {
-                        window.location.href = response.url || '{{ path('app_equipe_event') }}';
+                        window.location.href = data.redirect || '{{ path('app_equipe_event') }}';
                     });
                 } else {
-                    return response.json().then(data => {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message || 'Failed to update team-event association.'
-                        });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Failed to update team event association.'
                     });
                 }
             })
@@ -699,6 +819,14 @@
             document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
             document.body.classList.remove('modal-open');
             document.body.style.overflow = '';
+            isEditingTeam = false;
+            editingTeamId = null;
+            teamForm.action = equipeNewUrl;
+            teamForm.reset();
+            teamImagePreview.src = '';
+            teamImagePreview.style.display = 'none';
+            teamPlaceholderText.style.display = 'block';
+            teamRemoveImageBtn.style.display = 'none';
         });
     });
     </script>

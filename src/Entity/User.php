@@ -268,7 +268,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     public function setRole(Role $role): static
-    {
+    { 
         // Ce champ n'est pas mappé car le rôle est défini par héritage
         return $this;
     }
@@ -323,5 +323,61 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    #[ORM\Column(type: 'boolean')]
+private bool $isBlocked = false;
+
+public function isBlocked(): bool
+{
+    return $this->isBlocked;
+}
+
+public function setIsBlocked(bool $isBlocked): self
+{
+    $this->isBlocked = $isBlocked;
+    return $this;
+}
+#[ORM\Column(type: 'string', nullable: true)]
+private ?string $resetToken = null;
+
+#[ORM\Column(type: 'datetime', nullable: true)]
+private ?\DateTimeInterface $resetTokenExpiration = null;
+
+// + getters et setters
+public function getResetToken(): ?string
+{
+    return $this->resetToken;
+}
+
+public function setResetToken(?string $resetToken): static
+{
+    $this->resetToken = $resetToken;
+    return $this;
+}
+
+public function getResetTokenExpiration(): ?\DateTimeInterface
+{
+    return $this->resetTokenExpiration;
+}
+
+public function setResetTokenExpiration(?\DateTimeInterface $resetTokenExpiration): static
+{
+    $this->resetTokenExpiration = $resetTokenExpiration;
+    return $this;
+}
+
+#[ORM\Column(type: 'string', nullable: true)]
+private ?string $googleId = null;
+
+// Getter et Setter pour googleId
+public function getGoogleId(): ?string
+{
+    return $this->googleId;
+}
+
+public function setGoogleId(?string $googleId): self
+{
+    $this->googleId = $googleId;
+    return $this;
+}
 }
 

@@ -8,8 +8,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity]
+#[UniqueEntity(fields: ['nom'], message: 'This event name already exists.')]
 class Events
 {
     #[ORM\Id]
@@ -18,38 +21,41 @@ class Events
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: 'Event name is required.')]
+    #[Assert\Length(max: 255, maxMessage: 'Event name cannot exceed 255 characters.')]
     private ?string $nom = null;
 
     #[ORM\Column(type: 'text')]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: 'Description is required.')]
+    #[Assert\Length(max: 500, maxMessage: 'Description cannot exceed 500 characters.')]
     private ?string $description = null;
 
     #[ORM\Column(type: 'date')]
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'Date is required.')]
+    #[Assert\GreaterThanOrEqual('today', message: 'The date must be today or in the future.')]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(type: 'datetime')]
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'Start time is required.')]
     private ?\DateTimeInterface $heure_debut = null;
 
     #[ORM\Column(type: 'datetime')]
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'End time is required.')]
     private ?\DateTimeInterface $heure_fin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image_url = null;
 
     #[ORM\Column(type: 'string', enumType: EventType::class)]
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'Event type is required.')]
     private ?EventType $type = null;
 
     #[ORM\Column(type: 'string', enumType: Reward::class)]
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'Reward is required.')]
     private ?Reward $reward = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: 'Location is required.')]
     private ?string $lieu = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
@@ -73,6 +79,17 @@ class Events
         $this->equipeEvents = new ArrayCollection();
     }
 
+    #[Assert\Callback]
+    public function validateTimes(ExecutionContextInterface $context): void
+    {
+        if ($this->heure_debut && $this->heure_fin && $this->heure_debut >= $this->heure_fin) {
+            $context->buildViolation('Start time must be earlier than end time.')
+                ->atPath('heure_debut')
+                ->addViolation();
+        }
+    }
+
+    // Getters and setters
     public function getId(): ?int
     {
         return $this->id;

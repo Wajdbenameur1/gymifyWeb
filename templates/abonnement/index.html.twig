@@ -45,7 +45,9 @@
                 <div class="col-md-4 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary flex-grow-1 shadow-sm">
                         <i class="fas fa-filter me-2"></i> Apply Filters
-                    </button>
+                   
+
+ </button>
                     <a href="{{ path('responsable_abonnement_index') }}" class="btn btn-outline-dark shadow-sm">
                         <i class="fas fa-sync-alt"></i>
                     </a>
@@ -62,14 +64,20 @@
                     <i class="fas fa-list-ul text-primary me-3 fs-5"></i>
                     <h5 class="mb-0 text-dark fw-semibold">Subscription List</h5>
                 </div>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-cog"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-file-export me-2"></i>Export</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-columns me-2"></i>Columns</a></li>
-                    </ul>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                                <a class="dropdown-item" href="{{ path('responsable_abonnement_export_pdf', app.request.query.all) }}">
+                                    <i class="fas fa-file-pdf me-2"></i>Export to PDF
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-columns me-2"></i>Columns</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,23 +156,56 @@
             </div>
         </div>
         {% if abonnements|length > 0 %}
-        <div class="card-footer bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-muted small">
-                    Showing <span class="fw-bold">1</span> to <span class="fw-bold">{{ abonnements|length }}</span> of {{ abonnements|length }} entries
-                </div>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+        <div class="card-footer bg-white border-0 py-3 position-relative" style="min-height: 60px;">
+            <div class="text-muted small position-absolute start-0 ms-3">
+                Showing <span class="fw-bold">{{ (abonnements.getCurrentPageNumber() - 1) * abonnements.getItemNumberPerPage() + 1 }}</span> to 
+                <span class="fw-bold">{{ min(abonnements.getCurrentPageNumber() * abonnements.getItemNumberPerPage(), abonnements.getTotalItemCount()) }}</span> of 
+                <span class="fw-bold">{{ abonnements.getTotalItemCount() }}</span> entries
+            </div>
+            <div class="d-flex justify-content-end me-3">
+                <ul class="pagination">
+                    <!-- Double Previous Buttons -->
+                    <li class="page-item {% if abonnements.getCurrentPageNumber() == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ path('responsable_abonnement_index', app.request.query.all|merge({'page': 1})) }}">
+                            <i class="fas fa-angle-double-left"></i> First
+                        </a>
+                    </li>
+                    <li class="page-item {% if abonnements.getCurrentPageNumber() == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ path('responsable_abonnement_index', app.request.query.all|merge({'page': abonnements.getCurrentPageNumber() - 1})) }}">
+                            <i class="fas fa-chevron-left"></i> Précédent
+                        </a>
+                    </li>
+
+                    <!-- Page Numbers (limited to 12) -->
+                    {% set startPage = max(1, abonnements.getCurrentPageNumber() - 6) %}
+                    {% set endPage = min(startPage + 11, abonnements.getPageCount()) %}
+                    
+                    {% if startPage > 1 %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                    
+                    {% for i in startPage..endPage %}
+                        <li class="page-item {% if abonnements.getCurrentPageNumber() == i %}active{% endif %}">
+                            <a class="page-link" href="{{ path('responsable_abonnement_index', app.request.query.all|merge({'page': i})) }}">{{ i }}</a>
                         </li>
-                        <li class="page-item active"><a class="page-link bg-primary border-primary" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                    {% endfor %}
+                    
+                    {% if endPage < abonnements.getPageCount() %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+
+                    <!-- Double Next Buttons -->
+                    <li class="page-item {% if abonnements.getCurrentPageNumber() == abonnements.getPageCount() %}disabled{% endif %}">
+                        <a class="page-link" href="{{ path('responsable_abonnement_index', app.request.query.all|merge({'page': abonnements.getCurrentPageNumber() + 1})) }}">
+                            Suivant <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item {% if abonnements.getCurrentPageNumber() == abonnements.getPageCount() %}disabled{% endif %}">
+                        <a class="page-link" href="{{ path('responsable_abonnement_index', app.request.query.all|merge({'page': abonnements.getPageCount()})) }}">
+                            Last <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
         {% endif %}
@@ -172,94 +213,172 @@
 </div>
 
 <style>
-    body {
-        background-color: #ffffff;
+body {
+    background-color: #ffffff;
+}
+.text-primary {
+    color: #3f51b5 !important;
+}
+.btn-primary {
+    background-color: #3f51b5;
+    border-color: #3f51b5;
+}
+.btn-primary:hover {
+    background-color: #303f9f;
+    border-color: #303f9f;
+}
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08) !important;
+}
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa !important;
+    border-left: 3px solid #3f51b5;
+}
+.badge {
+    transition: all 0.2s ease;
+}
+.badge.bg-primary {
+    background-color: rgba(63, 81, 181, 0.1) !important;
+    color: #3f51b5 !important;
+    border: 1px solid rgba(63, 81, 181, 0.2);
+}
+.badge.bg-info {
+    background-color: rgba(0, 198, 255, 0.1) !important;
+    color: #00c6ff !important;
+    border: 1px solid rgba(0, 198, 255, 0.2);
+}
+.btn-outline-primary {
+    border-color: #3f51b5;
+    color: #3f51b5;
+}
+.btn-outline-primary:hover {
+    background-color: #3f51b5;
+    color: white;
+}
+.form-select {
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+.form-select:focus {
+    border-color: #3f51b5;
+    box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.15);
+}
+.dropdown-menu {
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+.dark-select {
+    background-color: #2c2c2c !important;
+    color: white !important;
+    border: none !important;
+}
+.dark-select:focus {
+    background-color: #2c2c2c !important;
+    color: white !important;
+}
+
+/* Neumorphic Pagination Styles */
+.pagination {
+    margin-bottom: 0;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding: 8px 0;
+}
+.page-item {
+    display: flex;
+    align-items: center;
+}
+.page-link {
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    border: none;
+    border-radius: 12px;
+    padding: 8px 14px;
+    color: #3f51b5;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+}
+.page-link:hover {
+    background: linear-gradient(145deg, #3f51b5, #303f9f);
+    color: white;
+    transform: translateY(1px);
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.1);
+}
+.page-item.active .page-link {
+    background: linear-gradient(145deg, #3f51b5, #303f9f);
+    color: white;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.1);
+    animation: pulse 1.5s infinite ease-in-out;
+}
+.page-item.disabled .page-link {
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    color: #bdbdbd;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.page-link i {
+    transition: transform 0.3s ease;
+}
+.page-link:hover i.fa-chevron-left {
+    transform: scale(1.2) translateX(-2px);
+}
+.page-link:hover i.fa-chevron-right {
+    transform: scale(1.2) translateX(2px);
+}
+.page-link span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+@media (max-width: 576px) {
+    .pagination {
+        gap: 6px;
+        justify-content: center;
     }
-    .text-primary {
-        color: #3f51b5 !important;
+    .page-link {
+        padding: 6px 12px;
+        min-width: 32px;
+        height: 32px;
+        font-size: 12px;
     }
-    .btn-primary {
-        background-color: #3f51b5;
-        border-color: #3f51b5;
-    }
-    .btn-primary:hover {
-        background-color: #303f9f;
-        border-color: #303f9f;
-    }
-    .card {
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08) !important;
-    }
-    .table-hover tbody tr {
-        transition: all 0.2s ease;
-        border-left: 3px solid transparent;
-    }
-    .table-hover tbody tr:hover {
-        background-color: #f8f9fa !important;
-        border-left: 3px solid #3f51b5;
-    }
-    .badge {
-        transition: all 0.2s ease;
-    }
-    .badge.bg-primary {
-        background-color: rgba(63, 81, 181, 0.1) !important;
-        color: #3f51b5 !important;
-        border: 1px solid rgba(63, 81, 181, 0.2);
-    }
-    .badge.bg-info {
-        background-color: rgba(0, 198, 255, 0.1) !important;
-        color: #00c6ff !important;
-        border: 1px solid rgba(0, 198, 255, 0.2);
-    }
-    .btn-outline-primary {
-        border-color: #3f51b5;
-        color: #3f51b5;
-    }
-    .btn-outline-primary:hover {
-        background-color: #3f51b5;
-        color: white;
-    }
-    .form-select {
-        border-radius: 8px;
-        transition: all 0.3s;
-    }
-    .form-select:focus {
-        border-color: #3f51b5;
-        box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.15);
-    }
-    .dropdown-menu {
-        border-radius: 8px;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    }
-    .dark-select {
-        background-color: #2c2c2c !important;
-        color: white !important;
-        border: none !important;
-    }
-    .dark-select:focus {
-        background-color: #2c2c2c !important;
-        color: white !important;
-    }
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
 </style>
 
 {% block javascripts %}
 {{ parent() }}
 <script>
-    // Initialize tooltips
     document.addEventListener('DOMContentLoaded', function() {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
 
-        // Add dark class to select elements
         document.querySelectorAll('.form-select').forEach(select => {
             select.classList.add('dark-select');
         });

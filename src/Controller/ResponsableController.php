@@ -133,4 +133,5 @@ final class ResponsableController extends AbstractController
             'stats' => $stats
         ]);
     }
+   
 }
