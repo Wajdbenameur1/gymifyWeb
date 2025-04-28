@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Comment;
 use App\Form\CommentType;
 use App\Repository\CommentRepository;
+use App\Service\AblyService;
 use App\Service\EmailJSService;
 use App\Service\PerspectiveApiService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,7 +27,8 @@ final class CommentController extends AbstractController
     public function __construct(
         private readonly PerspectiveApiService $perspectiveApiService,
         private readonly EmailJSService $emailJSService,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly AblyService $ablyService
     ) {
     }
 
@@ -213,6 +215,22 @@ final class CommentController extends AbstractController
                 'toxicityScore' => $toxicityScore,
                 'originalContent' => $toxicityScore > 0.4 ? $content : null // Pour le frontend
             ];
+            
+            // Send real-time notification via Ably for the new comment
+            $this->ablyService->publishNewComment([
+                'id' => $commentId,
+                'content' => $displayContent,
+                'postId' => $post->getId(),
+                'postTitle' => $post->getTitle(),
+                'createdAt' => $date->format('d M Y à H:i'),
+                'user' => [
+                    'id' => $user->getId(),
+                    'nom' => $user->getNom(),
+                    'avatar' => $user->getImageUrl() 
+                        ? '/uploads/users/' . $user->getImageUrl()
+                        : '/img/screen/user.png'
+                ]
+            ]);
 
             return new JsonResponse($response, Response::HTTP_CREATED);
 

@@ -7,6 +7,7 @@ use App\Entity\Post;
 use App\Form\PostType;
 use App\Entity\Reactions;           // ← Ajoutez cet import
 use App\Repository\PostRepository;
+use App\Service\AblyService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +20,13 @@ use App\Form\PostFilterType;
 #[Route('/post')]
 final class PostController extends AbstractController
 {
+    private AblyService $ablyService;
+    
+    public function __construct(AblyService $ablyService)
+    {
+        $this->ablyService = $ablyService;
+    }
+    
     #[Route('/', name: 'app_post_index', methods: ['GET'])]
     public function index(Request $request, PostRepository $postRepository, PaginatorInterface $paginator): Response
     {
@@ -48,9 +56,6 @@ final class PostController extends AbstractController
             'filter_form' => $form->createView(),
         ]);
     }
-
-
-
 
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
@@ -96,6 +101,16 @@ final class PostController extends AbstractController
     
             $entityManager->persist($post);
             $entityManager->flush();
+            
+            // Send real-time notification via Ably
+            $this->ablyService->publishNewPost([
+                'id' => $post->getId(),
+                'title' => $post->getTitle(),
+                'content' => substr(strip_tags($post->getContent()), 0, 100) . '...',
+                'author' => $user->getNom() ?? 'Anonymous',
+                'createdAt' => $post->getCreatedAt()->format('d/m/Y H:i'),
+                'imageUrl' => $post->getImageUrl()
+            ]);
     
             $this->addFlash('success', 'Post créé !');
             return $this->redirectToRoute('app_post_index');
@@ -103,16 +118,6 @@ final class PostController extends AbstractController
     
         return $this->render('post/new.html.twig', ['form' => $form]);
     }
-
-    
-
-
-
-
-
-
-
-
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
     public function show(Request $request, Post $post, PaginatorInterface $paginator): Response
@@ -134,21 +139,6 @@ final class PostController extends AbstractController
         ]);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
     #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
@@ -234,28 +224,6 @@ final class PostController extends AbstractController
             'existingImage' => $post->getImageUrl(),
         ]);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     #[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
     public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response

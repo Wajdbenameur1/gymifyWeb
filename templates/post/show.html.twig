@@ -172,6 +172,9 @@
 
 {% block javascripts %}
   {{ parent() }}
+  <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+  <script src="{{ asset('js/ably-notifications.js') }}"></script>
+  <script src="{{ asset('js/ably-reactions.js') }}"></script>
   <script>
     // Activer la journalisation de debug pour suivre les opérations de commentaires
     const DEBUG = true;
@@ -680,57 +683,90 @@
 {% endblock %}
 
 {% block body %}
-<div class="breadcrumb-container mb-4">
-  <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-    <ol class="breadcrumb bg-light p-2 rounded">
-      <li class="breadcrumb-item"><a href="{{ path('app_sportifdashboard') }}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{{ path('app_sportif_blogs') }}">Blogs</a></li>
-      <li class="breadcrumb-item"><a href="{{ path('app_post_index') }}">Liste des posts</a></li>
-      <li class="breadcrumb-item active" aria-current="page">{{ post.title }}</li>
-    </ol>
-  </nav>
-</div>
-
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-12 col-xl-10 p-0">
-      <div class="d-flex" style="height: 80vh; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
-
-        {# Colonne gauche : image du post #}
-        <div class="col-md-7 d-none d-md-block bg-dark p-0">
-          {% if post.imageUrl %}
-            <img src="{{ asset(post.webPath) }}" class="w-100 h-100" style="object-fit: cover;" alt="Image du post">
-          {% else %}
-            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white">
-              Pas d'image
-            </div>
-          {% endif %}
+<body {% if app.user %}data-user-id="{{ app.user.id }}"{% endif %}>
+<div class="container mt-4">
+    <!-- Notification System -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <a href="{{ path('app_post_index') }}" class="btn btn-outline-secondary me-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <h1 class="h2 mb-0">{{ post.title }}</h1>
         </div>
+        
+        <div class="d-flex gap-2 align-items-center">
+            <button id="refresh-comments" class="btn btn-outline-primary d-none">
+                <i class="fas fa-sync-alt"></i> Actualiser
+            </button>
+            
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                        0
+                    </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notification-list" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                    <li class="dropdown-item text-center text-muted">Aucune notification</li>
+                </ul>
+            </div>
+            
+            <button id="clear-notifications" class="btn btn-outline-secondary">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+    </div>
 
-        {# Colonne droite : contenu & commentaires #}
-        <div class="col-md-5 d-flex flex-column bg-white p-0">
+    <div class="breadcrumb-container mb-4">
+      <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+        <ol class="breadcrumb bg-light p-2 rounded">
+          <li class="breadcrumb-item"><a href="{{ path('app_sportifdashboard') }}">Dashboard</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('app_sportif_blogs') }}">Blogs</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('app_post_index') }}">Liste des posts</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ post.title }}</li>
+        </ol>
+      </nav>
+    </div>
 
-          {# Header avec avatar et auteur #}
-          <div class="d-flex align-items-center p-3 border-bottom">
-            <img 
-              src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}"
-              class="rounded-circle me-2" 
-              style="width:32px; height:32px; object-fit:cover;"
-              alt="Avatar {{ post.user.nom }}">
-            <strong>{{ post.user.nom }}</strong>
+    <div class="row justify-content-center">
+      <div class="col-12 col-xl-10 p-0">
+        <div class="d-flex" style="height: 80vh; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+
+          {# Colonne gauche : image du post #}
+          <div class="col-md-7 d-none d-md-block bg-dark p-0">
+            {% if post.imageUrl %}
+              <img src="{{ asset(post.webPath) }}" class="w-100 h-100" style="object-fit: cover;" alt="Image du post">
+            {% else %}
+              <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white">
+                Pas d'image
+              </div>
+            {% endif %}
           </div>
 
-          {# Contenu du post #}
-          <div class="p-3 border-bottom flex-grow-0">
-            <h5>{{ post.title }}</h5>
-            <p class="mb-1">{{ post.content|raw }}</p>
-            <small class="text-muted">{{ post.createdAt ? post.createdAt|date('d M Y à H:i') : '—' }}</small>
-          </div>
+          {# Colonne droite : contenu & commentaires #}
+          <div class="col-md-5 d-flex flex-column bg-white p-0">
 
-          {# Section commentaires (scrollable) #}
-          <div class="flex-grow-1 overflow-auto p-3 comments-container" style="min-height:0;">
-            {% if comments|length > 0 %}
-              {% for comment in comments %}
+            {# Header avec avatar et auteur #}
+            <div class="d-flex align-items-center p-3 border-bottom">
+              <img 
+                src="{{ post.user.imageUrl ? asset(post.user.imageUrl) : asset('img/screen/user.png') }}"
+                class="rounded-circle me-2" 
+                style="width:32px; height:32px; object-fit:cover;"
+                alt="Avatar {{ post.user.nom }}">
+              <strong>{{ post.user.nom }}</strong>
+            </div>
+
+            {# Contenu du post #}
+            <div class="p-3 border-bottom flex-grow-0">
+              <h5>{{ post.title }}</h5>
+              <p class="mb-1">{{ post.content|raw }}</p>
+              <small class="text-muted">{{ post.createdAt ? post.createdAt|date('d M Y à H:i') : '—' }}</small>
+            </div>
+
+            {# Section commentaires (scrollable) #}
+            <div class="flex-grow-1 overflow-auto p-3 comments-container" style="min-height:0;">
+              {% if comments|length > 0 %}
+                {% for comment in comments %}
                 <div class="d-flex align-items-start mb-3">
                   <img 
                     src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}"
@@ -813,6 +849,5 @@
         </div>
       </div>
     </div>
-  </div>
 </div>
 {% endblock %}
