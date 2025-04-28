@@ -4,6 +4,28 @@ body, .form-control, .dropzone, .cke_contents iframe, .cke_chrome, .cke_top, .ck
     font-size: 1rem;
 }
 
+/* Animation for highlighting newly added items */
+@keyframes highlight-new-item {
+    0% { background-color: rgba(13, 110, 253, 0.2); }
+    100% { background-color: transparent; }
+}
+
+/* Animation pour les compteurs quand ils sont mis à jour */
+@keyframes pulse-count {
+    0% { transform: scale(1); color: inherit; }
+    50% { transform: scale(1.5); color: #007bff; }
+    100% { transform: scale(1); color: inherit; }
+}
+
+/* Style pour les compteurs de commentaires */
+.comment-count {
+    transition: all 0.3s ease;
+}
+
+.comment-count.highlight {
+    animation: pulse-count 0.8s ease-in-out;
+}
+
 .form-label {
     font-weight: bold;
 }

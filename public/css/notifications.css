@@ -88,4 +88,10 @@
 
 .toast.hide {
     animation: slideOut 0.3s forwards;
+}
+
+/* Animation for highlighting newly added items */
+@keyframes highlight-new-item {
+    0% { background-color: rgba(13, 110, 253, 0.2); }
+    100% { background-color: transparent; }
 } 

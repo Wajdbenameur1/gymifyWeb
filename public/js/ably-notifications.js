@@ -201,16 +201,196 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // If we're currently viewing the post, update the comments section
         if (window.location.pathname === `/post/${comment.postId}`) {
-            // Refresh the comments or add the new comment dynamically
+            console.log('Adding new comment to DOM automatically');
+            
+            // Add the comment to the DOM without requiring a page refresh
+            addCommentToDOM(comment);
+            
+            // Update the comment count in any buttons/UI elements that show it
+            updateCommentCount(comment.postId);
+            
+            // Hide refresh button if it exists since we've already updated the UI
             const refreshCommentsButton = document.getElementById('refresh-comments');
             if (refreshCommentsButton) {
-                refreshCommentsButton.classList.remove('d-none');
-                refreshCommentsButton.addEventListener('click', function() {
-                    window.location.reload();
-                });
+                refreshCommentsButton.classList.add('d-none');
             }
+        } else {
+            console.log('Not on the post page for this comment');
+            // But we still need to update comment counts on other pages like index
+            updateCommentCountOnIndex(comment.postId);
         }
     });
+    
+    // Écouter les événements de suppression de commentaires
+    commentsChannel.subscribe('delete-comment', function(message) {
+        const deletedComment = message.data;
+        
+        // Ne pas traiter les notifications pour les actions de l'utilisateur courant
+        if (currentUserId && deletedComment.user && deletedComment.user.id == currentUserId) {
+            return;
+        }
+        
+        console.log('Received comment deletion notification:', deletedComment);
+        
+        // Si nous sommes sur la page du post, supprimer le commentaire du DOM s'il existe
+        if (window.location.pathname === `/post/${deletedComment.postId}`) {
+            // Essayer de trouver et supprimer le commentaire dans le DOM
+            const commentElement = document.querySelector(`.comment-container[data-comment-id="${deletedComment.commentId}"]`)?.closest('.d-flex.align-items-start');
+            if (commentElement) {
+                commentElement.remove();
+            }
+            
+            // Décrémenter le compteur de commentaires
+            decrementCommentCount(deletedComment.postId);
+        } else {
+            // Mettre à jour le compteur sur d'autres pages (comme l'index)
+            decrementCommentCountOnIndex(deletedComment.postId);
+        }
+    });
+    
+    // Function to add a new comment to the DOM
+    function addCommentToDOM(comment) {
+        // Find the comments container
+        const commentsContainer = document.querySelector('.comments-container');
+        if (!commentsContainer) {
+            console.error('Comments container not found');
+            return;
+        }
+        
+        // If there was a "no comments" message, remove it
+        const noCommentsMsg = commentsContainer.querySelector('.text-center.text-muted');
+        if (noCommentsMsg && noCommentsMsg.textContent.includes('Aucun commentaire')) {
+            noCommentsMsg.remove();
+        }
+        
+        // Create the comment HTML
+        const commentElement = document.createElement('div');
+        commentElement.className = 'd-flex align-items-start mb-3';
+        
+        // Set safe defaults for any missing properties
+        const userAvatar = comment.user.avatar || comment.user.imageUrl || '/img/screen/user.png';
+        const userName = comment.user.nom || 'Utilisateur';
+        const commentDate = comment.createdAt || new Date().toLocaleString();
+        
+        // Format the comment HTML
+        commentElement.innerHTML = `
+            <img 
+                src="${userAvatar}"
+                alt="Avatar commentateur"
+                class="rounded-circle me-2 comment-avatar"
+                style="width:32px; height:32px; object-fit:cover;"
+            >
+            <div class="comment-container w-100 position-relative" data-comment-id="${comment.id || ''}">
+                <strong>${userName}</strong>
+                <p class="comment-content mb-1">
+                    ${comment.content}
+                </p>
+                <small class="text-muted">${commentDate}</small>
+            </div>
+        `;
+        
+        // Add the new comment at the top of the comments container
+        if (commentsContainer.firstChild) {
+            commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
+        } else {
+            commentsContainer.appendChild(commentElement);
+        }
+        
+        // Add highlight animation effect
+        commentElement.style.animation = 'highlight-new-item 2s ease-out';
+    }
+    
+    // Function to update comment count in UI elements
+    function updateCommentCount(postId) {
+        // Find comment count elements - typically in buttons or badges
+        const commentButtons = document.querySelectorAll(`button[data-bs-target="#commentsModal${postId}"]`);
+        
+        commentButtons.forEach(btn => {
+            // Get current text and extract any existing count
+            const currentText = btn.textContent.trim();
+            const match = currentText.match(/Commentaires?\s*\((\d+)\)/i);
+            
+            if (match) {
+                // Increment existing count
+                const newCount = parseInt(match[1]) + 1;
+                btn.textContent = currentText.replace(/\(\d+\)/, `(${newCount})`);
+            } else if (currentText.toLowerCase().includes('commentaire')) {
+                // Add count if there's just "Commentaire(s)" text
+                btn.textContent = `${currentText} (1)`;
+            }
+        });
+        
+        // Also update any other UI elements that might show comment counts
+        const commentCountElements = document.querySelectorAll(`.comment-count[data-post-id="${postId}"]`);
+        commentCountElements.forEach(el => {
+            const count = parseInt(el.textContent) || 0;
+            el.textContent = count + 1;
+        });
+    }
+    
+    // Function to decrement comment count in UI elements
+    function decrementCommentCount(postId) {
+        // Find comment count elements - typically in buttons or badges
+        const commentButtons = document.querySelectorAll(`button[data-bs-target="#commentsModal${postId}"]`);
+        
+        commentButtons.forEach(btn => {
+            // Get current text and extract any existing count
+            const currentText = btn.textContent.trim();
+            const match = currentText.match(/Commentaires?\s*\((\d+)\)/i);
+            
+            if (match) {
+                // Decrement existing count
+                let newCount = parseInt(match[1]) - 1;
+                if (newCount < 0) newCount = 0;
+                btn.textContent = currentText.replace(/\(\d+\)/, `(${newCount})`);
+            }
+        });
+        
+        // Also update any other UI elements that might show comment counts
+        const commentCountElements = document.querySelectorAll(`.comment-count[data-post-id="${postId}"]`);
+        commentCountElements.forEach(el => {
+            const count = parseInt(el.textContent) || 0;
+            el.textContent = Math.max(0, count - 1);
+        });
+    }
+    
+    // Function to update comment counts on index page
+    function updateCommentCountOnIndex(postId) {
+        // Update comment count in card buttons on index page
+        const commentBtns = document.querySelectorAll(`button[data-bs-toggle="modal"][data-bs-target="#commentsModal${postId}"] .comment-count`);
+        commentBtns.forEach(countEl => {
+            // Get current count and increment it
+            const currentCount = parseInt(countEl.textContent.trim()) || 0;
+            countEl.textContent = currentCount + 1;
+            
+            // Apply highlight class for animation
+            countEl.classList.add('highlight');
+            
+            // Remove the class after animation completes
+            setTimeout(() => {
+                countEl.classList.remove('highlight');
+            }, 800); // Duration matches the CSS animation
+        });
+    }
+    
+    // Function to decrement comment counts on index page
+    function decrementCommentCountOnIndex(postId) {
+        // Update comment count in card buttons on index page
+        const commentBtns = document.querySelectorAll(`button[data-bs-toggle="modal"][data-bs-target="#commentsModal${postId}"] .comment-count`);
+        commentBtns.forEach(countEl => {
+            // Get current count and decrement it
+            const currentCount = parseInt(countEl.textContent.trim()) || 0;
+            countEl.textContent = Math.max(0, currentCount - 1);
+            
+            // Apply highlight class for animation
+            countEl.classList.add('highlight');
+            
+            // Remove the class after animation completes
+            setTimeout(() => {
+                countEl.classList.remove('highlight');
+            }, 800); // Duration matches the CSS animation
+        });
+    }
     
     // Subscribe to reactions channel
     const reactionsChannel = ably.channels.get('reactions');

@@ -822,7 +822,7 @@
                     class="rounded-circle me-2 comment-avatar"
                     style="width:32px; height:32px; object-fit:cover;"
                   >
-                  <div class="comment-container w-100 position-relative">
+                  <div class="comment-container w-100 position-relative" data-comment-id="{{ comment.id }}">
                     <strong>{{ comment.user.nom }}</strong>
                     <p class="comment-content mb-1" {% if comment.isSensitive %}data-real-content="{{ comment.originalContent }}"{% endif %}>
                       {% if comment.isSensitive %}

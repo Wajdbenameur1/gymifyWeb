@@ -593,6 +593,12 @@ final class CommentController extends AbstractController
         if ($this->isCsrfTokenValid('delete' . $comment->getId(), $request->request->get('_token'))) {
             $deleteSuccess = false;
             
+            // Capture les données avant suppression pour la notification
+            $postId = $comment->getPost()->getId();
+            $postTitle = $comment->getPost()->getTitle();
+            $userId = $comment->getUser()->getId();
+            $userName = $comment->getUser()->getNom();
+            
             // Première tentative: avec Doctrine ORM
             try {
                 $this->logger->info('Tentative de suppression via ORM');
@@ -613,6 +619,17 @@ final class CommentController extends AbstractController
                     ], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             }
+            
+            // Envoie une notification Ably pour la suppression du commentaire
+            $this->ablyService->publishEvent('comments', 'delete-comment', [
+                'commentId' => $id,
+                'postId' => $postId,
+                'postTitle' => $postTitle,
+                'user' => [
+                    'id' => $userId,
+                    'nom' => $userName
+                ]
+            ]);
 
             return new JsonResponse([
                 'success' => true,
