@@ -254,7 +254,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show toast
         showToast('Nouvelle réaction', `${reaction.user.nom} ${actionText} ${reactionEmoji} sur "${reaction.postTitle}"`, `/post/${reaction.postId}`);
         
-        // If we're currently viewing the post, update the reactions UI more comprehensively
+        // Get the updated reaction counts for use in all cases
+        const counts = reaction.counts || {};
+        
+        // Update UI differently based on whether we're viewing the post and have a pending reaction
         if (window.location.pathname === `/post/${reaction.postId}`) {
             console.log('Updating reactions for current post view');
             
@@ -263,7 +266,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('User has a pending reaction, only updating counts');
                 
                 // Mettre à jour uniquement les compteurs, pas l'icône
-                const counts = reaction.counts || {};
                 const totalReactions = Object.values(counts).reduce((sum, count) => sum + count, 0);
                 
                 // Update just the counts
@@ -277,9 +279,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.updateReactionSummaries(reaction.postId, counts);
                 }
             } else {
-                // Get the updated reaction counts
-                const counts = reaction.counts || {};
-                
                 // Call the updateReactionUI function from ably-reactions.js if it exists
                 if (typeof window.updateReactionUI === 'function') {
                     console.log('Using global updateReactionUI function');
@@ -321,7 +320,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         } else {
-            console.log('Not on the post view, skipping UI update');
+            console.log('Not on the post view; updating only counts on index page');
+            
+            // Update only counts on index page, preserving user reactions
+            if (hasPendingReaction) {
+                console.log('User has a pending reaction on index page, only updating counts');
+                // Update just the counts without changing the reaction icon
+                const totalReactions = Object.values(counts).reduce((sum, count) => sum + count, 0);
+                
+                const countElements = document.querySelectorAll(`.btn-react-toggle[data-post-id="${reaction.postId}"] .reaction-count`);
+                countElements.forEach(el => {
+                    el.textContent = totalReactions;
+                });
+                
+                // Update reaction summary if it exists
+                if (typeof window.updateReactionSummaries === 'function') {
+                    window.updateReactionSummaries(reaction.postId, counts);
+                }
+            } else {
+                // We're not on the post page and don't have a pending reaction
+                // This could be a user viewing the index page who has not reacted
+                // Update counts but don't change reaction status
+                const totalReactions = Object.values(counts).reduce((sum, count) => sum + count, 0);
+                
+                const countElements = document.querySelectorAll(`.btn-react-toggle[data-post-id="${reaction.postId}"] .reaction-count`);
+                countElements.forEach(el => {
+                    el.textContent = totalReactions;
+                });
+            }
         }
     });
 }); 
