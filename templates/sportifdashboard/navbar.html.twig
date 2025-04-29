@@ -31,14 +31,19 @@
         <input 
             type="text" 
             id="globalSearchInput" 
-            placeholder="Search ..." 
+            placeholder="{{ 'search.placeholder'|trans }}" 
             class="form-control" 
-            aria-label="Search"
+            aria-label="{{ 'search.label'|trans }}"
         >
     </div>
 </form>
 
             <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                {# Sélecteur de langue #}
+                <li class="nav-item me-2">
+                    {% include 'partials/_language_selector.html.twig' %}
+                </li>
+                
                 {# Menu utilisateur et notifications #}
                 <li class="nav-item topbar-user dropdown hidden-caret">
                     <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
@@ -46,12 +51,12 @@
                             <img src="{{ asset('img/kaiadmin/profile.jpg') }}" alt="..." class="avatar-img rounded-circle">
                         </div>
                         <span class="profile-username">
-                            <span class="op-7">Hi,</span>
+                            <span class="op-7">{{ 'navbar.greeting'|trans }},</span>
                             <span class="fw-bold">
                                 {% if app.user %}
                                     {{ app.user.nom }}
                                 {% else %}
-                                    Guest
+                                    {{ 'navbar.guest'|trans }}
                                 {% endif %}
                             </span>
                         </span>
@@ -68,7 +73,7 @@
                                             {% if app.user %}
                                                 {{ app.user.nom }}
                                             {% else %}
-                                                Guest
+                                                {{ 'navbar.guest'|trans }}
                                             {% endif %}
                                         </h4>
                                         <p class="text-muted">
@@ -78,18 +83,18 @@
                                                 guest@example.com
                                             {% endif %}
                                         </p>
-                                        <a href="{{ path('app_profile') }}" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                        <a href="{{ path('app_profile') }}" class="btn btn-xs btn-secondary btn-sm">{{ 'navbar.view_profile'|trans }}</a>
                                     </div>
                                 </div>
                             </li>
                             <li>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ path('app_profile') }}">My Profile</a>
+                                <a class="dropdown-item" href="{{ path('app_profile') }}">{{ 'navbar.my_profile'|trans }}</a>
                                 <div class="dropdown-divider"></div>
                                 {% if app.user %}
-                                    <a class="dropdown-item" href="">Logout</a>
+                                    <a class="dropdown-item" href="">{{ 'navbar.logout'|trans }}</a>
                                 {% else %}
-                                    <a class="dropdown-item" href="{{ path('app_login') }}">Login</a>
+                                    <a class="dropdown-item" href="{{ path('app_login') }}">{{ 'navbar.login'|trans }}</a>
                                 {% endif %}
                             </li>
                         </div>

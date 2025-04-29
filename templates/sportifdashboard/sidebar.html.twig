@@ -42,7 +42,7 @@
                 <li class="nav-item">
                   <a href="{{ path('app_sportif_blogs') }}">
                     <i class="fas fa-home"></i>
-                    <p>Home</p>
+                    <p>{{ 'blog.all_blogs'|trans }}</p>
                     <span class="badge badge-warning">4</span>
                   </a>
                 </li>
@@ -51,7 +51,7 @@
                 <li class="nav-item">
                     <a href="{{ path('app_sportif_create_post') }}">
                     <i class="fas fa-plus"></i>
-                    <p>New Blog</p>
+                    <p>{{ 'blog.add_blog'|trans }}</p>
                   </a>
                 </li>
 
@@ -59,7 +59,7 @@
                 <li class="nav-item">
                   <a href="widgets.html">
                     <i class="fas fa-comment"></i>
-                    <p>My blogs</p>
+                    <p>{{ 'blog.my_blogs'|trans }}</p>
                   </a>
                 </li>
 
@@ -67,19 +67,53 @@
                 <li class="nav-item">
                   <a href="{{ path('app_sportif_statistics') }}">
                     <i class="fas fa-chart-line"></i>
-                    <p>Statistics</p>
+                    <p>{{ 'stats.global_stats'|trans }}</p>
                   </a>
                 </li>
 
                 <li class="nav-item">
                   <a href="{{ path('app_sportif_my_statistics') }}">
                     <i class="fas fa-chart-pie"></i>
-                    <p>My Blogs Statistics</p>
+                    <p>{{ 'stats.my_stats'|trans }}</p>
                   </a>
                 </li>
 
                 
-                  
+                <!-- Séparateur pour les paramètres -->
+                <li class="nav-section mt-3">
+                  <span class="sidebar-mini-icon">
+                    <i class="fa fa-ellipsis-h"></i>
+                  </span>
+                  <h4 class="text-section">{{ 'sidebar.settings'|trans }}</h4>
+                </li>
+                
+                <!-- Sélecteur de langue -->
+                <li class="nav-item dropdown">
+                  <a data-bs-toggle="dropdown" href="#" class="dropdown-toggle" aria-expanded="false">
+                    <i class="fas fa-language"></i>
+                    <p>{{ 'sidebar.language'|trans }}</p>
+                    <span class="caret"></span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item {% if app.request.locale == 'fr' %}active{% endif %}" href="{{ path('app_change_language', {'locale': 'fr'}) }}">
+                      <i class="flag-icon flag-icon-fr"></i> Français
+                    </a>
+                    <a class="dropdown-item {% if app.request.locale == 'en' %}active{% endif %}" href="{{ path('app_change_language', {'locale': 'en'}) }}">
+                      <i class="flag-icon flag-icon-gb"></i> English
+                    </a>
+                    <a class="dropdown-item {% if app.request.locale == 'ar' %}active{% endif %}" href="{{ path('app_change_language', {'locale': 'ar'}) }}">
+                      <i class="flag-icon flag-icon-sa"></i> العربية
+                    </a>
+                  </div>
+                </li>
+                
+                <!-- Déconnexion -->
+                <li class="nav-item">
+                  <a href="{{ path('app_login') }}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <p>{{ 'navbar.logout'|trans }}</p>
+                  </a>
+                </li>
                   
                   
                   
@@ -98,5 +132,28 @@
       </div>
 </div>
 <style>
-
+  .dropdown-menu {
+    min-width: 180px;
+    padding: 0.5rem 0;
+  }
+  
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .dropdown-item.active {
+    background-color: rgba(32, 159, 205, 0.2);
+  }
+  
+  [dir="rtl"] .dropdown-item i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+  }
+  
+  [dir="ltr"] .dropdown-item i {
+    margin-right: 0.5rem;
+    margin-left: 0;
+  }
 </style>

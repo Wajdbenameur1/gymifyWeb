@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale }}">
+<html lang="{{ app.request.locale }}" {% if app.request.locale == 'ar' %}dir="rtl"{% else %}dir="ltr"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +22,9 @@
         <link rel="stylesheet" href="{{ asset('css/plugins.css.map') }}">
         <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        
+        {# CSS build par Webpack Encore #}
+        {{ encore_entry_link_tags('app') }}
 
       
 
@@ -49,7 +52,7 @@
     </script>
 {% endblock %}
 </head>
-<body {% block body_attrs %}{% endblock %}>
+<body {% block body_attrs %}{% endblock %} class="{{ app.request.locale == 'ar' ? 'rtl' : 'ltr' }}">
 <div class="wrapper d-flex">  {# bootstrap flex-container #}
     {% include 'sportifdashboard/sidebar.html.twig' %}
     
@@ -74,12 +77,8 @@
 
 {% block javascripts %}
     <script src="{{ asset('js/script.js') }}"></script>
-
-
-
-  
-      
-
+    {# JS build par Webpack Encore #}
+    {{ encore_entry_script_tags('app') }}
 {% endblock %}
 
   

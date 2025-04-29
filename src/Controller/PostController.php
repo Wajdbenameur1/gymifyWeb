@@ -16,15 +16,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use App\Form\PostFilterType;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/post')]
 final class PostController extends AbstractController
 {
     private AblyService $ablyService;
+    private TranslatorInterface $translator;
     
-    public function __construct(AblyService $ablyService)
+    public function __construct(AblyService $ablyService, TranslatorInterface $translator)
     {
         $this->ablyService = $ablyService;
+        $this->translator = $translator;
     }
     
     #[Route('/', name: 'app_post_index', methods: ['GET'])]
@@ -68,7 +71,7 @@ final class PostController extends AbstractController
         $webImage  = $form->get('webImage')->getData();
     
         if ($imageFile && $webImage) {
-            $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
+            $this->addFlash('error', $this->translator->trans('blog.error.image_both'));
             return $this->render('post/new.html.twig', [
                 'form' => $form->createView(),
             ]);
@@ -92,7 +95,7 @@ final class PostController extends AbstractController
                 $absolutePath = $targetDir . DIRECTORY_SEPARATOR . $newFilename;
                 $post->setImageUrl($absolutePath);  // Chemin web
                 } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload');
+                    $this->addFlash('error', $this->translator->trans('blog.error.image_upload'));
                     return $this->render('post/new.html.twig', ['form' => $form]);
                 }
             } elseif ($webImage) {
@@ -112,7 +115,7 @@ final class PostController extends AbstractController
                 'imageUrl' => $post->getImageUrl()
             ]);
     
-            $this->addFlash('success', 'Post créé !');
+            $this->addFlash('success', $this->translator->trans('blog.success.created'));
             return $this->redirectToRoute('app_post_index');
         }
     
