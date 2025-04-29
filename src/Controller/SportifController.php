@@ -39,6 +39,8 @@ final class SportifController extends AbstractController
         $salles = $salleRepository->findAll();
         return $this->render('sportif/index.html.twig', [
             'salles' => $salles,
+            'pusher_key' => $_ENV['PUSHER_APP_KEY'],
+             'pusher_cluster' => $_ENV['PUSHER_APP_CLUSTER'],
         ]);
     }
 

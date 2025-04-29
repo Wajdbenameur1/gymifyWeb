@@ -92,30 +92,6 @@
             "./config/packages/lexik_jwt_authentication.yaml"
         ]
     },
-    "knplabs/knp-paginator-bundle": {
-        "version": "v6.8.0"
-    },
-    "knplabs/knp-snappy-bundle": {
-        "version": "1.10",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "1.5",
-            "ref": "c81bdcf4a9d4e7b1959071457f9608631865d381"
-        }
-    },
-    "knplabs/knp-paginator-bundle": {
-        "version": "v6.8.0"
-    },
-    "knplabs/knp-snappy-bundle": {
-        "version": "1.10",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "1.5",
-            "ref": "c81bdcf4a9d4e7b1959071457f9608631865d381"
-        }
-    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {
@@ -128,18 +104,6 @@
             "./.env.test",
             "./phpunit.xml.dist",
             "./tests/bootstrap.php"
-        ]
-    },
-    "pusher/pusher-php-server": {
-        "version": "7.2",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "3.0",
-            "ref": "8dd3ea817217453e14ab596317177465211e01d2"
-        },
-        "files": [
-            "./config/packages/pusher_php_server.yaml"
         ]
     },
     "symfony/asset-mapper": {

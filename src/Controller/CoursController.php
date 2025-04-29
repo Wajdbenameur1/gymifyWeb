@@ -19,8 +19,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 
+
 final class CoursController extends AbstractController
 {
+  
+
   #[Route('/cours/{idPlanning}', name: 'app_cours')]
 public function index(Request $request, CoursRepository $coursRepository, 
   PlanningRepository $planningRepository, 
@@ -137,6 +140,9 @@ public function index(Request $request, CoursRepository $coursRepository,
     // 5. Enregistrer
     $entityManager->persist($cours);
     $entityManager->flush();
+    
+
+
 
     $this->addFlash('success', 'Cours créé avec succès!');
     return $this->redirectToRoute('app_cours_new',[
@@ -155,6 +161,7 @@ public function index(Request $request, CoursRepository $coursRepository,
         if ($this->isCsrfTokenValid('delete'.$cour->getId(), $request->request->get('_token'))) {
             $entityManager->remove($cour);
             $entityManager->flush();
+
             $this->addFlash('success', 'Le cours a été supprimé avec succès.');
         }
 
