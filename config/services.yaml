@@ -14,8 +14,9 @@ parameters:
     deepinfra_api_key: '%env(DEEPINFRA_API_KEY)%'
     stripe_secret_key: 'sk_test_51R6XfmCvMipSUHQuaVylRxEIETrWqy4OtYXPBegkEIcFhkUUkByDt8EixxdDNh1ekcHSdVAUGNRr7BUsfXFEc5VX00CqsNejm0'
     stripe_public_key: 'pk_test_51R6XfmCvMipSUHQuBPuvGSEoyT4USxinzYkBENoYz4C2LSYzsB46fd6CgJaXzAtDOUP7prhW651vB3CP6CM9PgvL009edX6abt'
-    parameters:
-    app.admin_email: 'benameur808@gmail.com'
+    twilio.account_sid: '%env(string:TWILIO_ACCOUNT_SID)%'
+    twilio.auth_token: '%env(string:TWILIO_AUTH_TOKEN)%'
+    twilio.phone_number: '%env(string:TWILIO_PHONE_NUMBER)%'
 services:
 
 
@@ -24,6 +25,10 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $twilioAccountSid: '%env(TWILIO_ACCOUNT_SID)%'
+            $twilioAuthToken: '%env(TWILIO_AUTH_TOKEN)%'
+            $twilioPhoneNumber: '%env(TWILIO_PHONE_NUMBER)%'
 
     App\Controller\AdminReclamationController:
         arguments:
@@ -63,9 +68,12 @@ services:
         arguments:
             $stripeSecretKey: '%stripe_secret_key%'
 
-  
+    
 
-        
+    App\Service\TwilioService:
+        arguments:
+            $params: '@parameter_bag'
+    
 
     # Add any other service definitions below
 

@@ -1103,7 +1103,7 @@
                 }
 
                 // Utilisez une URL absolue pour le QR code
-const pdfUrl = 'http://192.168.0.181:8000{{ path('abonnement_confirmation_pdf', {'id': 'ABON_ID'}) }}'
+const pdfUrl = 'http://192.168.111.1:8000{{ path('abonnement_confirmation_pdf', {'id': 'ABON_ID'}) }}'
     .replace('ABON_ID', currentAbonnementId);
 
                 try {
