@@ -38,6 +38,9 @@
     "knplabs/knp-paginator-bundle": {
         "version": "v6.8.0"
     },
+    "mhujer/breadcrumbs-bundle": {
+        "version": "1.5.10"
+    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {
