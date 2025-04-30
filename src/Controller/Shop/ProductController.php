@@ -114,6 +114,7 @@ class ProductController extends AbstractController
 
     #[Route('/checkout', name: 'shop_checkout', methods: ['POST'])]
     public function checkout(
+        Request $request,
         SessionInterface $session, 
         ProduitRepository $produitRepository,
         EntityManagerInterface $entityManager
@@ -126,10 +127,11 @@ class ProductController extends AbstractController
             return $this->redirectToRoute('shop_cart_index');
         }
 
-        // Create new order
+        // Create new order with hardcoded phone number
         $commande = new Commande();
         $commande->setDateC(new DateTime());
         $commande->setStatutC('En cours');
+        $commande->setPhoneNumber('28609851');
         
         $total = 0;
         
@@ -162,7 +164,7 @@ class ProductController extends AbstractController
         // Clear the cart
         $session->remove('cart');
         
-        $this->addFlash('success', 'Votre commande a été validée avec succès!');
+        $this->addFlash('success', 'Votre commande a été validée avec succès! Vous recevrez un SMS de confirmation.');
         return $this->redirectToRoute('shop_cart_index');
     }
 

@@ -63,6 +63,14 @@ class Commande
     private ?int $userId = null;
 
     /**
+     * @var string|null
+     *
+     * @ORM\Column(name="phone_number", type="string", length=20, nullable=true)
+     */
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $phoneNumber = null;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\ManyToMany(targetEntity="Produit", inversedBy="commande")
@@ -147,6 +155,17 @@ class Commande
     public function setUserId(?int $userId): self
     {
         $this->userId = $userId;
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): self
+    {
+        $this->phoneNumber = $phoneNumber;
         return $this;
     }
 
