@@ -19,9 +19,9 @@ class Paiement
 
     #[ORM\Column(length: 255)]
     private ?string $status = null;
-
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $paymentIntentId = null;
+
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
@@ -45,7 +45,8 @@ class Paiement
     #[ORM\ManyToOne(targetEntity: Abonnement::class)]
     #[ORM\JoinColumn(nullable: false,name: 'id_abonnement',referencedColumnName: 'id_Abonnement')]
     private ?Abonnement $abonnement = null;
-
+    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    private ?string $qrToken = null;
     public function getId(): ?int
     {
         return $this->id_paiement;
@@ -158,6 +159,16 @@ class Paiement
     public function setAbonnement(?Abonnement $abonnement): static
     {
         $this->abonnement = $abonnement;
+        return $this;
+    }
+    public function getQrToken(): ?string
+    {
+        return $this->qrToken;
+    }
+
+    public function setQrToken(?string $qrToken): self
+    {
+        $this->qrToken = $qrToken;
         return $this;
     }
 }

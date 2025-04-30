@@ -137,12 +137,102 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+ 
+        /* Styles existants inchangés */
+        .filter-form {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .filter-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .filter-form h4 {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .filter-form .form-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .filter-form .form-control {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            padding-left: 2.5rem;
+            transition: all 0.3s ease;
+        }
+        .filter-form .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .filter-form .form-icon {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+        .filter-form .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .filter-form .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .filter-form .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .filter-form .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+        .chart-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            background: white;
+            margin-bottom: 2rem;
+        }
+        .chart-card .card-header-modern {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+        .chart-card .card-header-modern i {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            opacity: 0.2;
+        }
     </style>
 {% endblock %}
 
+
 {% block body %}
 <div class="page-inner animate__animated animate__fadeIn">
-    <!-- Modern header -->
+   <!-- Modern header -->
     <div class="dashboard-header animate__animated animate__fadeInDown">
         <div class="d-flex justify-content-between align-items-start">
             <div>
@@ -199,51 +289,67 @@
                 </div>
             </div>
 
-           <!-- Quick Actions -->
-<h4 class="mb-3 animate__animated animate__fadeIn">Quick Access</h4>
-<div class="quick-actions animate__animated animate__fadeInUp">
-    <a href="{{ path('app_events_index') }}" class="quick-action-btn">
-        <i class="fas fa-calendar-alt"></i>
-        <span>Events</span>
-    </a>
+            <!-- Quick Actions -->
+            <h4 class="mb-3 animate__animated animate__fadeIn">Quick Access</h4>
+            <div class="quick-actions animate__animated animate__fadeInUp">
+                <a href="{{ path('app_events_index') }}" class="quick-action-btn">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Events</span>
+                </a>
+                <a href="{{ path('responsable_abonnement_index') }}" class="quick-action-btn">
+                    <i class="fas fa-id-card"></i>
+                    <span>Subscriptions</span>
+                </a>
+                <a href="#" class="quick-action-btn">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Statistics</span>
+                </a>
+                <a href="#" class="quick-action-btn">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
 
-        <a href="{{ path('responsable_abonnement_index') }}" class="quick-action-btn">
-            <i class="fas fa-id-card"></i>
-            <span>Subscriptions</span>
-        </a>
- 
-    <a href="#" class="quick-action-btn">
-        <i class="fas fa-chart-line"></i>
-        <span>Statistics</span>
-    </a>
-    <a href="#" class="quick-action-btn">
-        <i class="fas fa-cog"></i>
-        <span>Settings</span>
-    </a>
-</div>
-   </div>
-        <!-- Secondary column - Statistics -->
+        <!-- Secondary column - Form and Chart -->
         <div class="col-lg-4 animate__animated animate__fadeInRight">
-            <div class="stat-card">
-                <i class="fas fa-calendar-alt fa-3x mb-3 text-primary"></i>
-                <h6 class="text-muted text-uppercase">Events this month</h6>
-                <h2 class="stat-number">{{ stats.events }}</h2>
-                <p class="text-muted mb-0">+12% from last month</p>
+            <!-- Formulaire de filtrage -->
+            <div class="filter-form animate__animated animate__fadeIn">
+                <h4 class="mb-3">Filter Sales Data</h4>
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
+                <div class="form-group">
+                    <i class="fas fa-calendar-alt form-icon"></i>
+                    {{ form_widget(form.startDate, {'attr': {'class': 'form-control', 'placeholder': 'Start Date'}}) }}
+                    {{ form_label(form.startDate, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_errors(form.startDate) }}
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-calendar-alt form-icon"></i>
+                    {{ form_widget(form.endDate, {'attr': {'class': 'form-control', 'placeholder': 'End Date'}}) }}
+                    {{ form_label(form.endDate, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_errors(form.endDate) }}
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Apply</button>
+                    <a href="{{ path('app_responsable_mygym') }}" class="btn btn-secondary w-100">Reset</a>
+                </div>
+                {{ form_end(form) }}
             </div>
 
-            <div class="stat-card mt-4">
-                <i class="fas fa-users fa-3x mb-3 text-primary"></i>
-                <h6 class="text-muted text-uppercase">Active teams</h6>
-                <h2 class="stat-number">{{ stats.equipes }}</h2>
-                <p class="text-muted mb-0">5 new this week</p>
-            </div>
-
-            <div class="stat-card mt-4">
-                <i class="fas fa-user-check fa-3x mb-3 text-primary"></i>
-                <h6 class="text-muted text-uppercase">Occupancy rate</h6>
-                <h2 class="stat-number">78%</h2>
-                <div class="progress mt-3" style="height: 8px;">
-                    <div class="progress-bar bg-primary" style="width: 78%"></div>
+            <!-- Graphique des ventes -->
+            <div class="chart-card animate__animated animate__fadeIn mt-4">
+                <div class="card-header-modern">
+                    <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Subscriptions Sales</h3>
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="card-body">
+                    {% if chartData.labels|length > 0 %}
+                        <canvas id="subscriptionsChart" height="300"></canvas>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            Aucune donnée de vente disponible pour la période sélectionnée.
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -254,16 +360,11 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        // Animation on load
+    <!-- Inclure Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+     // Animation on load
         document.addEventListener('DOMContentLoaded', function() {
-            // Statistics cards animation
-            const statCards = document.querySelectorAll('.stat-card');
-            statCards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add('animate__animated', 'animate__fadeInRight');
-                }, index * 200);
-            });
-            
             // Wave effect on quick action buttons hover
             const quickActions = document.querySelectorAll('.quick-action-btn');
             quickActions.forEach(btn => {
@@ -274,6 +375,59 @@
                     btn.classList.remove('animate__animated', 'animate__pulse');
                 });
             });
+
+            // Configuration du graphique Chart.js
+            {% if chartData.labels|length > 0 %}
+                const ctx = document.getElementById('subscriptionsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ chartData.labels|json_encode|raw }},
+                        datasets: {{ chartData.datasets|json_encode|raw }}
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                stacked: true, // Barres empilées
+                                title: {
+                                    display: true,
+                                    text: 'Number of Subscriptions'
+                                }
+                            },
+                            x: {
+                                stacked: true, // Barres empilées
+                                title: {
+                                    display: true,
+                                    text: 'Month'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.parsed.y + ' subscription(s)';
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeOutQuart'
+                        }
+                    }
+                });
+            {% endif %}
         });
     </script>
 {% endblock %}

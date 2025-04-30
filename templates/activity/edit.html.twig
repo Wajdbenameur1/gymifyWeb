@@ -21,23 +21,47 @@
                     <h5 class="mb-0"><i class="fas fa-edit text-primary me-2"></i> Subscription Details</h5>
                 </div>
                 <div class="card-body p-4 p-md-5">
-                    
                     {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
                         <div class="row g-4 mb-4">
-                            <!-- ... autres champs ... -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_label(form.type) }}
+                                    <div class="invalid-feedback">
+                                        Please select a subscription type
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     {{ form_widget(form.tarif, {
                                         'attr': {
                                             'class': 'form-control',
-                                            'pattern': '^[0-9]+(\.[0-9]+)?$',
-                                            'title': 'Please enter a valid number (e.g. 50.99)',
-                                            'oninput': 'validateNumberInput(this)'
+                                            'pattern': '[0-9]+([\.,][0-9]+)?',
+                                            'title': 'Please enter a valid number (e.g. 50.99)'
                                         }
                                     }) }}
                                     {{ form_label(form.tarif) }}
-                                    <div class="invalid-feedback" id="tarif-error">
-                                        Please enter a valid number
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.tarif)|default('Please enter a valid number') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form_widget(form.activite, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_label(form.activite) }}
+                                    <div class="invalid-feedback">
+                                        Please select an activity
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form_widget(form.salle, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_label(form.salle) }}
+                                    <div class="invalid-feedback">
+                                        Please select a location
                                     </div>
                                 </div>
                             </div>

@@ -15,13 +15,14 @@ use App\Repository\AbonnementRepository;
 use App\Repository\EquipeEventRepository;
 use App\Repository\SalleRepository;
 use App\Repository\CoursRepository;
-use App\Service\WeatherService;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Psr\Log\LoggerInterface;
 
 final class SportifController extends AbstractController
@@ -58,8 +59,8 @@ final class SportifController extends AbstractController
                 'color' => $this->getColorForObjectif($cour->getObjectif()),
                 'description' => $cour->getDescription(),
                 'extendedProps' => [
-                    'activite' => $cour->getActivité()?->getNom(),
-                    'salle' => $cour->getSalle()?->getNom(),
+                    'activite' => $cour->getActivité() ? $cour->getActivité()->getNom() : null,
+                    'salle' => $cour->getSalle() ? $cour->getSalle()->getNom() : null,
                 ],
             ];
         }
@@ -69,46 +70,26 @@ final class SportifController extends AbstractController
         ]);
     }
 
-    #[Route('/sportif/cours', name: 'cours_sportif')]
-    public function coursSportif(CoursRepository $coursRepository): Response
-    {
-        $cours = $coursRepository->findAll();
-
-        return $this->render('sportif/cours.html.twig', [
-            'cours' => $cours,
-        ]);
-    }
-
     #[Route('/sportif/salle/{id}', name: 'sportif_salle_details')]
     public function salleDetails(
         Salle $salle,
         AbonnementRepository $abonnementRepository,
-        EquipeEventRepository $equipeEventRepository,
-        WeatherService $weatherService,
-        Request $request
+        EquipeEventRepository $equipeEventRepository
     ): Response {
+        $abonnements = $abonnementRepository->findBy(['salle' => $salle]);
         $equipeEvents = $equipeEventRepository->findBySalle($salle);
+        $sportif = $this->getUser();
 
-        // Gestion de la météo
-        $weatherData = null;
-        $forecastData = null;
-        $location = $request->query->get('location', $salle->getAdresse() ?? 'Tunis');
-        $days = 7;
-
-        try {
-            $weatherData = $weatherService->getCurrentWeather($location);
-            $forecastData = $weatherService->getForecast($location, $days);
-        } catch (\Exception $e) {
-            $this->addFlash('error', $e->getMessage());
+        if (!$sportif) {
+            throw $this->createAccessDeniedException('Vous devez être connecté en tant que sportif.');
         }
 
         return $this->render('sportif/salle_details.html.twig', [
             'salle' => $salle,
-            'abonnements' => $abonnementRepository->findBy(['salle' => $salle]),
+            'abonnements' => $abonnements,
             'equipe_events' => $equipeEvents,
-            'weatherData' => $weatherData,
-            'forecastData' => $forecastData,
-            'location' => $location,
+            'sportif' => $sportif,
+            'stripe_public_key' => $this->getParameter('stripe_public_key')
         ]);
     }
 
@@ -125,12 +106,12 @@ final class SportifController extends AbstractController
                 'id' => $equipeEvent->getId(),
                 'nom' => $event->getNom(),
                 'imageUrl' => $event->getImageUrl(),
-                'type' => $event->getType()?->value ?? 'N/A',
+                'type' => $event->getType() ? $event->getType()->value : 'N/A',
                 'dateDay' => $event->getDate()->format('d'),
                 'dateMonth' => $event->getDate()->format('M'),
                 'heureDebut' => $event->getHeureDebut()->format('H:i'),
                 'heureFin' => $event->getHeureFin()->format('H:i'),
-                'reward' => $event->getReward()?->value ?? 'N/A',
+                'reward' => $event->getReward() ? $event->getReward()->value : 'N/A',
                 'description' => $event->getDescription(),
                 'lieu' => $event->getLieu(),
                 'equipeNom' => $equipe->getNom(),
@@ -152,10 +133,9 @@ final class SportifController extends AbstractController
         $sportif = $this->getUser();
 
         if (!$sportif || !in_array('ROLE_SPORTIF', $sportif->getRoles(), true)) {
+            $this->logger->debug('User not logged in or not a sportif');
             $this->addFlash('error', 'Vous devez être connecté en tant que sportif pour participer.');
-            return $this->redirectToRoute('sportif_salle_details', [
-                'id' => $equipeEvent->getEvent()->getSalle()->getId()
-            ]);
+            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
         $existingParticipation = $entityManager->getRepository(User::class)
@@ -168,18 +148,16 @@ final class SportifController extends AbstractController
             ->getOneOrNullResult();
 
         if ($existingParticipation) {
+            $this->logger->debug('Sportif already in team', ['sportif_id' => $sportif->getId(), 'equipe_id' => $equipeEvent->getEquipe()->getId()]);
             $this->addFlash('error', 'Vous participez déjà à cette équipe pour cet événement.');
-            return $this->redirectToRoute('sportif_salle_details', [
-                'id' => $equipeEvent->getEvent()->getSalle()->getId()
-            ]);
+            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
         $equipe = $equipeEvent->getEquipe();
         if ($equipe->getNombreMembres() >= 8) {
+            $this->logger->debug('Team is full', ['equipe_id' => $equipe->getId()]);
             $this->addFlash('error', 'Cette équipe est complète (8/8).');
-            return $this->redirectToRoute('sportif_salle_details', [
-                'id' => $equipeEvent->getEvent()->getSalle()->getId()
-            ]);
+            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
         $form = $this->createForm(SportifParticipationType::class, $sportif);
@@ -193,16 +171,13 @@ final class SportifController extends AbstractController
             $entityManager->persist($equipe);
             $entityManager->flush();
 
-            $this->addFlash('success', sprintf(
-                'Le sportif %s %s a été ajouté à l\'équipe %s pour cet événement !',
-                $sportif->getPrenom(),
-                $sportif->getNom(),
-                $equipe->getNom()
-            ));
-
-            return $this->redirectToRoute('sportif_salle_details', [
-                'id' => $equipeEvent->getEvent()->getSalle()->getId()
+            $this->logger->info('Sportif joined team event', [
+                'sportif_id' => $sportif->getId(),
+                'equipe_id' => $equipe->getId(),
+                'event_id' => $equipeEvent->getEvent()->getId()
             ]);
+            $this->addFlash('success', sprintf('Le sportif %s %s a été ajouté à l\'équipe %s pour cet événement !', $sportif->getPrenom(), $sportif->getNom(), $equipe->getNom()));
+            return $this->redirectToRoute('sportif_salle_details', ['id' => $equipeEvent->getEvent()->getSalle()->getId()]);
         }
 
         return $this->render('sportif/join_equipe_event.html.twig', [
@@ -219,19 +194,79 @@ final class SportifController extends AbstractController
         ]);
     }
 
-    private function mergeDateTime(\DateTime $date, \DateTime $time): string
+    #[Route('/sportif/cours', name: 'cours_sportif')]
+    public function cours(CoursRepository $repo): Response
     {
-        return $date->format('Y-m-d') . 'T' . $time->format('H:i:s');
+        $cours = $repo->findAll();
+        return $this->render('sportif/cours.html.twig', ['cours' => $cours]);
     }
 
+    #[Route('/sportif/mes-abonnements', name: 'sportif_abonnements')]
+    public function mesAbonnements(EntityManagerInterface $em): Response
+    {
+        $sportif = $this->getUser();
+        $paiements = $em->getRepository(Paiement::class)->findBy(['user' => $sportif, 'status' => 'succeeded']);
+        
+        return $this->render('sportif/mes_abonnements.html.twig', [
+            'paiements' => $paiements,
+        ]);
+    }
+
+    
+    /**
+     * Merge a DateTime date with a DateTime time into a full ISO string.
+     *
+     * @param \DateTime $date
+     * @param \DateTime $time
+     * @return string
+     */
+    private function mergeDateTime(\DateTime $date, \DateTime $time): string
+    {
+        $dateStr = $date->format('Y-m-d');
+        $timeStr = $time->format('H:i:s');
+        return $dateStr . 'T' . $timeStr;
+    }
+
+    /**
+     * Get color based on the course objective.
+     *
+     * @param ObjectifCours|null $objectif
+     * @return string
+     */
     private function getColorForObjectif(?ObjectifCours $objectif): string
     {
+        if (null === $objectif) {
+            return '#CCCCCC';
+        }
+
         return match ($objectif) {
-            ObjectifCours::ENDURANCE => '#1890ff',
-            ObjectifCours::PERTE_POIDS => '#52c41a',
+            ObjectifCours::PERTE_POIDS => '#FF5733',
             ObjectifCours::PRISE_DE_MASSE => '#33FF57',
+            ObjectifCours::ENDURANCE => '#3357FF',
             ObjectifCours::RELAXATION => '#F033FF',
             default => '#CCCCCC',
         };
     }
+    #[Route('/notifications/unread', name: 'notifications_unread', methods: ['GET'])]
+public function getUnreadNotifications(EntityManagerInterface $em): JsonResponse
+{
+    $user = $this->getUser();
+    if (!$user) {
+        return new JsonResponse([]);
+    }
+    
+    // Récupérer les vraies notifications non lues depuis la base de données
+    $notifications = $em->getRepository(Notification::class)->findBy([
+        'user' => $user,
+        'isRead' => false
+    ], ['createdAt' => 'DESC']);
+    
+    return new JsonResponse(array_map(function($notification) {
+        return [
+            'id' => $notification->getId(),
+            'message' => $notification->getMessage(),
+            'createdAt' => $notification->getCreatedAt()->format('Y-m-d H:i:s')
+        ];
+    }, $notifications));
+}
 }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test WebSocket</title>
+</head>
+<body>
+    <h1>Test WebSocket</h1>
+    <div id="output">En attente...</div>
+    <script>
+        console.log('Script WebSocket chargé !');
+
+        try {
+            const socket = new WebSocket('ws://127.0.0.1:8081');
+            console.log('Tentative de connexion WebSocket');
+
+            socket.onopen = () => {
+                console.log('Connecté au WebSocket');
+                socket.send(JSON.stringify({ userId: 155 }));
+                console.log('Envoyé: {"userId": 155}');
+            };
+
+            socket.onmessage = (event) => {
+                console.log('Message reçu:', event.data);
+                document.getElementById('output').textContent = 'Message: ' + event.data;
+            };
+
+            socket.onerror = (error) => {
+                console.error('Erreur WebSocket:', error);
+                document.getElementById('output').textContent = 'Erreur WebSocket';
+            };
+
+            socket.onclose = (event) => {
+                console.log('Déconnexion:', event.code, event.reason);
+                document.getElementById('output').textContent = 'Déconnecté';
+            };
+        } catch (error) {
+            console.error('Erreur:', error);
+            document.getElementById('output').textContent = 'Erreur: ' + error.message;
+        }
+    </script>
+</body>
+</html>
