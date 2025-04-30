@@ -12,6 +12,23 @@
   <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    /* Facebook-like mention styling */
+    .user-mention {
+      color: #00CED1 !important; /* Turquoise blue */
+      font-weight: 500 !important;
+      background-color: rgba(0, 206, 209, 0.1) !important;
+      padding: 0 3px !important;
+      border-radius: 4px !important;
+      text-decoration: none !important;
+      display: inline-block !important;
+    }
+    
+    .user-mention:hover {
+      text-decoration: underline !important;
+      background-color: rgba(0, 206, 209, 0.2) !important;
+      cursor: pointer !important;
+    }
+    
     .alert {
       position: fixed;
       top: 20px;
@@ -181,6 +198,7 @@
   <script src="{{ asset('js/ably-notifications.js') }}"></script>
   <script src="{{ asset('js/ably-reactions.js') }}"></script>
   <script src="{{ asset('js/reaction-debug.js') }}"></script>
+  <script src="{{ asset('js/user-mentions.js') }}"></script>
   <script>
     // Activer la journalisation de debug pour suivre les opérations de commentaires
     const DEBUG = true;
@@ -319,7 +337,8 @@
           warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.';
           contentElement.appendChild(warningDiv);
         } else {
-          contentElement.textContent = data.content;
+          // Use innerHTML instead of textContent to properly render HTML from @mentions
+          contentElement.innerHTML = data.content;
         }
         commentContainer.appendChild(contentElement);
         
@@ -432,7 +451,19 @@
             commentText = commentContent.dataset.realContent;
           } else {
             // Pour les commentaires normaux, utiliser le contenu textuel
-            commentText = commentContent.textContent.trim();
+            // If there are HTML elements (like @mentions), we need to get the text content
+            // We'll use a technique to preserve the plain text
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = commentContent.innerHTML;
+            
+            // Replace all @mention spans with their original text
+            tempDiv.querySelectorAll('.user-mention').forEach(span => {
+              const username = span.dataset.username;
+              const mentionText = document.createTextNode('@' + username);
+              span.parentNode.replaceChild(mentionText, span);
+            });
+            
+            commentText = tempDiv.textContent.trim();
           }
           
           const actionsDiv = commentContainer.querySelector('.comment-actions');
@@ -513,7 +544,7 @@
                 // Afficher une alerte spécifique
                 showAlert('⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.', 'warning', document.querySelector('.comments-container'));
               } else {
-                // Commentaire normal - remplacement complet du contenu
+                // Commentaire normal - remplacement complet du contenu avec innerHTML pour gérer les mentions HTML
                 commentContent.innerHTML = data.content;
                 commentContent.classList.remove('sensitive-content');
                 // Supprimer l'attribut data si existant
@@ -830,7 +861,7 @@
                           <i class="fas fa-exclamation-triangle"></i> ⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.
                         </div>
                       {% else %}
-                        {{ comment.content }}
+                        {{ comment.content|raw }}
                       {% endif %}
                     </p>
                     <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>

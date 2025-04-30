@@ -8,46 +8,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const url    = form.action;
         const data   = new FormData(form);
   
-        // Envoi en AJAX
-        const resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          body: data
-        });
-  
-        if (!resp.ok) {
-          console.error('Erreur AJAX', resp);
-          return;
+        // AJAX submission
+        try {
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: data
+          });
+    
+          if (!resp.ok) {
+            console.error('AJAX Error', resp);
+            alert('Error submitting comment');
+            return;
+          }
+    
+          const json = await resp.json();
+    
+          // Build comment HTML
+          const commentHtml = `
+            <div class="d-flex align-items-start mb-3">
+              <img 
+                src="${json.user.avatar}" 
+                alt="Avatar de ${json.user.nom}" 
+                class="rounded-circle me-3" 
+                style="width:40px;height:40px;object-fit:cover;"
+              >
+              <div>
+                <strong>${json.user.nom}</strong>
+                <p class="mb-1">${json.content}</p>
+                <small class="text-muted">${json.createdAt}</small>
+              </div>
+            </div>`;
+    
+          // Insert into modal-body of corresponding post
+          const modalBody = document
+            .querySelector(`#commentsModal${postId} .modal-body`);
+          modalBody.insertAdjacentHTML('beforeend', commentHtml);
+    
+          // Reset input field
+          form.querySelector('input[name="comment[content]"]').value = '';
+    
+          // Update comment count in modal button
+          updateIndexCommentCount(postId);
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error submitting comment');
         }
-  
-        const json = await resp.json();
-  
-        // Construire le HTML du commentaire
-        const commentHtml = `
-          <div class="d-flex align-items-start mb-3">
-            <img 
-              src="${json.user.avatar}" 
-              alt="Avatar de ${json.user.nom}" 
-              class="rounded-circle me-3" 
-              style="width:40px;height:40px;object-fit:cover;"
-            >
-            <div>
-              <strong>${json.user.nom}</strong>
-              <p class="mb-1">${json.content}</p>
-              <small class="text-muted">${json.createdAt}</small>
-            </div>
-          </div>`;
-  
-        // L'insérer dans le modal-body du post correspondant
-        const modalBody = document
-          .querySelector(`#commentsModal${postId} .modal-body`);
-        modalBody.insertAdjacentHTML('beforeend', commentHtml);
-  
-        // Réinitialiser le champ de saisie
-        form.querySelector('input[name="comment[content]"]').value = '';
-  
-        // Mettre à jour le compteur de commentaires dans le bouton modal
-        updateIndexCommentCount(postId);
       });
     });
 
@@ -145,8 +151,25 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Reset the form
           form.querySelector('input[name="content"]').value = '';
+          
+          // Add event listeners to the new comment's buttons
+          const editBtn = commentElement.querySelector('.js-edit-comment-btn');
+          if (editBtn) {
+            editBtn.addEventListener('click', handleEditComment);
+          }
+          
+          const deleteForm = commentElement.querySelector('.js-delete-comment-form');
+          if (deleteForm) {
+            deleteForm.addEventListener('submit', handleDeleteComment);
+          }
+          
         } catch (error) {
           console.error('Error submitting comment:', error);
+          const errorsContainer = document.getElementById(`comment-errors-${postId}`);
+          if (errorsContainer) {
+            errorsContainer.textContent = 'Une erreur est survenue: ' + error.message;
+            errorsContainer.style.display = 'block';
+          }
         } finally {
           // Re-enable form
           if (submitButton) {
@@ -156,6 +179,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+    
+    // Event handlers for edit and delete buttons
+    function handleEditComment(e) {
+      e.preventDefault();
+      // Your existing edit comment logic
+      // ...
+    }
+    
+    function handleDeleteComment(e) {
+      e.preventDefault();
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+        // Your existing delete comment logic
+        // ...
+      }
+    }
     
     // Handler for comment deletion
     document.body.addEventListener('click', function(e) {
@@ -238,6 +276,46 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       });
+    }
+
+    // Fonction pour ajouter un commentaire au DOM
+    function addCommentToDOM(commentData) {
+        const commentBox = document.createElement('div');
+        commentBox.className = 'd-flex align-items-start mb-3 comment-box';
+        commentBox.dataset.commentId = commentData.id;
+        
+        const isSensitive = commentData.toxicityScore > 0.4;
+        
+        commentBox.innerHTML = `
+            <img 
+                src="${commentData.user.avatar}" 
+                alt="Avatar commentateur" 
+                class="rounded-circle me-2 comment-avatar" 
+                style="width:32px; height:32px; object-fit:cover;"
+            >
+            <div class="w-100">
+                <strong class="comment-username">${commentData.user.nom}</strong>
+                <div class="comment-content mb-1 ${isSensitive ? 'sensitive-content' : ''}">
+                    ${commentData.content}
+                </div>
+                <small class="text-muted comment-date">${commentData.createdAt}</small>
+                
+                <div class="mt-1 comment-actions">
+                    <button class="btn-edit-comment" data-comment-id="${commentData.id}" data-token="${commentData.tokens.edit}">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button class="btn-delete-comment" data-comment-id="${commentData.id}" data-token="${commentData.tokens.delete}">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Ajouter le commentaire au début de la liste
+        const commentsContainer = document.querySelector('.comments-container');
+        if (commentsContainer) {
+            commentsContainer.insertBefore(commentBox, commentsContainer.firstChild);
+        }
     }
   });
   

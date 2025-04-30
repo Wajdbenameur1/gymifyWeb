@@ -11,6 +11,23 @@
 <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
+    /* Facebook-like mention styling */
+    .user-mention {
+      color: #00CED1 !important; /* Turquoise blue */
+      font-weight: 500 !important;
+      background-color: rgba(0, 206, 209, 0.1) !important;
+      padding: 0 3px !important;
+      border-radius: 4px !important;
+      text-decoration: none !important;
+      display: inline-block !important;
+    }
+    
+    .user-mention:hover {
+      text-decoration: underline !important;
+      background-color: rgba(0, 206, 209, 0.2) !important;
+      cursor: pointer !important;
+    }
+
     .comment-actions {
         opacity: 0;
         transition: opacity 0.3s ease, transform 0.2s ease;
@@ -422,7 +439,7 @@
                                     <i class="fas fa-exclamation-triangle"></i> ⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.
                                   </div>
                                 {% else %}
-                                  {{ comment.content }}
+                                  {{ comment.content|raw }}
                                 {% endif %}
                               </p>
                               <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
@@ -545,6 +562,7 @@
 <script src="{{ asset('js/ably-notifications.js') }}"></script>
 <script src="{{ asset('js/ably-reactions.js') }}"></script>
 <script src="{{ asset('js/reaction-debug.js') }}"></script>
+<script src="{{ asset('js/user-mentions.js') }}"></script>
 <script>
 // Activer la journalisation de debug pour suivre les opérations de commentaires
 const DEBUG = true;
@@ -1177,96 +1195,90 @@ document.addEventListener('DOMContentLoaded', function() {
     function attachAddCommentFormEvents(form) {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            debugLog('Soumission du formulaire de commentaire', this.action);
-            
-            const modalBody = this.closest('.modal-body');
             const postId = this.dataset.postId;
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const errorDiv = document.getElementById(`comment-errors-${postId}`);
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi...';
-
+            const url = this.action;
+            const formData = new FormData(this);
+            
             try {
-                const formData = new FormData(this);
-                debugLog('FormData préparée', {
-                    postId: postId,
-                    content: formData.get('content'),
-                    token: formData.get('_token')
-                });
-                
-                const response = await fetch(this.action, {
+                const response = await fetch(url, {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
-                debugLog('Réponse reçue', response.status, response.statusText);
-
-                const data = await response.json();
-                debugLog('Données JSON reçues', data);
                 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Erreur lors de l\'ajout du commentaire');
-                }
-
-                console.log('Commentaire ajouté avec succès:', data);
-                debugLog('Création de l\'élément commentaire avec ID:', data.id);
-
-                // Créer et ajouter le nouveau commentaire
-                const commentElement = createCommentElement(data, postId);
-                const commentsContainer = modalBody.querySelector('.flex-grow-1.overflow-auto.p-3');
-                
-                // Si la liste est vide, supprimer le message "Aucun commentaire" s'il existe
-                const emptyMessage = commentsContainer.querySelector('.text-center.text-muted');
-                if (emptyMessage) {
-                    emptyMessage.remove();
+                    console.error('Error response:', response.status);
+                    return;
                 }
                 
-                // Ajouter le commentaire au début de la liste
-                debugLog('Ajout du commentaire au DOM');
-                commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
+                const data = await response.json();
+                console.log('Comment added successfully:', data);
                 
-                // Attacher les événements d'édition et de suppression
-                const newEditBtn = commentElement.querySelector('.js-edit-comment-btn');
-                if (newEditBtn) {
-                    debugLog('Attachement des événements d\'édition');
-                    attachEditButtonEvents(newEditBtn);
-                }
+                // Create new comment element
+                const commentElement = document.createElement('div');
+                commentElement.className = 'd-flex align-items-start mb-3';
                 
-                const newDeleteForm = commentElement.querySelector('.js-delete-comment-form');
-                if (newDeleteForm) {
-                    debugLog('Attachement des événements de suppression');
-                    attachDeleteFormEvents(newDeleteForm);
-                }
+                // Set HTML content with proper @mention rendering
+                commentElement.innerHTML = `
+                  <img src="${data.user.avatar || '/img/screen/user.png'}" 
+                       class="rounded-circle me-2" 
+                       style="width:32px;height:32px;object-fit:cover;">
+                  <div class="comment-container w-100 position-relative">
+                    <strong>${data.user.nom}</strong>
+                    <p class="comment-content mb-1">${data.content}</p>
+                    <small class="text-muted">${data.createdAt}</small>
+                    <div class="comment-actions">
+                      <button class="btn-icon edit js-edit-comment-btn" 
+                              data-comment-id="${data.id}"
+                              data-token="${data.tokens?.edit || ''}"
+                              data-tooltip="Modifier">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <form action="/comment/delete/${data.id}" 
+                            method="post" 
+                            class="js-delete-comment-form d-inline" 
+                            data-post-id="${postId}">
+                        <input type="hidden" name="_token" value="${data.tokens?.delete || ''}">
+                        <button type="submit" class="btn-icon delete" data-tooltip="Supprimer">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                `;
                 
-                // Réinitialiser le formulaire
+                // Add to modal
+                const commentsContainer = document.querySelector(`#commentsModal${postId} .modal-body`);
+                commentsContainer.appendChild(commentElement);
+                
+                // Clear form
                 this.reset();
                 
-                // Mettre à jour le compteur de commentaires
-                updateCommentCount(postId);
-                
-                // Afficher le message approprié en fonction du score de toxicité
-                if (data.toxicityScore > 0.4 && data.toxicityScore <= 0.6) {
-                    showAlert('⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.', 'warning', modalBody);
-                } else {
-                    showAlert('Commentaire ajouté avec succès', 'success', modalBody);
+                // Apply styles to new elements
+                const newActions = commentElement.querySelector('.comment-actions');
+                if (newActions) {
+                  newActions.style.opacity = "0";
+                  newActions.style.display = "inline-flex";
+                  newActions.style.gap = "12px";
+                  newActions.style.position = "absolute";
+                  newActions.style.right = "10px";
+                  newActions.style.top = "50%";
+                  newActions.style.transform = "translateY(-50%)";
+                  newActions.style.zIndex = "100";
+                  
+                  // Add hover events
+                  const container = commentElement.querySelector('.comment-container');
+                  if (container) {
+                    container.addEventListener('mouseenter', function() {
+                      newActions.style.opacity = "1";
+                    });
+                    container.addEventListener('mouseleave', function() {
+                      newActions.style.opacity = "0";
+                    });
+                  }
                 }
-
             } catch (error) {
-                console.error('Erreur lors de l\'ajout du commentaire:', error);
-                debugLog('ERREUR lors de l\'ajout du commentaire', error);
-                errorDiv.textContent = error.message;
-                errorDiv.style.display = 'block';
-                showAlert(error.message, 'danger', modalBody);
-                
-                // Masquer le message d'erreur après 5 secondes
-                setTimeout(() => {
-                    errorDiv.style.display = 'none';
-                }, 5000);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Ajouter';
+                console.error('Error:', error);
             }
         });
     }

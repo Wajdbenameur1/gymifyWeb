@@ -16,10 +16,11 @@
                 {% if comment.isSensitive %}
                     <div class="sensitive-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                        ⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.
+                         Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.
                     </div>
                 {% else %}
-                    {{ comment.content }}
+                    {# Display comment content with HTML not escaped to render user mentions properly #}
+                    {{ comment.content|raw }}
                 {% endif %}
             </div>
             

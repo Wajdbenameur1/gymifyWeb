@@ -252,4 +252,35 @@ public function checkEmail(Request $request): JsonResponse
 
     return new JsonResponse(['exists' => $existingUser !== null]);
 }
+
+#[Route('/api/users/search', name: 'api_users_search', methods: ['GET'])]
+public function searchUsers(Request $request): JsonResponse
+{
+    $query = $request->query->get('q', '');
+    
+    if (strlen($query) < 1) {
+        return new JsonResponse([]);
+    }
+    
+    // Search users whose name or first name contains the query
+    $users = $this->userRepository->createQueryBuilder('u')
+        ->where('u.nom LIKE :query OR u.prenom LIKE :query')
+        ->setParameter('query', '%' . $query . '%')
+        ->setMaxResults(5)
+        ->getQuery()
+        ->getResult();
+    
+    // Format the results
+    $formattedUsers = [];
+    foreach ($users as $user) {
+        $formattedUsers[] = [
+            'id' => $user->getId(),
+            'nom' => $user->getNom(),
+            'prenom' => $user->getPrenom(),
+            'imageUrl' => $user->getImageUrl() ? '/uploads/users/' . $user->getImageUrl() : '/img/screen/user.png'
+        ];
+    }
+    
+    return new JsonResponse($formattedUsers);
+}
 }
