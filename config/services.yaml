@@ -1,8 +1,4 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+# config/services.yaml
 parameters:
     activities_image_directory: '%kernel.project_dir%/public/uploads/activities'
     uploads_directory: '%kernel.project_dir%/public/uploads/images/users'
@@ -17,6 +13,8 @@ parameters:
     twilio.account_sid: '%env(string:TWILIO_ACCOUNT_SID)%'
     twilio.auth_token: '%env(string:TWILIO_AUTH_TOKEN)%'
     twilio.phone_number: '%env(string:TWILIO_PHONE_NUMBER)%'
+    RECAPTCHA_SITE_KEY: '%env(RECAPTCHA_SITE_KEY)%'
+
 services:
 
 
@@ -34,22 +32,20 @@ services:
         arguments:
             $logger: '@monolog.logger'
 
+    App\Service\TranslationService:
+        arguments:
+            $logger: '@monolog.logger'
+
     App\Service\EmailUniquenessValidator:
         arguments:
             $entityManager: '@doctrine.orm.entity_manager'
+
     App\Security\ClientRegistry: ~
-    
+
     App\Service\EmailService:
         arguments:
             $mailer: '@mailer'
 
-    
-
-    
-
-    
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
         exclude:
@@ -57,13 +53,7 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
             - '../src/Tests/'
-    
-      # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-    
 
-    # Controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
     App\Service\StripeService:
         arguments:
             $stripeSecretKey: '%stripe_secret_key%'

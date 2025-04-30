@@ -29,36 +29,60 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
         private UrlGeneratorInterface $urlGenerator,
         HttpClientInterface $client 
         // Ajoute cette dépendance
-        ) {}
+        ) {
+            $this->client = $client; // <- C'EST ÇA QUI MANQUAIT
+        }
 
-    public function authenticate(Request $request): Passport
-    {
-        $email = $request->request->get('email', '');
-        $password = $request->request->get('password', '');
-        $csrfToken = $request->request->get('_csrf_token', '');
-
-        // Store the last username for form repopulation
-        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
-
-        return new Passport(
-            new UserBadge($email, function ($identifier) {
-                $user = $this->userRepository->findOneBy(['email' => $identifier]);
-                if (!$user) {
-                    throw new AuthenticationException('Utilisateur non trouvé.');
-                }
-                  // ❌ Vérifie si l'utilisateur est bloqué
-                if ($user->isBlocked()) {
-                    throw new AuthenticationException('Votre compte est bloqué. Veuillez contacter un administrateur.');
-                }
-                return $user;
-            }),
-            new PasswordCredentials($password),
-            [
-                new CsrfTokenBadge('authenticate', $csrfToken),
-                new RememberMeBadge(),
-            ]
-        );
+        public function authenticate(Request $request): Passport
+        {
+            $email = $request->request->get('email', '');
+            $password = $request->request->get('password', '');
+            $csrfToken = $request->request->get('_csrf_token', '');
+            $recaptchaToken = $request->request->get('g-recaptcha-response');
+        
+            $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
+        
+            // Vérifier le token reCAPTCHA
+            if (!$this->isRecaptchaValid($recaptchaToken)) {
+                throw new AuthenticationException('Échec de la vérification reCAPTCHA. Veuillez réessayer.');
+            }
+        
+            return new Passport(
+                new UserBadge($email, function ($identifier) {
+                    $user = $this->userRepository->findOneBy(['email' => $identifier]);
+                    if (!$user) {
+                        throw new AuthenticationException('Utilisateur non trouvé.');
+                    }
+                    if ($user->isBlocked()) {
+                        throw new AuthenticationException('Votre compte est bloqué. Veuillez contacter un administrateur.');
+                    }
+                    return $user;
+                }),
+                new PasswordCredentials($password),
+                [
+                    new CsrfTokenBadge('authenticate', $csrfToken),
+                    new RememberMeBadge(),
+                ]
+            );
+        }
+        private function isRecaptchaValid(?string $recaptchaToken): bool
+{
+    if (empty($recaptchaToken)) {
+        return false;
     }
+
+    $response = $this->client->request('POST', 'https://www.google.com/recaptcha/api/siteverify', [
+        'body' => [
+            'secret' => '6LdsuycrAAAAAHUiaKbRgurxfp55Gw_GqhzEiQV2', // METS ICI TA CLE SECRETE
+            'response' => $recaptchaToken
+        ],
+    ]);
+
+    $data = $response->toArray(false); // false pour ignorer les erreurs HTTP 400
+
+    return $data['success'] ?? false;
+}
+
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
