@@ -40,4 +40,18 @@ class PaiementRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+public function findExpiringPaiements(\DateTimeImmutable $dateLimit): array
+{
+    $startOfDay = (clone $dateLimit)->modify('midnight');
+    $endOfDay = (clone $dateLimit)->modify('23:59:59');
+
+    return $this->createQueryBuilder('p')
+        ->where('p.date_fin BETWEEN :start AND :end')
+        ->andWhere('p.status = :status')
+        ->setParameter('start', $startOfDay)
+        ->setParameter('end', $endOfDay)
+        ->setParameter('status', 'succeeded')
+        ->getQuery()
+        ->getResult();
+}
 }

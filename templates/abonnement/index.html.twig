@@ -45,9 +45,7 @@
                 <div class="col-md-4 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary flex-grow-1 shadow-sm">
                         <i class="fas fa-filter me-2"></i> Apply Filters
-                   
-
- </button>
+                    </button>
                     <a href="{{ path('responsable_abonnement_index') }}" class="btn btn-outline-dark shadow-sm">
                         <i class="fas fa-sync-alt"></i>
                     </a>
@@ -73,6 +71,11 @@
                             <li>
                                 <a class="dropdown-item" href="{{ path('responsable_abonnement_export_pdf', app.request.query.all) }}">
                                     <i class="fas fa-file-pdf me-2"></i>Export to PDF
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ path('responsable_abonnement_export_excel', app.request.query.all) }}">
+                                    <i class="fas fa-file-excel me-2"></i>Export to Excel
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-columns me-2"></i>Columns</a></li>
