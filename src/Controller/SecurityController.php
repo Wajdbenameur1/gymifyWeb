@@ -17,17 +17,20 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use App\Service\EmailService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  // N'oublie pas d'importer ton EmailService
-
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class SecurityController extends AbstractController
 {
     #[Route(path: '/login', name: 'app_login', methods: ['GET', 'POST'])]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, ParameterBagInterface $params): Response
     {
         if ($this->getUser()) {
             return $this->redirectToRoute($this->getDashboardRouteByRole());
         }
 
+        $recaptchaKey = $params->get('RECAPTCHA_SITE_KEY');
+
         return $this->render('security/login.html.twig', [
+            'recaptcha_site_key' => $recaptchaKey,
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
         ]);
@@ -58,42 +61,43 @@ class SecurityController extends AbstractController
             default => 'app_home',
         };
     }
-
     #[Route('/app_forget_password', name: 'app_forgot_password')]
- public function forgotPassword(Request $request, EntityManagerInterface $em, EmailService $emailService): Response
+    public function forgotPassword(Request $request, EntityManagerInterface $em, EmailService $emailService): Response
     {
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
             $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
-
+    
             if ($user) {
                 // Générer un token de réinitialisation
                 $token = bin2hex(random_bytes(32));
                 $user->setResetToken($token);
                 $user->setResetTokenExpiration(new \DateTime('+1 hour'));
                 $em->flush();
-
+    
+                // Générer le lien de réinitialisation
+                $resetLink = $this->generateUrl('app_reset_password', [
+                    'token' => $token
+                ], UrlGeneratorInterface::ABSOLUTE_URL);
+    
                 // Envoyer l'email
-                $resetLink = $this->generateUrl('app_reset_password', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
                 $emailService->sendEmail(
                     $user->getEmail(),
-                    'Réinitialisation du mot de passe',
-                    'emails/reset_password.html.twig', // <-- Ici on doit passer un template Twig
-                    [
-                        'prenom' => $user->getPrenom(),
-                        'resetLink' => $resetLink,
-                    ]
+                    'Réinitialisation de votre mot de passe',
+                    'emails/reset_password.html.twig',
+                    ['resetLink' => $resetLink]
                 );
                 
-
+    
                 $this->addFlash('success', 'Un email de réinitialisation a été envoyé.');
             } else {
-                $this->addFlash('error', 'Aucun utilisateur trouvé avec cet email.');
+                $this->addFlash('error', 'Aucun compte associé à cet email.');
             }
         }
-
-        return $this->render('security/forgot_password.html.twig');
+    
+        return $this->redirectToRoute('app_login');
     }
+    
 
 
 

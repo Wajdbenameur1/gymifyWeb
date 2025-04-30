@@ -1,8 +1,4 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+# config/services.yaml
 parameters:
     activities_image_directory: '%kernel.project_dir%/public/uploads/activities'
     uploads_directory: '%kernel.project_dir%/public/uploads/images/users'
@@ -11,54 +7,34 @@ parameters:
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
     teams_images_directory: '%kernel.project_dir%/public/uploads/teams'
     uploads_public_path: '/uploads'
-    deepinfra_api_key: '%env(DEEPINFRA_API_KEY)%'
-    
+    RECAPTCHA_SITE_KEY: '%env(RECAPTCHA_SITE_KEY)%'
     stripe_secret_key: 'sk_test_51R6XfmCvMipSUHQuaVylRxEIETrWqy4OtYXPBegkEIcFhkUUkByDt8EixxdDNh1ekcHSdVAUGNRr7BUsfXFEc5VX00CqsNejm0'
     stripe_public_key: 'pk_test_51R6XfmCvMipSUHQuBPuvGSEoyT4USxinzYkBENoYz4C2LSYzsB46fd6CgJaXzAtDOUP7prhW651vB3CP6CM9PgvL009edX6abt'
     deepinfra_api_key: '%env(DEEPINFRA_API_KEY)%'
-    
-    stripe_secret_key: 'sk_test_51R6XfmCvMipSUHQuaVylRxEIETrWqy4OtYXPBegkEIcFhkUUkByDt8EixxdDNh1ekcHSdVAUGNRr7BUsfXFEc5VX00CqsNejm0'
-    stripe_public_key: 'pk_test_51R6XfmCvMipSUHQuBPuvGSEoyT4USxinzYkBENoYz4C2LSYzsB46fd6CgJaXzAtDOUP7prhW651vB3CP6CM9PgvL009edX6abt'
-    deepinfra_api_key: '%env(DEEPINFRA_API_KEY)%'
-    
-    stripe_secret_key: 'sk_test_51R6XfmCvMipSUHQuaVylRxEIETrWqy4OtYXPBegkEIcFhkUUkByDt8EixxdDNh1ekcHSdVAUGNRr7BUsfXFEc5VX00CqsNejm0'
-    stripe_public_key: 'pk_test_51R6XfmCvMipSUHQuBPuvGSEoyT4USxinzYkBENoYz4C2LSYzsB46fd6CgJaXzAtDOUP7prhW651vB3CP6CM9PgvL009edX6abt'
+   
 services:
-    
-    
-      # default configuration for services in *this* file
-
-
-
-
-
-
-    # default configuration for services in *this* file
-
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true
+        autoconfigure: true
 
     App\Controller\AdminReclamationController:
+        arguments:
+            $logger: '@monolog.logger'
+
+    App\Service\TranslationService:
         arguments:
             $logger: '@monolog.logger'
 
     App\Service\EmailUniquenessValidator:
         arguments:
             $entityManager: '@doctrine.orm.entity_manager'
+
     App\Security\ClientRegistry: ~
-    
+
     App\Service\EmailService:
         arguments:
             $mailer: '@mailer'
 
-    
-
-    
-
-    
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
         exclude:
@@ -66,40 +42,7 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
             - '../src/Tests/'
-    
-      # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-    
 
-    # Controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
     App\Service\StripeService:
         arguments:
             $stripeSecretKey: '%stripe_secret_key%'
-
-        
-
-    # Add any other service definitions below
-
-            - '../src/Tests/'
-
-    # Controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Service\StripeService:
-        arguments:
-            $stripeSecretKey: '%stripe_secret_key%'
-
-        
-
-    # Add any other service definitions below
-            - '../src/Tests/'
-
-    # Controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Service\StripeService:
-        arguments:
-            $stripeSecretKey: '%stripe_secret_key%'
-
-        
-
-    # Add any other service definitions below

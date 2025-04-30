@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Reclamation;
@@ -6,8 +7,10 @@ use App\Entity\Reponse;
 use App\Form\ReponseType;
 use App\Repository\ReclamationRepository;
 use App\Repository\ReponseRepository;
+use App\Service\TranslationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,7 +25,6 @@ class AdminReclamationController extends AbstractController
     {
         $this->logger = $logger;
     }
-
 
     #[Route('/', name: 'app_admin_reclamation_index', methods: ['GET', 'POST'])]
     public function index(
@@ -47,7 +49,6 @@ class AdminReclamationController extends AbstractController
                 $this->logger->error('Formulaire invalide', ['errors' => (string) $errors]);
                 $this->addFlash('error', 'Formulaire invalide. Vérifiez le champ de réponse.');
             } else {
-                // Use request->get() to safely handle array input
                 $selectedReclamations = $request->get('selected_reclamations', []);
                 if (!is_array($selectedReclamations)) {
                     $selectedReclamations = [];
@@ -72,17 +73,14 @@ class AdminReclamationController extends AbstractController
                             continue;
                         }
 
-                        // Create a new Reponse entity
                         $newReponse = new Reponse();
                         $newReponse->setMessage($reponse->getMessage());
                         $newReponse->setDateReponse(new \DateTime());
                         $newReponse->setAdmin($admin);
                         $newReponse->setReclamation($reclamation);
 
-                        // Update reclamation status
                         $reclamation->setStatut('Traitée');
 
-                        // Persist entities
                         $entityManager->persist($newReponse);
                         $entityManager->persist($reclamation);
                     }
@@ -104,7 +102,7 @@ class AdminReclamationController extends AbstractController
             'reclamations' => $reclamations,
             'reponses' => $reponses,
             'form' => $form->createView(),
-            'page_title' => 'Gestion des Réclamations',
+            'page_title' => 'Complaint Management',
         ]);
     }
 
@@ -114,7 +112,6 @@ class AdminReclamationController extends AbstractController
         ReponseRepository $reponseRepository,
         EntityManagerInterface $entityManager
     ): Response {
-        // Use request->get() to safely handle array input
         $selectedReponses = $request->get('selected_reponses', []);
         if (!is_array($selectedReponses)) {
             $selectedReponses = [];
@@ -141,5 +138,102 @@ class AdminReclamationController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin_reclamation_index');
+    }
+
+    #[Route('/translate-page', name: 'admin_reclamation_translate_page', methods: ['POST'])]
+    public function translatePage(
+        Request $request,
+        TranslationService $translationService,
+        ReclamationRepository $reclamationRepository,
+        ReponseRepository $reponseRepository
+    ): JsonResponse {
+        $targetLang = $request->request->get('lang', 'en');
+        if (!in_array($targetLang, ['en', 'fr', 'es', 'de', 'it'])) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid language'], 400);
+        }
+
+        // Static text to translate
+        $staticTexts = [
+            'page_title' => 'Complaint Management',
+            'page_subtitle' => 'Monitor and manage user complaints efficiently',
+            'total_complaints' => 'Total Complaints',
+            'pending_complaints' => 'Pending Complaints',
+            'processed_complaints' => 'Processed Complaints',
+            'complaints_list' => 'Complaints List',
+            'respond_to_complaints' => 'Respond to Complaints',
+            'response_message' => 'Response Message',
+            'send_response' => 'Send Response',
+            'type_response' => 'Type your response...',
+            'sent_responses' => 'Sent Responses',
+            'select_all' => 'Select All',
+            'delete_selected' => 'Delete Selected',
+            'no_complaints' => 'No complaints found',
+            'no_responses' => 'No responses found',
+            'confirm_deletion' => 'Confirm Deletion',
+            'delete_complaint_prompt' => 'Are you sure you want to delete this complaint? This action cannot be undone.',
+            'delete_responses_prompt' => 'Are you sure you want to delete the selected responses? This action cannot be undone.',
+            'cancel' => 'Cancel',
+            'delete' => 'Delete',
+            'translate_to_english' => 'Translate to English',
+            'translate_to_french' => 'Translate to French',
+            'translate_to_spanish' => 'Translate to Spanish',
+            'respond' => 'Respond',
+            'delete' => 'Delete',
+            'status_pending' => 'En attente',
+            'status_processed' => 'Traitée',
+            'flash_select_complaint' => 'Veuillez sélectionner au moins une réclamation.',
+            'flash_form_invalid' => 'Formulaire invalide. Vérifiez le champ de réponse.',
+            'flash_admin_not_logged' => 'Vous devez être connecté en tant qu\'admin.',
+            'flash_reclamation_not_found' => 'Réclamation introuvable.',
+            'flash_responses_sent' => 'Réponses envoyées avec succès.',
+            'flash_responses_error' => 'Erreur lors de l\'envoi des réponses.',
+            'flash_select_response' => 'Veuillez sélectionner au moins une réponse à supprimer.',
+            'flash_responses_deleted' => 'Réponses supprimées avec succès.',
+            'flash_responses_delete_error' => 'Erreur lors de la suppression des réponses.',
+        ];
+
+        // Dynamic text to translate
+        $reclamations = $reclamationRepository->findAll();
+        $reponses = $reponseRepository->findAll();
+        $dynamicTexts = [];
+
+        foreach ($reclamations as $index => $reclamation) {
+            $dynamicTexts["reclamation_{$reclamation->getId()}_sujet"] = $reclamation->getSujet();
+            $dynamicTexts["reclamation_{$reclamation->getId()}_description"] = $reclamation->getDescription();
+            $dynamicTexts["reclamation_{$reclamation->getId()}_user_nom"] = $reclamation->getUser()->getNom();
+            $dynamicTexts["reclamation_{$reclamation->getId()}_user_prenom"] = $reclamation->getUser()->getPrenom();
+            $dynamicTexts["reclamation_{$reclamation->getId()}_statut"] = $reclamation->getStatut();
+        }
+
+        foreach ($reponses as $index => $reponse) {
+            $dynamicTexts["reponse_{$reponse->getId()}_message"] = $reponse->getMessage();
+            $dynamicTexts["reponse_{$reponse->getId()}_admin_nom"] = $reponse->getAdmin()->getNom();
+            $dynamicTexts["reponse_{$reponse->getId()}_admin_prenom"] = $reponse->getAdmin()->getPrenom();
+            $dynamicTexts["reponse_{$reponse->getId()}_reclamation_sujet"] = $reponse->getReclamation()->getSujet();
+        }
+
+        // Combine static and dynamic texts
+        $textsToTranslate = array_merge($staticTexts, $dynamicTexts);
+        $textKeys = array_keys($textsToTranslate);
+        $textValues = array_values($textsToTranslate);
+
+        // Translate all texts
+        $translations = $translationService->translateBulk($textValues, $targetLang);
+        if ($translations === null) {
+            $this->logger->error('Échec de la traduction de la page', ['lang' => $targetLang]);
+            return new JsonResponse(['success' => false, 'error' => 'Translation failed. Please try again.'], 500);
+        }
+
+        // Map translations back to keys
+        $translatedTexts = [];
+        foreach ($textKeys as $index => $key) {
+            $translatedTexts[$key] = $translations[$index];
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'translations' => $translatedTexts,
+            'target_lang' => $targetLang,
+        ]);
     }
 }

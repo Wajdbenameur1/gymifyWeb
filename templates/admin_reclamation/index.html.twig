@@ -1,73 +1,88 @@
 {% extends 'admin/homepageadmin.html.twig' %}
 
-{% block title %}Complaints Management{% endblock %}
+{% block title %}
+    <span data-translate-key="page_title">Complaint Management</span>
+{% endblock %}
 
 {% block body %}
-    <div class="container py-5">
-        <div class="d-flex flex-column flex-md-row align-items-md-center mb-5">
+    <div class="container py-6">
+        {# Language Selector #}
+        <div class="mb-5">
+            <label for="language-select" class="form-label fw-medium text-gray-800">Select Language:</label>
+            <select id="language-select" class="form-select w-auto rounded-pill border-gray-300 shadow-sm">
+                <option value="en" selected>English</option>
+                <option value="fr">French</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+            </select>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row align-items-md-center mb-6">
             <div>
-                <h2 class="fw-bold text-dark mb-2">Complaints Management</h2>
-                <p class="text-secondary mb-0">Monitor and manage user complaints efficiently</p>
+                <h2 class="mb-3 fw-bold text-gray-900" data-translate-key="page_title">{{ page_title }}</h2>
+                <p class="text-gray-600 mb-0" data-translate-key="page_subtitle">Monitor and manage user complaints efficiently</p>
             </div>
         </div>
 
         {# Flash messages #}
         {% for message in app.flashes('success') %}
-            <div class="alert alert-blue alert-dismissible fade show rounded-4 border-0 shadow-sm">
-                {{ message }}
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm">
+                <span data-translate-key="flash_responses_sent">{{ message }}</span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
         {% for message in app.flashes('warning') %}
-            <div class="alert alert-blue-light alert-dismissible fade show rounded-4 border-0 shadow-sm">
-                {{ message }}
+            <div class="alert alert-warning alert-dismissible fade show rounded-3 shadow-sm">
+                <span data-translate-key="flash_select_complaint">{{ message }}</span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
         {% for message in app.flashes('error') %}
-            <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm">
-                {{ message }}
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm">
+                <span data-translate-key="flash_form_invalid">{{ message }}</span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
 
         {# Stats Section #}
-        <div class="row mb-5 g-4">
+        <div переживает за это время, пока не будет вызвана функция `render` для этого блока.
+        <div class="row mb-6 g-4">
             <div class="col-12 col-md-4">
-                <div class="p-4 rounded-4 bg-blue-100 h-100 shadow-sm">
+                <div class="card h-100 shadow-sm border-0 rounded-3 bg-white p-4">
                     <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-blue-600 text-white rounded-circle me-3">
+                        <div class="icon-circle bg-primary text-white me-3">
                             <i class="fas fa-inbox fa-lg"></i>
                         </div>
                         <div>
-                            <h6 class="text-dark mb-1">Total Complaints</h6>
-                            <h3 class="text-dark mb-0">{{ reclamations|length }}</h3>
+                            <h6 class="text-gray-800 fw-medium mb-1" data-translate-key="total_complaints">Total Complaints</h6>
+                            <h3 class="text-gray-900 fw-bold mb-0">{{ reclamations|length }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-md-4">
-                <div class="p-4 rounded-4 bg-blue-50 h-100 shadow-sm">
+                <div class="card h-100 shadow-sm border-0 rounded-3 bg-white p-4">
                     <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-blue-400 text-white rounded-circle me-3">
+                        <div class="icon-circle bg-warning text-white me-3">
                             <i class="fas fa-exclamation-circle fa-lg"></i>
                         </div>
                         <div>
-                            <h6 class="text-dark mb-1">Pending Complaints</h6>
-                            <h3 class="text-dark mb-0">{{ reclamations|filter(r => r.statut == 'Pending')|length }}</h3>
+                            <h6 class="text-gray-800 fw-medium mb-1" data-translate-key="pending_complaints">Pending Complaints</h6>
+                            <h3 class="text-gray-900 fw-bold mb-0">{{ reclamations|filter(r => r.statut == 'En attente')|length }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-md-4">
-                <div class="p-4 rounded-4 bg-blue-200 h-100 shadow-sm">
+                <div class="card h-100 shadow-sm border-0 rounded-3 bg-white p-4">
                     <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-blue-700 text-white rounded-circle me-3">
+                        <div class="icon-circle bg-success text-white me-3">
                             <i class="fas fa-check-circle fa-lg"></i>
                         </div>
                         <div>
-                            <h6 class="text-dark mb-1">Processed Complaints</h6>
-                            <h3 class="text-dark mb-0">{{ reclamations|filter(r => r.statut == 'Processed')|length }}</h3>
+                            <h6 class="text-gray-800 fw-medium mb-1" data-translate-key="processed_complaints">Processed Complaints</h6>
+                            <h3 class="text-gray-900 fw-bold mb-0">{{ reclamations|filter(r => r.statut == 'Traitée')|length }}</h3>
                         </div>
                     </div>
                 </div>
@@ -75,15 +90,15 @@
         </div>
 
         {# Complaints List #}
-        <div class="mb-5">
+        <div class="mb-6">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="mb-0 text-blue-600">Complaints List</h5>
+                <h5 class="mb-0 text-primary fw-semibold" data-translate-key="complaints_list">Complaints List</h5>
             </div>
             
             <form method="post" action="{{ path('app_admin_reclamation_index') }}" id="reclamationForm">
-                <div class="list-group mb-4 rounded-4 overflow-hidden shadow-sm">
+                <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
                     {% for reclamation in reclamations %}
-                        <div class="list-group-item border-0 py-4 px-4 {% if loop.index is odd %}bg-blue-50{% else %}bg-white{% endif %}">
+                        <div class="list-group-item border-0 p-4 {% if loop.index is odd %}bg-gray-50{% else %}bg-white{% endif %}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="form-check me-3">
                                     <input type="checkbox" name="selected_reclamations[]" value="{{ reclamation.id }}"
@@ -91,57 +106,62 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="fw-bold text-dark mb-0">{{ reclamation.sujet }}</h6>
+                                        <h6 class="fw-bold text-gray-900 mb-0" data-translate-key="reclamation_{{ reclamation.id }}_sujet">{{ reclamation.sujet }}</h6>
                                         <span class="badge
-                                            {% if reclamation.statut == 'Pending' %}bg-blue-400
-                                            {% elseif reclamation.statut == 'Processed' %}bg-blue-600
-                                            {% else %}bg-blue-500{% endif %} text-white">
+                                            {% if reclamation.statut == 'En attente' %}bg-warning
+                                            {% elseif reclamation.statut == 'Traitée' %}bg-success
+                                            {% else %}bg-primary{% endif %} text-white"
+                                            data-translate-key="reclamation_{{ reclamation.id }}_statut">
                                             {{ reclamation.statut }}
                                         </span>
                                     </div>
-                                    <p class="text-secondary mb-2">
+                                    <p class="text-gray-600 mb-2" data-translate-key="reclamation_{{ reclamation.id }}_description">
                                         {{ reclamation.description|slice(0, 120) ~ (reclamation.description|length > 120 ? '...' : '') }}
                                     </p>
-                                    <div class="d-flex flex-wrap gap-3 text-muted small">
-                                        <span><i class="fas fa-user me-1"></i> {{ reclamation.user.nom }} {{ reclamation.user.prenom }}</span>
+                                    <div class="d-flex flex-wrap gap-3 text-gray-500 small">
+                                        <span>
+                                            <i class="fas fa-user me-1"></i>
+                                            <span data-translate-key="reclamation_{{ reclamation.id }}_user_nom">{{ reclamation.user.nom }}</span>
+                                            <span data-translate-key="reclamation_{{ reclamation.id }}_user_prenom">{{ reclamation.user.prenom }}</span>
+                                        </span>
                                         <span><i class="fas fa-calendar-alt me-1"></i> {{ reclamation.dateCreation|date('d/m/Y H:i') }}</span>
                                     </div>
                                 </div>
                                 <div class="d-flex gap-2 ms-3">
-                                    <button type="button" class="btn btn-sm btn-blue-600 rounded-pill respond-btn"
-                                            data-reclamation-id="{{ reclamation.id }}" title="Respond">
+                                    <button type="button" class="btn btn-sm btn-primary rounded-pill respond-btn"
+                                            data-reclamation-id="{{ reclamation.id }}" title="Respond" data-translate-title="respond">
                                         <i class="fas fa-comment"></i>
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-danger rounded-pill delete-reclamation-btn"
                                             data-reclamation-id="{{ reclamation.id }}"
-                                            data-csrf-token="{{ csrf_token('delete_reclamation' ~ reclamation.id) }}" title="Delete">
+                                            data-csrf-token="{{ csrf_token('delete_reclamation' ~ reclamation.id) }}" title="Delete" data-translate-title="delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     {% else %}
-                        <div class="list-group-item border-0 py-5 text-center text-secondary">
+                        <div class="list-group-item border-0 py-5 text-center text-gray-500">
                             <i class="fas fa-info-circle fa-2x mb-3"></i>
-                            <p class="mb-0">No complaints found</p>
+                            <p class="mb-0" data-translate-key="no_complaints">No complaints found</p>
                         </div>
                     {% endfor %}
                 </div>
 
                 {# Response Form #}
-                <div class="mt-5">
-                    <h5 class="mb-4 text-blue-600">Respond to Complaints</h5>
-                    <div class="bg-white p-4 rounded-4 shadow-sm">
+                <div class="mt-6">
+                    <h5 class="mb-4 text-primary fw-semibold" data-translate-key="respond_to_complaints">Respond to Complaints</h5>
+                    <div class="card shadow-sm border-0 rounded-3 p-4">
                         {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
                             {{ form_errors(form) }}
                             {{ form_row(form.message, {
                                 'label': 'Response Message',
-                                'attr': {'class': 'form-control rounded-4 border-blue-200', 'rows': 4, 'placeholder': 'Type your response...'},
-                                'label_attr': {'class': 'form-label fw-semibold text-dark'}
+                                'attr': {'class': 'form-control rounded-3 border-gray-300 shadow-sm', 'rows': 4, 'placeholder': 'Type your response...', 'data-translate-placeholder': 'type_response'},
+                                'label_attr': {'class': 'form-label fw-medium text-gray-800', 'data-translate-key': 'response_message'}
                             }) }}
                             {{ form_row(form.submit, {
                                 'label': 'Send Response',
-                                'attr': {'class': 'btn btn-blue-600 rounded-pill mt-3'}
+                                'attr': {'class': 'btn btn-primary rounded-pill mt-3', 'data-translate-label': 'send_response'}
                             }) }}
                         {{ form_end(form) }}
                     </div>
@@ -152,42 +172,53 @@
         {# Responses List #}
         <div>
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="mb-0 text-blue-600">Sent Responses</h5>
+                <h5 class="mb-0 text-primary fw-semibold" data-translate-key="sent_responses">Sent Responses</h5>
                 <div>
-                    <button type="button" class="btn btn-outline-blue-600 rounded-pill me-2" id="selectAllResponses">
+                    <button type="button" class="btn btn-outline-primary rounded-pill me-2" id="selectAllResponses"
+                            data-translate-key="select_all">
                         <i class="fas fa-check me-1"></i> Select All
                     </button>
-                    <button type="button" class="btn btn-outline-danger rounded-pill" id="deleteSelectedResponses" title="Delete Selected">
+                    <button type="button" class="btn btn-outline-danger rounded-pill" id="deleteSelectedResponses" title="Delete Selected"
+                            data-translate-title="delete_selected">
                         <i class="fas fa-trash me-1"></i> Delete Selected
                     </button>
                 </div>
             </div>
             
             <form method="post" action="{{ path('app_admin_reponse_delete') }}" id="deleteResponsesForm">
-                <div class="list-group rounded-4 overflow-hidden shadow-sm">
+                <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
                     {% for reponse in reponses %}
-                        <div class="list-group-item border-0 py-4 px-4 {% if loop.index is odd %}bg-blue-50{% else %}bg-white{% endif %}">
+                        <div class="list-group-item border-0 p-4 {% if loop.index is odd %}bg-gray-50{% else %}bg-white{% endif %}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="form-check me-3">
                                     <input type="checkbox" name="selected_reponses[]" value="{{ reponse.id }}"
                                            class="reponse-checkbox form-check-input">
                                 </div>
                                 <div class="flex-grow-1">
-                                    <p class="text-secondary mb-2">
+                                    <p class="text-gray-600 mb-2" data-translate-key="reponse_{{ reponse.id }}_message">
                                         {{ reponse.message|slice(0, 120) ~ (reponse.message|length > 120 ? '...' : '') }}
                                     </p>
-                                    <div class="d-flex flex-wrap gap-3 text-muted small">
-                                        <span><i class="fas fa-user me-1"></i> {{ reponse.admin.nom }} {{ reponse.admin.prenom }}</span>
+                                    <div class="d-flex flex-wrap gap-3 text-gray-500 small">
+                                        <span>
+                                            <i class="fas fa-user me-1"></i>
+                                            <span data-translate-key="reponse_{{ reponse.id }}_admin_nom">{{ reponse.admin.nom }}</span>
+                                            <span data-translate-key="reponse_{{ reponse.id }}_admin_prenom">{{ reponse.admin.prenom }}</span>
+                                        </span>
                                         <span><i class="fas fa-calendar-alt me-1"></i> {{ reponse.dateReponse|date('d/m/Y H:i') }}</span>
-                                        <span><i class="fas fa-link me-1"></i> {{ reponse.reclamation.sujet|slice(0, 25) ~ (reponse.reclamation.sujet|length > 25 ? '...' : '') }}</span>
+                                        <span>
+                                            <i class="fas fa-link me-1"></i>
+                                            <span data-translate-key="reponse_{{ reponse.id }}_reclamation_sujet">
+                                                {{ reponse.reclamation.sujet|slice(0, 25) ~ (reponse.reclamation.sujet|length > 25 ? '...' : '') }}
+                                            </span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     {% else %}
-                        <div class="list-group-item border-0 py-5 text-center text-secondary">
+                        <div class="list-group-item border-0 py-5 text-center text-gray-500">
                             <i class="fas fa-info-circle fa-2x mb-3"></i>
-                            <p class="mb-0">No responses found</p>
+                            <p class="mb-0" data-translate-key="no_responses">No responses found</p>
                         </div>
                     {% endfor %}
                 </div>
@@ -198,19 +229,19 @@
         {# Delete Confirmation Modal for Complaints #}
         <div class="modal fade" id="deleteReclamationModal" tabindex="-1" aria-labelledby="deleteReclamationModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content rounded-4 border-0 shadow-sm">
+                <div class="modal-content rounded-3 border-0 shadow-sm">
                     <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-semibold text-blue-600" id="deleteReclamationModalLabel">Confirm Deletion</h5>
+                        <h5 class="modal-title fw-semibold text-primary" id="deleteReclamationModalLabel" data-translate-key="confirm_deletion">Confirm Deletion</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" data-translate-key="delete_complaint_prompt">
                         Are you sure you want to delete this complaint? This action cannot be undone.
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-outline-blue-600 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-primary rounded-pill" data-bs-dismiss="modal" data-translate-key="cancel">Cancel</button>
                         <form id="deleteReclamationForm" method="POST" action="">
                             <input type="hidden" name="_token" value="">
-                            <button type="submit" class="btn btn-danger rounded-pill">Delete</button>
+                            <button type="submit" class="btn btn-danger rounded-pill" data-translate-key="delete">Delete</button>
                         </form>
                     </div>
                 </div>
@@ -220,17 +251,17 @@
         {# Delete Confirmation Modal for Responses #}
         <div class="modal fade" id="deleteResponsesModal" tabindex="-1" aria-labelledby="deleteResponsesModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content rounded-4 border-0 shadow-sm">
+                <div class="modal-content rounded-3 border-0 shadow-sm">
                     <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-semibold text-blue-600" id="deleteResponsesModalLabel">Confirm Deletion</h5>
+                        <h5 class="modal-title fw-semibold text-primary" id="deleteResponsesModalLabel" data-translate-key="confirm_deletion">Confirm Deletion</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" data-translate-key="delete_responses_prompt">
                         Are you sure you want to delete the selected responses? This action cannot be undone.
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-outline-blue-600 rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger rounded-pill" form="deleteResponsesForm">Delete</button>
+                        <button type="button" class="btn btn-outline-primary rounded-pill" data-bs-dismiss="modal" data-translate-key="cancel">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill" form="deleteResponsesForm" data-translate-key="delete">Delete</button>
                     </div>
                 </div>
             </div>
@@ -239,140 +270,167 @@
 
     <style>
         body {
-            background-color: #f5f7fa;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            background-color: #f8fafc;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1f2937;
         }
         .container {
-            max-width: 1400px;
+            max-width: 1440px;
         }
-        .rounded-4 {
-            border-radius: 1rem !important;
+        .rounded-3 {
+            border-radius: 0.75rem !important;
         }
-        .text-dark {
-            color: #1a202c !important;
+        .rounded-pill {
+            border-radius: 50rem !important;
         }
-        .text-secondary {
+        .text-gray-900 {
+            color: #1f2937 !important;
+        }
+        .text-gray-800 {
+            color: #374151 !important;
+        }
+        .text-gray-600 {
             color: #6b7280 !important;
         }
-        .text-blue-600 {
-            color: #2563eb !important;
+        .text-gray-500 {
+            color: #9ca3af !important;
         }
-        .bg-blue-50 {
-            background-color: #dbeafe !important;
+        .bg-gray-50 {
+            background-color: #f9fafb !important;
         }
-        .bg-blue-100 {
-            background-color: #bfdbfe !important;
-        }
-        .bg-blue-200 {
-            background-color: #93c5fd !important;
-        }
-        .bg-blue-400 {
-            background-color: #60a5fa !important;
-        }
-        .bg-blue-500 {
+        .bg-primary {
             background-color: #3b82f6 !important;
         }
-        .bg-blue-600 {
-            background-color: #2563eb !important;
+        .bg-success {
+            background-color: #10b981 !important;
         }
-        .bg-blue-700 {
-            background-color: #1d4ed8 !important;
+        .bg-warning {
+            background-color: #f59e0b !important;
         }
-        .border-blue-200 {
-            border-color: #93c5fd !important;
+        .border-gray-300 {
+            border-color: #d1d5db !important;
         }
-        .btn-blue-600 {
-            background-color: #2563eb;
-            border-color: #2563eb;
+        .btn-primary {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
             color: #ffffff;
         }
-        .btn-blue-600:hover {
-            background-color: #1d4ed8;
-            border-color: #1d4ed8;
-        }
-        .btn-outline-blue-600 {
-            border-color: #2563eb;
-            color: #2563eb;
-        }
-        .btn-outline-blue-600:hover {
-            background-color: #dbeafe;
+        .btn-primary:hover {
+            background-color: #2563eb;
             border-color: #2563eb;
         }
-        .alert-blue {
-            background-color: #bfdbfe;
-            color: #1e40af;
-            border-color: #93c5fd;
+        .btn-outline-primary {
+            border-color: #3b82f6;
+            color: #3b82f6;
         }
-        .alert-blue-light {
-            background-color: #dbeafe;
-            color: #1e40af;
-            border-color: #bfdbfe;
+        .btn-outline-primary:hover {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
         }
-        .icon-shape {
-            width: 40px;
-            height: 40px;
+        .btn-outline-danger {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .btn-outline-danger:hover {
+            background-color: #fef2f2;
+            border-color: #ef4444;
+        }
+        .alert-success {
+            background-color: #ecfdf5;
+            color: #064e3b;
+            border-color: #6ee7b7;
+        }
+        .alert-warning {
+            background-color: #fefce8;
+            color: #713f12;
+            border-color: #facc15;
+        }
+        .alert-danger {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border-color: #f87171;
+        }
+        .icon-circle {
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%;
         }
         .btn {
             font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-sm {
             padding: 0.5rem 1rem;
-            transition: all 0.2s ease;
+            font-size: 0.875rem;
         }
-        .form-control {
-            border-radius: 0.75rem;
-            border: 1px solid #e2e8f0;
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
             box-shadow: none;
-            transition: border-color 0.2s ease;
+            transition: all 0.3s ease;
         }
-        .form-control:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
         .form-check-input {
-            border-radius: 4px;
+            border-radius: 0.25rem;
             cursor: pointer;
         }
         .badge {
             font-size: 0.75rem;
-            padding: 0.4em 0.8em;
+            padding: 0.5em 1em;
             border-radius: 0.5rem;
+            font-weight: 500;
         }
-        .alert {
-            border-radius: 1rem;
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .modal-content {
-            border-radius: 1rem;
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         .list-group-item {
-            transition: background-color 0.2s ease;
+            transition: background-color 0.3s ease;
         }
         .list-group-item:hover {
-            background-color: #dbeafe !important;
+            background-color: #eff6ff !important;
         }
         h2 {
-            font-size: 2rem;
+            font-size: 2.25rem;
+            font-weight: 700;
         }
         h5 {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
         h6 {
-            font-size: 1rem;
+            font-size: 1.125rem;
+        }
+        .modal-content {
+            border-radius: 0.75rem;
         }
         @media (max-width: 576px) {
             .btn-sm {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.75rem;
+                padding: 0.375rem 0.75rem;
+                font-size: 0.8125rem;
             }
             .list-group-item {
-                padding: 1rem;
+                padding: 1.25rem;
             }
             h2 {
-                font-size: 1.5rem;
+                font-size: 1.75rem;
             }
             h5 {
-                font-size: 1rem;
+                font-size: 1.25rem;
+            }
+            .icon-circle {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -380,10 +438,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Enable tooltips
-            document.querySelectorAll('[title]').forEach(el => new bootstrap.Tooltip(el));
+            document.querySelectorAll('[title]').forEach(el => {
+                new bootstrap.Tooltip(el);
+            });
 
             // Select all responses
-            document.getElementById('selectAllResponses')?.addEventListener('click', function() {
+            document.getElementById('selectAllResponses').addEventListener('click', function() {
                 const checkboxes = document.querySelectorAll('.reponse-checkbox');
                 const allChecked = Array.from(checkboxes).every(cb => cb.checked);
                 checkboxes.forEach(cb => cb.checked = !allChecked);
@@ -404,7 +464,7 @@
 
             // Delete confirmation modal for responses
             const deleteResponsesModal = new bootstrap.Modal(document.getElementById('deleteResponsesModal'));
-            document.getElementById('deleteSelectedResponses')?.addEventListener('click', function(e) {
+            document.getElementById('deleteSelectedResponses').addEventListener('click', function(e) {
                 e.preventDefault();
                 const checked = document.querySelectorAll('input[name="selected_reponses[]"]:checked').length;
                 if (checked === 0) {
@@ -432,6 +492,77 @@
                     e.preventDefault();
                     alert('Please select at least one complaint.');
                 }
+            });
+
+            // Language selector
+            const languageSelect = document.getElementById('language-select');
+            languageSelect.addEventListener('change', function() {
+                const lang = this.value;
+                const loadingIndicator = document.createElement('span');
+                loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                languageSelect.disabled = true;
+                languageSelect.parentNode.appendChild(loadingIndicator);
+
+                fetch('/admin/reclamation/translate-page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: `lang=${lang}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    languageSelect.disabled = false;
+                    loadingIndicator.remove();
+
+                    if (data.success) {
+                        // Update text elements
+                        document.querySelectorAll('[data-translate-key]').forEach(element => {
+                            const key = element.getAttribute('data-translate-key');
+                            if (data.translations[key]) {
+                                element.textContent = data.translations[key];
+                            }
+                        });
+
+                        // Update title attributes
+                        document.querySelectorAll('[data-translate-title]').forEach(element => {
+                            const key = element.getAttribute('data-translate-title');
+                            if (data.translations[key]) {
+                                element.setAttribute('title', data.translations[key]);
+                                // Refresh tooltip if it exists
+                                const tooltip = bootstrap.Tooltip.getInstance(element);
+                                if (tooltip) {
+                                    tooltip.setContent({ '.tooltip-inner': data.translations[key] });
+                                }
+                            }
+                        });
+
+                        // Update placeholder attributes
+                        document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                            const key = element.getAttribute('data-translate-placeholder');
+                            if (data.translations[key]) {
+                                element.setAttribute('placeholder', data.translations[key]);
+                            }
+                        });
+
+                        // Update button labels
+                        document.querySelectorAll('[data-translate-label]').forEach(element => {
+                            const key = element.getAttribute('data-translate-label');
+                            if (data.translations[key]) {
+                                element.textContent = data.translations[key];
+                            }
+                        });
+                    } else {
+                        alert(data.error || 'Translation failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    languageSelect.disabled = false;
+                    loadingIndicator.remove();
+                    alert('Error during translation: ' + error.message);
+                    console.error('Translation error:', error);
+                });
             });
         });
     </script>
