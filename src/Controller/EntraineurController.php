@@ -15,6 +15,8 @@ use App\Enum\ObjectifCours;
 use Google_Client;
 use Google_Service_Calendar;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Security\Core\Security;
+
 
 final class EntraineurController extends AbstractController
 {
@@ -24,8 +26,11 @@ final class EntraineurController extends AbstractController
         EntityManagerInterface $entityManager,
         SessionInterface $session
     ): Response {
+        /** @var \App\Entity\User|null $user */
+        $user = $this->getUser();
+
         $coursRepository = $entityManager->getRepository(Cours::class);
-        $coursList = $coursRepository->findAll();
+        $coursList = $coursRepository->findAll(['entaineur' => $user]);
 
         $events = [];
 

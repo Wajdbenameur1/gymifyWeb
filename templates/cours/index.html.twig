@@ -14,7 +14,10 @@
             </a>
         </div>
 
-        {# Calendrier amélioré #}
+        <!-- Champ de recherche -->
+        
+
+        <!-- Calendrier amélioré -->
         <div class="calendar-container mb-4">
             <div class="swiper calendar-swiper">
                 <div class="swiper-wrapper">
@@ -22,7 +25,10 @@
                         <div class="swiper-slide calendar-day 
                             {% if jour|date('Y-m-d') == "now"|date('Y-m-d') %}active{% endif %}
                             {% if jour|date('Y-m-d') in datesAvecCours %}has-cours{% endif %}" 
-                             data-date="{{ jour|date('Y-m-d') }}">
+                            data-date="{{ jour|date('Y-m-d') }}"
+                            role="button"
+                            aria-label="Sélectionner le {{ jour|date('d F Y') }}"
+                            tabindex="0">
                             <div class="day-name">{{ jour|date('D')|trans }}</div>
                             <div class="day-number">{{ jour|date('d') }}</div>
                             <div class="day-month">{{ jour|date('M')|trans }}</div>
@@ -55,6 +61,7 @@
                                     <th class="py-3">Heures</th>
                                     <th class="py-3">Activité</th>
                                     <th class="py-3">Salle</th>
+                                    <th class="py-3">État</th>
                                     <th class="pe-4 py-3 text-end">Actions</th>
                                 </tr>
                             </thead>
@@ -97,18 +104,28 @@
                                         <td class="py-3">
                                             <span class="text-sm">{{ cour.salle.nom }}</span>
                                         </td>
+                                        <td class="py-3">
+                                            <span class="badge 
+                                                {% if cour.etat == 'Terminé' %}bg-danger
+                                                {% elseif cour.etat starts with 'Début il y a' %}bg-success
+                                                {% elseif cour.etat starts with 'Début dans' %}bg-warning
+                                                {% else %}bg-info{% endif %}">
+                                                {{ cour.etat }}
+                                            </span>
+                                        </td>
                                         <td class="pe-4 py-3 text-end">
                                             <div class="btn-group">
                                                 <a href="{{ path('app_cours_edit', {'id': cour.id}) }}" 
                                                    class="btn btn-sm btn-outline-primary rounded-circle me-1" 
-                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
+                                                   title="Modifier">
                                                     <i class="fas fa-pencil-alt"></i>
                                                 </a>
-                                                <form action="{{ path('app_cours_delete', {'id': cour.id}) }}" method="POST" class="d-inline">
+                                                <form action="{{ path('app_cours_delete', {'id': cour.id}) }}" method="POST" class="d-inline" id="deleteForm{{ cour.id }}">
                                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cour.id) }}">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" 
-                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer"
-                                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" 
+                                                            data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                                            data-form-id="deleteForm{{ cour.id }}"
+                                                            title="Supprimer">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -130,6 +147,25 @@
                 {% endif %}
             </div>
         </div>
+
+        <!-- Modal de confirmation -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Êtes-vous sûr de vouloir supprimer ce cours ?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Supprimer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
@@ -137,7 +173,6 @@
     {{ parent() }}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <style>
-        /* Styles pour le calendrier */
         .calendar-container {
             background: #fff;
             border-radius: 12px;
@@ -218,7 +253,6 @@
             font-weight: bold;
         }
         
-        /* Autres styles */
         .bg-primary-soft {
             background-color: rgba(70, 127, 207, 0.1) !important;
         }
@@ -246,6 +280,19 @@
             align-items: center;
             justify-content: center;
         }
+
+        @media (max-width: 576px) {
+            .calendar-day {
+                width: 50px !important;
+                height: 70px;
+            }
+            .day-name, .day-month {
+                font-size: 10px;
+            }
+            .day-number {
+                font-size: 18px;
+            }
+        }
     </style>
 {% endblock %}
 
@@ -253,85 +300,81 @@
     {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-    function filterCourses() {
-        const searchTerm = document.getElementById('globalSearchInput').value.toLowerCase();
-        const selectedDate = document.querySelector('.calendar-day.active')?.getAttribute('data-date') || 'all';
-        
-        document.querySelectorAll('tbody tr').forEach(row => {
-            const rowDate = row.getAttribute('data-date');
-            const rowText = row.textContent.toLowerCase();
-            
-            const dateMatch = selectedDate === 'all' || rowDate === selectedDate;
-            const searchMatch = rowText.includes(searchTerm);
-            
-            row.style.display = (dateMatch && searchMatch) ? '' : 'none';
-        });
-    }
+        function filterCourses() {
+            const searchTerm = document.getElementById('globalSearchInput')?.value.toLowerCase() || '';
+            const selectedDate = document.querySelector('.calendar-day.active')?.getAttribute('data-date') || 'all';
 
-    // Écouteurs d'événements
-    document.getElementById('globalSearchInput').addEventListener('input', filterCourses);
-    document.querySelectorAll('.calendar-day').forEach(day => {
-        day.addEventListener('click', filterCourses);
-    });
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const rowDate = row.getAttribute('data-date');
+                const rowText = row.textContent.toLowerCase();
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Activer les tooltips Bootstrap
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-        
-        // Initialiser le Swiper
-        const calendarSwiper = new Swiper('.calendar-swiper', {
-            slidesPerView: 'auto',
-            spaceBetween: 10,
-            centeredSlides: false,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            breakpoints: {
-                768: {
-                    slidesPerView: 'auto',
-                    spaceBetween: 10,
-                },
-                992: {
-                    slidesPerView: 'auto',
-                    spaceBetween: 10,
-                }
-            }
-        })
-        
-        // Gestion du clic sur les jours
-        document.querySelectorAll('.calendar-day').forEach(day => {
-            day.addEventListener('click', function() {
-                // Retirer la classe active de tous les jours
-                document.querySelectorAll('.calendar-day').forEach(d => {
-                    d.classList.remove('active')
-                })
-                
-                // Ajouter la classe active au jour cliqué
-                this.classList.add('active')
-                
-                // Filtrer les cours par date
-                const selectedDate = this.getAttribute('data-date')
-                document.querySelectorAll('tbody tr').forEach(row => {
-                    const rowDate = row.getAttribute('data-date')
-                    if (selectedDate === 'all' || rowDate === selectedDate) {
-                        row.style.display = ''
-                    } else {
-                        row.style.display = 'none'
-                    }
-                })
-            })
-        })
-        
-        // Centrer le jour actuel dans le Swiper
-        const todaySlide = document.querySelector('.calendar-day.active')
-        if (todaySlide) {
-            const slideIndex = Array.from(todaySlide.parentNode.children).indexOf(todaySlide)
-            calendarSwiper.slideTo(slideIndex)
+                const dateMatch = selectedDate === 'all' || rowDate === selectedDate;
+                const searchMatch = searchTerm === '' || rowText.includes(searchTerm);
+
+                row.style.display = (dateMatch && searchMatch) ? '' : 'none';
+            });
         }
-    })
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Activer les tooltips Bootstrap
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialiser le Swiper
+            const calendarSwiper = new Swiper('.calendar-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 10,
+                centeredSlides: false,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    768: { slidesPerView: 'auto', spaceBetween: 10 },
+                    992: { slidesPerView: 'auto', spaceBetween: 10 }
+                }
+            });
+
+            // Gestion du clic et du clavier sur les jours
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.addEventListener('click', function() {
+                    document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('active'));
+                    this.classList.add('active');
+                    filterCourses();
+                });
+                day.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('active'));
+                        this.classList.add('active');
+                        filterCourses();
+                    }
+                });
+            });
+
+            // Centrer le jour actuel dans le Swiper
+            const todaySlide = document.querySelector('.calendar-day.active');
+            if (todaySlide) {
+                const slideIndex = Array.from(todaySlide.parentNode.children).indexOf(todaySlide);
+                calendarSwiper.slideTo(slideIndex);
+            }
+
+            // Gestion du modal de suppression
+            document.querySelectorAll('[data-bs-target="#deleteModal"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const formId = this.getAttribute('data-form-id');
+                    document.getElementById('confirmDelete').onclick = function() {
+                        document.getElementById(formId).submit();
+                    };
+                });
+            });
+
+            // Appel initial du filtrage
+            filterCourses();
+        });
+
+        // Écouteur pour la recherche
+        document.getElementById('globalSearchInput')?.addEventListener('input', filterCourses);
     </script>
 {% endblock %}

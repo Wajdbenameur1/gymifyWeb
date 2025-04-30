@@ -21,6 +21,7 @@
         "hwi/oauth-bundle": "*",
         "knplabs/knp-paginator-bundle": "^6.8",
         "knplabs/knp-snappy-bundle": "^1.10",
+        "knplabs/knp-time-bundle": "^2.4",
         "knpuniversity/oauth2-client-bundle": "*",
         "league/oauth2-google": "*",
         "phpdocumentor/reflection-docblock": "^5.6",
@@ -48,6 +49,7 @@
         "symfony/runtime": "6.4.*",
         "symfony/security-bundle": "6.4.*",
         "symfony/serializer": "6.4.*",
+        "symfony/slack-notifier": "6.4.*",
         "symfony/stimulus-bundle": "^2.23",
         "symfony/string": "6.4.*",
         "symfony/translation": "6.4.*",
@@ -58,6 +60,7 @@
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
+        "twig/intl-extra": "^3.20",
         "twig/twig": "^3.20"
     },
     "config": {
