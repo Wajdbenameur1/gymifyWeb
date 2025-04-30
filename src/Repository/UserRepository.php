@@ -117,5 +117,39 @@ class UserRepository extends ServiceEntityRepository
             throw $e;
         }
     }
+    public function getUserCountByRole(): array
+    {
+        return [
+            'sportif' => (int) $this->createQueryBuilder('u')
+                ->select('COUNT(u.id)')
+                ->where('u INSTANCE OF \App\Entity\Sportif')
+                ->getQuery()
+                ->getSingleScalarResult(),
     
-}
+            'entraineur' => (int) $this->createQueryBuilder('u')
+                ->select('COUNT(u.id)')
+                ->where('u INSTANCE OF \App\Entity\Entraineur')
+                ->getQuery()
+                ->getSingleScalarResult(),
+    
+            'admin' => (int) $this->createQueryBuilder('u')
+                ->select('COUNT(u.id)')
+                ->where('u INSTANCE OF \App\Entity\Admin')
+                ->getQuery()
+                ->getSingleScalarResult(),
+    
+            'responsable_salle' => (int) $this->createQueryBuilder('u')
+                ->select('COUNT(u.id)')
+                ->where('u INSTANCE OF \App\Entity\ResponsableSalle')
+                ->getQuery()
+                ->getSingleScalarResult(),
+        ];
+    }
+    public function save(User $user): void
+    {
+        $entityManager = $this->getEntityManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+    }
+    }
+

@@ -17,17 +17,19 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
-
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
     public const LOGIN_ROUTE = 'app_login';
-
+    private HttpClientInterface $client;
     public function __construct(
         private UserRepository $userRepository,
-        private UrlGeneratorInterface $urlGenerator
-    ) {}
+        private UrlGeneratorInterface $urlGenerator,
+        HttpClientInterface $client 
+        // Ajoute cette dépendance
+        ) {}
 
     public function authenticate(Request $request): Passport
     {
@@ -43,6 +45,10 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
                 $user = $this->userRepository->findOneBy(['email' => $identifier]);
                 if (!$user) {
                     throw new AuthenticationException('Utilisateur non trouvé.');
+                }
+                  // ❌ Vérifie si l'utilisateur est bloqué
+                if ($user->isBlocked()) {
+                    throw new AuthenticationException('Votre compte est bloqué. Veuillez contacter un administrateur.');
                 }
                 return $user;
             }),

@@ -1,24 +1,26 @@
 {% extends 'admin/homepageadmin.html.twig' %}
 
-{% block title %}User List{% endblock %}
+{% block title %}Liste des utilisateurs{% endblock %}
 
 {% block body %}
     <div class="container-fluid px-4 py-5">
+        <!-- En-tête -->
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
-                <h1 class="fw-bold mb-2 text-primary"><i class="fas fa-users me-2"></i>User List</h1>
+                <h1 class="fw-bold mb-2 text-primary"><i class="fas fa-users me-2"></i>Liste des utilisateurs</h1>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb bg-light p-2 rounded shadow-sm">
-                        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Users</li>
+                        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}" class="text-decoration-none">Tableau de bord</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Utilisateurs</li>
                     </ol>
                 </nav>
             </div>
             <a href="{{ path('user_create') }}" class="btn btn-primary btn-lg rounded-pill">
-                <i class="fas fa-plus me-2"></i>Add User
+                <i class="fas fa-plus me-2"></i>Ajouter un utilisateur
             </a>
         </div>
 
+        <!-- Messages flash -->
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
@@ -28,22 +30,29 @@
             {% endfor %}
         {% endfor %}
 
+        <!-- Carte pour le tableau -->
         <div class="card shadow-lg border-0 rounded-4">
-            <div class="card-header bg-gradient-primary text-white py-3 rounded-top-4">
-                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Users</h5>
+            <div class="card-header bg-gradient-primary text-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Utilisateurs</h5>
+                <!-- Champ de recherche -->
+                <div class="input-group w-25">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un utilisateur..." aria-label="Rechercher">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                </div>
             </div>
             <div class="card-body p-4">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle" id="userTable">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
-                                <th>Image</th>
-                                <th>Last Name</th>
-                                <th>First Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th class="text-end">Actions</th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Image</th>
+                                <th scope="col">Nom</th>
+                                <th scope="col">Prénom</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Rôle</th>
+                                <th scope="col">Statut</th>
+                                <th scope="col" class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,30 +85,51 @@
                                             {{ user.role.value|capitalize }}
                                         </span>
                                     </td>
+                                    <td>
+                                        <span class="badge {{ user.isBlocked ? 'bg-danger' : 'bg-success' }}">
+                                            {{ user.isBlocked ? 'Bloqué' : 'Actif' }}
+                                        </span>
+                                    </td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
+                                            <!-- Bouton Voir -->
                                             <a href="{{ path('user_show', {'id': user.id}) }}"
                                                class="btn btn-sm btn-outline-info rounded-pill"
                                                data-bs-toggle="tooltip"
-                                               title="View">
+                                               title="Voir">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                            <!-- Bouton Modifier -->
                                             <a href="{{ path('app_user_update', {'id': user.id}) }}"
                                                class="btn btn-sm btn-outline-primary rounded-pill"
                                                data-bs-toggle="tooltip"
-                                               title="Edit">
+                                               title="Modifier">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <!-- Bouton Supprimer -->
                                             <form action="{{ path('user_delete', {'id': user.id}) }}"
                                                   method="POST"
                                                   class="d-inline"
-                                                  onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
                                                 <button type="submit"
                                                         class="btn btn-sm btn-outline-danger rounded-pill"
                                                         data-bs-toggle="tooltip"
-                                                        title="Delete">
+                                                        title="Supprimer">
                                                     <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            <!-- Bouton Bloquer/Débloquer -->
+                                            <form action="{{ path('user_toggle_block', {'id': user.id}) }}"
+                                                  method="POST"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir {{ user.isBlocked ? 'débloquer' : 'bloquer' }} cet utilisateur ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('toggle_block' ~ user.id) }}">
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-{{ user.isBlocked ? 'success' : 'warning' }} rounded-pill"
+                                                        data-bs-toggle="tooltip"
+                                                        title="{{ user.isBlocked ? 'Débloquer' : 'Bloquer' }}">
+                                                    <i class="fas fa-{{ user.isBlocked ? 'lock-open' : 'lock' }}"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -107,8 +137,8 @@
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">
-                                        <i class="fas fa-info-circle me-2"></i>No users found
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>Aucun utilisateur trouvé
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -119,6 +149,7 @@
         </div>
     </div>
 
+    <!-- Styles personnalisés -->
     <style>
         .bg-gradient-primary {
             background: linear-gradient(45deg, #007bff, #00bcd4);
@@ -136,13 +167,41 @@
             font-weight: 500;
             padding: 0.5em 0.75em;
         }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .table-responsive {
+            min-height: 200px;
+        }
     </style>
 
+    <!-- Scripts pour la recherche et les tooltips -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialiser les tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.forEach(tooltipTriggerEl => {
                 new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Fonction de recherche
+            const searchInput = document.getElementById('searchInput');
+            const table = document.getElementById('userTable');
+            const rows = table.getElementsByTagName('tr');
+
+            searchInput.addEventListener('keyup', function () {
+                const filter = searchInput.value.toLowerCase();
+                for (let i = 1; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName('td');
+                    let match = false;
+                    for (let j = 0; j < cells.length; j++) {
+                        if (cells[j].innerText.toLowerCase().includes(filter)) {
+                            match = true;
+                            break;
+                        }
+                    }
+                    rows[i].style.display = match ? '' : 'none';
+                }
             });
         });
     </script>

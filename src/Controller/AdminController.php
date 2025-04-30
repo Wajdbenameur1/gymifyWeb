@@ -9,7 +9,7 @@ use App\Repository\ActivityRepository;
 use App\Entity\Activité; 
 use App\Entity\Reponse;
 use App\Form\ReponseType;
-
+use App\Repository\UserRepository;
 use App\Repository\ReclamationRepository;
 use App\Repository\ReponseRepository;
 
@@ -19,13 +19,15 @@ use App\Repository\ReponseRepository;
 final class AdminController extends AbstractController
 {
     #[Route('/admin', name: 'app_admin')]
-    public function index(): Response
+    public function index(UserRepository $userRepository): Response
+    
     {
        $this->denyAccessUnlessGranted('ROLE_ADMIN');
       $stats = [
         'visitors' => 1294,
         'subscribers' => 1303,
         'sales' => 1345,
+        'usersByRole' => $userRepository->getUserCountByRole(),
         'orders' => 576
     ];
 
@@ -40,13 +42,20 @@ final class AdminController extends AbstractController
         return new Response('Welcome to the home page');
     }
        #[Route('/dashboard', name:'app_dashboard')]
-      public function dashboard()
+      public function dashboard(UserRepository $userRepository): Response
+      
       {
+        $totalUsers = $userRepository->createQueryBuilder('u')
+    ->select('COUNT(u.id)')
+    ->getQuery()
+    ->getSingleScalarResult();
+
         $stats = [
-          'visitors' => 1294,
+          'visitors' => (int) $totalUsers,
           'subscribers' => 1303,
           'sales' => 1345,
-          'orders' => 576
+          'orders' => 576,
+          'usersByRole' => $userRepository->getUserCountByRole(),
       ];
   
       return $this->render('admin/index.html.twig', [
