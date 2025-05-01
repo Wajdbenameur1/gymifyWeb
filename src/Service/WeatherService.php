@@ -38,7 +38,7 @@ class WeatherService
 
             $data = $response->toArray();
             $cachedItem->set($data);
-            $cachedItem->expiresAfter(3600); // Cache pendant 1 heure
+            $cachedItem->expiresAfter(3600); // Cache for 1 hour
             $this->cache->save($cachedItem);
 
             return $data;
@@ -68,7 +68,7 @@ class WeatherService
 
             $data = $response->toArray();
             $cachedItem->set($data);
-            $cachedItem->expiresAfter(3600); // Cache pendant 1 heure
+            $cachedItem->expiresAfter(3600); // Cache for 1 hour
             $this->cache->save($cachedItem);
 
             return $data;

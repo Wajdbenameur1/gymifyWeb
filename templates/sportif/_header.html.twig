@@ -13,7 +13,7 @@
                 <nav class="nav-menu">
                     <ul>
                         <li class="{{ app.request.get('_route') == 'home' ? 'active' }}"><a href="{{ path('home') }}">Home</a></li>
-                        <li class="{{ app.request.get('_route') == 'about_us' ? 'active' }}"><a href="#">About Us</a></li>
+                        <li class="{{ app.request.get('_route') == 'about_us' ? 'active' }}"><a href="{{path('shop_product_index')}}">Produit</a></li>
                         <li class="{{ app.request.get('_route') == 'app_reclamation_index' ? 'active' }}"><a href="{{ path('app_reclamation_index') }}">Reclamation</a></li>
                         <li class="{{ app.request.get('_route') == 'cours_sportif' ? 'active' }}"><a href="{{ path('cours_sportif') }}">Classes</a></li>
                         <li class="{{ app.request.get('_route') == 'activity_sportif' ? 'active' }}"><a href="{{ path('activity_sportif') }}">Activity</a></li>
@@ -73,7 +73,7 @@
     <nav class="canvas-menu mobile-menu">
         <ul>
             <li><a href="{{ path('home') }}">Home</a></li>
-            <li><a href="#">About Us</a></li>
+            <li><a href="{{path('shop_product_index')}}">Produit</a></li>
             <li><a href="{{ path('app_reclamation_index') }}">Reclamation</a></li>
             <li><a href="{{ path('cours_sportif') }}">Classes</a></li>
             <li><a href="{{ path('activity_sportif') }}">Activity</a></li>

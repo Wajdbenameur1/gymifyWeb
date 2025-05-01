@@ -2,6 +2,7 @@
 parameters:
     activities_image_directory: '%kernel.project_dir%/public/uploads/activities'
     uploads_directory: '%kernel.project_dir%/public/uploads/images/users'
+    upload_directory: '%kernel.project_dir%/public/uploads/images/users'
     images_directory: '%kernel.project_dir%/public/uploads/images'
     users_images_directory: '%kernel.project_dir%/public/uploads/images/users'
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
@@ -14,7 +15,13 @@ parameters:
     twilio.auth_token: '%env(string:TWILIO_AUTH_TOKEN)%'
     twilio.phone_number: '%env(string:TWILIO_PHONE_NUMBER)%'
     RECAPTCHA_SITE_KEY: '%env(RECAPTCHA_SITE_KEY)%'
-    
+    google_client_id: '426973845068-m2kpmpksncdup4069cl4c7a7rrchls9l.apps.googleusercontent.com'
+    google_client_secret: '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'
+    google_redirect_uri: 'http://localhost:8000/callback'
+    teams_images_base_url: '/uploads/teams/'
+    app.token_secret: '%env(TOKEN_SECRET)%'
+    router.request_context.host: '6933-197-15-91-100.ngrok-free.app'
+    router.request_context.scheme: 'https'
 
 services:
 
@@ -64,6 +71,13 @@ services:
     App\Service\TwilioService:
         arguments:
             $params: '@parameter_bag'
+
+    App\Service\WeatherService:
+        arguments:
+            
+            #$stripeSecretKey: '%stripe_secret_key%'
+            $httpClient: '@http_client'
+            $apiKey: '%env(WEATHER_API_KEY)%'        
     
 
     # Add any other service definitions below

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller;
 
 use App\Entity\Commande;
 use App\Repository\CommandeRepository;
@@ -13,20 +13,20 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/admin/orders')]
 class OrderController extends AbstractController
 {
-    #[Route('/', name: 'admin_orders_index')]
+    #[Route('/orders', name: 'admin_orders_index')]
     public function index(CommandeRepository $commandeRepository): Response
     {
         $commandes = $commandeRepository->findBy([], ['dateC' => 'DESC']);
         
-        return $this->render('admin/order/index.html.twig', [
+        return $this->render('order/index.html.twig', [
             'commandes' => $commandes
         ]);
     }
 
-    #[Route('/{id}', name: 'admin_order_show', methods: ['GET'])]
+    #[Route('/order/{id}', name: 'admin_order_show', methods: ['GET'])]
     public function show(Commande $commande): Response
     {
-        return $this->render('admin/order/show.html.twig', [
+        return $this->render('order/show.html.twig', [
             'commande' => $commande
         ]);
     }

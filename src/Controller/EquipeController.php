@@ -15,6 +15,8 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 
 class EquipeController extends AbstractController
 {
@@ -30,12 +32,31 @@ class EquipeController extends AbstractController
     }
 
     #[Route('/equipe', name: 'app_equipe_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $equipes = $this->entityManager->getRepository(Equipe::class)->findAll();
+        $qb = $this->entityManager->getRepository(Equipe::class)->createQueryBuilder('e');
+
+        // Create Pagerfanta instance
+        $adapter = new QueryAdapter($qb);
+        $pagerfanta = new Pagerfanta($adapter);
+        $pagerfanta->setMaxPerPage(5); // Limit to 5 teams per page
+        $pagerfanta->setCurrentPage($request->query->getInt('page', 1));
+
+        if ($request->isXmlHttpRequest()) {
+            $equipes = $pagerfanta->getCurrentPageResults();
+            return new JsonResponse(array_map(function($equipe) {
+                return [
+                    'id' => $equipe->getId(),
+                    'nom' => $equipe->getNom(),
+                    'niveau' => $equipe->getNiveau() ? $equipe->getNiveau()->value : null,
+                    'nombre_membres' => $equipe->getNombreMembres(),
+                    'imageUrl' => $equipe->getImageUrl(),
+                ];
+            }, iterator_to_array($equipes)));
+        }
 
         return $this->render('equipe/index.html.twig', [
-            'equipes' => $equipes,
+            'equipes' => $pagerfanta,
             'page_title' => 'List of Teams',
         ]);
     }
@@ -111,7 +132,7 @@ class EquipeController extends AbstractController
                         'nom' => $equipe->getNom(),
                         'niveau' => $equipe->getNiveau() ? $equipe->getNiveau()->value : null,
                         'nombre_membres' => $equipe->getNombreMembres(),
-                        'imageFile' => $equipe->getImageUrl(),
+                        'imageUrl' => $equipe->getImageUrl(),
                         'message' => 'Team added successfully!',
                     ]);
                 }
@@ -129,7 +150,7 @@ class EquipeController extends AbstractController
             }
         }
 
-        if ($request->isXmlHttpRequest()) {
+        if ($form->isSubmitted() && !$form->isValid() && $request->isXmlHttpRequest()) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Invalid form data.',
@@ -245,7 +266,7 @@ class EquipeController extends AbstractController
                             'nom' => $equipe->getNom(),
                             'niveau' => $equipe->getNiveau() ? $equipe->getNiveau()->value : null,
                             'nombre_membres' => $equipe->getNombreMembres(),
-                            'imageFile' => $equipe->getImageUrl(),
+                            'imageUrl' => $equipe->getImageUrl(),
                             'message' => 'Team updated successfully!',
                         ]);
                     }

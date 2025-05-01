@@ -203,49 +203,255 @@
             </div>
         </div>
     </div>
-
     <!-- Events Section -->
-    <section id="events" class="events-section">
+
+<section id="events" class="events-section spad">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title">
-                        <span>What's Happening</span>
-                        <h2>Upcoming Events</h2>
+                        <span>Discover Our</span>
+                        <h2>Available Events</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Flash Messages -->
+            {% set errorMessages = app.flashes('error') %}
+            {% if errorMessages is not empty %}
+                <div class="alert alert-danger">
+                    {% for message in errorMessages %}
+                        {% if message|trim is not empty %}
+                            {{ message }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% set successMessages = app.flashes('success') %}
+            {% if successMessages is not empty %}
+                <div class="alert alert-success">
+                    {% for message in successMessages %}
+                        {% if message|trim is not empty %}
+                            {{ message }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="row" id="events-container">
+                {% if grouped_equipe_events|length > 0 %}
+                    {% for group in grouped_equipe_events %}
+                        {% set event = group.event %}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="event-card" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                                <div class="event-image-wrapper">
+                                    {% if event.imageUrl %}
+                                        <img src="{{ asset('Uploads/events/' ~ event.imageUrl|split('/')|last) }}" alt="{{ event.nom }}" onerror="this.src='{{ asset('img/event-default.jpg') }}'">
+                                    {% else %}
+                                        <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
+                                    {% endif %}
+                                    <div class="event-overlay">
+                                        <div class="event-type-badge">{{ event.type ? event.type|capitalize : 'Not defined' }}</div>
+                                    </div>
+                                    <div class="event-date">
+                                        <span>{{ event.date ?? 'N/A' }}</span>
+                                        <p>{{ event.date ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                                <div class="event-content">
+                                    <h3>{{ event.nom }}</h3>
+                                    <ul class="details-list">
+                                        <li>
+                                            <i class="fa fa-users icon"></i>
+                                            <strong>Teams:</strong>
+                                            <div class="team-list">
+                                                {% for equipeEvent in group.equipeEvents %}
+                                                    <div class="team-item">
+                                                         {{ equipeEvent.equipeNom }}
+                                                    </div>
+                                                {% else %}
+                                                    <div class="team-item text-muted">No teams associated.</div>
+                                                {% endfor %}
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-info-circle icon"></i>
+                                            <strong>Description:</strong> {{ event.description|default('No description')|slice(0, 60) ~ '...' }}
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-clock-o icon"></i>
+                                            <strong>Time:</strong> {{ event.heureDebut ? event.heureDebut|date('H:i') : 'N/A' }} - {{ event.heureFin ? event.heureFin|date('H:i') : 'N/A' }}
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-trophy icon reward-icon"></i>
+                                            <strong>Reward:</strong> {{ event.reward.value|default('None')|capitalize }}
+                                        </li>
+                                        <li class="location-item">
+                                            <i class="fa fa-map-marker icon"></i>
+                                            <strong>Location:</strong> <span class="location-text">{{ event.lieu|default('Not specified') }}</span>
+                                        </li>
+                                    </ul>
+                                    <div class="event-actions">
+                                        {% if group.equipeEvents|length == 1 %}
+                                            <a href="{{ path('app_equipe_event_show', {'id': group.equipeEvents[0].id}) }}" class="event-btn" data-tooltip="View event details" aria-label="View details for {{ event.nom }}">
+                                                <i class="fa fa-info-circle me-2"></i>Details
+                                            </a>
+                                            <a href="{{ path('app_equipe_event_join', {'id': group.equipeEvents[0].id}) }}" class="join-btn" data-tooltip="Join this event" aria-label="Join {{ event.nom }}">
+                                                <i class="fas fa-user-plus me-2"></i>Join
+                                            </a>
+                                        {% else %}
+                                            <div class="dropdown">
+                                                <button class="event-btn dropdown-toggle" type="button" id="detailsDropdown-{{ event.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fa fa-info-circle me-2"></i>Details
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="detailsDropdown-{{ event.id }}">
+                                                    {% for equipeEvent in group.equipeEvents %}
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ path('app_equipe_event_show', {'id': equipeEvent.id}) }}">
+                                                                {{ equipeEvent.equipe.nom }}
+                                                            </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="join-btn dropdown-toggle" type="button" id="joinDropdown-{{ event.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fas fa-user-plus me-2"></i>Join
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="joinDropdown-{{ event.id }}">
+                                                    {% for equipeEvent in group.equipeEvents %}
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ path('app_equipe_event_join', {'id': equipeEvent.id}) }}">
+                                                                {{ equipeEvent.equipe.nom }}
+                                                            </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-lg-12 text-center">
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle fa-2x mb-3"></i>
+                            <p>No team events scheduled for this gym currently.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    <!-- Weather Section -->
+    <section id="weather" class="weather-section spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title">
+                        <span>Check the</span>
+                        <h2>Local Weather</h2>
                     </div>
                 </div>
             </div>
             <div class="row">
-                {% for equipe_event in equipe_events %}
-                    <div class="col-lg-4 col-md-6">
-                        <div class="event-card">
-                            <div class="event-pic">
-                                {% if equipe_event.event.imageUrl %}
-                                    <img src="{{ asset('Uploads/evenements/' ~ equipe_event.event.imageUrl) }}" alt="{{ equipe_event.event.nom }}">
-                                {% else %}
-                                    <img src="{{ asset('img/event-default.jpg') }}" alt="Default Event Image">
-                                {% endif %}
+                <div class="col-lg-12">
+                    <!-- Weather Search Form -->
+                    <form method="get" action="{{ path('sportif_salle_details', {'id': salle.id}) }}" class="weather-search-form">
+                        <div class="weather-search-container">
+                            <label for="location" class="sr-only">Enter a city</label>
+                            <input type="text" id="location" name="location" value="{{ location }}" placeholder="Enter a city (e.g., Tunis)" class="weather-search-input">
+                            <button type="submit" class="weather-search-btn" data-tooltip="Search weather" aria-label="Search weather for the entered city">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button type="button" onclick="getLocation()" class="weather-geo-btn" data-tooltip="Use my current location" aria-label="Get weather for my current location">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% if weatherData %}
+                <div class="weather-widget">
+                    <!-- Current Weather -->
+                    <div class="current-weather">
+                        <div class="weather-header">
+                            <h3>{{ weatherData.location.name }}</h3>
+                            <p class="current-date"><i class="fas fa-calendar-alt"></i> Today: {{ "now"|date('D, d M Y') }}</p>
+                        </div>
+                        <div class="weather-body">
+                            <div class="weather-main">
+                                <div class="weather-icon">
+                                    <img src="{{ weatherData.current.condition.icon }}" alt="{{ weatherData.current.condition.text }}">
+                                    <span class="condition">{{ weatherData.current.condition.text }}</span>
+                                </div>
+                                <div class="weather-temp">
+                                    <h2>{{ weatherData.current.temp_c }}°C</h2>
+                                </div>
                             </div>
-                            <div class="event-text">
-                                <span>{{ equipe_event.event.type ? equipe_event.event.type.value|capitalize : 'Not defined' }}</span>
-                                <h5>{{ equipe_event.event.nom }}</h5>
-                                <p>{{ equipe_event.event.description|length > 100 ? equipe_event.event.description|slice(0, 100) ~ '...' : equipe_event.event.description }}</p>
-                                <ul class="event-details">
-                                    <li><i class="fas fa-calendar"></i> {{ equipe_event.event.date|date('d/m/Y') }}</li>
-                                    <li><i class="fas fa-clock"></i> {{ equipe_event.event.heureDebut|date('H:i') }} - {{ equipe_event.event.heureFin|date('H:i') }}</li>
-                                    <li><i class="fas fa-map-marker-alt"></i> {{ equipe_event.event.lieu|default('Not specified') }}</li>
-                                </ul>
-                                <a href="{{ path('app_equipe_event_show', {'id': equipe_event.id}) }}" class="event-btn" data-tooltip="View event details">Details</a>
+                            <div class="weather-details">
+                                <p><i class="fas fa-wind"></i> <strong>Wind:</strong> {{ weatherData.current.wind_kph }} km/h, {{ weatherData.current.wind_dir }}</p>
+                                <p><i class="fas fa-cloud-rain"></i> <strong>Precipitation:</strong> {{ weatherData.current.precip_mm }} mm</p>
+                                <p><i class="fas fa-tachometer-alt"></i> <strong>Pressure:</strong> {{ weatherData.current.pressure_mb }} mb</p>
+                                <p><i class="fas fa-tint"></i> <strong>Humidity:</strong> {{ weatherData.current.humidity }}%</p>
                             </div>
                         </div>
                     </div>
-                {% else %}
-                    <div class="col-lg-12 text-center">
-                        <p>No events available at the moment.</p>
+                    <!-- Forecast Weather -->
+                    {% if forecastData %}
+                        <div class="forecast-weather-container">
+                            <button class="scroll-btn scroll-left" onclick="scrollForecast('left')">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="forecast-weather-wrapper">
+                                <div class="forecast-weather">
+                                    {% for day in forecastData.forecast.forecastday|slice(0, 7) %}
+                                        <div class="forecast-day" onclick="showForecastDetails({{ loop.index0 }})" data-index="{{ loop.index0 }}">
+                                            <p class="day">{{ day.date ? day.date|date('D, d M') : 'N/A' }}</p>
+                                            <img src="{{ day.day.condition.icon }}" alt="{{ day.day.condition.text }}" class="forecast-icon">
+                                            <p class="temp">{{ day.day.maxtemp_c }}°C / {{ day.day.mintemp_c }}°C</p>
+                                            <p class="condition">{{ day.day.condition.text }}</p>
+                                            <!-- Hidden forecast details -->
+                                            <div class="forecast-details-hidden" id="forecast-details-{{ loop.index0 }}" style="display: none;">
+                                                <p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong> {{ day.date ? day.date|date('Y-m-d') : 'N/A' }}</p>
+                                                <p><i class="fas fa-cloud"></i> <strong>Condition:</strong> {{ day.day.condition.text }}</p>
+                                                <p><i class="fas fa-temperature-high"></i> <strong>Max Temp:</strong> {{ day.day.maxtemp_c }}°C</p>
+                                                <p><i class="fas fa-temperature-low"></i> <strong>Min Temp:</strong> {{ day.day.mintemp_c }}°C</p>
+                                                <p><i class="fas fa-cloud-rain"></i> <strong>Precipitation:</strong> {{ day.day.totalprecip_mm }} mm</p>
+                                                <p><i class="fas fa-umbrella"></i> <strong>Chance of Rain:</strong> {{ day.day.daily_chance_of_rain|default('N/A') }}%</p>
+                                                <p><i class="fas fa-wind"></i> <strong>Wind:</strong> {{ day.day.maxwind_kph|default('N/A') }} km/h</p>
+                                                <p><i class="fas fa-tint"></i> <strong>Humidity:</strong> {{ day.day.avghumidity|default('N/A') }}%</p>
+                                                <p><i class="fas fa-sun"></i> <strong>UV Index:</strong> {{ day.day.uv|default('N/A') }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <button class="scroll-btn scroll-right" onclick="scrollForecast('right')">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <!-- Forecast Details Display -->
+                        <div class="forecast-details-display" id="forecast-details-display">
+                            <h4>Forecast Details</h4>
+                            <div id="forecast-details-content">
+                                <p>Click a day to see detailed forecast information.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="col-lg-12 text-center">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle fa-2x mb-3"></i>
+                        <p>Enter a city or use your current location to view the weather.</p>
                     </div>
-                {% endfor %}
-            </div>
-        </div>
+                </div>
+            {% endif %}
+      </div>
     </section>
 {% endblock %}
 
@@ -1017,11 +1223,1530 @@
                 font-size: 18px;
             }
         }
+          /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Breadcrumb Section Styling */
+        .breadcrumb-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+            transform: skewY(-2deg);
+        }
+        .breadcrumb-section > .container {
+            transform: skewY(2deg);
+        }
+        .breadcrumb-text h2 {
+            color: #ffffff;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .bt-option a {
+            color: #f36100;
+            font-size: 16px;
+            text-decoration: none;
+            font-family: 'Muli', sans-serif;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .bt-option a:hover {
+            color: #ff8c00;
+        }
+        .bt-option a::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ff8c00;
+            transition: width 0.3s ease;
+        }
+        .bt-option a:hover::after {
+            width: 100%;
+        }
+        .bt-option span {
+            color: #f36100;
+            font-size: 16px;
+            font-family: 'Muli', sans-serif;
+        }
+
+        /* Gym Details Section */
+        .gym-details-section {
+            padding: 100px 0;
+            background: #fafafa;
+            position: relative;
+            overflow: hidden;
+        }
+        .gym-details-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+            opacity: 0.05;
+            z-index: 0;
+        }
+        .gym-image {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.5s ease;
+            z-index: 1;
+            position: relative;
+        }
+        .gym-image:hover {
+            transform: scale(1.03);
+        }
+        .gym-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+            z-index: 1;
+        }
+        .gym-content {
+            z-index: 1;
+            position: relative;
+        }
+        .gym-content h2 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .gym-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 5px;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            border-radius: 3px;
+        }
+        .gym-content p {
+            font-size: 15px;
+            color: #333333;
+            line-height: 1.9;
+            margin-bottom: 25px;
+            font-family: 'Muli', sans-serif;
+        }
+        .gym-meta {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+        .gym-meta li {
+            font-size: 15px;
+            color: #333333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-family: 'Muli', sans-serif;
+        }
+        .gym-meta li i {
+            color: #f36100;
+            margin-right: 15px;
+            font-size: 20px;
+            transition: color 0.3s ease;
+        }
+        .gym-meta li:hover i {
+            color: #ff8c00;
+        }
+        .gym-actions {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .primary-btn {
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            box-shadow: 0 6px 20px rgba(243, 97, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .primary-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(243, 97, 0, 0.5);
+        }
+        .primary-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .primary-btn:hover::before {
+            left: 100%;
+        }
+        .primary-btn[data-tooltip] {
+            position: relative;
+        }
+        .primary-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .primary-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Subscriptions and Events Sections */
+        .subscriptions-section, .events-section, .weather-section {
+            padding: 100px 0;
+            background: #fafafa;
+            position: relative;
+        }
+        .subscriptions-section::before, .events-section::before, .weather-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+            opacity: 0.05;
+            z-index: 0;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 70px;
+            position: relative;
+            z-index: 1;
+        }
+        .section-title span {
+            font-family: 'Oswald', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: #f36100;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .section-title h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 5px;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            border-radius: 3px;
+        }
+
+        /* Activity Grid */
+        .activity-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+        .activity-card:hover {
+            transform: translateY(-5px) rotate(0.5deg);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .activity-name {
+            padding: 20px;
+            background: linear-gradient(90deg, rgb(96, 94, 94), rgb(133, 130, 130));
+            color: #e0e0e0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .activity-name i {
+            font-size: 20px;
+            color: #e0e0e0;
+            margin-right: 10px;
+            transition: color 0.3s ease;
+        }
+        .activity-name:hover i {
+            color: #ff8c00;
+        }
+        .activity-name h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .subscriptions-container {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .subscription-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            background: #f8f9fa;
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 1;
+        }
+        .subscription-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .subscription-header {
+            padding: 15px;
+            background: #ffffff;
+            border-bottom: 2px solid #e0e0e0;
+            text-align: center;
+        }
+        .subscription-header h4 {
+            font-size: 20px;
+            margin: 0;
+            color: #1a1a1a;
+            font-weight: 700;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+        .subscription-header .price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f36100;
+            margin-top: 10px;
+            font-family: 'Oswald', sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .subscription-body {
+            padding: 15px;
+        }
+        .subscription-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .subscription-features li {
+            font-size: 15px;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            font-family: 'Muli', sans-serif;
+        }
+        .subscription-features li i {
+            color: #f36100;
+            margin-right: 12px;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+        .subscription-features li:hover i {
+            color: #ff8c00;
+        }
+        .subscription-btn {
+            display: block;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .subscription-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(243, 97, 0, 0.4);
+        }
+        .subscription-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .subscription-btn:hover::before {
+            left: 100%;
+        }
+        .subscription-btn[data-tooltip] {
+            position: relative;
+        }
+        .subscription-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .subscription-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Events */
+        .event-card {
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s ease;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInUp 0.6s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+        .event-image-wrapper {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        .event-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .event-card:hover .event-image-wrapper img {
+            transform: scale(1.08);
+        }
+        .event-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+        }
+        .event-type-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-family: 'Oswald', sans-serif;
+        }
+        .event-date {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(90deg, #ff6200, #ff8c00);
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            width: 60px;
+        }
+        .event-date span {
+            font-size: 24px;
+            font-weight: 700;
+            display: block;
+            font-family: 'Oswald', sans-serif;
+        }
+        .event-date p {
+            font-size: 12px;
+            margin: 0;
+            text-transform: uppercase;
+            font-family: 'Muli', sans-serif;
+        }
+        .event-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-content h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f36100;
+            padding-bottom: 10px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+        .details-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .details-list li {
+            font-size: 14px;
+            color: #333333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.5;
+            transition: color 0.3s ease;
+            font-family: 'Muli', sans-serif;
+        }
+        .details-list li:hover {
+            color: #1a1a1a;
+        }
+        .details-list li strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        .details-list .icon {
+            color: #f36100;
+            font-size: 16px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .details-list .reward-icon {
+            color: #FFD700; /* Gold for reward */
+            font-size: 16px;
+        }
+        .details-list li:hover .icon {
+            transform: scale(1.2);
+            color: #ff8c00;
+        }
+        .details-list li:hover .reward-icon {
+            transform: scale(1.2);
+            color: #FFC107; /* Brighter gold on hover */
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.2); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1.2); }
+        }
+        .location-item {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .location-item .icon {
+            font-size: 18px;
+        }
+        .location-item:hover .icon {
+            color: #ff6200;
+        }
+        .location-text {
+            color: #333333;
+            background: rgba(243, 97, 0, 0.05);
+            padding: 5px 8px;
+            border-radius: 5px;
+            max-width: 80%;
+            display: inline-block;
+        }
+        .location-text:empty:before, .location-text:contains('Not specified') {
+            content: 'Not specified';
+            font-style: italic;
+            color: #888888;
+        }
+        .event-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .event-btn, .join-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px 18px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .event-btn {
+            background: linear-gradient(90deg, #6c757d, #adb5bd);
+            color: #ffffff;
+            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+            border: 2px solid #6c757d;
+        }
+        .event-btn:hover {
+            background: linear-gradient(90deg, #adb5bd, #6c757d);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.4);
+            border-color: #adb5bd;
+        }
+        .event-btn i {
+            transition: transform 0.3s ease;
+        }
+        .event-btn:hover i {
+            transform: scale(1.2);
+        }
+        .event-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .event-btn:hover::before {
+            left: 100%;
+        }
+        .join-btn {
+            background: linear-gradient(90deg, #ff6200, #ff8c00);
+            color: #ffffff;
+            box-shadow: 0 6px 15px rgba(255, 98, 0, 0.3);
+            border: 2px solid #ff6200;
+        }
+        .join-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #ff6200);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(255, 98, 0, 0.4);
+            border-color: #ff8c00;
+        }
+        .join-btn i {
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .join-btn:hover i {
+            transform: scale(1.2);
+            color: #ff8c00;
+        }
+        .join-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .join-btn:hover::before {
+            left: 100%;
+        }
+        .event-btn[data-tooltip], .join-btn[data-tooltip] {
+            position: relative;
+        }
+        .event-btn[data-tooltip]::after, .join-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .event-btn[data-tooltip]:hover::after, .join-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+        .dropdown-toggle::after {
+            margin-left: 5px;
+        }
+        .dropdown-menu {
+            min-width: 150px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .dropdown-item {
+            padding: 8px 15px;
+            color: #333;
+        }
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Teams List Styling */
+        .team-list {
+            margin-top: 5px;
+            padding: 5px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .team-item {
+            padding: 5px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* Weather Section Styling */
+        .weather-search-form {
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .weather-search-container {
+            display: inline-flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 50px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+        }
+        .weather-search-input {
+            border: none;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-family: 'Muli', sans-serif;
+            flex: 1;
+            outline: none;
+            border-radius: 50px 0 0 50px;
+            transition: all 0.3s ease;
+        }
+        .weather-search-input:focus {
+            box-shadow: inset 0 0 5px rgba(243, 97, 0, 0.3);
+        }
+        .weather-search-btn, .weather-geo-btn {
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .weather-search-btn {
+            border-radius: 0 50px 50px 0;
+        }
+        .weather-geo-btn {
+            border-radius: 50px;
+            margin-left: 5px;
+        }
+        .weather-search-btn:hover, .weather-geo-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(243, 97, 0, 0.4);
+        }
+        .weather-search-btn::before, .weather-geo-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .weather-search-btn:hover::before, .weather-geo-btn:hover::before {
+            left: 100%;
+        }
+        .weather-search-btn[data-tooltip]::after, .weather-geo-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Muli', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .weather-search-btn[data-tooltip]:hover::after, .weather-geo-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Weather Widget Styling */
+        .weather-widget {
+            background: linear-gradient(135deg, #d3d3d3, #87CEEB); /* Light gray to light blue */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .weatherDRAM-widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/light-gray-tiles.png');
+            opacity: 0.1;
+            z-index: -1;
+        }
+        .current-weather {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .weather-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .weather-header h3 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .current-date {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2F4F4F;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .current-date i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .weather-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .weather-icon {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        .weather-icon img {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .weather-icon .condition {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2F4F4F; /* Dark slate gray for text */
+            margin-left: 10px;
+            text-transform: capitalize;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .weather-temp h2 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .weather-details {
+            text-align: center;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+        .weather-details p {
+            font-size: 14px;
+            margin: 5px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .weather-details p i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .weather-details strong {
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+
+        /* Forecast Weather with Arrows */
+        .forecast-weather-container {
+            position: relative;
+            width: 100%;
+            border-top: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        .forecast-weather-wrapper {
+            width: 100%;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .forecast-weather {
+            display: flex;
+            padding: 15px 0;
+            width: max-content;
+        }
+        .forecast-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #2F4F4F; /* Dark slate gray for text */
+            padding: 10px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .forecast-day:hover {
+            transform: scale(1.05);
+        }
+        .forecast-day.active {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .forecast-day .day {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .forecast-day .temp {
+            font-size: 16px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-day .condition {
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: capitalize;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(90deg, #f36100, #ff8c00);
+            color: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        .scroll-btn:hover {
+            background: linear-gradient(90deg, #ff8c00, #f36100);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .scroll-left {
+            left: -20px;
+        }
+        .scroll-right {
+            right: -20px;
+        }
+        .scroll-btn i {
+            font-size: 18px;
+        }
+        .forecast-details-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            color: #2F4F4F; /* Dark slate gray for text */
+            text-align: center;
+        }
+        .forecast-details-display h4 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .forecast-details-display p {
+            font-size: 14px;
+            margin: 5px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .forecast-details-display p i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #4682B4; /* Steel blue for icons */
+        }
+        .forecast-details-display strong {
+            font-weight: 600;
+            color: #2F4F4F; /* Dark slate gray for text */
+        }
+
+        /* Flash Message Styles */
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-family: 'Muli', sans-serif;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .gym-content h2 {
+                font-size: 40px;
+            }
+            .section-title h2 {
+                font-size: 40px;
+            }
+            .event-image-wrapper {
+                height: 180px;
+            }
+            .subscriptions-container {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            .activity-card, .event-card {
+                animation: none;
+            }
+            .weather-main {
+                flex-direction: column;
+                text-align: center;
+            }
+            .weather-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .forecast-day {
+                min-width: 140px;
+            }
+            .scroll-btn {
+                width: 35px;
+                height: 35px;
+            }
+            .scroll-left {
+                left: -15px;
+            }
+            .scroll-right {
+                right: -15px;
+            }
+        }
+        @media (max-width: 768px) {
+            .gym-details-section, .subscriptions-section, .events-section, .weather-section {
+                padding: 80px 0;
+            }
+            .gym-image {
+                margin-bottom: 40px;
+            }
+            .gym-content h2 {
+                font-size: 36px;
+            }
+            .section-title h2 {
+                font-size: 36px;
+            }
+            .event-image-wrapper {
+                height: 160px;
+            }
+            .subscriptions-container {
+                grid-template-columns: 1fr;
+            }
+            .gym-actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .primary-btn, .event-btn, .join-btn, .weather-search-btn, .weather-geo-btn {
+                padding: 12px 20px;
+            }
+            .event-actions {
+                flex-direction: column;
+            }
+            .weather-search-container {
+                flex-direction: column;
+                max-width: 100%;
+            }
+            .weather-search-input {
+                border-radius: 50px;
+                margin-bottom: 10px;
+            }
+            .weather-search-btn, .weather-geo-btn {
+                width: 100%;
+                border-radius: 50px;
+            }
+            .weather-geo-btn {
+                margin-left: 0;
+            }
+            .weather-temp h2 {
+                font-size: 36px;
+            }
+            .weather-icon img {
+                width: 50px;
+                height: 50px;
+            }
+            .weather-icon .condition {
+                font-size: 16px;
+            }
+            .forecast-day {
+                min-width: 130px;
+            }
+            .scroll-btn {
+                width: 30px;
+                height: 30px;
+            }
+            .scroll-left {
+                left: -10px;
+            }
+            .scroll-right {
+                right: -10px;
+            }
+        }
+        @media (max-width: 576px) {
+            .gym-content h2 {
+                font-size: 32px;
+            }
+            .section-title h2 {
+                font-size: 32px;
+            }
+            .event-image-wrapper {
+                height: 140px;
+            }
+            .event-content {
+                padding: 20px;
+            }
+            .event-content h3 {
+                font-size: 20px;
+            }
+            .details-list li {
+                font-size: 13px;
+            }
+            .weather-temp h2 {
+                font-size: 32px;
+            }
+            .weather-icon img {
+                width: 40px;
+                height: 40px;
+            }
+            .weather-icon .condition {
+                font-size: 14px;
+            }
+            .forecast-day {
+                min-width: 120px;
+            }
+            .forecast-day .day {
+                font-size: 12px;
+            }
+            .forecast-day .temp {
+                font-size: 14px;
+            }
+            .forecast-day .condition {
+                font-size: 12px;
+            }
+            .scroll-btn {
+                width: 25px;
+                height: 25px;
+            }
+            .scroll-btn i {
+                font-size: 14px;
+            }
+        }
+    
     </style>
+
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": true,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        // Define asset paths for JavaScript usage
+        const assetBaseUrl = "{{ asset('') }}";
+        const eventImageBasePath = assetBaseUrl + 'Uploads/events/';
+        const defaultEventImage = assetBaseUrl + 'img/event-default.jpg';
+
+        // Geolocation for weather
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const locationInput = document.getElementById('location');
+                        locationInput.value = `${lat},${lon}`;
+                        locationInput.form.submit();
+                    },
+                    error => {
+                        console.error("Error getting location:", error);
+                        toastr.error("Unable to retrieve your location. Please enter a city manually.");
+                    }
+                );
+            } else {
+                toastr.error("Geolocation is not supported by your browser. Please enter a city manually.");
+            }
+        }
+
+        // Scroll forecast weather
+        function scrollForecast(direction) {
+            const wrapper = document.querySelector('.forecast-weather-wrapper');
+            const scrollAmount = 200;
+            if (direction === 'left') {
+                wrapper.scrollLeft -= scrollAmount;
+            } else {
+                wrapper.scrollLeft += scrollAmount;
+            }
+        }
+
+        // Show forecast details
+        function showForecastDetails(index) {
+            const detailsHidden = document.getElementById(`forecast-details-${index}`);
+            const detailsContent = document.getElementById('forecast-details-content');
+            const allForecastDays = document.querySelectorAll('.forecast-day');
+
+            // Remove active class from all days
+            allForecastDays.forEach(day => day.classList.remove('active'));
+
+            // Add active class to the clicked day
+            const clickedDay = document.querySelector(`.forecast-day[data-index="${index}"]`);
+            clickedDay.classList.add('active');
+
+            // Display the details
+            detailsContent.innerHTML = detailsHidden.innerHTML;
+        }
+
+        // Refresh events every 30 seconds
+        let lastNotifications = [];
+        function refreshEvents() {
+            fetch("{{ path('sportif_salle_events', {'id': salle.id}) }}")
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('events-container');
+                    container.innerHTML = '';
+
+                    // Handle notifications
+                    if (data.notifications && Array.isArray(data.notifications)) {
+                        data.notifications.forEach(notification => {
+                            if (!lastNotifications.includes(notification.id)) {
+                                if (notification.type === 'added') {
+                                    toastr.success(`New event team added: ${notification.message}`, 'Event Added');
+                                } else if (notification.type === 'deleted') {
+                                    toastr.warning(`Event team deleted: ${notification.message}`, 'Event Deleted');
+                                }
+                                lastNotifications.push(notification.id);
+                                // Keep only the last 50 notifications to prevent memory issues
+                                if (lastNotifications.length > 50) {
+                                    lastNotifications.shift();
+                                }
+                            }
+                        });
+                    }
+
+                    if (!data.grouped_equipe_events || data.grouped_equipe_events.length === 0) {
+                        container.innerHTML = `
+                            <div class="col-lg-12 text-center">
+                                <div class="alert alert-info">
+                                    <i class="fa fa-info-circle fa-2x mb-3"></i>
+                                    <p>No team events scheduled for this gym currently.</p>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    data.grouped_equipe_events.forEach((group, index) => {
+                        const event = group.event;
+                        const equipeEvents = group.equipeEvents;
+                        const imageUrl = event.imageUrl ? `${eventImageBasePath}${event.imageUrl.split('/').pop()}` : defaultEventImage;
+
+                        let eventActions = '';
+                        if (equipeEvents.length === 1) {
+                            eventActions = `
+                                <a href="${equipeEvents[0].detailsUrl}" class="event-btn" data-tooltip="View event details" aria-label="View details for ${event.nom}">
+                                    <i class="fa fa-info-circle me-2"></i>Details
+                                </a>
+                                <a href="${equipeEvents[0].joinUrl}" class="join-btn" data-tooltip="Join this event" aria-label="Join ${event.nom}">
+                                    <i class="fas fa-user-plus me-2"></i>Join
+                                </a>
+                            `;
+                        } else {
+                            eventActions = `
+                                <div class="dropdown">
+                                    <button class="event-btn dropdown-toggle" type="button" id="detailsDropdown-${event.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa fa-info-circle me-2"></i>Details
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="detailsDropdown-${event.id}">
+                                        ${equipeEvents.map(ee => `
+                                            <li>
+                                                <a class="dropdown-item" href="${ee.detailsUrl}">
+                                                    ${ee.equipeNom}
+                                                </a>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="join-btn dropdown-toggle" type="button" id="joinDropdown-${event.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user-plus me-2"></i>Join
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="joinDropdown-${event.id}">
+                                        ${equipeEvents.map(ee => `
+                                            <li>
+                                                <a class="dropdown-item" href="${ee.joinUrl}">
+                                                    ${ee.equipeNom}
+                                                </a>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            `;
+                        }
+
+                        const card = `
+                            <div class="col-lg-4 col-md-6">
+                                <div class="event-card" style="animation-delay: ${index * 0.1}s;">
+                                    <div class="event-image-wrapper">
+                                        <img src="${imageUrl}" alt="${event.nom}" onerror="this.src='${defaultEventImage}'">
+                                        <div class="event-overlay">
+                                            <div class="event-type-badge">${event.type ? event.type.charAt(0).toUpperCase() + event.type.slice(1) : 'Not defined'}</div>
+                                        </div>
+                                        <div class="event-date">
+                                            <span>${event.dateDay || 'N/A'}</span>
+                                            <p>${event.dateMonth || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="event-content">
+                                        <h3>${event.nom}</h3>
+                                        <ul class="details-list">
+                                            <li>
+                                                <i class="fa fa-users icon"></i>
+                                                <strong>Teams:</strong>
+                                                <div class="team-list">
+                                                    ${equipeEvents.length > 0 ? equipeEvents.map(ee => `<div class="team-item">- ${ee.equipeNom}</div>`).join('') : '<div class="team-item text-muted">No teams associated.</div>'}
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <i class="fa fa-info-circle icon"></i>
+                                                <strong>Description:</strong> ${event.description ? event.description.substring(0, 60) + '...' : 'No description'}
+                                            </li>
+                                            <li>
+                                                <i class="fa fa-clock-o icon"></i>
+                                                <strong>Time:</strong> ${event.heureDebut || 'N/A'} - ${event.heureFin || 'N/A'}
+                                            </li>
+                                            <li>
+                                                <i class="fas fa-trophy icon reward-icon"></i>
+                                                <strong>Reward:</strong> ${event.reward ? event.reward.charAt(0).toUpperCase() + event.reward.slice(1) : 'None'}
+                                            </li>
+                                            <li class="location-item">
+                                                <i class="fa fa-map-marker icon"></i>
+                                                <strong>Location:</strong> <span class="location-text">${event.lieu || 'Not specified'}</span>
+                                            </li>
+                                        </ul>
+                                        <div class="event-actions">
+                                            ${eventActions}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.innerHTML += card;
+
+                        // Reinitialize Bootstrap dropdowns after adding new content
+                        const dropdownElementList = container.querySelectorAll('.dropdown-toggle');
+                        dropdownElementList.forEach(dropdown => {
+                            new bootstrap.Dropdown(dropdown);
+                        });
+                    });
+
+                    // Ensure consistent card heights
+                    const eventCards = document.querySelectorAll('.event-card');
+                    let maxHeight = 0;
+                    eventCards.forEach(card => {
+                        const height = card.offsetHeight;
+                        if (height > maxHeight) {
+                            maxHeight = height;
+                        }
+                    });
+                    eventCards.forEach(card => {
+                        card.style.height = `${maxHeight}px`;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error refreshing events:', error);
+                    const container = document.getElementById('events-container');
+                    container.innerHTML = `
+                        <div class="col-lg-12 text-center">
+                            <div class="alert alert-danger">
+                                <i class="fa fa-exclamation-circle fa-2x mb-3"></i>
+                                <p>Failed to load events. Please try again later.</p>
+                            </div>
+                        </div>
+                    `;
+                    toastr.error('Failed to load events. Please try again later.', 'Error');
+                });
+        }
+
+        // Initial call and set interval for refreshing events
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshEvents();
+            setInterval(refreshEvents, 30000);
+
+            // Initialize Bootstrap dropdowns for initial content
+            const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+            dropdownElementList.forEach(dropdown => {
+                new bootstrap.Dropdown(dropdown);
+            });
+
+            // Ensure consistent card heights
+            const cards = document.querySelectorAll('.activity-card, .event-card, .subscription-card');
+            cards.forEach(card => {
+                card.style.minHeight = 'auto';
+                card.style.height = '100%';
+            });
+
+            const eventCards = document.querySelectorAll('.event-card');
+            let maxHeight = 0;
+            eventCards.forEach(card => {
+                const height = card.offsetHeight;
+                if (height > maxHeight) {
+                    maxHeight = height;
+                }
+            });
+            eventCards.forEach(card => {
+                card.style.height = `${maxHeight}px`;
+            });
+        });
+    </script>
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
@@ -1103,7 +2828,7 @@
                 }
 
                 // Utilisez une URL absolue pour le QR code
-const pdfUrl = 'http://192.168.111.1:8000{{ path('abonnement_confirmation_pdf', {'id': 'ABON_ID'}) }}'
+const pdfUrl = 'http://192.168.234.75:8000{{ path('abonnement_confirmation_pdf', {'id': 'ABON_ID'}) }}'
     .replace('ABON_ID', currentAbonnementId);
 
                 try {
@@ -1137,7 +2862,7 @@ const pdfUrl = 'http://192.168.111.1:8000{{ path('abonnement_confirmation_pdf', 
                     <div class="qr-error">
                         <p>${message}</p>
                         <button class="retry-btn">Réessayer</button>
-                        <a href="/abonnement/${currentAbonnementId}/confirmation/pdf" class="pdf-link">
+                        <a href="responsable/abonnement/abonnement/${currentAbonnementId}/confirmation/pdf" class="pdf-link">
                             Télécharger le PDF
                         </a>
                     </div>

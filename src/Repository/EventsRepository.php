@@ -16,28 +16,23 @@ class EventsRepository extends ServiceEntityRepository
         parent::__construct($registry, Events::class);
     }
 
-//    /**
-//     * @return Events[] Returns an array of Events objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Find events by multi-criteria search (name, type, location).
+     *
+     * @param string $query
+     * @return Events[]
+     */
+    public function findByMultiCriteria(string $query): array
+    {
+        $qb = $this->createQueryBuilder('e');
 
-//    public function findOneBySomeField($value): ?Events
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ($query) {
+            $qb->where('LOWER(e.nom) LIKE :query')
+               ->orWhere('LOWER(e.type) LIKE :query')
+               ->orWhere('LOWER(e.lieu) LIKE :query')
+               ->setParameter('query', '%' . strtolower($query) . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DashboardController extends AbstractController
 {
-    #[Route('/admin', name: 'admin_dashboard')]
+    #[Route('/adminDashboard', name: 'admin_dashboard')]
     public function index(ProduitRepository $produitRepository, CommandeRepository $commandeRepository): Response
     {
         // Get total products
@@ -27,7 +27,7 @@ class DashboardController extends AbstractController
         // Get recent products (last 5)
         $recentProducts = $produitRepository->findBy([], ['idP' => 'DESC'], 5);
 
-        return $this->render('admin/dashboard/index.html.twig', [
+        return $this->render('dashboard/index.html.twig', [
             'total_products' => $totalProducts,
             'total_orders' => $totalOrders,
             'completed_orders' => $completedOrders,

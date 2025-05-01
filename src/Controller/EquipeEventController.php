@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 
 class EquipeEventController extends AbstractController
 {
@@ -27,12 +29,52 @@ class EquipeEventController extends AbstractController
     }
 
     #[Route('/equipe/event', name: 'app_equipe_event', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $equipeEvents = $this->entityManager->getRepository(EquipeEvent::class)->findAll();
+        // Fetch events that have associated EquipeEvent entries
+        $queryBuilder = $this->entityManager->getRepository(Events::class)
+            ->createQueryBuilder('e')
+            ->innerJoin('App\Entity\EquipeEvent', 'ee', 'WITH', 'ee.event = e.id')
+            ->groupBy('e.id'); // Group by event to avoid duplicates
+
+        $query = $queryBuilder->getQuery();
+
+        // Create Pagerfanta instance for events
+        $adapter = new QueryAdapter($query);
+        $pagerfanta = new Pagerfanta($adapter);
+        $pagerfanta->setMaxPerPage(6); // Items per page
+        $pagerfanta->setCurrentPage($request->query->getInt('page', 1)); // Current page, default to 1
+
+        // Fetch EquipeEvent entries for the current page's events to get associated teams
+        $events = $pagerfanta->getCurrentPageResults();
+        $eventIds = array_map(fn($event) => $event->getId(), iterator_to_array($events));
+        
+        $equipeEvents = [];
+        if (!empty($eventIds)) {
+            $equipeEvents = $this->entityManager->getRepository(EquipeEvent::class)
+                ->createQueryBuilder('ee')
+                ->where('ee.event IN (:eventIds)')
+                ->setParameter('eventIds', $eventIds)
+                ->getQuery()
+                ->getResult();
+        }
+
+        // Group EquipeEvent by Event
+        $groupedEquipeEvents = [];
+        foreach ($equipeEvents as $ee) {
+            $eventId = $ee->getEvent()->getId();
+            if (!isset($groupedEquipeEvents[$eventId])) {
+                $groupedEquipeEvents[$eventId] = [
+                    'event' => $ee->getEvent(),
+                    'equipeEvents' => [],
+                ];
+            }
+            $groupedEquipeEvents[$eventId]['equipeEvents'][] = $ee;
+        }
 
         return $this->render('equipe_event/index.html.twig', [
-            'equipe_events' => $equipeEvents,
+            'grouped_equipe_events' => $groupedEquipeEvents,
+            'pager' => $pagerfanta,
             'page_title' => 'List of Teams Events',
         ]);
     }
@@ -176,11 +218,30 @@ class EquipeEventController extends AbstractController
                 try {
                     $teamIds = json_decode($teamsData, true);
                     $existingEquipeEvents = $this->entityManager->getRepository(EquipeEvent::class)->findBy(['event' => $event]);
+                    $existingTeamIds = array_map(fn($ee) => $ee->getEquipe()->getId(), $existingEquipeEvents);
+                    $newTeamIds = is_array($teamIds) ? $teamIds : [];
+
+                    // Detect added and removed teams
+                    $addedTeamIds = array_diff($newTeamIds, $existingTeamIds);
+                    $removedTeamIds = array_diff($existingTeamIds, $newTeamIds);
+
+                    // Log added teams
+                    foreach ($addedTeamIds as $teamId) {
+                        $this->logger->info("New EquipeEvent added for Event ID {$event->getId()} with Team ID {$teamId}");
+                    }
+
+                    // Log removed teams
+                    foreach ($removedTeamIds as $teamId) {
+                        $this->logger->info("EquipeEvent removed for Event ID {$event->getId()} with Team ID {$teamId}");
+                    }
+
+                    // Remove existing EquipeEvents
                     foreach ($existingEquipeEvents as $eqEvent) {
                         $this->entityManager->remove($eqEvent);
                     }
                     $this->entityManager->flush();
 
+                    // Add new EquipeEvents
                     if (is_array($teamIds) && !empty($teamIds)) {
                         foreach ($teamIds as $teamId) {
                             $team = $this->entityManager->getRepository(Equipe::class)->find((int)$teamId);
@@ -249,8 +310,11 @@ class EquipeEventController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$equipeEvent->getId(), $request->request->get('_token'))) {
             try {
+                $eventId = $equipeEvent->getEvent()->getId();
+                $teamId = $equipeEvent->getEquipe()->getId();
                 $this->entityManager->remove($equipeEvent);
                 $this->entityManager->flush();
+                $this->logger->info("EquipeEvent deleted for Event ID {$eventId} with Team ID {$teamId}");
                 if ($request->isXmlHttpRequest()) {
                     return new JsonResponse([
                         'success' => true,

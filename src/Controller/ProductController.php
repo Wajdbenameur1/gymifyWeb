@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller;
 
 use App\Entity\Produit;
 use App\Form\ProduitType;
@@ -18,7 +18,7 @@ class ProductController extends AbstractController
     #[Route('/', name: 'admin_product_index', methods: ['GET'])]
     public function index(ProduitRepository $produitRepository): Response
     {
-        return $this->render('admin/product/index.html.twig', [
+        return $this->render('product/index.html.twig', [
             'produits' => $produitRepository->findAll(),
         ]);
     }
@@ -57,7 +57,7 @@ class ProductController extends AbstractController
             return $this->redirectToRoute('admin_product_index');
         }
 
-        return $this->render('admin/product/new.html.twig', [
+        return $this->render('product/new.html.twig', [
             'produit' => $produit,
             'form' => $form,
         ]);
@@ -104,7 +104,7 @@ class ProductController extends AbstractController
             return $this->redirectToRoute('admin_product_index');
         }
 
-        return $this->render('admin/product/edit.html.twig', [
+        return $this->render('product/edit.html.twig', [
             'produit' => $produit,
             'form' => $form,
         ]);

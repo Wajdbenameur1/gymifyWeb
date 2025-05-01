@@ -2,9 +2,9 @@
 
 namespace App\Repository;
 
-use App\Entity\EquipeEvent;
 use App\Entity\Salle;
-use App\Entity\User;
+use App\Entity\EquipeEvent;
+use App\Enum\EventType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,10 +19,9 @@ class EquipeEventRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find EquipeEvents by Salle and optionally by the logged-in Sportif's Equipe.
+     * Find EquipeEvents by Salle.
      *
      * @param Salle $salle
-     * @param User|null $sportif
      * @return EquipeEvent[]
      */
     public function findBySalle(Salle $salle): array
@@ -31,10 +30,28 @@ class EquipeEventRepository extends ServiceEntityRepository
             ->join('ee.event', 'e')
             ->where('e.salle = :salle')
             ->setParameter('salle', $salle)
+            ->orderBy('e.date', 'ASC')
             ->getQuery()
             ->getResult();
-    
+    }
 
-        return $qb->getQuery()->getResult();
+    /**
+     * Find EquipeEvents for a given Salle and EventType.
+     *
+     * @param Salle $salle
+     * @param EventType $type
+     * @return EquipeEvent[]
+     */
+    public function findBySalleAndType(Salle $salle, EventType $type): array
+    {
+        return $this->createQueryBuilder('ee')
+            ->innerJoin('ee.event', 'e')
+            ->where('e.salle = :salle')
+            ->andWhere('e.type = :type')
+            ->setParameter('salle', $salle)
+            ->setParameter('type', $type)
+            ->orderBy('e.date', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }
