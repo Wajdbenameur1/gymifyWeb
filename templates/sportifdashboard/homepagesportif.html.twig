@@ -7,6 +7,7 @@
     
     {% block stylesheets %}
     
+
         <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('css/style.css') }}">
         <link rel="stylesheet" href="{{ asset('css/fonts.min.css') }}">
@@ -25,7 +26,10 @@
         {# CSS build par Webpack Encore #}
         {{ encore_entry_link_tags('app') }}
 
+      
+
     {% endblock %}
+    
     
     {% block javascripts_head %}
     <script src="{{ asset('js/webfont.min.js') }}"></script>
@@ -76,6 +80,10 @@
     {# JS build par Webpack Encore #}
     {{ encore_entry_script_tags('app') }}
 {% endblock %}
+
+  
+      
+
 
 </body>
 

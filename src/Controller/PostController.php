@@ -60,9 +60,6 @@ final class PostController extends AbstractController
         ]);
     }
 
-
-
-
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -145,13 +142,13 @@ final class PostController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
+    #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
-        // Vérifier que l'utilisateur est bien le créateur du post
+        // ✅ Vérifier que l'utilisateur est bien le créateur du post
         $user = $this->getUser();
         if ($user !== $post->getUser()) {
-            throw new AccessDeniedHttpException($this->translator->trans('blog.error.unauthorized'));
+            throw new AccessDeniedHttpException('Vous n\'êtes pas autorisé à modifier ce post.');
         }
 
         // 1) Création du form et pré-remplissage du champ URL si nécessaire
@@ -172,9 +169,16 @@ final class PostController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // 3.a) Check exclusivité fichier vs URL
             if ($imageFile && $webImage) {
-                $this->addFlash('error', $this->translator->trans('blog.error.image_both'));
+                $this->addFlash('error', 'Veuillez choisir soit une image locale, soit une URL, pas les deux.');
+                return $this->render('post/edit.html.twig', [
+                    'form' => $form->createView(),
+                    'post' => $post,
+                    'existingImage' => $post->getImageUrl(),
+                ]);
             } else {
-                // 3.b) Traitement du fichier
+                $imageUpdated = false;
+                
+                // 3.b) Traitement du fichier uploadé
                 if ($imageFile) {
                     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = preg_replace('/[^a-z0-9_]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $originalFilename)));
@@ -183,70 +187,55 @@ final class PostController extends AbstractController
                     try {
                         $targetDir = $this->getParameter('uploads_directory');
                         $imageFile->move($targetDir, $newFilename);
-                        $post->setImageUrl(
-                            // ici le chemin complet exposé au web, ex. '/uploads/nom-de-fichier.jpg'
-                            '/uploads/'.$newFilename
-                        );
+                        $post->setImageUrl('/uploads/'.$newFilename);
+                        $imageUpdated = true;
                     } catch (FileException $e) {
-                        $this->addFlash('error', $this->translator->trans('blog.error.image_upload'));
+                        $this->addFlash('error', "Erreur lors de l'upload de l'image.");
                         return $this->render('post/edit.html.twig', [
                             'form' => $form->createView(),
                             'post' => $post,
+                            'existingImage' => $post->getImageUrl(),
                         ]);
                     }
                 }
-                // 3.c) Traitement de l'URL
-                if ($webImage && !$imageFile) {
+                
+                // 3.c) Traitement de l'URL web
+                if ($webImage) {
                     $post->setImageUrl($webImage);
+                    $imageUpdated = true;
+                } 
+                // 3.d) Si aucune image n'est fournie mais qu'il y avait une image précédente
+                // et que l'utilisateur a explicitement vidé les deux champs, on supprime l'image
+                else if (!$imageFile && !$webImage && $post->getImageUrl() && 
+                         $request->request->has('post') && 
+                         array_key_exists('webImage', $request->request->get('post'))) {
+                    $post->setImageUrl(null);
+                    $imageUpdated = true;
                 }
 
-                // 3.d) Sauvegarde
+                // 3.e) Sauvegarde
                 $entityManager->flush();
-
-                // Send notification about update
-                $this->ablyService->publishUpdatedPost([
-                    'id' => $post->getId(),
-                    'title' => $post->getTitle(),
-                    'content' => substr(strip_tags($post->getContent()), 0, 100) . '...',
-                    'author' => $user->getNom() ?? 'Anonymous',
-                    'updatedAt' => (new \DateTime())->format('d/m/Y H:i'),
-                ]);
-
-                $this->addFlash('success', $this->translator->trans('blog.success.updated'));
-                return $this->redirectToRoute('app_post_show', ['id' => $post->getId()]);
+                $this->addFlash('success', 'Post modifié avec succès !');
+                return $this->redirectToRoute('app_post_index');
             }
         }
 
+        // 4) Affichage du template
         return $this->render('post/edit.html.twig', [
             'form' => $form->createView(),
             'post' => $post,
+            'existingImage' => $post->getImageUrl(),
         ]);
     }
 
     #[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
     public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
-        // Vérifier que l'utilisateur est bien le créateur du post
-        $user = $this->getUser();
-        if ($user !== $post->getUser()) {
-            throw new AccessDeniedHttpException($this->translator->trans('blog.error.unauthorized'));
-        }
-
         if ($this->isCsrfTokenValid('delete'.$post->getId(), $request->request->get('_token'))) {
-            $postId = $post->getId();
             $entityManager->remove($post);
             $entityManager->flush();
-
-            // Notify about deletion
-            $this->ablyService->publishDeletedPost([
-                'id' => $postId,
-                'title' => $post->getTitle(),
-                'author' => $user->getNom() ?? 'Anonymous'
-            ]);
-
-            $this->addFlash('success', $this->translator->trans('blog.success.deleted'));
         }
 
-        return $this->redirectToRoute('app_post_index');
+        return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
     }
-}
+}  
