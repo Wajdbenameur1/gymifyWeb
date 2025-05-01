@@ -255,8 +255,9 @@
                                         <div class="event-type-badge">{{ event.type ? event.type|capitalize : 'Not defined' }}</div>
                                     </div>
                                     <div class="event-date">
-                                        <span>{{ event.date ?? 'N/A' }}</span>
-                                        <p>{{ event.date ?? 'N/A' }}</p>
+                                         <span>{{ event.dateDay ?? 'N/A' }}</span>
+                                         <p>{{ event.dateMonth ?? 'N/A' }}</p>
+
                                     </div>
                                 </div>
                                 <div class="event-content">
@@ -309,7 +310,7 @@
                                                     {% for equipeEvent in group.equipeEvents %}
                                                         <li>
                                                             <a class="dropdown-item" href="{{ path('app_equipe_event_show', {'id': equipeEvent.id}) }}">
-                                                                {{ equipeEvent.equipe.nom }}
+                                                                {{ equipeEvent.equipeNom }}
                                                             </a>
                                                         </li>
                                                     {% endfor %}
@@ -323,7 +324,7 @@
                                                     {% for equipeEvent in group.equipeEvents %}
                                                         <li>
                                                             <a class="dropdown-item" href="{{ path('app_equipe_event_join', {'id': equipeEvent.id}) }}">
-                                                                {{ equipeEvent.equipe.nom }}
+                                                                {{ equipeEvent.equipeNom }}
                                                             </a>
                                                         </li>
                                                     {% endfor %}
@@ -2641,8 +2642,11 @@
                                             <div class="event-type-badge">${event.type ? event.type.charAt(0).toUpperCase() + event.type.slice(1) : 'Not defined'}</div>
                                         </div>
                                         <div class="event-date">
-                                            <span>${event.dateDay || 'N/A'}</span>
-                                            <p>${event.dateMonth || 'N/A'}</p>
+                                            <span>${ event.date}</span>
+                                            <p>${ event.date}</p>
+                                        </div>
+
+
                                         </div>
                                     </div>
                                     <div class="event-content">
