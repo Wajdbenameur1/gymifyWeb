@@ -101,6 +101,9 @@
             "./config/packages/lexik_jwt_authentication.yaml"
         ]
     },
+    "mhujer/breadcrumbs-bundle": {
+        "version": "1.5.10"
+    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {
@@ -350,6 +353,8 @@
             "version": "5.0",
             "ref": "10af129fcac6d00ffc9bb23d039d997dee35e657"
         }
+    "symfony/ux-chartjs": {
+        "version": "v2.24.0"
     },
     "symfony/ux-turbo": {
         "version": "2.23",

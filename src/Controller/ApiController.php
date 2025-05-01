@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api')]
 class ApiController extends AbstractController
 {
-    #[Route('/users/{id}', name: 'api_user', methods: ['GET'])]
+    #[Route('/users/{id}', name: 'api_user', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getUserData(int $id, InfosportifRepository $infosportifRepository): JsonResponse
     {
         $infosportif = $infosportifRepository->findOneBy(['sportif' => $id]);

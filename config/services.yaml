@@ -2,7 +2,8 @@
 parameters:
     activities_image_directory: '%kernel.project_dir%/public/uploads/activities'
     uploads_directory: '%kernel.project_dir%/public/uploads/images/users'
-    upload_directory: '%kernel.project_dir%/public/uploads/images/users'
+    # chemin public utilisable dans asset() pour afficher l'image
+    uploads_public_path: '/uploads'
     images_directory: '%kernel.project_dir%/public/uploads/images'
     users_images_directory: '%kernel.project_dir%/public/uploads/images/users'
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
@@ -22,7 +23,11 @@ parameters:
     app.token_secret: '%env(TOKEN_SECRET)%'
     router.request_context.host: '6933-197-15-91-100.ngrok-free.app'
     router.request_context.scheme: 'https'
-
+    ibm_watson_api_key: 'JR-LCWjnds3scsjrtCtn2wCNlyR2GWGAQq_hJ1D6Fhh-'
+    ibm_watson_service_url: 'https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/760398a7-3622-4319-83f8-415080a4ee25'
+    
+    # Ably API Key
+    ably_api_key: 'WWlNRQ.NtFTkw:nUpGoNHsYuuGPEGaiG7MFXg-VnDJCA-huFa182u2_0c'
 services:
 
 
@@ -53,7 +58,24 @@ services:
     App\Service\EmailService:
         arguments:
             $mailer: '@mailer'
-
+            
+    App\Service\SpeechToTextService:
+        arguments:
+            $apiKey: '%ibm_watson_api_key%'
+            $serviceUrl: '%ibm_watson_service_url%'
+            
+    App\Service\PerspectiveApiService:
+        public: true
+        
+    App\Service\EmailJSService:
+        public: true
+        
+    App\Service\AblyService:
+        arguments:
+            $apiKey: '%ably_api_key%'
+            
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
         exclude:

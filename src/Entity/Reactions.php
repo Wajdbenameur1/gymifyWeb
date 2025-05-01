@@ -8,24 +8,33 @@ use App\Repository\ReactionsRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ReactionsRepository::class)]
+#[ORM\Table(name: "reactions")]
 class Reactions
 {
+    public const TYPES = [
+        'like' => '👍',
+        'love' => '❤️',
+        'haha' => '😂',
+        'wow' => '😮',
+        'sad' => '😢',
+        'angry' => '😡',
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reactions')]
-    #[ORM\JoinColumn(name: "id_User", referencedColumnName: "id")]  // Définir le nom de la colonne
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reactions')]
+    #[ORM\JoinColumn(name: "id_User", referencedColumnName: "id", nullable: false)]
+    private ?User $user = null;
 
-private ?User $user = null;
+    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'reactions')]
+    #[ORM\JoinColumn(name: "postId", referencedColumnName: "id", nullable: false)]
+    private ?Post $post = null;
 
-#[ORM\ManyToOne(inversedBy: 'reactions')]
-#[ORM\JoinColumn(name: "postId", referencedColumnName: "id")]  // Définir le nom de la colonne
-
-private ?Post $post = null;
-#[ORM\Column(type: "string", length: 10)]
-    private ?string $type = null;  // Ajout du champ 'type'
+    #[ORM\Column(type: "string", length: 10)]
+    private ?string $type = null;
 
     public function getId(): ?int
     {
@@ -54,7 +63,6 @@ private ?Post $post = null;
         return $this;
     }
 
-    // Getter et Setter pour 'type'
     public function getType(): ?string
     {
         return $this->type;

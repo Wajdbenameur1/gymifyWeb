@@ -45,14 +45,11 @@ private ?string $title = null;
 private ?string $content = null;
 
 
-
-
-
 #[ORM\Column(length: 255, nullable: true)]
-#[Assert\Url(message: 'Veuillez saisir une URL valide (http(s)://...) pour l’image.')]
+#[Assert\Url(message: "Veuillez saisir une URL valide (http(s)://...) pour l'image.")]
 #[Assert\Regex(
     pattern: '/\.(jpg|jpeg|png|gif)$/i',
-    message: 'L’URL de l’image doit se terminer par .jpg, .jpeg, .png ou .gif'
+    message: "L'URL de l'image doit se terminer par .jpg, .jpeg, .png ou .gif"
 )]
 private ?string $image_url = null;
 
@@ -72,7 +69,8 @@ private ?string $image_url = null;
     private Collection $comments;
     
     //reactions
-    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+    //#[ORM\OneToMany(mappedBy: 'post', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Reactions::class, orphanRemoval: true)]
 private Collection $reactions;
 
 
@@ -176,10 +174,13 @@ private Collection $reactions;
     }
 
 
+   /**
+     * @return Collection|Reactions[]
+     */
     public function getReactions(): Collection
-{
-    return $this->reactions;
-}
+    {
+        return $this->reactions;
+    }
 
 public function addReaction(Reactions $reaction): static
 {
@@ -206,6 +207,66 @@ public function removeReaction(Reactions $reaction): static
 
 
 
+   /**
+     * Renvoie un array ['like' => 3, 'love' => 1, …]
+     */
+    public function getReactionsCountByType(): array
+    {
+        $counts = array_fill_keys(array_keys(Reactions::TYPES), 0);
+        foreach ($this->reactions as $r) {
+            $type = $r->getType();
+            if (isset($counts[$type])) {
+                $counts[$type]++;
+            }
+        }
+        return $counts;
+    }
+
+    /**
+     * Renvoie la réaction de cet utilisateur ou null
+     */
+    public function getReactionByUser(User $user): ?Reactions
+    {
+        foreach ($this->reactions as $r) {
+            if ($r->getUser() === $user) {
+                return $r;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Renvoie le type de réaction de l'utilisateur ou null
+     */
+    public function userReaction(User $user): ?string
+    {
+        $reaction = $this->getReactionByUser($user);
+        return $reaction ? $reaction->getType() : null;
+    }
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public function getWebPath(): ?string
 {
     if ($this->image_url === null) {
@@ -225,6 +286,10 @@ public function getWebPath(): ?string
     // Si le chemin ne contient pas "public", on retourne tel quel
     return $path;
 }
+
+
+
+
 
 
 
