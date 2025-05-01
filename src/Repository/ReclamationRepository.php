@@ -42,7 +42,7 @@ class ReclamationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-<<<<<<< HEAD
+
     public function remove(Reclamation $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);  // Utilise getEntityManager() ici
@@ -50,6 +50,4 @@ class ReclamationRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-=======
->>>>>>> blogs
 }

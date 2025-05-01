@@ -257,79 +257,76 @@ class UserController extends AbstractController
         ]);
     }
     #[Route('/api/check-email', name: 'api_check_email', methods: ['POST'])]
-public function checkEmail(Request $request): JsonResponse
-{
-    $email = $request->request->get('email');
-    $existingUser = $this->userRepository->findOneBy(['email' => $email]);
+    public function checkEmail(Request $request): JsonResponse
+    {
+        $email = $request->request->get('email');
+        $existingUser = $this->userRepository->findOneBy(['email' => $email]);
 
-    return new JsonResponse(['exists' => $existingUser !== null]);
-}
-<<<<<<< HEAD
-#[Route('/admin/user/{id}/toggle-block', name: 'user_toggle_block', methods: ['POST'])]
-public function toggleBlock(Request $request, User $user, EntityManagerInterface $em): Response
-{
-    // Vérifier le jeton CSRF
-    if (!$this->isCsrfTokenValid('toggle_block' . $user->getId(), $request->request->get('_token'))) {
-        $this->addFlash('danger', 'Jeton CSRF invalide.');
+        return new JsonResponse(['exists' => $existingUser !== null]);
+    }
+
+    #[Route('/admin/user/{id}/toggle-block', name: 'user_toggle_block', methods: ['POST'])]
+    public function toggleBlock(Request $request, User $user, EntityManagerInterface $em): Response
+    {
+        // Vérifier le jeton CSRF
+        if (!$this->isCsrfTokenValid('toggle_block' . $user->getId(), $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Jeton CSRF invalide.');
+            return $this->redirectToRoute('user_index');
+        }
+
+        try {
+            // Basculer l'état de blocage
+            $user->setIsBlocked(!$user->isBlocked());
+            $em->flush();
+
+            // Logger l'action
+            $status = $user->isBlocked() ? 'bloqué' : 'débloqué';
+            $this->logger->info("Utilisateur $status", [
+                'user_id' => $user->getId(),
+                'email' => $user->getEmail(),
+            ]);
+
+            // Ajouter un message flash
+            $this->addFlash('success', "L'utilisateur a été $status avec succès.");
+        } catch (\Exception $e) {
+            $this->logger->error('Erreur lors du changement d\'état de blocage', [
+                'message' => $e->getMessage(),
+                'user_id' => $user->getId(),
+            ]);
+            $this->addFlash('danger', 'Une erreur est survenue lors du changement d\'état.');
+        }
+
         return $this->redirectToRoute('user_index');
     }
 
-    try {
-        // Basculer l'état de blocage
-        $user->setIsBlocked(!$user->isBlocked());
-        $em->flush();
-
-        // Logger l'action
-        $status = $user->isBlocked() ? 'bloqué' : 'débloqué';
-        $this->logger->info("Utilisateur $status", [
-            'user_id' => $user->getId(),
-            'email' => $user->getEmail(),
-        ]);
-
-        // Ajouter un message flash
-        $this->addFlash('success', "L'utilisateur a été $status avec succès.");
-    } catch (\Exception $e) {
-        $this->logger->error('Erreur lors du changement d\'état de blocage', [
-            'message' => $e->getMessage(),
-            'user_id' => $user->getId(),
-        ]);
-        $this->addFlash('danger', 'Une erreur est survenue lors du changement d\'état.');
+    #[Route('/api/users/search', name: 'api_users_search', methods: ['GET'])]
+    public function searchUsers(Request $request): JsonResponse
+    {
+        $query = $request->query->get('q', '');
+        
+        if (strlen($query) < 1) {
+            return new JsonResponse([]);
+        }
+        
+        // Search users whose name or first name contains the query
+        $users = $this->userRepository->createQueryBuilder('u')
+            ->where('u.nom LIKE :query OR u.prenom LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+        
+        // Format the results
+        $formattedUsers = [];
+        foreach ($users as $user) {
+            $formattedUsers[] = [
+                'id' => $user->getId(),
+                'nom' => $user->getNom(),
+                'prenom' => $user->getPrenom(),
+                'imageUrl' => $user->getImageUrl() ? '/uploads/users/' . $user->getImageUrl() : '/img/screen/user.png'
+            ];
+        }
+        
+        return new JsonResponse($formattedUsers);
     }
-
-    return $this->redirectToRoute('user_index');
-}
-
-=======
-
-#[Route('/api/users/search', name: 'api_users_search', methods: ['GET'])]
-public function searchUsers(Request $request): JsonResponse
-{
-    $query = $request->query->get('q', '');
-    
-    if (strlen($query) < 1) {
-        return new JsonResponse([]);
-    }
-    
-    // Search users whose name or first name contains the query
-    $users = $this->userRepository->createQueryBuilder('u')
-        ->where('u.nom LIKE :query OR u.prenom LIKE :query')
-        ->setParameter('query', '%' . $query . '%')
-        ->setMaxResults(5)
-        ->getQuery()
-        ->getResult();
-    
-    // Format the results
-    $formattedUsers = [];
-    foreach ($users as $user) {
-        $formattedUsers[] = [
-            'id' => $user->getId(),
-            'nom' => $user->getNom(),
-            'prenom' => $user->getPrenom(),
-            'imageUrl' => $user->getImageUrl() ? '/uploads/users/' . $user->getImageUrl() : '/img/screen/user.png'
-        ];
-    }
-    
-    return new JsonResponse($formattedUsers);
-}
->>>>>>> blogs
 }
