@@ -39,3 +39,35 @@ class ResponsableSalleRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Find a single ResponsableSalle entity by a specific field.
+     *
+     * @param mixed $value The value to search for
+     * @param string $field The field to search on (default: 'id')
+     * @return ResponsableSalle|null Returns a ResponsableSalle object or null
+     */
+    public function findOneByField($value, string $field = 'id'): ?ResponsableSalle
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere("r.{$field} = :val")
+            ->setParameter('val', $value)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * Find all ResponsableSalle entities.
+     *
+     * @return ResponsableSalle[] Returns an array of all ResponsableSalle objects
+     */
+    public function findAllResponsableSalle(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->orderBy('r.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+}
+>>>>>>> blogs

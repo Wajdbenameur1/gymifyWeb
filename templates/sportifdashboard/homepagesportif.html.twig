@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale }}">
+<html lang="{{ app.request.locale }}" {% if app.request.locale == 'ar' %}dir="rtl"{% else %}dir="ltr"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,11 +22,15 @@
         <link rel="stylesheet" href="{{ asset('css/plugins.css.map') }}">
         <link rel="stylesheet" href="{{ asset('css/post-style.css') }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        
+        {# CSS build par Webpack Encore #}
+        {{ encore_entry_link_tags('app') }}
 
       
 
     {% endblock %}
     
+<<<<<<< HEAD
     
     {% block javascripts_head %}
     <script src="{{ asset('js/webfont.min.js') }}"></script>
@@ -55,6 +59,36 @@
     
     <div class="main-panel flex-grow-1">
        {# on peut garder container-fluid ou container selon l’effet désiré #}
+=======
+    
+    {% block javascripts_head %}
+    <script src="{{ asset('js/webfont.min.js') }}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["{{ asset('css/fonts.min.css') }}"]
+        },
+        active: function() {
+          sessionStorage.fonts = true;
+        }
+      });
+    </script>
+{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %} class="{{ app.request.locale == 'ar' ? 'rtl' : 'ltr' }}">
+<div class="wrapper d-flex">  {# bootstrap flex-container #}
+    {% include 'sportifdashboard/sidebar.html.twig' %}
+    
+    <div class="main-panel flex-grow-1">
+       {# on peut garder container-fluid ou container selon l'effet désiré #}
+>>>>>>> blogs
         
         
        <div class="container-fluid">
@@ -74,12 +108,17 @@
 
 {% block javascripts %}
     <script src="{{ asset('js/script.js') }}"></script>
+<<<<<<< HEAD
 
 
 
   
       
 
+=======
+    {# JS build par Webpack Encore #}
+    {{ encore_entry_script_tags('app') }}
+>>>>>>> blogs
 {% endblock %}
 
   

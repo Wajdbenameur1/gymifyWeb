@@ -68,6 +68,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'sportif', targetEntity: Infosportif::class)]
     private Collection $Infosportifs;
 
+#[ORM\Column(type: 'string', length: 100, nullable: true)]
+private ?string $specialite = null;
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
     private Collection $reactions;
 

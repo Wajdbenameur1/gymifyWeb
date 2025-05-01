@@ -4,6 +4,53 @@ body, .form-control, .dropzone, .cke_contents iframe, .cke_chrome, .cke_top, .ck
     font-size: 1rem;
 }
 
+/* Comment content styling */
+.comment-content {
+  color: #333; /* Default text color for comments */
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* User mentions styling */
+.user-mention {
+  display: inline-block;
+  background-color: rgba(29, 155, 240, 0.1);
+  color: #00CED1; /* Turquoise blue color for mentions */
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0 3px;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.user-mention:hover {
+  background-color: rgba(0, 206, 209, 0.2);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Animation for highlighting newly added items */
+@keyframes highlight-new-item {
+    0% { background-color: rgba(13, 110, 253, 0.2); }
+    100% { background-color: transparent; }
+}
+
+/* Animation pour les compteurs quand ils sont mis à jour */
+@keyframes pulse-count {
+    0% { transform: scale(1); color: inherit; }
+    50% { transform: scale(1.5); color: #007bff; }
+    100% { transform: scale(1); color: inherit; }
+}
+
+/* Style pour les compteurs de commentaires */
+.comment-count {
+    transition: all 0.3s ease;
+}
+
+.comment-count.highlight {
+    animation: pulse-count 0.8s ease-in-out;
+}
+
 .form-label {
     font-weight: bold;
 }

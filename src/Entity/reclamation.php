@@ -34,6 +34,7 @@ class Reclamation
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
     private ?User $user = null;
+<<<<<<< HEAD
 
     #[ORM\OneToMany(mappedBy: 'reclamation', targetEntity: Reponse::class, cascade: ['persist', 'remove'])]
     private Collection $reponses;
@@ -43,6 +44,8 @@ class Reclamation
         $this->dateCreation = new \DateTime();
         $this->reponses = new ArrayCollection();
     }
+=======
+>>>>>>> blogs
 
     public function getId(): ?int
     {
@@ -90,6 +93,7 @@ class Reclamation
     public function setDateCreation(\DateTimeInterface $dateCreation): self
     {
         $this->dateCreation = $dateCreation;
+<<<<<<< HEAD
         return $this;
     }
 
@@ -126,6 +130,19 @@ class Reclamation
         if ($this->reponses->removeElement($reponse) && $reponse->getReclamation() === $this) {
             $reponse->setReclamation(null);
         }
+=======
+>>>>>>> blogs
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
         return $this;
     }
 }

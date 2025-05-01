@@ -38,14 +38,18 @@ class Comment
 
 
 
+<<<<<<< HEAD
      // Relation ManyToOne avec Post
+=======
+     // Relation ManyToOne avec Post, name matches exact database column name
+>>>>>>> blogs
      #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'comments')]
-     #[ORM\JoinColumn(name: 'postId', referencedColumnName: 'id')]
+     #[ORM\JoinColumn(name: 'postId', referencedColumnName: 'id', nullable: false)]
      private ?Post $post = null;
  
-     // Relation ManyToOne avec User
+     // Relation ManyToOne avec User, name matches exact database column name
      #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'comments')]
-     #[ORM\JoinColumn(name: 'id_User', referencedColumnName: 'id')]
+     #[ORM\JoinColumn(name: 'id_User', referencedColumnName: 'id', nullable: false)]
      private ?User $user = null;
  
     public function getId(): ?int
@@ -98,5 +102,37 @@ class Comment
   {
       $this->user = $user;
       return $this;
+  }
+
+  /**
+   * Vérifie si le commentaire est sensible
+   */
+  public function isSensitive(): bool
+  {
+      return strpos($this->content, '[SENSITIVE]') === 0;
+  }
+  
+  /**
+   * Récupère le contenu original (sans le préfixe [SENSITIVE])
+   */
+  public function getOriginalContent(): ?string
+  {
+      if ($this->isSensitive()) {
+          return substr($this->content, 11); // Enlever le préfixe '[SENSITIVE]'
+      }
+      
+      return $this->content;
+  }
+  
+  /**
+   * Récupère le contenu à afficher (avec avertissement pour les commentaires sensibles)
+   */
+  public function getDisplayContent(): ?string
+  {
+      if ($this->isSensitive()) {
+          return '⚠️ Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.';
+      }
+      
+      return $this->content;
   }
 }

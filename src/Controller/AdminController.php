@@ -12,9 +12,9 @@ use App\Form\ReponseType;
 use App\Repository\UserRepository;
 use App\Repository\ReclamationRepository;
 use App\Repository\ReponseRepository;
-
-
-
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class AdminController extends AbstractController
 {
@@ -74,14 +74,14 @@ final class AdminController extends AbstractController
            $reponse = new Reponse();
            $form = $this->createForm(ReponseType::class, $reponse);
            $form->handleRequest($request);
-       
+   
            if ($form->isSubmitted() && $form->isValid()) {
                $selectedReclamations = $request->request->get('selected_reclamations', []);
                if (empty($selectedReclamations)) {
                    $this->addFlash('warning', 'Veuillez sélectionner au moins une réclamation.');
                    return $this->redirectToRoute('app_admin_reclamation_index');
                }
-       
+   
                foreach ($selectedReclamations as $reclamationId) {
                    $reclamation = $reclamationRepository->find($reclamationId);
                    if ($reclamation) {
@@ -96,11 +96,11 @@ final class AdminController extends AbstractController
                    }
                }
                $entityManager->flush();
-       
+   
                $this->addFlash('success', 'Réponses envoyées avec succès !');
                return $this->redirectToRoute('app_admin_reclamation_index');
            }
-       
+   
            return $this->render('admin_reclamation/index.html.twig', [
                'reclamations' => $reclamations,
                'reponses' => $reponses,
@@ -108,9 +108,10 @@ final class AdminController extends AbstractController
                'page_title' => 'Gestion des Réclamations'
            ]);
        }
+   
        #[Route('/admin/reclamation/delete-reponses', name: 'app_admin_reponse_delete', methods: ['POST'])]
        #[IsGranted('ROLE_ADMIN')]
-       public function deleteReponses(Request $request, ReponseRepository $reponseRepository): Response
+       public function deleteReponses(Request $request, ReponseRepository $reponseRepository, EntityManagerInterface $entityManager): Response
        {
            $selectedReponses = $request->request->get('selected_reponses', []);
            if (empty($selectedReponses)) {
@@ -118,7 +119,6 @@ final class AdminController extends AbstractController
                return $this->redirectToRoute('app_admin_reclamation_index');
            }
    
-           $em = $this->getDoctrine()->getManager();
            foreach ($selectedReponses as $reponseId) {
                $reponse = $reponseRepository->find($reponseId);
                if ($reponse) {
@@ -126,7 +126,7 @@ final class AdminController extends AbstractController
                    $reponseRepository->remove($reponse);
                }
            }
-           $em->flush();
+           $entityManager->flush();
    
            $this->addFlash('success', 'Réponses supprimées avec succès !');
            return $this->redirectToRoute('app_admin_reclamation_index');
