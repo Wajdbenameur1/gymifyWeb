@@ -1,38 +1,22 @@
 {# templates/comment/_comment.html.twig #}
 
-<<<<<<< HEAD
-<div class="comment d-flex gap-2 mb-3">
-    <img src="{{ comment.user.imageUrl ? asset('uploads/' ~ comment.user.imageUrl) : asset('img/screen/user.png') }}"
-         alt="avatar"
-         class="rounded-circle"
-         style="width: 40px; height: 40px; object-fit: cover;">
-
-    <div>
-        <div class="bg-light p-2 rounded">
-            <strong>{{ comment.user.nom }}</strong><br>
-            <span>{{ comment.content }}</span>
-        </div>
-        <small class="text-muted">{{ comment.createdAt|date('d M Y à H:i') }}</small>
-    </div>
-</div>
-=======
 <div class="comments-container">
     {% for comment in comments %}
         <div class="comment-box" data-comment-id="{{ comment.id }}">
             <div class="comment-header">
-                <img src="{{ comment.user.avatar }}" alt="Avatar" class="comment-avatar">
+                <img src="{{ comment.user.imageUrl ? asset(comment.user.imageUrl) : asset('img/screen/user.png') }}" alt="Avatar" class="comment-avatar">
                 <div class="comment-info">
                     <span class="comment-username">{{ comment.user.nom }}</span>
                     <span class="comment-date">{{ comment.createdAt|date('d/m/Y H:i') }}</span>
                 </div>
             </div>
             
-            <div class="comment-content {% if comment.isSensitive %}sensitive-content{% endif %}" 
-                 {% if comment.isSensitive %}data-real-content="{{ comment.originalContent }}"{% endif %}>
-                {% if comment.isSensitive %}
+            <div class="comment-content {% if comment.isSensitive is defined and comment.isSensitive %}sensitive-content{% endif %}" 
+                 {% if comment.isSensitive is defined and comment.isSensitive %}data-real-content="{{ comment.originalContent }}"{% endif %}>
+                {% if comment.isSensitive is defined and comment.isSensitive %}
                     <div class="sensitive-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                         Votre commentaire contient un contenu sensible. Veuillez le modifier si nécessaire.
+                         {{ 'blog.sensitive_content_warning'|trans }}
                     </div>
                 {% else %}
                     {# Display comment content with HTML not escaped to render user mentions properly #}
@@ -43,10 +27,10 @@
             {% if app.user and app.user.id == comment.user.id %}
                 <div class="comment-actions">
                     <button class="btn-edit-comment" data-token="{{ csrf_token('edit' ~ comment.id) }}">
-                        <i class="fas fa-edit"></i> Modifier
+                        <i class="fas fa-edit"></i> {{ 'blog.edit'|trans }}
                     </button>
                     <button class="btn-delete-comment" data-token="{{ csrf_token('delete' ~ comment.id) }}">
-                        <i class="fas fa-trash"></i> Supprimer
+                        <i class="fas fa-trash"></i> {{ 'blog.delete'|trans }}
                     </button>
                 </div>
             {% endif %}
@@ -59,14 +43,11 @@
     <form id="comment-form" class="comment-form" data-post-id="{{ post.id }}">
         <input type="hidden" name="_token" value="{{ csrf_token('comment') }}">
         <div class="form-group">
-            <textarea name="content" class="form-control" rows="3" placeholder="Ajouter un commentaire..."></textarea>
+            <textarea name="content" class="form-control" rows="3" placeholder="{{ 'blog.add_comment'|trans }}..."></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Publier</button>
+        <button type="submit" class="btn btn-primary">{{ 'blog.post'|trans }}</button>
     </form>
 {% endif %}
-
-{# Inclusion du JavaScript #}
-{{ encore_entry_script_tags('comment') }}
 
 <style>
     .comments-container {
@@ -92,6 +73,7 @@
         height: 40px;
         border-radius: 50%;
         margin-right: 10px;
+        object-fit: cover;
     }
 
     .comment-info {
@@ -238,4 +220,3 @@
         }
     }
 </style>
->>>>>>> blogs
