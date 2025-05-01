@@ -3,9 +3,11 @@
 <script src="{{ asset('js/core/popper.min.js') }}"></script>
 <script src="{{ asset('js/core/bootstrap.min.js') }}"></script>
 
+<!-- Make sure Chart.js is loaded before any other scripts that depend on it -->
+<script src="{{ asset('js/plugin/chart.js/chart.min.js') }}"></script>
+
 <!-- Plugins -->
 <script src="{{ asset('js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
-<script src="{{ asset('js/plugin/chart.js/chart.min.js') }}"></script>
 <script src="{{ asset('js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
 <script src="{{ asset('js/plugin/chart-circle/circles.min.js') }}"></script>
 <script src="{{ asset('js/plugin/datatables/datatables.min.js') }}"></script>

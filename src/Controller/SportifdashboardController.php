@@ -119,6 +119,38 @@ final class SportifdashboardController extends AbstractController{
         ]);
     }
     
+    #[Route('/sportifdashboard/chart-test', name: 'app_sportif_chart_test')]
+    public function chartTest(ChartBuilderInterface $chartBuilder): Response
+    {
+        // Create a simple test chart
+        $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
+        
+        $chart->setData([
+            'labels' => ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            'datasets' => [
+                [
+                    'label' => 'Test Data',
+                    'backgroundColor' => 'rgba(54, 162, 235, 0.2)',
+                    'borderColor' => 'rgb(54, 162, 235)',
+                    'data' => [10, 15, 20, 25, 30, 35, 40],
+                    'tension' => 0.4,
+                ],
+            ],
+        ]);
+        
+        $chart->setOptions([
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                ],
+            ],
+        ]);
+        
+        return $this->render('sportifdashboard/chart_test.html.twig', [
+            'chart' => $chart,
+        ]);
+    }
+    
     private function getPostsChartData(PostRepository $repository, $user = null): array
     {
         // Date range (last 30 days)
