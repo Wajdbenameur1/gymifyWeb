@@ -9,7 +9,6 @@
 
 {% block javascripts_head %}
     {{ parent() }}
-    {{ importmap('app') }}
 {% endblock %}
 
 {% block body %}
@@ -63,7 +62,18 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="{{ asset('build/runtime.7b7fe445.js') }}"></script>
-    <script src="{{ asset('build/chart-init.af67d565.js') }}"></script>
-    <script src="{{ asset('js/chart-init.js') }}"></script>
+    <script src="{{ asset('js/charts-helper.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialisation discrète des graphiques sans modifier l'interface
+            if (window.chartsHelper) {
+                window.chartsHelper.reloadCharts();
+                
+                // Réessayer après un délai pour s'assurer que les graphiques sont chargés
+                setTimeout(function() {
+                    window.chartsHelper.reloadCharts();
+                }, 1000);
+            }
+        });
+    </script>
 {% endblock %} 

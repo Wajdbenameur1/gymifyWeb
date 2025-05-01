@@ -2,6 +2,8 @@
     "controllers": {
         "@symfony/ux-chartjs": {
             "chart": {
+                "main": "./controllers/chart_controller.js",
+                "webpackMode": "eager",
                 "enabled": true,
                 "fetch": "eager"
             }
