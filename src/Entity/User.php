@@ -68,8 +68,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'sportif', targetEntity: Infosportif::class)]
     private Collection $Infosportifs;
 
-#[ORM\Column(type: 'string', length: 100, nullable: true)]
-private ?string $specialite = null;
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reactions::class, cascade: ['persist', 'remove'])]
     private Collection $reactions;
 
@@ -260,35 +258,41 @@ private ?string $specialite = null;
 
     public function getRole(): Role
     {
-        return match (true) {
-            $this instanceof Admin => Role::ADMIN,
-            $this instanceof Sportif => Role::SPORTIF,
-            $this instanceof ResponsableSalle => Role::RESPONSABLE_SALLE,
-            $this instanceof Entraineur => Role::ENTRAINEUR,
-            default => Role::SPORTIF,
+        $class = get_class($this);
+        return match ($class) {
+            Sportif::class => Role::SPORTIF,
+            Admin::class => Role::ADMIN,
+            ResponsableSalle::class => Role::RESPONSABLE_SALLE,
+            Entraineur::class => Role::ENTRAINEUR,
+            default => throw new \LogicException("Unexpected class name $class"),
         };
     }
 
     public function setRole(Role $role): static
-    { 
-        // Ce champ n'est pas mappé car le rôle est défini par héritage
+    {
         return $this;
     }
 
     public function getRoles(): array
     {
-        return match (true) {
-            $this instanceof Admin => ['ROLE_ADMIN'],
-            $this instanceof Sportif => ['ROLE_SPORTIF'],
-            $this instanceof ResponsableSalle => ['ROLE_RESPONSABLE_SALLE'],
-            $this instanceof Entraineur => ['ROLE_ENTRAINEUR'],
-            default => ['ROLE_USER'],
-        };
+        $roles = ['ROLE_USER'];
+        
+        if ($this instanceof Admin) {
+            $roles[] = 'ROLE_ADMIN';
+        } elseif ($this instanceof ResponsableSalle) {
+            $roles[] = 'ROLE_RESPONSABLE_SALLE';
+        } elseif ($this instanceof Entraineur) {
+            $roles[] = 'ROLE_ENTRAINEUR';
+        } elseif ($this instanceof Sportif) {
+            $roles[] = 'ROLE_SPORTIF';
+        }
+        
+        return $roles;
     }
 
     public function eraseCredentials(): void
     {
-        // Aucun champ sensible temporaire à effacer
+        // Il n'est pas utile d'effacer les données sensibles dans cette implémentation.
     }
 
     public function getUserIdentifier(): string
@@ -325,61 +329,61 @@ private ?string $specialite = null;
 
         return $this;
     }
-    #[ORM\Column(type: 'boolean')]
-private bool $isBlocked = false;
 
-public function isBlocked(): bool
-{
-    return $this->isBlocked;
-}
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isBlocked = false;
 
-public function setIsBlocked(bool $isBlocked): self
-{
-    $this->isBlocked = $isBlocked;
-    return $this;
-}
-#[ORM\Column(type: 'string', nullable: true)]
-private ?string $resetToken = null;
+    public function isBlocked(): bool
+    {
+        return $this->isBlocked;
+    }
 
-#[ORM\Column(type: 'datetime', nullable: true)]
-private ?\DateTimeInterface $resetTokenExpiration = null;
+    public function setIsBlocked(bool $isBlocked): self
+    {
+        $this->isBlocked = $isBlocked;
+        return $this;
+    }
 
-// + getters et setters
-public function getResetToken(): ?string
-{
-    return $this->resetToken;
-}
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $resetToken = null;
 
-public function setResetToken(?string $resetToken): static
-{
-    $this->resetToken = $resetToken;
-    return $this;
-}
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resetTokenExpiration = null;
 
-public function getResetTokenExpiration(): ?\DateTimeInterface
-{
-    return $this->resetTokenExpiration;
-}
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
 
-public function setResetTokenExpiration(?\DateTimeInterface $resetTokenExpiration): static
-{
-    $this->resetTokenExpiration = $resetTokenExpiration;
-    return $this;
-}
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+        return $this;
+    }
 
-#[ORM\Column(type: 'string', nullable: true)]
-private ?string $googleId = null;
+    public function getResetTokenExpiration(): ?\DateTimeInterface
+    {
+        return $this->resetTokenExpiration;
+    }
 
-// Getter et Setter pour googleId
-public function getGoogleId(): ?string
-{
-    return $this->googleId;
-}
-
-public function setGoogleId(?string $googleId): self
-{
-    $this->googleId = $googleId;
-    return $this;
-}
+    public function setResetTokenExpiration(?\DateTimeInterface $resetTokenExpiration): static
+    {
+        $this->resetTokenExpiration = $resetTokenExpiration;
+        return $this;
+    }
+    
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $googleId = null;
+    
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+    
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+        return $this;
+    }
 }
 

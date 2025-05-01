@@ -37,12 +37,7 @@ class Comment
     private ?\DateTimeInterface $createdAt = null;
 
 
-
-<<<<<<< HEAD
-     // Relation ManyToOne avec Post
-=======
      // Relation ManyToOne avec Post, name matches exact database column name
->>>>>>> blogs
      #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'comments')]
      #[ORM\JoinColumn(name: 'postId', referencedColumnName: 'id', nullable: false)]
      private ?Post $post = null;

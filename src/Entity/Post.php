@@ -45,12 +45,6 @@ private ?string $title = null;
 private ?string $content = null;
 
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> blogs
 #[ORM\Column(length: 255, nullable: true)]
 #[Assert\Url(message: "Veuillez saisir une URL valide (http(s)://...) pour l'image.")]
 #[Assert\Regex(
@@ -209,12 +203,6 @@ public function removeReaction(Reactions $reaction): static
     return $this;
 }
 
-  
-
-
-
-<<<<<<< HEAD
-=======
    /**
      * Renvoie un array ['like' => 3, 'love' => 1, …]
      */
@@ -252,59 +240,8 @@ public function removeReaction(Reactions $reaction): static
         return $reaction ? $reaction->getType() : null;
     }
 
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> blogs
-public function getWebPath(): ?string
-{
-    if ($this->image_url === null) {
-        return null;
+    public function getWebPath(): ?string
+    {
+        return $this->image_url;
     }
-
-    // Normalise le chemin (Windows -> compatible avec URL)
-    $path = str_replace('\\', '/', $this->image_url);
-
-    // Enlève la partie absolue jusqu'à "public"
-    $publicPos = strpos($path, '/public');
-
-    if ($publicPos !== false) {
-        return substr($path, $publicPos + 7); // 7 = longueur de "/public"
-    }
-
-    // Si le chemin ne contient pas "public", on retourne tel quel
-    return $path;
-}
-
-
-
-
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> blogs
-
 }

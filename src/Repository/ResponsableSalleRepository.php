@@ -12,7 +12,6 @@ class ResponsableSalleRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, ResponsableSalle::class);
     }
-}
 
     //    /**
     //     * @return ResponsableSalle[] Returns an array of ResponsableSalle objects
@@ -39,8 +38,6 @@ class ResponsableSalleRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-<<<<<<< HEAD
-=======
     /**
      * Find a single ResponsableSalle entity by a specific field.
      *
@@ -70,4 +67,3 @@ class ResponsableSalleRepository extends ServiceEntityRepository
             ->getResult();
     }
 }
->>>>>>> blogs
