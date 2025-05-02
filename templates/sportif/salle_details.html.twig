@@ -3,6 +3,20 @@
 {% block title %}{{ salle.nom }} | Gym{% endblock %}
 
 {% block body %}
+<!-- Notification Modal -->
+    <div class="notification-modal" id="notification-modal">
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <h3 class="notification-title">Subscription Reminder</h3>
+            <p class="notification-message"></p>
+            <div class="notification-actions">
+                <button class="notification-btn remind-later">Remind Later</button>
+                <button class="notification-btn cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
     <!-- Breadcrumb Section -->
     <section class="breadcrumb-section">
         <div class="container">

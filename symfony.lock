@@ -211,7 +211,7 @@
         }
     },
     "symfony/maker-bundle": {
-        "version": "1.62",
+        "version": "1.63",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
@@ -306,7 +306,7 @@
         }
     },
     "symfony/stimulus-bundle": {
-        "version": "2.23",
+        "version": "2.24",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
@@ -353,11 +353,12 @@
             "version": "5.0",
             "ref": "10af129fcac6d00ffc9bb23d039d997dee35e657"
         }
+    },
     "symfony/ux-chartjs": {
         "version": "v2.24.0"
     },
     "symfony/ux-turbo": {
-        "version": "2.23",
+        "version": "2.24",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",

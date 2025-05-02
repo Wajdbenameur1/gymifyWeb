@@ -8,7 +8,6 @@ parameters:
     users_images_directory: '%kernel.project_dir%/public/uploads/images/users'
     events_images_directory: '%kernel.project_dir%/public/uploads/events'
     teams_images_directory: '%kernel.project_dir%/public/uploads/teams'
-    uploads_public_path: '/uploads'
     deepinfra_api_key: '%env(DEEPINFRA_API_KEY)%'
     stripe_secret_key: 'sk_test_51R6XfmCvMipSUHQuaVylRxEIETrWqy4OtYXPBegkEIcFhkUUkByDt8EixxdDNh1ekcHSdVAUGNRr7BUsfXFEc5VX00CqsNejm0'
     stripe_public_key: 'pk_test_51R6XfmCvMipSUHQuBPuvGSEoyT4USxinzYkBENoYz4C2LSYzsB46fd6CgJaXzAtDOUP7prhW651vB3CP6CM9PgvL009edX6abt'
