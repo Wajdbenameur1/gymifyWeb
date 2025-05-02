@@ -44,6 +44,11 @@
                                 <a href="{{ path('shop_order_show', {'id': commande.idC}) }}" class="btn btn-sm btn-info">
                                     <i class="bi bi-eye"></i> Détails
                                 </a>
+                                {% if commande.statutC == 'Validée' %}
+                                    <a href="{{ path('shop_order_export_pdf', {'id': commande.idC}) }}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                                    </a>
+                                {% endif %}
                                 {% if commande.statutC == 'En cours' %}
                                     <form action="{{ path('shop_order_cancel', {'id': commande.idC}) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                                         <button type="submit" class="btn btn-sm btn-danger">

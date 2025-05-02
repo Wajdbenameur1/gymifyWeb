@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Comparaison de prix - {{ product.nomP }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('shop_product_index') }}">Produits</a></li>
+                <li class="breadcrumb-item active">Comparaison de prix</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Notre Prix</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if product.imagePath %}
+                            <img src="{{ asset('uploads/products/' ~ product.imagePath) }}" 
+                                 alt="{{ product.nomP }}"
+                                 class="img-fluid mb-3"
+                                 style="max-height: 200px; object-fit: contain;">
+                        {% endif %}
+                        
+                        <h4>{{ product.nomP }}</h4>
+                        <h3 class="text-primary mb-4">{{ product.prixP }} €</h3>
+
+                        <a href="{{ path('shop_product_index') }}" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-arrow-left"></i> Retour aux produits
+                        </a>
+
+                        <form action="{{ path('shop_cart_add', {'id': product.idP}) }}" method="POST" class="mb-2">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Produits similaires dans la catégorie {{ product.categorieP }}</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if similarProducts is empty %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Aucun autre produit trouvé dans la catégorie {{ product.categorieP }}.
+                            </div>
+                        {% else %}
+                            <div class="row">
+                                {% for similar in similarProducts %}
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card h-100">
+                                            {% if similar.imagePath %}
+                                                <img src="{{ asset('uploads/products/' ~ similar.imagePath) }}" 
+                                                     class="card-img-top" 
+                                                     alt="{{ similar.nomP }}"
+                                                     style="height: 200px; object-fit: contain;">
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ similar.nomP }}</h5>
+                                                <p class="card-text">
+                                                    <strong>Prix:</strong> {{ similar.prixP }} €<br>
+                                                    <strong>Stock:</strong> {{ similar.stockP }} unités
+                                                </p>
+                                                <div class="d-grid gap-2">
+                                                    <form action="{{ path('shop_cart_add', {'id': similar.idP}) }}" method="POST">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <button type="submit" class="btn btn-primary w-100">
+                                                            <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

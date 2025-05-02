@@ -18,6 +18,13 @@ use DateTime;
 #[Route('/shop')]
 class ProductController extends AbstractController
 {
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/', name: 'shop_product_index')]
     public function index(Request $request, ProduitRepository $produitRepository): Response
     {
@@ -230,5 +237,89 @@ class ProductController extends AbstractController
             'products' => $products,
             'query' => $query
         ]);
+    }
+
+    #[Route('/commande/{id}/export-pdf', name: 'shop_order_export_pdf', methods: ['GET'])]
+    public function exportPdf(Commande $commande): Response
+    {
+        if ($commande->getStatutC() !== 'Validée') {
+            $this->addFlash('error', 'Seules les commandes validées peuvent être exportées en PDF.');
+            return $this->redirectToRoute('shop_orders_index');
+        }
+        $pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Votre Boutique');
+        $pdf->SetTitle('Facture - Commande #' . $commande->getIdC());
+        $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PDF_HEADER_STRING);
+        $pdf->setHeaderFont([PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN]);
+        $pdf->setFooterFont([PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA]);
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        $pdf->SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
+        $pdf->AddPage();
+        $pdf->SetFont('helvetica', '', 12);
+        $html = '<h1 style="text-align: center;">Gymify store</h1>';
+        $html .= '<p style="text-align: center;">Adresse de la boutique</p>';
+        $html .= '<p style="text-align: center;">Tél: +216 XX XXX XXX</p>';
+        $html .= '<p style="text-align: center;">Email: contact@example.com</p>';
+        $html .= '<h2 style="text-align: center; margin: 20px 0;">FACTURE</h2>';
+        $html .= '<table border="1" cellpadding="5">
+            <tr><th width="40%">Numéro de Commande:</th><td width="60%">' . $commande->getIdC() . '</td></tr>
+            <tr><th>Date:</th><td>' . $commande->getDateC()->format('d/m/Y H:i:s') . '</td></tr>
+            <tr><th>Statut:</th><td>' . strtoupper($commande->getStatutC()) . '</td></tr>
+            <tr><th>Total:</th><td>' . number_format($commande->getTotalC(), 2, '.', ' ') . ' €</td></tr>
+        </table>';
+        $html .= '<div style="text-align: center; margin-top: 30px;"><strong>Merci de votre confiance!</strong><br><small>Conditions: Cette facture est valable pendant 30 jours.<br>Pour toute question, veuillez nous contacter.</small></div>';
+        $pdf->writeHTML($html, true, false, true, false, '');
+        $filename = sprintf('facture_commande_%d.pdf', $commande->getIdC());
+        return new Response(
+            $pdf->Output($filename, 'S'),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
+    }
+
+    #[Route('/product/{id}/compare', name: 'shop_product_compare', methods: ['GET'])]
+    public function compare(int $id, ProduitRepository $produitRepository): Response
+    {
+        try {
+            $product = $produitRepository->find($id);
+            if (!$product) {
+                throw $this->createNotFoundException('Produit non trouvé');
+            }
+
+            // Calculate price range as ±20% of the product's price
+            $priceMargin = $product->getPrixP() * 0.20; // 20% of the price
+
+            // Find similar products from the same category with similar price (±20%)
+            $similarProducts = $produitRepository->createQueryBuilder('p')
+                ->where('p.categorieP = :category')
+                ->andWhere('p.idP != :id')
+                ->andWhere('p.prixP BETWEEN :minPrice AND :maxPrice')
+                ->setParameter('category', $product->getCategorieP())
+                ->setParameter('id', $product->getIdP())
+                ->setParameter('minPrice', $product->getPrixP() - $priceMargin)
+                ->setParameter('maxPrice', $product->getPrixP() + $priceMargin)
+                ->orderBy('p.prixP', 'ASC') // Sort by price
+                ->setMaxResults(4)
+                ->getQuery()
+                ->getResult();
+
+            return $this->render('shop/product/compare.html.twig', [
+                'product' => $product,
+                'similarProducts' => $similarProducts
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->render('error/error.html.twig', [
+                'message' => 'Une erreur est survenue lors de la comparaison des produits.',
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 } 

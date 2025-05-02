@@ -116,9 +116,9 @@ class OrderController extends AbstractController
         $pdf->SetFont('helvetica', '', 12);
 
         // Company information
-        $html = '<h1 style="text-align: center;">Votre Entreprise</h1>';
-        $html .= '<p style="text-align: center;">123 Rue Example, Ville</p>';
-        $html .= '<p style="text-align: center;">Tél: +216 XX XXX XXX</p>';
+        $html = '<h1 style="text-align: center;">Gymify</h1>';
+        $html .= '<p style="text-align: center;">123 Rue El hamra, tunis</p>';
+        $html .= '<p style="text-align: center;">Tél: +216 75444112/p>';
         $html .= '<p style="text-align: center;">Email: contact@example.com</p>';
         
         // Invoice title

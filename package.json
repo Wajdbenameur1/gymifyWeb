@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "react-medium-image-zoom": "^5.2.14",
+    "@fancyapps/ui": "^5.0.0",
+    "@fancyapps/fancybox": "^5.0.0",
+    "jquery": "^3.7.1"
+  }
+} 

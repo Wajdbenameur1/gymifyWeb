@@ -2,6 +2,11 @@
 
 {% block title %}Nos Produits{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
+{% endblock %}
+
 {% block body %}
     <div class="container mt-4">
         <h1>Nos Produits</h1>
@@ -114,25 +119,36 @@
                                 {% if produit.idP in topVentesIds %}
                                     <span class="badge bg-danger position-absolute" style="top: 10px; left: 10px; z-index: 10; font-size: 1rem; padding: 0.5em 1em;">TOP VENTES</span>
                                 {% endif %}
-                                {% if produit.imagePath %}
-                                    <img src="{{ asset('uploads/products/' ~ produit.imagePath) }}" 
-                                         class="card-img-top" 
-                                         alt="{{ produit.nomP }}"
-                                         style="height: 200px; object-fit: cover;">
-                                {% else %}
-                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                                    </div>
-                                {% endif %}
+                                <div class="fancybox-container">
+                                    <a href="{{ asset('uploads/products/' ~ produit.imagePath) }}" 
+                                       data-fancybox="gallery" 
+                                       data-caption="{{ produit.nomP }}">
+                                        {% if produit.imagePath %}
+                                            <img src="{{ asset('uploads/products/' ~ produit.imagePath) }}" 
+                                                 class="card-img-top" 
+                                                 alt="{{ produit.nomP }}"
+                                                 style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {% endif %}
+                                    </a>
+                                </div>
                                 <div class="card-body">
                                     <h5 class="card-title">{{ produit.nomP }}</h5>
                                     <p class="card-text">
                                         <strong>Prix:</strong> {{ produit.prixP }} €<br>
                                         <strong>Catégorie:</strong> {{ produit.categorieP }}
                                     </p>
-                                    <button type="button" class="btn btn-info mb-2 w-100" data-bs-toggle="modal" data-bs-target="#productModal{{ produit.idP }}">
-                                        <i class="bi bi-eye"></i> Voir les détails
-                                    </button>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#productModal{{ produit.idP }}">
+                                            <i class="bi bi-eye"></i> Voir les détails
+                                        </button>
+                                        <a href="{{ path('shop_product_compare', {'id': produit.idP}) }}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-graph-up"></i> Comparer les prix
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -178,9 +194,14 @@
                                                         <button class="btn btn-outline-secondary" type="button" onclick="incrementQuantity(this, {{ produit.stockP }})">+</button>
                                                     </div>
                                                     <div class="invalid-feedback" style="display: none;"></div>
-                                                    <button type="submit" class="btn btn-primary" id="addToCartBtn{{ produit.idP }}">
-                                                        <i class="bi bi-cart-plus"></i> Ajouter au panier
-                                                    </button>
+                                                    <div class="d-flex gap-2">
+                                                        <button type="submit" class="btn btn-primary" id="addToCartBtn{{ produit.idP }}">
+                                                            <i class="bi bi-cart-plus"></i> Ajouter au panier
+                                                        </button>
+                                                        <a href="{{ path('shop_product_compare', {'id': produit.idP}) }}" class="btn btn-outline-secondary">
+                                                            <i class="bi bi-graph-up"></i> Comparer les prix
+                                                        </a>
+                                                    </div>
                                                 </form>
                                             </div>
                                         </div>
@@ -203,6 +224,8 @@
 
 {% block javascripts %}
 {{ parent() }}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 <script>
 function validateQuantity(input, maxStock) {
     let value = parseInt(input.value) || 0;
@@ -286,6 +309,20 @@ document.querySelectorAll('input[type="number"]').forEach(input => {
             e.preventDefault();
         }
     });
+});
+
+Fancybox.bind("[data-fancybox]", {
+    // Your custom options
+    Thumbs: {
+        type: "modern",
+    },
+    Toolbar: {
+        display: {
+            left: ["infobar"],
+            middle: ["zoomIn", "zoomOut", "toggle1to1", "rotateCCW", "rotateCW", "flipX", "flipY"],
+            right: ["slideshow", "thumbs", "close"],
+        },
+    },
 });
 </script>
 {% endblock %} 

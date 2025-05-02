@@ -7,6 +7,8 @@ parameters:
     twilio.account_sid: '%env(string:TWILIO_ACCOUNT_SID)%'
     twilio.auth_token: '%env(string:TWILIO_AUTH_TOKEN)%'
     twilio.phone_number: '%env(string:TWILIO_PHONE_NUMBER)%'
+    google_merchant_id: '%env(GOOGLE_MERCHANT_ID)%'
+    google_credentials_path: '%kernel.project_dir%/config/google-credentials.json'
 
 services:
     # default configuration for services in *this* file
@@ -33,3 +35,8 @@ services:
     App\Service\TwilioService:
         arguments:
             $params: '@parameter_bag'
+
+    App\Service\GoogleShoppingService:
+        arguments:
+            $merchantId: '%google_merchant_id%'
+            $credentialsPath: '%google_credentials_path%'

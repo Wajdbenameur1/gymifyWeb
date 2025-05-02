@@ -1,0 +1,14 @@
+<div class="card-body">
+    <h5 class="card-title">{{ product.nomP }}</h5>
+    <p class="card-text">{{ product.descriptionP }}</p>
+    <p class="card-text"><strong>Prix: {{ product.prixP }} €</strong></p>
+    
+    <div class="d-flex gap-2">
+        <a href="{{ path('shop_cart_add', {'id': product.idP}) }}" class="btn btn-primary">
+            <i class="bi bi-cart-plus"></i> Add to Cart
+        </a>
+        <a href="{{ path('shop_product_compare', {'id': product.idP}) }}" class="btn btn-outline-info">
+            <i class="bi bi-graph-up"></i> Compare Prices
+        </a>
+    </div>
+</div> 
