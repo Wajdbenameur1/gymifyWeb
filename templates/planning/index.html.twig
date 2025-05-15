@@ -90,12 +90,14 @@
                             <i class="fas fa-pen"></i>
                         </a>
                         
-                        <button class="btn btn-icon btn-outline-danger rounded-circle delete-btn"
-                                data-planning-id="{{ planning.id }}"
-                                data-planning-title="{{ planning.title }}"
-                                title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <form method="post" action="{{ path('app_planning_delete', {'id': planning.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ planning.id) }}">
+                            <button type="submit" class="btn btn-icon btn-outline-danger rounded-circle delete-btn"
+                                    title="Supprimer"
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce planning ?');">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                         
                         <a href="{{path('app_cours', {'idPlanning': planning.id})}}" class="btn btn-icon btn-outline-secondary rounded-circle"
                            title="Liste cours">
@@ -122,11 +124,6 @@
         </div>
         {% endfor %}
     </div>
-
-    {# Formulaire caché pour la suppression #}
-    <form id="deleteForm" method="post" action="">
-        <input type="hidden" name="_token" value="">
-    </form>
 {% endblock %}
 
 {% block javascripts %}
@@ -138,15 +135,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Gestion de la suppression avec SweetAlert2
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const planningId = this.getAttribute('data-planning-id');
-                    const planningTitle = this.getAttribute('data-planning-title');
-                    const deleteUrl = "{{ path('app_planning_delete', {'id': 'PLANNING_ID'}) }}".replace('PLANNING_ID', planningId);
-                    const csrfToken = "{{ csrf_token('delete' ~ 'PLANNING_ID') }}".replace('PLANNING_ID', planningId);
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
                     
                     Swal.fire({
                         title: 'Confirmer la suppression',
-                        html: `Êtes-vous sûr de vouloir supprimer le planning <b>"${planningTitle}"</b> ?`,
+                        html: 'Êtes-vous sûr de vouloir supprimer ce planning ?',
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#d33',
@@ -155,9 +150,6 @@
                         cancelButtonText: 'Annuler',
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            const form = document.getElementById('deleteForm');
-                            form.action = deleteUrl;
-                            form.querySelector('input[name="_token"]').value = csrfToken;
                             form.submit();
                         }
                     });

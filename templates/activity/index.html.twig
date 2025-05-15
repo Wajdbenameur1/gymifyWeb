@@ -374,7 +374,7 @@
                     const activityType = row.getAttribute('data-activity-type');
                     const matchesType = selectedTypes.includes(activityType);
                     const matchesSearch = searchTerm === '' || 
-                                        row.getAttribute('data-searchable').includes(searchTerm);
+                      row.getAttribute('data-searchable').includes(searchTerm);
 
                     if (matchesType && matchesSearch) {
                         row.style.display = '';

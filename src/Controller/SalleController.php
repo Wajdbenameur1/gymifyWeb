@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\Salle;
@@ -30,11 +29,17 @@ final class SalleController extends AbstractController
 
     #[Route('/', name: 'admin_salle_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(SalleRepository $salleRepository): Response
+    public function index(Request $request, SalleRepository $salleRepository): Response
     {
+        $search = $request->query->get('search', '');
+
+        // Fetch salles based on search query
+        $salles = $search
+            ? $salleRepository->findBySearchQuery($search)
+            : $salleRepository->findAll();
+
         return $this->render('salle/index.html.twig', [
-            'salles' => $salleRepository->findAll(),
-            'page_title' => 'Gym Management',
+            'salles' => $salles,
         ]);
     }
 
@@ -314,5 +319,17 @@ final class SalleController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_salle_index');
+    }
+    #[Route('/salles/load-more/{page}', name: 'salle_load_more', methods: ['GET'])]
+    public function loadMore(SalleRepository $salleRepository, int $page = 1): JsonResponse
+    {
+        $limit = 3; // Number of salles per page
+        $offset = ($page - 1) * $limit;
+        $salles = $salleRepository->findBy([], [], $limit, $offset);
+
+        return new JsonResponse([
+            'html' => $this->renderView('sportif/_salle_cards.html.twig', ['salles' => $salles]),
+            'hasMore' => count($salles) === $limit,
+        ]);
     }
 }

@@ -6,25 +6,25 @@
     {{ parent() }}
     <style>
         :root {
-            --primary: #5e35b1;
-            --primary-light: #7c4dff;
-            --primary-dark: #4527a0;
-            --secondary: #ff4081;
-            --accent: #ffab40;
-            --success: #00c853;
-            --info: #00b8d4;
-            --warning: #ff9100;
-            --danger: #ff1744;
+            --primary: #3a7bd5;
+            --primary-light: #00d2ff;
+            --primary-dark: #396afc;
+            --secondary: #11998e;
+            --accent: #f46b45;
+            --success: #38ef7d;
+            --info: #2948ff;
+            --warning: #eea849;
+            --danger: #ff416c;
             --light: #f5f5f5;
             --dark: #212121;
-            --gray: #757575;
+            --gray: #6c757d;
             --light-gray: #f5f5f5;
             --border: #e0e0e0;
-            --radius-lg: 16px;
-            --radius-md: 12px;
-            --radius-sm: 8px;
+            --radius-lg: 1rem;
+            --radius-md: 0.75rem;
+            --radius-sm: 0.5rem;
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.08);
-            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
             --shadow-md: 0 8px 24px rgba(0,0,0,0.12);
             --shadow-lg: 0 16px 32px rgba(0,0,0,0.15);
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -32,17 +32,65 @@
         }
 
         body {
-            background-color: #fafafa;
+            background-color: #f8f9fa;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-
-        .glassmorphism {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+/* Search Form Styles */
+        .search-form {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
         }
 
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.2);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(58, 123, 213, 0.3);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(58, 123, 213, 0.4);
+        }
+
+        .search-clear {
+            color: var(--gray);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .search-clear:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
         .dashboard-container {
             max-width: 1800px;
             margin: 0 auto;
@@ -55,37 +103,18 @@
             justify-content: space-between;
             align-items: flex-end;
             margin-bottom: 3rem;
-            position: relative;
-        }
-
-        .dashboard-header::after {
-            content: '';
-            position: absolute;
-            bottom: -1.5rem;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border), transparent);
-        }
-
-        .dashboard-title-container {
-            position: relative;
         }
 
         .dashboard-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
             margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
         }
 
         .dashboard-subtitle {
             color: var(--gray);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 400;
             max-width: 600px;
             line-height: 1.6;
@@ -96,41 +125,18 @@
             color: white;
             border: none;
             border-radius: var(--radius-md);
-            padding: 1rem 2rem;
+            padding: 0.75rem 1.5rem;
             font-weight: 500;
-            box-shadow: 0 4px 6px rgba(92, 107, 192, 0.3);
+            box-shadow: 0 4px 6px rgba(58, 123, 213, 0.3);
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 0.75rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-            opacity: 0;
-            transition: var(--transition);
+            gap: 0.5rem;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(92, 107, 192, 0.4);
-        }
-
-        .btn-primary:hover::after {
-            opacity: 1;
-        }
-
-        .btn-primary span {
-            position: relative;
-            z-index: 1;
+            box-shadow: 0 8px 15px rgba(58, 123, 213, 0.4);
         }
 
         /* Stats Cards */
@@ -144,22 +150,10 @@
         .stat-card {
             background: white;
             border-radius: var(--radius-lg);
-            padding: 2rem;
+            padding: 1.5rem;
             box-shadow: var(--shadow);
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
             border: none;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
         }
 
         .stat-card:hover {
@@ -168,17 +162,17 @@
         }
 
         .stat-icon {
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
             border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--primary);
             font-size: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 8px rgba(94, 53, 177, 0.2);
+            box-shadow: 0 4px 8px rgba(58, 123, 213, 0.2);
         }
 
         .stat-content {
@@ -207,7 +201,7 @@
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
             margin-top: 0.75rem;
-            background: rgba(0, 200, 83, 0.1);
+            background: rgba(56, 239, 125, 0.1);
             color: var(--success);
         }
 
@@ -215,7 +209,7 @@
         .rooms-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 2rem;
+            gap: 1.5rem;
             margin-top: 2rem;
         }
 
@@ -226,7 +220,6 @@
             box-shadow: var(--shadow);
             transition: var(--transition);
             border: none;
-            position: relative;
         }
 
         .room-card:hover {
@@ -271,11 +264,11 @@
         }
 
         .room-body {
-            padding: 1.75rem;
+            padding: 1.5rem;
         }
 
         .room-title {
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--dark);
             margin-bottom: 1rem;
@@ -327,7 +320,7 @@
 
         .action-btn {
             flex: 1;
-            padding: 0.85rem;
+            padding: 0.75rem;
             border-radius: var(--radius-sm);
             font-size: 0.9rem;
             font-weight: 500;
@@ -339,35 +332,17 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .action-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.2);
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .action-btn:hover::after {
-            opacity: 1;
         }
 
         .action-btn.view {
-            background: var(--primary-light);
+            background: rgba(58, 123, 213, 0.1);
             color: var(--primary);
         }
 
         .action-btn.view:hover {
             background: var(--primary);
             color: white;
-            box-shadow: 0 4px 8px rgba(94, 53, 177, 0.3);
+            box-shadow: 0 4px 8px rgba(58, 123, 213, 0.3);
         }
 
         .action-btn.edit {
@@ -378,24 +353,24 @@
         .action-btn.edit:hover {
             background: var(--info);
             color: white;
-            box-shadow: 0 4px 8px rgba(0, 184, 212, 0.3);
+            box-shadow: 0 4px 8px rgba(41, 72, 255, 0.3);
         }
 
         .action-btn.delete {
-            background: rgba(255, 23, 68, 0.1);
+            background: rgba(255, 65, 108, 0.1);
             color: var(--danger);
         }
 
         .action-btn.delete:hover {
             background: var(--danger);
             color: white;
-            box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+            box-shadow: 0 4px 8px rgba(255, 65, 108, 0.3);
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 5rem 2rem;
+            padding: 4rem 2rem;
             background: white;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow);
@@ -412,73 +387,49 @@
         }
 
         .empty-icon {
-            font-size: 5rem;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
         }
 
         .empty-title {
-            font-weight: 800;
-            font-size: 2rem;
+            font-weight: 700;
+            font-size: 1.75rem;
             color: var(--dark);
             margin-bottom: 1rem;
-            letter-spacing: -0.5px;
         }
 
         .empty-text {
             color: var(--gray);
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             max-width: 500px;
-            margin: 0 auto 2.5rem;
+            margin: 0 auto 2rem;
             line-height: 1.7;
         }
 
         /* Alerts */
         .alert {
             border-radius: var(--radius-md);
-            padding: 1.25rem 1.75rem;
-            margin-bottom: 2.5rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
             border: none;
             box-shadow: var(--shadow-sm);
             display: flex;
             align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .alert::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
         }
 
         .alert-success {
-            background: rgba(0, 200, 83, 0.08);
+            background: rgba(56, 239, 125, 0.1);
             color: var(--success);
         }
 
-        .alert-success::before {
-            background: var(--success);
-        }
-
         .alert-danger {
-            background: rgba(255, 23, 68, 0.08);
+            background: rgba(255, 65, 108, 0.1);
             color: var(--danger);
         }
 
-        .alert-danger::before {
-            background: var(--danger);
-        }
-
         .alert i {
-            margin-right: 1.25rem;
+            margin-right: 1rem;
             font-size: 1.5rem;
         }
 
@@ -494,32 +445,34 @@
         /* Responsive */
         @media (max-width: 1200px) {
             .dashboard-title {
-                font-size: 2.25rem;
-            }
+                font-size: 1.75rem;
+            }}
             
-            .rooms-grid {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            }
+     .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
+        .room-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: none;
+        }
         @media (max-width: 992px) {
             .dashboard-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1.5rem;
             }
-            
-            .dashboard-title {
-                font-size: 2rem;
-            }
         }
 
         @media (max-width: 768px) {
             .dashboard-container {
-                padding: 1.5rem;
-            }
-            
-            .stat-card {
                 padding: 1.5rem;
             }
             
@@ -544,49 +497,56 @@
             .action-btn {
                 flex: 0 0 100%;
             }
-            
-            .empty-state {
-                padding: 3rem 1.5rem;
-            }
-            
-            .empty-title {
-                font-size: 1.75rem;
-            }
+        }
+        /* Loading Spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+            display: none;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .spinner-border {
+            width: 2rem;
+            height: 2rem;
+            border: 0.25em solid var(--primary);
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
         }
 
-        .animate-fade-in {
-            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
         }
-
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
 {% block body %}
     <div class="dashboard-container">
-        <div class="dashboard-header animate-fade-in">
+        <div class="dashboard-header">
             <div class="dashboard-title-container">
                 <h1 class="dashboard-title">Gym Rooms Dashboard</h1>
                 <p class="dashboard-subtitle">Premium management interface for your fitness facilities and spaces</p>
             </div>
-            <a href="{{ path('admin_salle_new') }}" class="btn-primary animate-fade-in delay-1">
-                <i class="fas fa-plus"></i>
-                <span>Add New Room</span>
+            <a href="{{ path('admin_salle_new') }}" class="btn-primary">
+                <i class="fas fa-plus me-2"></i>
+                Add New Room
             </a>
         </div>
 
+        <form method="get" action="{{ path('admin_salle_index') }}" class="search-form">
+            <input type="text" name="search" class="search-input" placeholder="Search rooms by name, address, or details..." value="{{ app.request.query.get('search')|default('') }}" />
+            <button type="submit" class="search-btn">
+                <i class="fas fa-search me-1"></i> Search
+            </button>
+            {% if app.request.query.get('search') %}
+                <a href="{{ path('admin_salle_index') }}" class="search-clear">Clear Search</a>
+            {% endif %}
+        </form>
+
         {% for message in app.flashes('success') %}
-            <div class="alert alert-success animate-fade-in delay-2">
+            <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i>
                 <div class="alert-content">
                     <div class="alert-title">Success</div>
@@ -595,7 +555,7 @@
             </div>
         {% endfor %}
         {% for message in app.flashes('error') %}
-            <div class="alert alert-danger animate-fade-in delay-2">
+            <div class="alert alert-danger">
                 <i class="fas fa-exclamation-circle"></i>
                 <div class="alert-content">
                     <div class="alert-title">Error</div>
@@ -605,7 +565,7 @@
         {% endfor %}
 
         <div class="stats-grid">
-            <div class="stat-card animate-fade-in delay-1">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-dumbbell"></i>
                 </div>
@@ -613,11 +573,11 @@
                     <h3 class="stat-value">{{ salles|length }}</h3>
                     <p class="stat-label">Total Rooms</p>
                     <div class="stat-change">
-                        <i class="fas fa-arrow-up mr-1"></i> 12% this month
+                        <i class="fas fa-arrow-up me-1"></i> 12% this month
                     </div>
                 </div>
             </div>
-            <div class="stat-card animate-fade-in delay-2">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-calendar-check"></i>
                 </div>
@@ -625,11 +585,11 @@
                     <h3 class="stat-value">36</h3>
                     <p class="stat-label">Active Classes</p>
                     <div class="stat-change">
-                        <i class="fas fa-arrow-up mr-1"></i> 5% this month
+                        <i class="fas fa-arrow-up me-1"></i> 5% this month
                     </div>
                 </div>
             </div>
-            <div class="stat-card animate-fade-in delay-3">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-users"></i>
                 </div>
@@ -637,11 +597,11 @@
                     <h3 class="stat-value">289</h3>
                     <p class="stat-label">Daily Visitors</p>
                     <div class="stat-change">
-                        <i class="fas fa-arrow-up mr-1"></i> 8% this week
+                        <i class="fas fa-arrow-up me-1"></i> 8% this week
                     </div>
                 </div>
             </div>
-            <div class="stat-card animate-fade-in delay-4">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-star"></i>
                 </div>
@@ -649,7 +609,7 @@
                     <h3 class="stat-value">4.9</h3>
                     <p class="stat-label">Average Rating</p>
                     <div class="stat-change">
-                        <i class="fas fa-arrow-up mr-1"></i> 0.2 this month
+                        <i class="fas fa-arrow-up me-1"></i> 0.2 this month
                     </div>
                 </div>
             </div>
@@ -658,9 +618,9 @@
         {% if salles|length > 0 %}
             <div class="rooms-grid">
                 {% for salle in salles %}
-                    <div class="room-card animate-fade-in" style="animation-delay: {{ loop.index * 0.1 }}s">
+                    <div class="room-card">
                         <div class="room-image-container">
-                                                        <img src="{{ salle.urlPhoto ? asset('Uploads/images/' ~ salle.urlPhoto) : asset('images/default-gym.jpg') }}" 
+                            <img src="{{ salle.urlPhoto ? asset('Uploads/images/' ~ salle.urlPhoto) : asset('images/default-gym.jpg') }}" 
                                  class="room-image" 
                                  alt="{{ salle.nom }}">
                             <span class="room-badge {{ loop.index % 3 == 0 ? 'popular' : '' }}">
@@ -687,18 +647,18 @@
                             <div class="room-actions">
                                 <a href="{{ path('admin_salle_show', {'id': salle.id}) }}" 
                                    class="action-btn view">
-                                    <i class="fas fa-eye"></i> View
+                                    <i class="fas fa-eye me-1"></i> View
                                 </a>
                                 <a href="{{ path('admin_salle_edit', {'id': salle.id}) }}" 
                                    class="action-btn edit">
-                                    <i class="fas fa-edit"></i> Edit
+                                    <i class="fas fa-edit me-1"></i> Edit
                                 </a>
                                 <form method="post" 
                                       action="{{ path('admin_salle_delete', {'id': salle.id}) }}" 
                                       onsubmit="return confirm('Are you sure you want to delete this room?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ salle.id) }}">
                                     <button class="action-btn delete">
-                                        <i class="fas fa-trash"></i> Delete
+                                        <i class="fas fa-trash me-1"></i> Delete
                                     </button>
                                 </form>
                             </div>
@@ -707,24 +667,23 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="empty-state animate-fade-in delay-2">
+            <div class="empty-state">
                 <div class="empty-icon">
                     <i class="fas fa-dumbbell"></i>
                 </div>
                 <h3 class="empty-title">No Gym Rooms Found</h3>
                 <p class="empty-text">You haven't added any gym rooms yet. Get started by creating your first premium fitness space now!</p>
                 <a href="{{ path('admin_salle_new') }}" class="btn-primary">
-                    <i class="fas fa-plus"></i> Create First Room
+                    <i class="fas fa-plus me-2"></i> Create First Room
                 </a>
             </div>
         {% endif %}
     </div>
 {% endblock %}
-
 {% block javascripts %}
     {{ parent() }}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
             // Enhanced hover effects
             const roomCards = document.querySelectorAll('.room-card');
             roomCards.forEach(card => {
@@ -738,60 +697,25 @@
                 });
             });
 
-            // Button ripple effect
-            const buttons = document.querySelectorAll('.btn-primary, .action-btn');
-            buttons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    const rect = this.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    const ripple = document.createElement('span');
-                    ripple.className = 'ripple-effect';
-                    ripple.style.left = `${x}px`;
-                    ripple.style.top = `${y}px`;
-                    
-                    this.appendChild(ripple);
-                    
-                    setTimeout(() => {
-                        ripple.remove();
-                    }, 1000);
+            // Auto-focus search input on page load
+            const searchInput = document.querySelector('.search-input');
+            if (searchInput) {
+                searchInput.focus();
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced hover effects
+            const roomCards = document.querySelectorAll('.room-card');
+            roomCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    const image = card.querySelector('.room-image');
+                    image.style.transform = 'scale(1.1)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    const image = card.querySelector('.room-image');
+                    image.style.transform = 'scale(1)';
                 });
             });
-
-            // Scroll animation
-            const animateOnScroll = () => {
-                const elements = document.querySelectorAll('.animate-fade-in');
-                elements.forEach(el => {
-                    const elementPosition = el.getBoundingClientRect().top;
-                    const windowHeight = window.innerHeight;
-                    
-                    if (elementPosition < windowHeight - 100) {
-                        el.style.opacity = '1';
-                        el.style.transform = 'translateY(0)';
-                    }
-                });
-            };
-
-            window.addEventListener('scroll', animateOnScroll);
-            animateOnScroll(); // Initialize
         });
     </script>
-    <style>
-        .ripple-effect {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-        }
-
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-    </style>
 {% endblock %}

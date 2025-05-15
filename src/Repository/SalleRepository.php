@@ -15,7 +15,23 @@ class SalleRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Salle::class);
     }
+    public function findBySearchQuery(string $query): array
+    {
+        $query = trim($query);
+        if (empty($query)) {
+            return $this->findAll();
+        }
 
+        return $this->createQueryBuilder('s')
+            ->where('LOWER(s.nom) LIKE :query')
+            ->orWhere('LOWER(s.adresse) LIKE :query')
+            ->orWhere('LOWER(s.email) LIKE :query')
+            ->orWhere('LOWER(s.details) LIKE :query')
+            ->setParameter('query', '%' . strtolower($query) . '%')
+            ->orderBy('s.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 //    /**
 //     * @return Salle[] Returns an array of Salle objects
 //     */
